@@ -1,0 +1,149 @@
+package ${modulePackage}.ctrl;
+
+import java.util.HashMap;
+import java.util.Map;
+
+import javax.annotation.Resource;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
+
+import ${moClassFullName};
+import ${modulePackage}.svc.${entityName}Svc;
+import com.github.pagehelper.PageInfo;
+
+@RestController
+public class ${entityName}Ctrl {
+    /**
+     * @mbg.generated
+     */
+    private final static Logger _log = LoggerFactory.getLogger(${entityName}Ctrl.class);
+
+    /**
+     * @mbg.generated
+     */
+	@Resource
+    private ${entityName}Svc svc;
+
+    /**
+     * 添加${entityTitle}
+     * @mbg.generated
+     */
+    @PostMapping("/${strutil.toLowerCase(entityNamePrefix)}/${strutil.toLowerCase(entitySimpleName)}")
+    Map<String, Object> add(${moClassShortName} vo) throws Exception {
+        _log.info("add ${moClassShortName}:" + vo);
+        svc.add(vo);
+        Map<String, Object> result = new HashMap<>();
+        result.put("success", true);
+        result.put("id", vo.getId());
+        _log.info("add ${moClassShortName} success!");
+        return result;
+    }
+
+    /**
+     * 修改${entityTitle}
+     * @mbg.generated
+     */
+    @PutMapping("/${strutil.toLowerCase(entityNamePrefix)}/${strutil.toLowerCase(entitySimpleName)}")
+    Map<String, Object> modify(${moClassShortName} vo) throws Exception {
+        _log.info("modify ${moClassShortName}:" + vo);
+        svc.modify(vo);
+        Map<String, Object> result = new HashMap<>();
+        result.put("success", true);
+        _log.info("modify ${moClassShortName} success!");
+        return result;
+    }
+
+    /**
+     * 删除${entityTitle}
+     * @mbg.generated
+     */
+    @DeleteMapping("/${strutil.toLowerCase(entityNamePrefix)}/${strutil.toLowerCase(entitySimpleName)}/{id}")
+    Map<String, Object> del(<&
+		for(id in ids){
+			if(!idLP.first) {
+				print(', ');
+			}
+			print('@PathVariable("');
+		    print(id.key);
+		    print('") ');
+		    print(id.value);
+		    print(' ');
+		    print(id.key);
+		}
+	&>) {
+
+        _log.info("save ${moClassShortName}:" + <&
+			for(id in ids){
+				if(!idLP.first) {
+					print(', ');
+				}
+			    print(id.key);
+			}
+		&>);
+        svc.del(<&
+			for(id in ids){
+				if(!idLP.first) {
+					print(', ');
+				}
+			    print(id.key);
+			}
+		&>);
+		
+        Map<String, Object> result = new HashMap<>();
+        result.put("success", true);
+        _log.info("delete ${moClassShortName} success!");
+        return result;
+    }
+
+    /**
+     * 查询${entityTitle}
+     * @mbg.generated
+     */
+    @GetMapping("/${strutil.toLowerCase(entityNamePrefix)}/${strutil.toLowerCase(entitySimpleName)}")
+    PageInfo<${moClassShortName}> list(${moClassShortName} qo, @RequestParam("pageNum") int pageNum, @RequestParam("pageSize") int pageSize) {
+    		_log.info("list ${moClassShortName}:" + qo+", pageNum = " + pageNum + ", pageSize = " + pageSize);
+
+        if (pageSize > 50) {
+            String msg = "pageSize不能大于50";
+            _log.error(msg);
+            throw new IllegalArgumentException(msg);
+        }
+
+        PageInfo<${moClassShortName}> result = svc.list(qo, pageNum, pageSize);
+        _log.info("result: " + result);
+        return result;
+    }
+
+    /**
+     * 获取单个${entityTitle}
+     * @mbg.generated
+     */
+    @GetMapping("/${strutil.toLowerCase(entityNamePrefix)}/${strutil.toLowerCase(entitySimpleName)}/{id}")
+    ${moClassShortName} get(<&
+		for(id in ids){
+			if(!idLP.first) {
+				print(', ');
+			}
+			print('@PathVariable("');
+		    print(id.key);
+		    print('") ');
+		    print(id.value);
+		    print(' ');
+		    print(id.key);
+		}
+	&>) {
+        _log.info("get ${moClassShortName} by id: " + id);
+        ${moClassShortName} result = svc.getById(id);
+        _log.info("get: " + result);
+        return result;
+    }
+
+}

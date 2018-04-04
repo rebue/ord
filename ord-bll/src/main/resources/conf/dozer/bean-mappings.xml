@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<mappings xmlns="http://dozermapper.github.io/schema/bean-mapping"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://dozermapper.github.io/schema/bean-mapping http://dozermapper.github.io/schema/bean-mapping.xsd">
+	<!-- <configuration> -->
+	<!-- <custom-converters> -->
+	<!-- <converter type="rebue.wheel.dozer.MapConverter"> -->
+	<!-- <class-a>java.util.Map<String, Object></class-a> -->
+	<!-- <class-b>java.lang.Object</class-b> -->
+	<!-- </converter> -->
+	<!-- </custom-converters> -->
+	<!-- </configuration> -->
+	<!-- <mapping> -->
+	<!-- <class-a>rebue.suc.to.RegByLoginNameTo</class-a> -->
+	<!-- <class-b>rebue.suc.mo.SucUserMo</class-b> -->
+	<!-- </mapping> -->
+</mappings> 
