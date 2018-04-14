@@ -1,12 +1,36 @@
 /*==============================================================*/
 /* DBMS name:      MySQL 5.0                                    */
-/* Created on:     2018/4/7 16:57:59                            */
+/* Created on:     2018/4/13 18:10:43                           */
 /*==============================================================*/
 
+
+drop table if exists ORD_ADDR;
 
 drop table if exists ORD_ORDER;
 
 drop table if exists ORD_ORDER_DETAIL;
+
+/*==============================================================*/
+/* Table: ORD_ADDR                                              */
+/*==============================================================*/
+create table ORD_ADDR
+(
+   ID                   bigint not null comment '收货地址ID',
+   USER_ID              bigint not null comment '用户ID',
+   RECEIVER_NAME        varchar(30) not null comment '收件人名称',
+   RECEIVER_TEL         varchar(20) comment '收件人电话',
+   RECEIVER_MOBILE      varchar(20) comment '收件人手机',
+   RECEIVER_PROVINCE    varchar(20) not null comment '收件省',
+   RECEIVER_CITY        varchar(20) not null comment '收件市',
+   RECEIVER_EXP_AREA    varchar(50) not null comment '收件区/直辖镇',
+   RECEIVER_ADDRESS     varchar(100) not null comment '收件人详细地址',
+   RECEIVER_POST_CODE   char(6) comment '收件地邮编',
+   IS_DEF               bool not null comment '是否为默认收货地址（0：否 1：默认）',
+   OP_TIME              datetime not null comment '操作时间',
+   primary key (ID)
+);
+
+alter table ORD_ADDR comment '用户收货地址';
 
 /*==============================================================*/
 /* Table: ORD_ORDER                                             */
@@ -45,8 +69,14 @@ create table ORD_ORDER
    RECEIVER_EXP_AREA    varchar(20) comment '收件区',
    RECEIVER_ADDRESS     varchar(100) comment '收件人详细地址',
    RECEIVER_POST_CODE   char(6) comment '收件地邮编',
+   ORDER_MESSAGES       varchar(500) comment '订单留言',
+   MODIFY_REAL_MONEY_OP_ID bigint comment '修改实际金额操作人ID',
+   CANCELING_ORDER_OP_ID bigint comment '取消订单操作人ID',
+   CANCEL_REASON        varchar(500) comment '取消发货的原因',
+   SEND_OP_ID           bigint comment '发货操作人',
+   RECEIVED_OP_ID       bigint comment '签收人',
    primary key (ID),
-   unique key AK_SHIPPER_LOGISTIC_CODE (SHIPPER_CODE, LOGISTIC_CODE)
+   key AK_SHIPPER_LOGISTIC_CODE (SHIPPER_CODE, LOGISTIC_CODE)
 );
 
 alter table ORD_ORDER comment '订单信息';
@@ -59,6 +89,7 @@ create table ORD_ORDER_DETAIL
    ID                   bigint not null comment '订单详情ID',
    ORDER_ID             bigint not null comment '订单ID',
    ONLINE_ID            bigint not null comment '上线ID',
+   PRODUCE_ID           bigint not null comment '产品ID',
    ONLINE_TITLE         varchar(200) not null comment '上线标题',
    SPEC_NAME            varchar(50) not null comment '规格名称',
    BUY_COUNT            int not null comment '购买数量',

@@ -4,8 +4,16 @@
 
 <Workspace>
 	<Local Expanded="Yes">
-		<Model Expanded="Yes" ID="{51687919-12C7-42E8-B4FF-B67D7F72A68E}" Name="order" Type="{5F45F978-C4F3-4E35-A3FC-AF3318663A0F}" URL="ord.ldm"/>
-		<Model Expanded="Yes" ID="{58C9C079-A494-4174-B5E8-BB8DD63FEDEA}" Name="order-mysql" Type="{CDE44E21-9669-11D1-9914-006097355D9B}" URL="ord-mysql.pdm"/>
+		<Model ID="{51687919-12C7-42E8-B4FF-B67D7F72A68E}" Loaded="No" Name="order" Type="{5F45F978-C4F3-4E35-A3FC-AF3318663A0F}" URL="ord.ldm"/>
+		<Model ID="{4E3A319B-3F7D-4130-97E2-2259BCE70364}" Loaded="No" Name="order" Type="{CDE44E21-9669-11D1-9914-006097355D9B}" URL="/PowerDesigner文件/order.pdm"/>
+		<Model Expanded="Yes" ID="{7BBAE808-61E7-42AC-8DF1-A09F7F8D9452}" Loaded="No" Name="order" Type="{CDE44E21-9669-11D1-9914-006097355D9B}" URL="/PowerDesigner文件/order.pdm"/>
+		<Model Expanded="Yes" ID="{3D40173B-A846-40D7-B136-69DD5C4BF769}" Loaded="No" Name="goods" Type="{5F45F978-C4F3-4E35-A3FC-AF3318663A0F}" URL="/eclipse/onl/db/model/onl.ldm"/>
+		<Model Expanded="Yes" ID="{3D40173B-A846-40D7-B136-69DD5C4BF769}" Loaded="No" Name="goods" Type="{5F45F978-C4F3-4E35-A3FC-AF3318663A0F}" URL="/eclipse/onl/db/model/onl.ldm"/>
+		<Model Expanded="Yes" ID="{3D40173B-A846-40D7-B136-69DD5C4BF769}" Loaded="No" Name="goods" Type="{5F45F978-C4F3-4E35-A3FC-AF3318663A0F}" URL="/eclipse/onl/db/model/onl.ldm"/>
+		<Model Expanded="Yes" ID="{58C9C079-A494-4174-B5E8-BB8DD63FEDEA}" Loaded="No" Name="order-mysql" Type="{CDE44E21-9669-11D1-9914-006097355D9B}" URL="ord-mysql.pdm"/>
+		<Model Expanded="Yes" ID="{51687919-12C7-42E8-B4FF-B67D7F72A68E}" Loaded="No" Name="order" Type="{5F45F978-C4F3-4E35-A3FC-AF3318663A0F}" URL="ord.ldm"/>
+		<Model ID="{51687919-12C7-42E8-B4FF-B67D7F72A68E}" Loaded="No" Name="order" Type="{5F45F978-C4F3-4E35-A3FC-AF3318663A0F}" URL="ord.ldm"/>
+		<Model ID="{F989D0E3-002A-431D-A3F8-2959A6E5F6AE}" Loaded="No" Name="order" Type="{CDE44E21-9669-11D1-9914-006097355D9B}" URL="/PowerDesigner文件/order.pdm"/>
 	</Local>
 	<BrowserModule Name="Repository"/>
 </Workspace>
