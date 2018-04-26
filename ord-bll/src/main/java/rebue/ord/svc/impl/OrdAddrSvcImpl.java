@@ -29,11 +29,16 @@ import org.slf4j.LoggerFactory;
  * </pre>
  */
 @Transactional(readOnly = true, propagation = Propagation.SUPPORTS)
-public class OrdAddrSvcImpl extends MybatisBaseSvcImpl<OrdAddrMo, java.lang.Long, OrdAddrMapper> implements OrdAddrSvc {
+public class OrdAddrSvcImpl
+		extends
+			MybatisBaseSvcImpl<OrdAddrMo, java.lang.Long, OrdAddrMapper>
+		implements
+			OrdAddrSvc {
 
 	/**
 	 */
-	private final static Logger _log = LoggerFactory.getLogger(OrdAddrSvcImpl.class);
+	private final static Logger _log = LoggerFactory
+			.getLogger(OrdAddrSvcImpl.class);
 
 	/**
 	 * 添加用户收货地址 2018年4月8日13:48:03

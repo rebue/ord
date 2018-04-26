@@ -1,6 +1,6 @@
 /*==============================================================*/
 /* DBMS name:      MySQL 5.0                                    */
-/* Created on:     2018/4/13 18:10:43                           */
+/* Created on:     2018/4/24 10:41:51                           */
 /*==============================================================*/
 
 
@@ -9,6 +9,10 @@ drop table if exists ORD_ADDR;
 drop table if exists ORD_ORDER;
 
 drop table if exists ORD_ORDER_DETAIL;
+
+drop table if exists ORD_RETURN;
+
+drop table if exists ORD_RETURN_PIC;
 
 /*==============================================================*/
 /* Table: ORD_ADDR                                              */
@@ -42,7 +46,8 @@ create table ORD_ORDER
    ORDER_TITLE          varchar(200) not null comment '订单标题',
    ORDER_MONEY          decimal(50,4) not null comment '下单金额',
    REAL_MONEY           decimal(50,4) not null comment '实际金额',
-   ORDER_STATE          tinyint not null comment '订单状态
+   RETURN_TOTAL         decimal(50,2) comment '退货总额',
+   ORDER_STATE          tinyint not null comment '订单状态（-1：作废  1：已下单（待支付）  2：已支付（待发货）  3：已发货（待签收）  4：已签收（待结算）  5：已结算  ））
             -1：作废
             1：已下单（待支付）
             2：已支付（待发货）
@@ -70,11 +75,12 @@ create table ORD_ORDER
    RECEIVER_ADDRESS     varchar(100) comment '收件人详细地址',
    RECEIVER_POST_CODE   char(6) comment '收件地邮编',
    ORDER_MESSAGES       varchar(500) comment '订单留言',
-   MODIFY_REAL_MONEY_OP_ID bigint comment '修改实际金额操作人ID',
+   MODIFY_REALVERY_MONEY_OP_ID bigint comment '修改实际金额操作人ID',
    CANCELING_ORDER_OP_ID bigint comment '取消订单操作人ID',
-   CANCEL_REASON        varchar(500) comment '取消发货的原因',
+   CANCELDELI_REASON    varchar(500) comment '取消发货的原因',
    SEND_OP_ID           bigint comment '发货操作人',
    RECEIVED_OP_ID       bigint comment '签收人',
+   CANCEL_REASON        varchar(300) comment '作废原因',
    primary key (ID),
    key AK_SHIPPER_LOGISTIC_CODE (SHIPPER_CODE, LOGISTIC_CODE)
 );
@@ -95,9 +101,58 @@ create table ORD_ORDER_DETAIL
    BUY_COUNT            int not null comment '购买数量',
    BUY_PRICE            numeric(18,4) not null comment '购买价格',
    CASHBACK_AMOUNT      numeric(18,4) not null comment '返现金额',
+   RETURN_COUNT         int comment '退货数量',
    BUY_UNIT             varchar(10) comment '购买单位',
+   RETURN_STATE         tinyint not null comment '退货状态（0：未退货  1：退货中  2：已退货）',
    primary key (ID)
 );
 
 alter table ORD_ORDER_DETAIL comment '订单详情';
+
+/*==============================================================*/
+/* Table: ORD_RETURN                                            */
+/*==============================================================*/
+create table ORD_RETURN
+(
+   ID                   bigint not null comment '退货ID',
+   RETURN_CODE          bigint not null comment '退货编号',
+   ORDER_ID             bigint not null comment '订单ID',
+   ORDER_DETAIL_ID      bigint not null comment '订单详情ID',
+   RETURN_COUNT         int not null comment '退货数量',
+   RETURN_RENTAL        decimal(18,4) not null comment '退货总额',
+   RETURN_AMOUNT1       decimal(18,4) comment '退货金额（余额）',
+   RETURN_AMOUNT2       decimal(18,4) comment '退货金额（返现金）',
+   RETURN_TYPE          tinyint not null comment '退款类型（1：仅退款  2：退货并退款）',
+   APPLICATION_STATE    tinyint not null comment '申请状态（-1：已取消  1：待审核  2：退款中  3：完成   4：已拒绝）',
+   RETURN_REASON        varchar(500) not null comment '退货原因',
+   APPLICATION_OP_ID    bigint not null comment '申请操作人',
+   APPLICATION_TIME     datetime not null comment '申请时间',
+   CANCEL_OP_ID         bigint comment '取消操作人',
+   CANCEL_TIME          datetime comment '取消时间',
+   REVIEW_OP_ID         bigint comment '审核操作人',
+   REVIEW_TIME          datetime comment '审核时间',
+   REFUND_OP_ID         bigint comment '退款操作人',
+   REFUND_TIME          datetime comment '退款时间',
+   REJECT_OP_ID         bigint comment '拒绝操作人',
+   REJECT_REASON        varchar(200) comment '拒绝原因',
+   REJECT_TIME          datetime comment '拒绝时间',
+   FINISH_OP_ID         bigint comment '完成操作人',
+   FINISH_TIME          datetime comment '完成时间',
+   primary key (ID)
+);
+
+alter table ORD_RETURN comment '用户退货信息';
+
+/*==============================================================*/
+/* Table: ORD_RETURN_PIC                                        */
+/*==============================================================*/
+create table ORD_RETURN_PIC
+(
+   ID                   bigint not null comment '退货图片ID',
+   RETURN_ID            bigint not null comment '退货ID',
+   PIC_PATH             varchar(500) not null comment '图片路径',
+   primary key (ID)
+);
+
+alter table ORD_RETURN_PIC comment '退货图片';
 

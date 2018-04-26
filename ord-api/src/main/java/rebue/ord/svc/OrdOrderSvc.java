@@ -2,7 +2,10 @@ package rebue.ord.svc;
 
 import rebue.robotech.svc.MybatisBaseSvc;
 import rebue.ord.mo.OrdOrderMo;
+import java.beans.IntrospectionException;
 import java.io.IOException;
+import java.lang.reflect.InvocationTargetException;
+import java.text.ParseException;
 import java.util.List;
 import java.util.Map;
 import com.fasterxml.jackson.core.JsonParseException;
@@ -27,9 +30,17 @@ public interface OrdOrderSvc extends MybatisBaseSvc<OrdOrderMo, java.lang.Long> 
 	 * 
 	 * @param mo
 	 * @return
+	 * @throws ParseException
+	 * @throws IntrospectionException
+	 * @throws InvocationTargetException
+	 * @throws IllegalArgumentException
+	 * @throws IllegalAccessException
 	 * @date 2018年4月9日 下午4:48:40
 	 */
-	List<OrdOrderMo> selectOrderInfo(Map<String, Object> map);
+	List<Map<String, Object>> selectOrderInfo(Map<String, Object> map)
+			throws ParseException, IntrospectionException,
+			IllegalAccessException, IllegalArgumentException,
+			InvocationTargetException;
 
 	/**
 	 * 取消订单 Title: cancellationOfOrder Description:
@@ -67,9 +78,8 @@ public interface OrdOrderSvc extends MybatisBaseSvc<OrdOrderMo, java.lang.Long> 
 	Map<String, Object> cancelDeliveryUpdateOrderState(OrdOrderMo mo);
 
 	/**
-	 * 确认发货
-	 * Title: sendAndPrint
-	 * Description: 
+	 * 确认发货 Title: sendAndPrint Description:
+	 * 
 	 * @param mo
 	 * @return
 	 * @date 2018年4月13日 下午6:19:09
@@ -77,9 +87,8 @@ public interface OrdOrderSvc extends MybatisBaseSvc<OrdOrderMo, java.lang.Long> 
 	Map<String, Object> shipmentConfirmation(OrdOrderMo mo);
 
 	/**
-	 * 订单签收
-	 * Title: orderSignIn
-	 * Description: 
+	 * 订单签收 Title: orderSignIn Description:
+	 * 
 	 * @param mo
 	 * @return
 	 * @date 2018年4月14日 下午2:29:58

@@ -19,7 +19,10 @@ import rebue.ord.mo.OrdOrderMo;
 import rebue.ord.svc.OrdOrderSvc;
 import com.github.pagehelper.PageInfo;
 import java.util.List;
+import java.beans.IntrospectionException;
 import java.io.IOException;
+import java.lang.reflect.InvocationTargetException;
+import java.text.ParseException;
 import com.fasterxml.jackson.core.JsonParseException;
 import com.fasterxml.jackson.databind.JsonMappingException;
 
@@ -28,7 +31,8 @@ public class OrdOrderCtrl {
 	/**
 	 * @mbg.generated
 	 */
-	private final static Logger _log = LoggerFactory.getLogger(OrdOrderCtrl.class);
+	private final static Logger _log = LoggerFactory
+			.getLogger(OrdOrderCtrl.class);
 
 	/**
 	 * @mbg.generated
@@ -101,12 +105,20 @@ public class OrdOrderCtrl {
 	 * 
 	 * @param qo
 	 * @return
+	 * @throws ParseException
+	 * @throws IntrospectionException
+	 * @throws InvocationTargetException
+	 * @throws IllegalArgumentException
+	 * @throws IllegalAccessException
 	 * @date 2018年4月9日 下午3:06:37
 	 */
 	@GetMapping("/ord/order/info")
-	List<OrdOrderMo> orderInfo(@RequestParam Map<String, Object> map) {
+	List<Map<String, Object>> orderInfo(@RequestParam Map<String, Object> map)
+			throws ParseException, IllegalAccessException,
+			IllegalArgumentException, InvocationTargetException,
+			IntrospectionException {
 		_log.info("查询订单信息的参数为：{}", map.toString());
-		List<OrdOrderMo> list = svc.selectOrderInfo(map);
+		List<Map<String, Object>> list = svc.selectOrderInfo(map);
 		_log.info("查询订单信息的返回值：{}", String.valueOf(list));
 		return list;
 	}
@@ -205,7 +217,7 @@ public class OrdOrderCtrl {
 	}
 
 	/**
-	 * 用户取消订单 Title: cancellationOfOrder Description:
+	 * 取消发货 Title: cancellationOfOrder Description:
 	 * 
 	 * @param qo
 	 * @return
@@ -252,9 +264,8 @@ public class OrdOrderCtrl {
 	}
 
 	/**
-	 * 确认发货
-	 * Title: sendAndPrint
-	 * Description: 
+	 * 确认发货 Title: sendAndPrint Description:
+	 * 
 	 * @param qo
 	 * @return
 	 * @date 2018年4月13日 下午6:23:46
@@ -295,9 +306,8 @@ public class OrdOrderCtrl {
 	}
 
 	/**
-	 * 订单签收
-	 * Title: orderSignIn
-	 * Description: 
+	 * 订单签收 Title: orderSignIn Description:
+	 * 
 	 * @param qo
 	 * @return
 	 * @date 2018年4月14日 下午2:30:53
@@ -308,7 +318,6 @@ public class OrdOrderCtrl {
 		_log.info("订单签收的参数为：{}", qo.toString());
 		Map<String, Object> resultMap = new HashMap<String, Object>();
 		try {
-			// 订单签收
 			resultMap = svc.orderSignIn(qo);
 		} catch (RuntimeException e) {
 			String msg = e.getMessage();
@@ -326,4 +335,5 @@ public class OrdOrderCtrl {
 			return resultMap;
 		}
 	}
+
 }

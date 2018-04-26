@@ -23,7 +23,8 @@ public class OrdAddrCtrl {
 	/**
 	 * @mbg.generated
 	 */
-	private final static Logger _log = LoggerFactory.getLogger(OrdAddrCtrl.class);
+	private final static Logger _log = LoggerFactory
+			.getLogger(OrdAddrCtrl.class);
 
 	/**
 	 * @mbg.generated

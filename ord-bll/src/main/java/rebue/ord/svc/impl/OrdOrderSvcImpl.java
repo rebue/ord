@@ -12,12 +12,21 @@ import rebue.robotech.svc.impl.MybatisBaseSvcImpl;
 import rebue.kdi.ro.EOrderRo;
 import rebue.kdi.svr.feign.KdiSvc;
 import rebue.kdi.to.EOrderTo;
+import rebue.onl.mo.OnlOnlinePicMo;
 import rebue.onl.ro.DeleteCartAndModifyInventoryRo;
-import rebue.onl.ro.OnlOnlineSpecInfoRo;
 import rebue.onl.svr.feign.OnlCartSvc;
+import rebue.onl.svr.feign.OnlOnlinePicSvc;
 import rebue.onl.svr.feign.OnlOnlineSpecSvc;
 import rebue.onl.svr.feign.OnlOnlineSvc;
+import java.beans.BeanInfo;
+import java.beans.IntrospectionException;
+import java.beans.Introspector;
+import java.beans.PropertyDescriptor;
 import java.io.IOException;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
@@ -33,6 +42,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import rebue.ord.mo.OrdAddrMo;
 import rebue.ord.mo.OrdOrderDetailMo;
 import rebue.ord.ro.OrdOrderRo;
+import rebue.ord.ro.OrderDetailRo;
 import rebue.ord.svc.OrdAddrSvc;
 import rebue.ord.svc.OrdOrderDetailSvc;
 
@@ -49,11 +59,16 @@ import rebue.ord.svc.OrdOrderDetailSvc;
  * </pre>
  */
 @Transactional(readOnly = true, propagation = Propagation.SUPPORTS)
-public class OrdOrderSvcImpl extends MybatisBaseSvcImpl<OrdOrderMo, java.lang.Long, OrdOrderMapper> implements OrdOrderSvc {
+public class OrdOrderSvcImpl
+		extends
+			MybatisBaseSvcImpl<OrdOrderMo, java.lang.Long, OrdOrderMapper>
+		implements
+			OrdOrderSvc {
 
 	/**
 	 */
-	private final static Logger _log = LoggerFactory.getLogger(OrdOrderSvcImpl.class);
+	private final static Logger _log = LoggerFactory
+			.getLogger(OrdOrderSvcImpl.class);
 	/**
 	 */
 	@Resource
@@ -74,9 +89,14 @@ public class OrdOrderSvcImpl extends MybatisBaseSvcImpl<OrdOrderMo, java.lang.Lo
 	 */
 	@Resource
 	private OnlCartSvc onlCartSvc;
-	
+	/**
+	 */
 	@Resource
 	private KdiSvc kdiSvc;
+	/**
+	 */
+	@Resource
+	private OnlOnlinePicSvc onlOnlinePicSvc;
 
 	/**
 	 * @mbg.generated
@@ -186,6 +206,7 @@ public class OrdOrderSvcImpl extends MybatisBaseSvcImpl<OrdOrderMo, java.lang.Lo
 			detailMo.setBuyCount(buyCount);
 			detailMo.setBuyPrice(orderList.get(i).getSalePrice());
 			detailMo.setCashbackAmount(orderList.get(i).getCashbackAmount());
+			detailMo.setReturnState((byte) 0);
 			_log.info("添加订单详情的参数为：{}", detailMo.toString());
 			int intserOrderDetailresult = ordOrderDetailSvc.add(detailMo);
 			_log.info("添加订单详情的返回值为：{}", intserOrderDetailresult);
@@ -197,20 +218,16 @@ public class OrdOrderSvcImpl extends MybatisBaseSvcImpl<OrdOrderMo, java.lang.Lo
 		_log.info("删除购物车和修改上线数量的参数为：{}", String.valueOf(cartAndSpecList));
 		Map<String, Object> deleteAndUpdateMap = new HashMap<String, Object>();
 		try {
-			deleteAndUpdateMap = onlOnlineSpecSvc
-					.deleteCartAndUpdateOnlineCount(mapper
-							.writeValueAsString(cartAndSpecList));
+			deleteAndUpdateMap = onlOnlineSpecSvc.deleteCartAndUpdateOnlineCount(mapper.writeValueAsString(cartAndSpecList));
 		} catch (Exception e) {
 			_log.error("删除购物车和修改上线数量失败");
 			e.printStackTrace();
 		}
 		_log.info("删除购物车和修改上线数量的返回值为：{}", String.valueOf(deleteAndUpdateMap));
-		int deleteAndUpdateResult = Integer.parseInt(String
-				.valueOf(deleteAndUpdateMap.get("result")));
+		int deleteAndUpdateResult = Integer.parseInt(String.valueOf(deleteAndUpdateMap.get("result")));
 		if (deleteAndUpdateResult < 1) {
 			_log.error("{}删除购物车和修改上线数量失败", userId);
-			throw new RuntimeException(String.valueOf(deleteAndUpdateMap
-					.get("msg")));
+			throw new RuntimeException(String.valueOf(deleteAndUpdateMap.get("msg")));
 		}
 		resultMap.put("orderId", orderId);
 		resultMap.put("result", 1);
@@ -220,11 +237,84 @@ public class OrdOrderSvcImpl extends MybatisBaseSvcImpl<OrdOrderMo, java.lang.Lo
 
 	/**
 	 * 查询用户订单信息 2018年4月9日16:49:17
+	 * 
+	 * @throws ParseException
+	 * @throws IntrospectionException
+	 * @throws InvocationTargetException
+	 * @throws IllegalArgumentException
+	 * @throws IllegalAccessException
 	 */
 	@Override
-	public List<OrdOrderMo> selectOrderInfo(Map<String, Object> map) {
+	public List<Map<String, Object>> selectOrderInfo(Map<String, Object> map)
+			throws ParseException, IntrospectionException,
+			IllegalAccessException, IllegalArgumentException,
+			InvocationTargetException {
+		List<Map<String, Object>> list = new ArrayList<Map<String, Object>>();
 		_log.info("查询用户订单信息的参数为：{}", map.toString());
-		return _mapper.selectOrderInfo(map);
+		List<OrdOrderMo> orderList = _mapper.selectOrderInfo(map);
+		_log.info("获取到的用户订单信息为：{}", String.valueOf(orderList));
+		SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+		if (orderList.size() != 0) {
+			for (int i = 0; i < orderList.size(); i++) {
+				Map<String, Object> hm = new HashMap<String, Object>();
+				String l = simpleDateFormat.format(orderList.get(i).getOrderTime());
+				Date date = simpleDateFormat.parse(l);
+				long ts = date.getTime();
+				_log.info("转换时间得到的时间戳为：{}", ts);
+				hm.put("dateline", ts / 1000);
+				hm.put("finishDate", ts / 1000 + 86400);
+				hm.put("system", System.currentTimeMillis() / 1000);
+				OrdOrderMo obj = orderList.get(i);
+				BeanInfo beanInfo = Introspector.getBeanInfo(obj.getClass());
+				PropertyDescriptor[] propertyDescriptors = beanInfo.getPropertyDescriptors();
+				for (PropertyDescriptor property : propertyDescriptors) {
+					String key = property.getName();
+					if (!key.equals("class")) {
+						Method getter = property.getReadMethod();
+						Object value = getter.invoke(obj);
+						hm.put(key, value);
+					}
+				}
+				_log.info("查询用户订单信息hm里面的值为：{}", String.valueOf(hm));
+				OrdOrderDetailMo detailMo = new OrdOrderDetailMo();
+				detailMo.setOrderId(Long.parseLong(orderList.get(i)
+						.getOrderCode()));
+				List<OrdOrderDetailMo> orderDetailList = ordOrderDetailSvc
+						.list(detailMo);
+				List<OrderDetailRo> orderDetailRoList = new ArrayList<OrderDetailRo>();
+				for (OrdOrderDetailMo orderDetailMo : orderDetailList) {
+					List<OnlOnlinePicMo> onlinePicList = new ArrayList<OnlOnlinePicMo>();
+					try {
+						onlinePicList = onlOnlinePicSvc.list(orderDetailMo.getOnlineId(), (byte) 1);
+					} catch (Exception e) {
+						e.printStackTrace();
+					}
+					_log.info("获取商品主图的返回值为{}", String.valueOf(onlinePicList));
+					OrderDetailRo orderDetailRo = new OrderDetailRo();
+					orderDetailRo.setId(orderDetailMo.getId());
+					orderDetailRo.setOrderId(orderDetailMo.getOrderId());
+					orderDetailRo.setOnlineId(orderDetailMo.getOnlineId());
+					orderDetailRo.setProduceId(orderDetailMo.getProduceId());
+					orderDetailRo
+							.setOnlineTitle(orderDetailMo.getOnlineTitle());
+					orderDetailRo.setSpecName(orderDetailMo.getSpecName());
+					orderDetailRo.setBuyCount(orderDetailMo.getBuyCount());
+					orderDetailRo.setBuyPrice(orderDetailMo.getBuyPrice());
+					orderDetailRo.setCashbackAmount(orderDetailMo
+							.getCashbackAmount());
+					orderDetailRo.setBuyUnit(orderDetailMo.getBuyUnit());
+					orderDetailRo
+							.setReturnState(orderDetailMo.getReturnState());
+					orderDetailRo.setGoodsQsmm(onlinePicList.get(0)
+							.getPicPath());
+					orderDetailRoList.add(orderDetailRo);
+				}
+				hm.put("items", orderDetailRoList);
+				list.add(i, hm);
+			}
+		}
+		_log.info("最新获取用户订单信息的返回值为：{}", String.valueOf(list));
+		return list;
 	}
 
 	/**
@@ -235,8 +325,11 @@ public class OrdOrderSvcImpl extends MybatisBaseSvcImpl<OrdOrderMo, java.lang.Lo
 	public Map<String, Object> cancellationOfOrder(OrdOrderMo mo) {
 		Map<String, Object> resultMap = new HashMap<String, Object>();
 		Map<String, Object> map = new HashMap<String, Object>();
+		// 用户编号
 		long userId = mo.getUserId();
+		// 订单编号
 		String orderCode = mo.getOrderCode();
+		// ==========================================查询用户订单信息开始=================================
 		map.put("userId", userId);
 		map.put("orderCode", orderCode);
 		List<OrdOrderMo> orderList = _mapper.selectOrderInfo(map);
@@ -249,10 +342,12 @@ public class OrdOrderSvcImpl extends MybatisBaseSvcImpl<OrdOrderMo, java.lang.Lo
 			_log.error("由于订单：{}处于非待支付状态，{}取消订单失败", orderCode, userId);
 			throw new RuntimeException("当前状态不允许取消");
 		}
+		// ==========================================查询用户订单信息结束=================================
+		
 		OrdOrderDetailMo detailMo = new OrdOrderDetailMo();
+		// ==========================================查询用户订单详情开始=================================
 		detailMo.setOrderId(Long.parseLong(orderCode));
-		List<OrdOrderDetailMo> orderDetailList = ordOrderDetailSvc
-				.list(detailMo);
+		List<OrdOrderDetailMo> orderDetailList = ordOrderDetailSvc.list(detailMo);
 		_log.info("查询订单详情的返回值为：{}", String.valueOf(orderDetailList));
 		if (orderDetailList.size() == 0) {
 			_log.error("由于订单：{}不存在，{}取消订单失败", orderCode, userId);
@@ -260,25 +355,35 @@ public class OrdOrderSvcImpl extends MybatisBaseSvcImpl<OrdOrderMo, java.lang.Lo
 			resultMap.put("msg", "订单不存在");
 			throw new RuntimeException("订单不存在");
 		}
-		for (int i = 0; i < orderDetailList.size(); i++) {
-			long onlineId = orderDetailList.get(i).getOnlineId();
-			String specName = orderDetailList.get(i).getSpecName();
-			List<OnlOnlineSpecInfoRo> onlineSpecList = onlOnlineSpecSvc
-					.selectOnlineSpecInfo(onlineId, specName);
-			int updateStockCount = onlineSpecList.get(0).getSaleCount()
-					+ orderDetailList.get(i).getBuyCount();
-			Map<String, Object> udpateStockResultMap = onlOnlineSpecSvc
-					.updateSelective(onlineId, specName, updateStockCount);
-			int udpateStockResult = Integer.parseInt(String
-					.valueOf(udpateStockResultMap.get("result")));
-			if (udpateStockResult < 1) {
-				_log.error("{}取消订单时出现修改库存出错", orderList.get(0).getUserName());
-				throw new RuntimeException("修改库存失败");
-			}
+		// 购买规格信息
+		List<Map<String, Object>> orderSpecList = new ArrayList<Map<String, Object>>();
+		for (OrdOrderDetailMo ordOrderDetailMo : orderDetailList) {
+			Map<String, Object> specMap = new HashMap<String, Object>();
+			specMap.put("onlineId", ordOrderDetailMo.getOnlineId());
+			specMap.put("specName", ordOrderDetailMo.getSpecName());
+			specMap.put("buyCount", ordOrderDetailMo.getBuyCount());
+			orderSpecList.add(specMap);
 		}
+		// ==========================================查询用户订单详情结束=================================
+		
+		// ==========================================查询并修改上线规格信息开始=================================
+		_log.info("查询并修改上线规格信息的参数为：{}", String.valueOf(orderSpecList));
+		// 查询并修改上线规格信息
+		Map<String, Object> specMap = onlOnlineSpecSvc.updateSpenInfo(orderSpecList);
+		_log.info("查询并修改上线规格信息的返回值为：{}", String.valueOf(specMap));
+		int specResult = Integer.parseInt(String.valueOf(specMap.get("result")));
+		if (specResult < 1) {
+			_log.info("取消订单时出现修改上线规格信息出错，返回值为：{}", specResult);
+			throw new RuntimeException("修改规格数量失败");
+		}
+		// ==========================================查询并修改上线规格信息结束=================================
 		Date date = new Date();
+		
+		// ==========================================用户取消订单并修改状态开始=================================
 		mo.setCancelTime(date);
+		_log.info("取消订单并修改状态的参数为：", mo.toString());
 		int updateResult = _mapper.cancellationOrderUpdateOrderState(mo);
+		_log.info("取消订单并修改状态的返回值为：{}", updateResult);
 		if (updateResult < 1) {
 			_log.error("{}取消订单：{}失败", userId, orderCode);
 			resultMap.put("result", -2);
@@ -286,6 +391,7 @@ public class OrdOrderSvcImpl extends MybatisBaseSvcImpl<OrdOrderMo, java.lang.Lo
 			throw new RuntimeException("修改订单状态失败");
 		}
 		_log.info("{}取消订单：{}成功", userId, orderCode);
+		// ==========================================用户取消订单并修改状态结束=================================
 		resultMap.put("result", 1);
 		resultMap.put("msg", "取消订单成功");
 		return resultMap;
@@ -364,23 +470,33 @@ public class OrdOrderSvcImpl extends MybatisBaseSvcImpl<OrdOrderMo, java.lang.Lo
 		}
 		OrdOrderDetailMo detailMo = new OrdOrderDetailMo();
 		detailMo.setOrderId(Long.parseLong(orderCode));
-		List<OrdOrderDetailMo> orderDetailList = ordOrderDetailSvc.list(detailMo);
+		List<OrdOrderDetailMo> orderDetailList = ordOrderDetailSvc
+				.list(detailMo);
 		_log.info("查询订单详情的返回值为：{}", String.valueOf(orderDetailList));
 		if (orderDetailList.size() == 0) {
 			_log.error("由于订单：{}不存在，{}取消订单失败", orderCode, userId);
 			throw new RuntimeException("订单不存在");
 		}
-		for (int i = 0; i < orderDetailList.size(); i++) {
-			long onlineId = orderDetailList.get(i).getOnlineId();
-			String specName = orderDetailList.get(i).getSpecName();
-			List<OnlOnlineSpecInfoRo> onlineSpecList = onlOnlineSpecSvc.selectOnlineSpecInfo(onlineId, specName);
-			int updateStockCount = onlineSpecList.get(0).getSaleCount() + orderDetailList.get(i).getBuyCount();
-			Map<String, Object> udpateStockResultMap = onlOnlineSpecSvc.updateSelective(onlineId, specName, updateStockCount);
-			int udpateStockResult = Integer.parseInt(String.valueOf(udpateStockResultMap.get("result")));
-			if (udpateStockResult < 1) {
-				_log.error("{}取消订单时出现修改库存出错", orderList.get(0).getUserName());
-				throw new RuntimeException("修改库存失败");
-			}
+		// 购买规格信息
+		List<Map<String, Object>> orderSpecList = new ArrayList<Map<String, Object>>();
+		for (OrdOrderDetailMo ordOrderDetailMo : orderDetailList) {
+			Map<String, Object> specMap = new HashMap<String, Object>();
+			specMap.put("onlineId", ordOrderDetailMo.getOnlineId());
+			specMap.put("specName", ordOrderDetailMo.getSpecName());
+			specMap.put("buyCount", ordOrderDetailMo.getBuyCount());
+			orderSpecList.add(specMap);
+		}
+		// ==========================================查询用户订单详情结束=================================
+		
+		// ==========================================查询并修改上线规格信息开始=================================
+		_log.info("查询并修改上线规格信息的参数为：{}", String.valueOf(orderSpecList));
+		// 查询并修改上线规格信息
+		Map<String, Object> specMap = onlOnlineSpecSvc.updateSpenInfo(orderSpecList);
+		_log.info("查询并修改上线规格信息的返回值为：{}", String.valueOf(specMap));
+		int specResult = Integer.parseInt(String.valueOf(specMap.get("result")));
+		if (specResult < 1) {
+			_log.info("取消订单时出现修改上线规格信息出错，返回值为：{}", specResult);
+			throw new RuntimeException("修改规格数量失败");
 		}
 		Date date = new Date();
 		mo.setCancelTime(date);
@@ -396,9 +512,8 @@ public class OrdOrderSvcImpl extends MybatisBaseSvcImpl<OrdOrderMo, java.lang.Lo
 	}
 
 	/**
-	 * 确认发货并修改订单状态
-	 * Title: sendAndPrint
-	 * Description: 
+	 * 确认发货并修改订单状态 Title: sendAndPrint Description:
+	 * 
 	 * @param mo
 	 * @return
 	 * @date 2018年4月13日 下午6:18:44
@@ -417,32 +532,27 @@ public class OrdOrderSvcImpl extends MybatisBaseSvcImpl<OrdOrderMo, java.lang.Lo
 			throw new RuntimeException("确认发货失败");
 		}
 		_log.info("确认发货成功，返回值为：{}", result);
-		// 快递公司编码
 		String shipperCode = mo.getShipperCode();
 		EOrderTo eOrderTo = new EOrderTo();
 		eOrderTo.setOrderId(Long.parseLong(mo.getOrderCode()));
 		eOrderTo.setShipperCode(shipperCode);
 		eOrderTo.setOrderTitle(mo.getOrderTitle());
-		// 发件人
 		String senderName = "余蓓蓓";
 		if (shipperCode.equals("HTKY")) {
 			senderName = "微薄利";
 		}
-		// ===============发件人信息==============
 		eOrderTo.setSenderName(senderName);
 		eOrderTo.setSenderMobile("13657882081");
 		eOrderTo.setSenderProvince("广西壮族自治区");
 		eOrderTo.setSenderCity("南宁市");
 		eOrderTo.setSenderExpArea("西乡塘区");
 		eOrderTo.setSenderAddress("安吉华尔街工谷微薄利商超1楼wboly.com");
-		// ===============收件人信息==============
 		eOrderTo.setReceiverName(mo.getReceiverName());
 		eOrderTo.setReceiverMobile(mo.getReceiverMobile());
 		eOrderTo.setReceiverProvince(mo.getReceiverProvince());
 		eOrderTo.setReceiverCity(mo.getReceiverCity());
 		eOrderTo.setReceiverExpArea(mo.getReceiverExpArea());
 		eOrderTo.setReceiverAddress(mo.getReceiverAddress());
-		// 如果是邮政则必须填写邮政编码
 		if (shipperCode.equals("YZPY")) {
 			eOrderTo.setSenderPostCode("530001");
 			eOrderTo.setReceiverPostCode(mo.getReceiverPostCode());
@@ -450,7 +560,6 @@ public class OrdOrderSvcImpl extends MybatisBaseSvcImpl<OrdOrderMo, java.lang.Lo
 		_log.info("调用快递电子面单的参数为：{}", eOrderTo.toString());
 		EOrderRo eOrderRo = new EOrderRo();
 		try {
-			// 调用快递电子面单
 			eOrderRo = kdiSvc.eorder(eOrderTo);
 		} catch (Exception e) {
 			e.printStackTrace();
@@ -479,9 +588,8 @@ public class OrdOrderSvcImpl extends MybatisBaseSvcImpl<OrdOrderMo, java.lang.Lo
 	}
 
 	/**
-	 * 订单签收
-	 * Title: orderSignIn
-	 * Description: 
+	 * 订单签收 Title: orderSignIn Description:
+	 * 
 	 * @param mo
 	 * @return
 	 * @date 2018年4月14日 下午2:20:19
@@ -506,7 +614,6 @@ public class OrdOrderSvcImpl extends MybatisBaseSvcImpl<OrdOrderMo, java.lang.Lo
 			_log.error("由于订单：{}处于非待签收状态，{}签收订单失败", orderCode, userId);
 			throw new RuntimeException("当前状态不允许签收");
 		}
-		// =====================================订单签收开始=====================================
 		Date date = new Date();
 		mo.setReceivedTime(date);
 		_log.info("订单签收的参数为：{}", mo.toString());
@@ -518,7 +625,7 @@ public class OrdOrderSvcImpl extends MybatisBaseSvcImpl<OrdOrderMo, java.lang.Lo
 		}
 		resultMap.put("result", 1);
 		resultMap.put("msg", "签收成功");
-		// =====================================订单签收结束=====================================
 		return resultMap;
 	}
+
 }
