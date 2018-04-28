@@ -15,6 +15,7 @@ import rebue.ord.svc.OrdReturnSvc;
 
 import rebue.robotech.svc.impl.MybatisBaseSvcImpl;
 
+import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
@@ -123,7 +124,9 @@ public class OrdReturnSvcImpl extends MybatisBaseSvcImpl<OrdReturnMo, java.lang.
 		List<OrdOrderDetailMo> orderDetailList = new ArrayList<OrdOrderDetailMo>();
 		try {
 			orderDetailList = ordOrderDetailSvc.list(orderDetailMo);
+			_log.info("查询订单详情的返回值为：{}", String.valueOf(orderDetailList));
 		} catch (Exception e) {
+			_log.error("===========查询订单详情出错了===========");
 			e.printStackTrace();
 		}
 		if (orderDetailList.size() == 0) {
@@ -135,7 +138,8 @@ public class OrdReturnSvcImpl extends MybatisBaseSvcImpl<OrdReturnMo, java.lang.
 			throw new RuntimeException("当前状态不允许退货");
 		}
 		// 订单详情退货数量
-		int returnCount = orderDetailList.get(0).getReturnCount();
+		Integer returnCount = orderDetailList.get(0).getReturnCount();
+		returnCount=returnCount == null ? 0 : returnCount;
 		// 订单详情购买数量
 		int buyCount = orderDetailList.get(0).getBuyCount();
 		if (buyCount == returnCount) {
@@ -164,6 +168,7 @@ public class OrdReturnSvcImpl extends MybatisBaseSvcImpl<OrdReturnMo, java.lang.
 		ordReturnMo.setReturnRental(to.getReturnPrice());
 		ordReturnMo.setReturnType((byte) 2);
 		ordReturnMo.setApplicationState((byte) 1);
+		ordReturnMo.setRefundState((byte) 1);
 		ordReturnMo.setReturnReason(to.getReturnReason());
 		ordReturnMo.setApplicationOpId(userId);
 		ordReturnMo.setApplicationTime(date);
@@ -197,7 +202,7 @@ public class OrdReturnSvcImpl extends MybatisBaseSvcImpl<OrdReturnMo, java.lang.
 		}
 		// =============================添加退货图片结束=============================
 		
-		// =============================修改订单详情状态开始=============================
+		// =============================修改订单详情状态和数量开始=============================
 		orderDetailMo.setReturnState((byte) 1);
 		orderDetailMo.setId(orderDetailId);
 		orderDetailMo.setReturnCount(newReturnCount);
@@ -206,7 +211,7 @@ public class OrdReturnSvcImpl extends MybatisBaseSvcImpl<OrdReturnMo, java.lang.
 			_log.error("修改订单详情状态失败，返回值为：{}", updateOrderDetailStateResult);
 			throw new RuntimeException("修改订单详情状态失败");
 		}
-		// =============================修改订单详情状态结束=============================
+		// =============================修改订单详情状态和数量结束=============================
 		resultMap.put("result", 1);
 		resultMap.put("msg", "提交成功");
 		return resultMap;
@@ -233,13 +238,104 @@ public class OrdReturnSvcImpl extends MybatisBaseSvcImpl<OrdReturnMo, java.lang.
      * @param record
      * @return
      * @date 2018年4月21日 下午5:14:48
+     * 1、判断订单编号和退货编号是否为为空
+     * 2、查询订单信息
+     * 3、判断订单状态是否处于取消状态
+     * 4、判断订单实际金额是否小于订单退货总额
+     * 5、查询退货信息
+     * 6、判断退货申请状态是否处于待审核状态
+     * 7、修改订单退货总额
+     * 8、修改退货申请状态
      */
 	@Override
+	@Transactional(readOnly = false, propagation = Propagation.REQUIRED)
 	public Map<String, Object> updateReturnApprove(OrdReturnMo record) {
 		Date date = new Date();
 		record.setReviewTime(date);
 		_log.info("退货审核通过的参数为：{}", record.toString());
+		// =================================第一步===========================
+		// 订单编号
+		long orderId = record.getOrderId();
+		// 退货编号
+		long returnCode = record.getReturnCode();
+		if (orderId == 0) {
+			_log.error("退货审核通过出现订单编号为空，退货编号为：{}", returnCode);
+			throw new RuntimeException("订单编号不能为空");
+		}
+		if (returnCode == 0) {
+			_log.error("退货审核通过出现退货编号为空，退货编号为：{}", returnCode);
+			throw new RuntimeException("退货编号不能为空");
+		}
+		
 		Map<String, Object> resultMap = new HashMap<String, Object>();
+		
+		// =================================第二步================================
+		OrdOrderMo orderMo = new OrdOrderMo();
+		orderMo.setOrderCode(String.valueOf(orderId));
+		_log.info("退货审核通过查询订单信息的参数为：{}", orderMo.toString());
+		// 查询订单信息
+		List<OrdOrderMo> orderList = ordOrderSvc.list(orderMo);
+		_log.info("退货审核通过查询订单信息的返回值为：{}", String.valueOf(orderList));
+		
+		// =================================第三步================================
+		if (orderList.get(0).getOrderState() == -1) {
+			_log.error("退货审核通过时出现订单状态为取消状态，退货编号为：{}", returnCode);
+			throw new RuntimeException("该订单已取消，审核失败");
+		}
+		_log.info("===========退货审核通过第四步开始==========");
+		// =================================第四步================================
+		// 订单实际金额
+		BigDecimal realMoney = orderList.get(0).getRealMoney();
+		realMoney = realMoney == null ? new BigDecimal("0") : realMoney;
+		// 订单退货总额
+		BigDecimal returnTotal = orderList.get(0).getReturnTotal();
+		returnTotal = returnTotal == null ? new BigDecimal("0") : returnTotal;
+		// 退货总额
+		BigDecimal returnRental = record.getReturnRental();
+		returnRental = returnRental == null ? new BigDecimal("0") : returnRental;
+		// 订单退货总额和退货总额相加后得到的新的订单退货总额
+		BigDecimal newReturnTotal = returnTotal.add(returnRental);
+		// 判断新的订单退货总额是否大于订单实际金额
+		// 如果大于则说明当前的退货总额已经超出了订单的实际金额
+		if (realMoney.compareTo(newReturnTotal) == -1) {
+			_log.error("退货审核通过时出现订单退货总额大于订单总额，退货编号为：{}", returnCode);
+			throw new RuntimeException("当前退货金额不能超过订单总额");
+		}
+		
+		// =================================第五步================================
+		_log.info("退货审核通过查询订单退货信息的参数为：{}", record.toString());
+		List<OrdReturnRo> returnList = new ArrayList<OrdReturnRo>();
+		try {
+			// 查询订单退货信息
+			returnList = _mapper.selectReturnPageList(record);
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		
+		_log.info("退货审核通过查询订单退货信息的返回值为：{}", String.valueOf(returnList));
+		if (returnList.size() == 0) {
+			_log.error("退货审核通过查询订单退货信息时出现退货信息为空，退货编号为：{}", returnCode);
+			throw new RuntimeException("找不到该退货信息");
+		}
+		
+		// =================================第六步================================
+		if (returnList.get(0).getApplicationState() != 1) {
+			_log.error("退货审核通过时出现退货状态不处于待审核状态，退货编号为：{}", returnCode);
+			throw new RuntimeException("当前状态不允许审核");
+		}
+		
+		// =================================第七步================================
+		orderMo.setId(orderList.get(0).getId());
+		orderMo.setReturnTotal(newReturnTotal);
+		_log.info("退货审核通过修改订单退货总额的参数为：{}", orderMo.toString());
+		int updateReturnCountResult = ordOrderSvc.modify(orderMo);
+		_log.info("退货审核通过修改订单退货总额的返回值为：{}", updateReturnCountResult);
+		if (updateReturnCountResult < 1) {
+			_log.error("退货审核通过时出现修改订单退货总额出错，退货编号为：{}", returnCode);
+			throw new RuntimeException("修改订单退货总额出错");
+		}
+		
+		// =================================第八步================================
 		// 退货审核通过
 		int result = _mapper.updateReturnApprove(record);
 		_log.info("退货审核通过的返回值为：{}", result);
@@ -252,4 +348,178 @@ public class OrdReturnSvcImpl extends MybatisBaseSvcImpl<OrdReturnMo, java.lang.
 		return resultMap;
 	}
 
+	/**
+	 * 拒绝退货
+	 * Title: rejectReturn
+	 * Description: 
+	 * @param record
+	 * @return
+	 * @date 2018年4月27日 上午9:42:37
+	 * 1、判断退货编号、订单编号、订单详情ID、拒绝用户编号、拒绝原因等参数是否已传过来
+	 * 2、查询根据退货编号和订单编号查询退货信息，判断该退货编号是否存在和查询退货订单的申请状态是否处于待审核状态
+	 * 3、查询订单信息并判断订单状态是否处于已取消状态
+	 * 4、根据订单编号和订单详情ID查询订单详情信息并判断该订单详情的状态是否处于已退货的状态
+	 * 5、修改订单详情退货数量和状态
+	 * 6、修改退货订单信息
+	 */
+	@Override
+	@Transactional(readOnly = false, propagation = Propagation.REQUIRED)
+	public Map<String, Object> rejectReturn(OrdReturnMo record) {
+		_log.info("拒绝退货的请求参数为：{}", record.toString());
+		Map<String, Object> resultMap = new HashMap<String, Object>();
+		// 退货编号
+		long returnCode = record.getReturnCode();
+		// 订单编号
+		long orderId = record.getOrderId();
+		// 订单详情ID
+		long orderDetailId = record.getOrderDetailId();
+		// 拒绝退货操作人编号
+		long rejectOpId = record.getRejectOpId();
+		// 拒绝原因
+		String rejectReason = record.getRejectReason();
+		
+		// ===================================拒绝退货第一步==============================
+		if (returnCode == 0 || orderId == 0 || orderDetailId == 0 || rejectOpId == 0 || rejectReason.equals("") || rejectReason == null || rejectReason.equals("null")) {
+			_log.error("拒绝退货时出现参数不正确，退货编号为：{}", returnCode);
+			throw new RuntimeException("参数不正确");
+		}
+		
+		// ===================================拒绝退货第二步==============================
+		_log.info("拒绝退货查询退货信息的参数为：{}", record.toString());
+		List<OrdReturnRo> returnList = _mapper.selectReturnPageList(record);
+		_log.info("拒绝退货查询退货信息的返回值为：{}", String.valueOf(returnList));
+		if (returnList.size() == 0) {
+			_log.error("拒绝退货查询退货信息时出现退货信息为空，退货编号为：{}", returnCode);
+			throw new RuntimeException("退货信息不存在");
+		}
+		
+		if (returnList.get(0).getApplicationState() != 1) {
+			_log.error("拒绝退货时出现退货状态不处于待审核状态，退货编号为：{}", returnCode);
+			throw new RuntimeException("当前状态不允许审核");
+		}
+		
+		// ===================================拒绝退货第三步==============================
+		OrdOrderMo orderMo = new OrdOrderMo();
+		orderMo.setOrderCode(String.valueOf(orderId));
+		_log.info("拒绝退货查询订单信息的参数为：{}", orderMo.toString());
+		// 查询订单信息
+		List<OrdOrderMo> orderList = ordOrderSvc.list(orderMo);
+		_log.info("拒绝退货查询订单信息的返回值为：{}", String.valueOf(orderList));
+		if (orderList.size() == 0) {
+			_log.error("拒绝退货查询订单信息时出现订单信息不存在，退货编号为：{}", returnCode);
+			throw new RuntimeException("该用户订单不存在");
+		}
+		
+		if (orderList.get(0).getOrderState() == -1) {
+			_log.error("拒绝退货时出现订单状态为取消状态，退货编号为：{}", returnCode);
+			throw new RuntimeException("该订单已取消，拒绝退货失败");
+		}
+		
+		// ===================================拒绝退货第四步==============================
+		_log.info("拒绝退货查询订单详情的参数为：{}", orderDetailId);
+		OrdOrderDetailMo orderDetailMo = ordOrderDetailSvc.getById(orderDetailId);
+		_log.info("拒绝退货查询订单详情的返回值为：{}", orderDetailMo.toString());
+		// 订单详情Id
+		Long detailId = orderDetailMo.getId();
+		detailId = detailId == null ? 0 : detailId;
+		if (orderDetailMo.getId() == 0) {
+			_log.error("拒绝退货查询订单详情时出现订单详情不存在：退货编号为：{}", returnCode);
+			throw new RuntimeException("该用户 订单不存在");
+		}
+		
+		if (orderDetailMo.getReturnState() != 1) {
+			_log.error("拒绝退货时出现订单详情退货状态不处于退货中状态，退货编号为：{}", returnCode);
+			throw new RuntimeException("该退货订单已退货或该订单未退货");
+		}
+		
+		// ===================================拒绝退货第五步==============================
+		OrdOrderDetailMo detailMo = new OrdOrderDetailMo();
+		detailMo.setId(orderDetailMo.getId());
+		detailMo.setReturnCount(orderDetailMo.getReturnCount() - returnList.get(0).getReturnCount());
+		detailMo.setReturnState((byte) 0);
+		_log.info("拒绝退货修改订单详情信息的参数为：{}", detailMo.toString());
+		// 修改订单详情信息
+		int updateOrderDetailStateResult = ordOrderDetailSvc.modify(orderDetailMo);
+		_log.info("拒绝退货修改订单详情信息的返回值为：{}", updateOrderDetailStateResult);
+		if (updateOrderDetailStateResult < 1) {
+			_log.error("拒绝退货修改订单详情信息出错，退货编号为{}", returnCode);
+			throw new RuntimeException("修改订单详情信息出错");
+		}
+		resultMap.put("result", 1);
+		resultMap.put("msg", "操作成功");
+		return resultMap;
+	}
+	
+	/**
+	 * 确认退款
+	 * Title: confirmTheRefund
+	 * Description: 
+	 * @param record
+	 * @return
+	 * @date 2018年4月27日 下午6:39:09
+	 * 1、判断参数是否已传完过来
+	 * 2、查询退货信息并判断退货状态
+	 * 2、查询订单信息并判断状态
+	 * 4、查询订单详情并判断状态
+	 * 5、修改退货订单信息
+	 * 6、判断订单详情是否已退完该订单详情已退完则修改订单详情状态
+	 * 7、判断该订单是否已退完，如果已退完则修改订单状态
+	 * 8、调用v支付退款
+	 */
+	public Map<String, Object> confirmTheRefund(OrdReturnMo record) {
+		_log.info("确认退款的参数为：", record.toString());
+		Map<String, Object> resultMap = new HashMap<String, Object>();
+		// 退货编号
+		long returnCode = record.getReturnCode();
+		// 订单编号
+		long orderId = record.getOrderId();
+		// 订单详情编号
+		long orderDetailId = record.getOrderDetailId();
+		// 退到余额的金额
+		BigDecimal returnAmount1 = record.getReturnAmount1();
+		// 退到返现金的金额
+		BigDecimal returnAmount2 = record.getReturnAmount2();
+		if (returnCode == 0 || orderId == 0 || orderDetailId == 0 || returnAmount1.equals(null) || returnAmount2.equals(null)) {
+			_log.info("确认退款出现参数有误，退货编号为：{}", returnCode);
+			throw new RuntimeException("参数有误");
+		}
+		
+		_log.info("确认退款查询退货信息的参数为：{}", record.toString());
+		List<OrdReturnRo> returnList = _mapper.selectReturnPageList(record);
+		_log.info("确认退款查询退货信息的返回值为：{}", String.valueOf(returnList));
+		if (returnList.size() == 0) {
+			_log.error("确认退款查询退货信息时出现退货信息为空，退货编号为：{}", returnCode);
+			throw new RuntimeException("没有找到退货信息");
+		}
+		
+		OrdOrderMo orderMo = new OrdOrderMo();
+		orderMo.setOrderCode(String.valueOf(orderId));
+		_log.info("确认退款查询订单信息的参数为：{}", orderMo.toString());
+		// 查询订单信息
+		List<OrdOrderMo> orderList = ordOrderSvc.list(orderMo);
+		_log.info("确认退款查询订单信息的返回值为：{}", String.valueOf(orderList));
+		if (orderList.size() == 0) {
+			_log.error("确认退款查询订单信息时出现订单信息为空，退货编号为：{}", returnCode);
+			throw new RuntimeException("该用户没有购买此商品");
+		}
+		
+		if (orderList.get(0).getOrderState() == -1) {
+			_log.error("确认退款时发现用户已经取消该订单，退货编号为：{}", returnCode);
+			throw new RuntimeException("该订单处于取消状态无法退款");
+		}
+		
+		_log.info("确认退款查询订单详情的参数为：{}", orderDetailId);
+		OrdOrderDetailMo orderDetailMo = ordOrderDetailSvc.getById(orderDetailId);
+		_log.info("确认退款查询订单详情的返回值为：{}", orderDetailMo.toString());
+		// 订单详情Id
+		Long detailId = orderDetailMo.getId();
+		detailId = detailId == null ? 0 : detailId;
+		if (detailId == 0) {
+			_log.error("确认退款查询订单详情时出现订单详情为空，退货编号为：{}", returnCode);
+			throw new RuntimeException("该用户没有购买此商品");
+		}
+		
+		
+		return resultMap;
+	}
 }

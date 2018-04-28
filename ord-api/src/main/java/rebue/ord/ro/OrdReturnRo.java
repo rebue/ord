@@ -46,6 +46,9 @@ public class OrdReturnRo {
 	/** 申请状态（-1：已取消 1：待审核 2：退款中 3：完成 4：已拒绝） **/
 	private Byte applicationState;
 
+	/** 退款状态（1：未退款 2、已退款） **/
+	private Byte refundState;
+
 	/** 退货原因 **/
 	private String returnReason;
 
@@ -54,7 +57,7 @@ public class OrdReturnRo {
 
 	/** 申请时间 **/
 	@DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss")
-    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd HH:mm:ss", timezone = "GMT+8")
+	@JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd HH:mm:ss", timezone = "GMT+8")
 	private Date applicationTime;
 
 	/** 取消操作人 **/
@@ -62,7 +65,7 @@ public class OrdReturnRo {
 
 	/** 取消时间 **/
 	@DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss")
-    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd HH:mm:ss", timezone = "GMT+8")
+	@JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd HH:mm:ss", timezone = "GMT+8")
 	private Date cancelTime;
 
 	/** 审核操作人 **/
@@ -70,7 +73,7 @@ public class OrdReturnRo {
 
 	/** 审核时间 **/
 	@DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss")
-    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd HH:mm:ss", timezone = "GMT+8")
+	@JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd HH:mm:ss", timezone = "GMT+8")
 	private Date reviewTime;
 
 	/** 退款操作人 **/
@@ -78,7 +81,7 @@ public class OrdReturnRo {
 
 	/** 退款时间 **/
 	@DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss")
-    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd HH:mm:ss", timezone = "GMT+8")
+	@JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd HH:mm:ss", timezone = "GMT+8")
 	private Date refundTime;
 
 	/** 拒绝操作人 **/
@@ -89,7 +92,7 @@ public class OrdReturnRo {
 
 	/** 拒绝时间 **/
 	@DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss")
-    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd HH:mm:ss", timezone = "GMT+8")
+	@JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd HH:mm:ss", timezone = "GMT+8")
 	private Date rejectTime;
 
 	/** 完成操作人 **/
@@ -97,7 +100,7 @@ public class OrdReturnRo {
 
 	/** 完成时间 **/
 	@DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss")
-    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd HH:mm:ss", timezone = "GMT+8")
+	@JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd HH:mm:ss", timezone = "GMT+8")
 	private Date finishTime;
 
 	/** 上线ID **/
@@ -133,11 +136,11 @@ public class OrdReturnRo {
 
 	public OrdReturnRo(Long id, Long returnCode, Long orderId, Long orderDetailId, Integer returnCount,
 			BigDecimal returnRental, BigDecimal returnAmount1, BigDecimal returnAmount2, Byte returnType,
-			Byte applicationState, String returnReason, Long applicationOpId, Date applicationTime, Long cancelOpId,
-			Date cancelTime, Long reviewOpId, Date reviewTime, Long refundOpId, Date refundTime, Long rejectOpId,
-			String rejectReason, Date rejectTime, Long finishOpId, Date finishTime, Long onlineId, Long produceId,
-			String onlineTitle, String specName, Integer buyCount, BigDecimal buyPrice, BigDecimal cashbackAmount,
-			String buyUnit, Byte returnState) {
+			Byte applicationState, Byte refundState, String returnReason, Long applicationOpId, Date applicationTime,
+			Long cancelOpId, Date cancelTime, Long reviewOpId, Date reviewTime, Long refundOpId, Date refundTime,
+			Long rejectOpId, String rejectReason, Date rejectTime, Long finishOpId, Date finishTime, Long onlineId,
+			Long produceId, String onlineTitle, String specName, Integer buyCount, BigDecimal buyPrice,
+			BigDecimal cashbackAmount, String buyUnit, Byte returnState) {
 		super();
 		this.id = id;
 		this.returnCode = returnCode;
@@ -149,6 +152,7 @@ public class OrdReturnRo {
 		this.returnAmount2 = returnAmount2;
 		this.returnType = returnType;
 		this.applicationState = applicationState;
+		this.refundState = refundState;
 		this.returnReason = returnReason;
 		this.applicationOpId = applicationOpId;
 		this.applicationTime = applicationTime;
@@ -252,6 +256,14 @@ public class OrdReturnRo {
 
 	public void setApplicationState(Byte applicationState) {
 		this.applicationState = applicationState;
+	}
+
+	public Byte getRefundState() {
+		return refundState;
+	}
+
+	public void setRefundState(Byte refundState) {
+		this.refundState = refundState;
 	}
 
 	public String getReturnReason() {
@@ -443,15 +455,15 @@ public class OrdReturnRo {
 		return "OrdReturnRo [id=" + id + ", returnCode=" + returnCode + ", orderId=" + orderId + ", orderDetailId="
 				+ orderDetailId + ", returnCount=" + returnCount + ", returnRental=" + returnRental + ", returnAmount1="
 				+ returnAmount1 + ", returnAmount2=" + returnAmount2 + ", returnType=" + returnType
-				+ ", applicationState=" + applicationState + ", returnReason=" + returnReason + ", applicationOpId="
-				+ applicationOpId + ", applicationTime=" + applicationTime + ", cancelOpId=" + cancelOpId
-				+ ", cancelTime=" + cancelTime + ", reviewOpId=" + reviewOpId + ", reviewTime=" + reviewTime
-				+ ", refundOpId=" + refundOpId + ", refundTime=" + refundTime + ", rejectOpId=" + rejectOpId
-				+ ", rejectReason=" + rejectReason + ", rejectTime=" + rejectTime + ", finishOpId=" + finishOpId
-				+ ", finishTime=" + finishTime + ", onlineId=" + onlineId + ", produceId=" + produceId
-				+ ", onlineTitle=" + onlineTitle + ", specName=" + specName + ", buyCount=" + buyCount + ", buyPrice="
-				+ buyPrice + ", cashbackAmount=" + cashbackAmount + ", buyUnit=" + buyUnit + ", returnState="
-				+ returnState + "]";
+				+ ", applicationState=" + applicationState + ", refundState=" + refundState + ", returnReason="
+				+ returnReason + ", applicationOpId=" + applicationOpId + ", applicationTime=" + applicationTime
+				+ ", cancelOpId=" + cancelOpId + ", cancelTime=" + cancelTime + ", reviewOpId=" + reviewOpId
+				+ ", reviewTime=" + reviewTime + ", refundOpId=" + refundOpId + ", refundTime=" + refundTime
+				+ ", rejectOpId=" + rejectOpId + ", rejectReason=" + rejectReason + ", rejectTime=" + rejectTime
+				+ ", finishOpId=" + finishOpId + ", finishTime=" + finishTime + ", onlineId=" + onlineId
+				+ ", produceId=" + produceId + ", onlineTitle=" + onlineTitle + ", specName=" + specName + ", buyCount="
+				+ buyCount + ", buyPrice=" + buyPrice + ", cashbackAmount=" + cashbackAmount + ", buyUnit=" + buyUnit
+				+ ", returnState=" + returnState + "]";
 	}
 
 }

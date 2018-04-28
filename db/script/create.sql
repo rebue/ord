@@ -1,6 +1,6 @@
 /*==============================================================*/
 /* DBMS name:      MySQL 5.0                                    */
-/* Created on:     2018/4/24 10:41:51                           */
+/* Created on:     2018/4/27 11:46:40                           */
 /*==============================================================*/
 
 
@@ -103,7 +103,7 @@ create table ORD_ORDER_DETAIL
    CASHBACK_AMOUNT      numeric(18,4) not null comment '返现金额',
    RETURN_COUNT         int comment '退货数量',
    BUY_UNIT             varchar(10) comment '购买单位',
-   RETURN_STATE         tinyint not null comment '退货状态（0：未退货  1：退货中  2：已退货）',
+   RETURN_STATE         tinyint not null comment '退货状态（0：未退货  1：退货中  2：已退货  3：部分已退）',
    primary key (ID)
 );
 
@@ -123,7 +123,8 @@ create table ORD_RETURN
    RETURN_AMOUNT1       decimal(18,4) comment '退货金额（余额）',
    RETURN_AMOUNT2       decimal(18,4) comment '退货金额（返现金）',
    RETURN_TYPE          tinyint not null comment '退款类型（1：仅退款  2：退货并退款）',
-   APPLICATION_STATE    tinyint not null comment '申请状态（-1：已取消  1：待审核  2：退款中  3：完成   4：已拒绝）',
+   APPLICATION_STATE    tinyint not null comment '申请状态（-1：已取消  1：待审核  2：退货中  3：已退货   4：已拒绝）',
+   REFUND_STATE         tinyint not null comment '退款状态（1：未退款  2、已退款）',
    RETURN_REASON        varchar(500) not null comment '退货原因',
    APPLICATION_OP_ID    bigint not null comment '申请操作人',
    APPLICATION_TIME     datetime not null comment '申请时间',
@@ -138,6 +139,7 @@ create table ORD_RETURN
    REJECT_TIME          datetime comment '拒绝时间',
    FINISH_OP_ID         bigint comment '完成操作人',
    FINISH_TIME          datetime comment '完成时间',
+   Attribute_26         char(10),
    primary key (ID)
 );
 
