@@ -32,16 +32,6 @@ public interface OrdReturnSvc extends MybatisBaseSvc<OrdReturnMo, java.lang.Long
     PageInfo<OrdReturnRo> selectReturnPageList(OrdReturnMo record, int pageNum, int pageSize);
     
     /**
-     * 退货审核通过
-     * Title: updateReturnApprove
-     * Description: 
-     * @param record
-     * @return
-     * @date 2018年4月21日 下午5:14:48
-     */
-    Map<String, Object> updateReturnApprove(OrdReturnMo record);
-
-    /**
      * 拒绝退货
      * Title: rejectReturn
      * Description: 

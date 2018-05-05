@@ -150,53 +150,6 @@ public class OrdReturnCtrl {
 	}
 
 	/**
-	 * 退货审核通过
-	 * Title: returnApprove
-	 * Description: 
-	 * @param mo
-	 * @return
-	 * @date 2018年4月26日 下午2:41:32
-	 */
-	@PutMapping("/ord/return/approve")
-	Map<String, Object> returnApprove(OrdReturnMo mo) {
-		Map<String, Object> resultMap = new HashMap<String, Object>();
-		try {
-			return svc.updateReturnApprove(mo);
-		} catch (RuntimeException e) {
-			String msg = e.getMessage();
-			if (msg.equals("订单编号不能为空")) {
-				resultMap.put("result", -1);
-				resultMap.put("msg", msg);
-			} else if (msg.equals("退货编号不能为空")) {
-				resultMap.put("result", -2);
-				resultMap.put("msg", msg);
-			} else if (msg.equals("该订单已取消，审核失败")) {
-				resultMap.put("result", -3);
-				resultMap.put("msg", msg);
-			} else if (msg.equals("当前退货金额不能超过订单总额")) {
-				resultMap.put("result", -4);
-				resultMap.put("msg", msg);
-			} else if (msg.equals("找不到该退货信息")) {
-				resultMap.put("result", -5);
-				resultMap.put("msg", msg);
-			} else if (msg.equals("当前状态不允许审核")) {
-				resultMap.put("result", -6);
-				resultMap.put("msg", msg);
-			} else if (msg.equals("修改订单退货总额出错")) {
-				resultMap.put("result", -7);
-				resultMap.put("msg", msg);
-			} else if (msg.equals("审核通过失败")) {
-				resultMap.put("result", -8);
-				resultMap.put("msg", msg);
-			} else {
-				resultMap.put("result", -8);
-				resultMap.put("msg", "审核失败");
-			}
-			return resultMap;
-		}
-	}
-	
-	/**
 	 * 拒绝退货
 	 * Title: rejectReturn
 	 * Description: 
