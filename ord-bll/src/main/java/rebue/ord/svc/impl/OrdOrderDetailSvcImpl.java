@@ -1,6 +1,9 @@
 package rebue.ord.svc.impl;
 
 
+import java.math.BigDecimal;
+
+import org.apache.ibatis.annotations.Param;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
@@ -38,5 +41,21 @@ public class OrdOrderDetailSvcImpl extends MybatisBaseSvcImpl<OrdOrderDetailMo, 
         }
         return super.add(mo);
     }
-
+    
+    /**
+     * 根据订单编号、详情ID修改退货数量和返现总额
+     * Title: modifyReturnCountAndCashBackTotal
+     * Description: 
+     * @param orderId
+     * @param orderDetailId
+     * @param returnCount
+     * @param cashbackTotal
+     * @return
+     * @date 2018年5月7日 上午9:53:45
+     */
+    @Override
+    @Transactional(readOnly = false, propagation = Propagation.REQUIRED)
+    public int modifyReturnCountAndCashBackTotal(long orderId, long orderDetailId, int returnCount, BigDecimal cashbackTotal) {
+    	return _mapper.modifyReturnCountAndCashBackTotal(orderId, orderDetailId, returnCount, cashbackTotal);
+    }
 }

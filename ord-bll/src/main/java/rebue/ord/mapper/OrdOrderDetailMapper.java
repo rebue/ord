@@ -1,7 +1,11 @@
 package rebue.ord.mapper;
 
+import java.math.BigDecimal;
 import java.util.List;
 import org.apache.ibatis.annotations.Mapper;
+import org.apache.ibatis.annotations.Param;
+import org.apache.ibatis.annotations.Update;
+
 import rebue.ord.mo.OrdOrderDetailMo;
 import rebue.robotech.mapper.MybatisBaseMapper;
 
@@ -86,4 +90,15 @@ public interface OrdOrderDetailMapper extends MybatisBaseMapper<OrdOrderDetailMo
      * @mbg.generated 2018-05-05 16:21:19
      */
     boolean existSelective(OrdOrderDetailMo record);
+    
+    /**
+     * 根据订单编号订单详情ID修改退货数量和返现总额
+     * Title: modifyReturnCountAndCashBackTotal
+     * Description: 
+     * @param record
+     * @return
+     * @date 2018年5月7日 上午9:46:55
+     */
+    @Update("UPDATE ORD_ORDER_DETAIL SET RETURN_COUNT=#{returnCount,jdbcType=INTEGER}, CASHBACK_TOTAL=#{cashbackTotal,jdbcType=DECIMAL} WHERE ID=#{orderDetailId,jdbcType=BIGINT} AND ORDER_ID=#{orderId,jdbcType=BIGINT}")
+    int modifyReturnCountAndCashBackTotal(@Param("orderId") long orderId, @Param("orderDetailId") long orderDetailId, @Param("returnCount") int returnCount, @Param("cashbackTotal") BigDecimal cashbackTotal);
 }

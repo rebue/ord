@@ -15,6 +15,7 @@ import rebue.ord.svc.OrdReturnSvc;
 
 import rebue.robotech.svc.impl.MybatisBaseSvcImpl;
 
+import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
@@ -341,8 +342,143 @@ public class OrdReturnSvcImpl extends MybatisBaseSvcImpl<OrdReturnMo, java.lang.
 	 * @return
 	 * @date 2018年5月5日 下午3:26:49
 	 */
-	public Map<String, Object> agreeToReturn() {
+	public Map<String, Object> agreeToReturn(OrdReturnMo mo) {
 		Map<String, Object> resultMap = new HashMap<String, Object>();
+		// 退货编号
+		Long returnCode = mo.getReturnCode();
+		returnCode = returnCode == null ? returnCode : 0L;
+		
+		// 订单编号
+		Long orderId = mo.getOrderId();
+		orderId = orderId == null ? orderId : 0L;
+		
+		// 订单详情编号
+		Long orderDetailId = mo.getOrderDetailId();
+		orderDetailId = orderDetailId == null ? orderDetailId : 0L;
+		
+		// 同意退货操作人编号
+		Long reviewOpId = mo.getReviewOpId();
+		reviewOpId = reviewOpId == null ? reviewOpId : 0L;
+		
+		BigDecimal bd = new BigDecimal("0");
+		
+		// 退货金额（余额）
+		BigDecimal returnAmount1 = mo.getReturnAmount1();
+		returnAmount1 = returnAmount1 == null ? returnAmount1 : bd;
+		
+		// 退货金额（返现金）
+		BigDecimal returnAmount2 = mo.getReturnAmount2();
+		returnAmount2 = returnAmount2 == null ? returnAmount2 : bd;
+		
+		// 扣减返现金额
+		BigDecimal subtractCashback = mo.getSubtractCashback();
+		subtractCashback = subtractCashback == null ? subtractCashback : bd;
+		
+		// 退货总额 = 退货金额（余额） + 退货金额（返现金）
+		BigDecimal totalReturn = new BigDecimal(returnAmount1.add(returnAmount2).doubleValue());
+		
+		// 退货数量
+		int returnCount = mo.getReturnCount();
+		
+		if (returnCode == 0 || orderId == 0 || orderDetailId == 0 || reviewOpId == 0 || subtractCashback.compareTo(bd) == -1 || returnCount == 0) {
+			_log.error("同意退货时出现参数为空的情况，同意退货失败");
+			throw new RuntimeException("参数不正确");
+		}
+		
+		if (returnAmount1.compareTo(bd) == -1 && returnAmount2.compareTo(bd) == -1) {
+			_log.error("同意退货时出现退到余额和返现金都为空，退货编号为：{}", returnCode);
+			throw new RuntimeException("参数不正确");
+		}
+		
+		OrdReturnMo ordReturnMo = new OrdReturnMo();
+		ordReturnMo.setReturnCode(returnCode);
+		_log.info("同意退货查询退货信息的参数为：{}", returnCode);
+		// 查询退货信息
+		List<OrdReturnMo> returnList = _mapper.selectSelective(ordReturnMo);
+		_log.info("同意退货查询退货信息的返回值为：{}", String.valueOf(returnList));
+		if (returnList.size() == 0) {
+			_log.error("同意退货查询退货信息时出现找不到退货信息，退货编号为：{}", returnCode);
+			throw new RuntimeException("退货信息不存在");
+		}
+		
+		if (returnList.get(0).getApplicationState() != 1) {
+			_log.error("同意退货时出现退货订单已审核，退货编号为：{}", returnCode);
+			throw new RuntimeException("该退货单已审核");
+		}
+		
+		OrdOrderMo orderMo = new OrdOrderMo();
+		orderMo.setOrderCode(String.valueOf(orderId));
+		_log.info("同意退货查询订单信息的参数为：{}", orderId);
+		// 查询订单信息
+		List<OrdOrderMo> orderList = ordOrderSvc.list(orderMo);
+		_log.info("同意退货查询订单信息的返回值为：{}", String.valueOf(orderList));
+
+		if (orderList.size() == 0) {
+			_log.error("同意退货查询订单信息时出现没有该订单，退货编号为：{}", returnCode);
+			throw new RuntimeException("没有找到该订单信息");
+		}
+		
+		if (orderList.get(0).getOrderState() == -1 || orderList.get(0).getOrderState() == 1) {
+			_log.error("同意退货时发现该订单未支付或已取消，退货编号为：{}", returnCode);
+			throw new RuntimeException("该订单未支付或已取消");
+		}
+		
+		OrdOrderDetailMo orderDetailMo = new OrdOrderDetailMo();
+		orderDetailMo.setOrderId(orderId);
+		orderDetailMo.setId(orderDetailId);
+		_log.info("同意退货查询订单详情信息的参数为：{}", orderDetailMo.toString());
+		// 查询订单详情信息
+		List<OrdOrderDetailMo> orderDetailList = ordOrderDetailSvc.list(orderDetailMo);
+		_log.info("同意退货查询订单详情信息的返回值为：{}", String.valueOf(orderDetailList));
+		if (orderDetailList.size() == 0) {
+			_log.error("同意退货查询订单详情信息时发现没有找到该订单详情信息，退货编号为：{}", returnCode);
+			throw new RuntimeException("没有找到该订单详情信息");
+		}
+		
+		if (orderDetailList.get(0).getReturnState() != 1) {
+			_log.error("同意退货时发现该商品并未申请退货或已完成退货，退货编号为：{}", returnCode);
+			throw new RuntimeException("该商品未申请退货或已完成退货");
+		}
+		
+		// 订单退货总额
+		BigDecimal orderReturnTotal = orderList.get(0).getReturnTotal();
+		orderReturnTotal = orderReturnTotal == null ? orderReturnTotal : bd;
+		
+		// 订单退货金额（余额）
+		BigDecimal orderReturnAmount1 = orderList.get(0).getReturnAmount1();
+		orderReturnAmount1 = orderReturnAmount1 == null ? orderReturnAmount1 : bd;
+		
+		// 订单退货金额（返现金）
+		BigDecimal orderReturnAmount2 = orderList.get(0).getReturnAmount2();
+		orderReturnAmount2 = orderReturnAmount2 == null ? orderReturnAmount2 : bd;
+		
+		orderMo.setReturnTotal(new BigDecimal(orderReturnTotal.add(totalReturn).doubleValue()));
+		orderMo.setReturnAmount1(new BigDecimal(orderReturnAmount1.add(returnAmount1).doubleValue()));
+		orderMo.setReturnAmount2(new BigDecimal(orderReturnAmount2.add(returnAmount2).doubleValue()));
+		_log.info("同意退货修改订单退货金额的参数为{}", orderMo.toString());
+		// 修改订单退货金额
+		int modifyReturnAmountResult = ordOrderSvc.modifyReturnAmountByorderCode(orderMo);
+		_log.info("同意退货修改订单退货金额的返回值为：{}", modifyReturnAmountResult);
+		if (modifyReturnAmountResult != 1) {
+			_log.error("同意退货修改订单退货金额时出现错误，退货编号为：{}", returnCode);
+			throw new RuntimeException("修改订单金额错误");
+		}
+		
+		// 订单详情退货数量
+		Integer orderDetailReturnCount = orderDetailList.get(0).getReturnCount();
+		orderDetailReturnCount = orderDetailReturnCount == null ? orderDetailReturnCount : 0;
+		
+		// 返现总额
+		BigDecimal cashBackTotal = orderDetailList.get(0).getCashbackTotal();
+		
+		// 新退货数量
+		Integer newReturnCount = returnCount + orderDetailReturnCount;
+		
+		// 新返现总额
+		BigDecimal newCashBackTotal = new BigDecimal(cashBackTotal.add(totalReturn).doubleValue());
+		_log.info("同意退货修改订单详情退货数量和返现总额的参数为：{}，{}，{}，{}", orderId, orderDetailId, newReturnCount, newCashBackTotal);
+		// 修改订单详情退货数量和返现总额
+		int modifyReturnCountAndCashBackTotalResult = ordOrderDetailSvc.modifyReturnCountAndCashBackTotal(orderId, orderDetailId, newReturnCount, newCashBackTotal);
 		return resultMap;
 	}
 	

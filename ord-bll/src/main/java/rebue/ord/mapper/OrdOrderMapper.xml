@@ -877,4 +877,10 @@
   	UPDATE ORD_ORDER SET ORDER_STATE=4, RECEIVED_TIME=#{receivedTime,jdbcType=TIMESTAMP}, RECEIVED_OP_ID=#{receivedOpId,jdbcType=BIGINT} 
   	WHERE USER_ID=#{userId,jdbcType=BIGINT} AND ORDER_CODE=#{orderCode, jdbcType=VARCHAR} AND ORDER_STATE=3
   </update>
+  
+  <!-- 修改退货金额 -->
+  <update id="modifyReturnAmountByorderCode" parameterType="rebue.ord.mo.OrdOrderMo">
+  	UPDATE ORD_ORDER SET RETURN_TOTAL=#{returnTotal,jdbcType=DECIMAL}, RETURN_AMOUNT1=#{returnAmount1,jdbcType=DECIMAL}, RETURN_AMOUNT2=#{returnAmount2,jdbcType=DECIMAL} 
+  	WHERE ORDER_CODE=#{orderCode, jdbcType=VARCHAR}
+  </update>
 </mapper>

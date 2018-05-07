@@ -150,4 +150,14 @@ public interface OrdOrderMapper extends MybatisBaseMapper<OrdOrderMo, Long> {
 	 * @date 2018年4月14日 下午2:18:26
 	 */
 	int orderSignIn(OrdOrderMo record);
+	
+	/**
+	 * 修改退货金额
+	 * Title: modifyReturnAmount
+	 * Description: 
+	 * @param record
+	 * @return
+	 * @date 2018年5月7日 上午9:09:35
+	 */
+	int modifyReturnAmountByorderCode(OrdOrderMo record);
 }

@@ -95,4 +95,14 @@ public interface OrdOrderSvc extends MybatisBaseSvc<OrdOrderMo, java.lang.Long> 
 	 */
 	Map<String, Object> orderSignIn(OrdOrderMo mo);
 
+	/**
+	 * 根据退货编号修改退货金额
+	 * Title: modifyReturnAmountByorderCode
+	 * Description: 
+	 * @param mo
+	 * @return
+	 * @date 2018年5月7日 上午9:18:51
+	 */
+	int modifyReturnAmountByorderCode(OrdOrderMo mo);
+
 }

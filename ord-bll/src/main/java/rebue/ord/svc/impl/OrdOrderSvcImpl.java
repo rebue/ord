@@ -628,4 +628,17 @@ public class OrdOrderSvcImpl
 		return resultMap;
 	}
 
+	/**
+	 * 根据订单编号修改退货金额
+	 * Title: modifyReturnAmountByorderCode
+	 * Description: 
+	 * @param mo
+	 * @return
+	 * @date 2018年5月7日 上午9:18:19
+	 */
+	@Override
+	@Transactional(readOnly = false, propagation = Propagation.REQUIRED)
+	public int modifyReturnAmountByorderCode(OrdOrderMo mo) {
+		return _mapper.modifyReturnAmountByorderCode(mo);
+	}
 }
