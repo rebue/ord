@@ -641,4 +641,20 @@ public class OrdOrderSvcImpl
 	public int modifyReturnAmountByorderCode(OrdOrderMo mo) {
 		return _mapper.modifyReturnAmountByorderCode(mo);
 	}
+	
+	/**
+	 * 根据订单编号修改订单状态
+	 * Title: modifyOrderStateByOderCode
+	 * Description: 
+	 * @param orderCode
+	 * @param orderState
+	 * @return
+	 * @date 2018年5月8日 上午10:45:12
+	 */
+	@Override
+	@Transactional(readOnly = false, propagation = Propagation.REQUIRED)
+	public int modifyOrderStateByOderCode(long orderCode, byte orderState) {
+		_log.info("修改订单状态的参数为：{}，{}", orderCode, orderState);
+		return _mapper.modifyOrderStateByOderCode(orderCode, orderState);
+	}
 }
