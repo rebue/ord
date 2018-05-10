@@ -41,7 +41,7 @@ public class OrdOrderDetailCtrl {
 	 * @mbg.generated
 	 */
 	@PostMapping("/ord/orderdetail")
-	Map<String, Object> add(@RequestBody OrdOrderDetailMo vo) throws Exception {
+	Map<String, Object> add(OrdOrderDetailMo vo) throws Exception {
 		_log.info("add OrdOrderDetailMo:" + vo);
 		svc.add(vo);
 		Map<String, Object> result = new HashMap<>();
@@ -57,7 +57,7 @@ public class OrdOrderDetailCtrl {
 	 * @mbg.generated
 	 */
 	@PutMapping("/ord/orderdetail")
-	Map<String, Object> modify(@RequestBody OrdOrderDetailMo vo) throws Exception {
+	Map<String, Object> modify(OrdOrderDetailMo vo) throws Exception {
 		_log.info("modify OrdOrderDetailMo:" + vo);
 		svc.modify(vo);
 		Map<String, Object> result = new HashMap<>();
@@ -87,7 +87,7 @@ public class OrdOrderDetailCtrl {
 	 * @mbg.generated
 	 */
 	@GetMapping("/ord/orderdetail")
-	PageInfo<OrdOrderDetailMo> list(@RequestBody OrdOrderDetailMo qo,
+	PageInfo<OrdOrderDetailMo> list(OrdOrderDetailMo qo,
 			@RequestParam("pageNum") int pageNum,
 			@RequestParam("pageSize") int pageSize) {
 		_log.info("list OrdOrderDetailMo:" + qo + ", pageNum = " + pageNum
@@ -125,7 +125,7 @@ public class OrdOrderDetailCtrl {
 	 * @date 2018年4月9日 下午5:02:41
 	 */
 	@GetMapping("/ord/orderdetail/info")
-	List<OrdOrderDetailMo> orderDetailInfo(@RequestBody OrdOrderDetailMo qo) {
+	List<OrdOrderDetailMo> orderDetailInfo(OrdOrderDetailMo qo) {
 		_log.info("获取订单详情的参数为：{}", qo.toString());
 		List<OrdOrderDetailMo> list = svc.list(qo);
 		_log.info("获取到的订单详情为：{}", String.valueOf(list));

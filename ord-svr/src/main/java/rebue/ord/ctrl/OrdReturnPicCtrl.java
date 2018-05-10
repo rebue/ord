@@ -38,7 +38,7 @@ public class OrdReturnPicCtrl {
      * @mbg.generated
      */
     @PostMapping("/ord/returnpic")
-    Map<String, Object> add(@RequestBody OrdReturnPicMo vo) throws Exception {
+    Map<String, Object> add(OrdReturnPicMo vo) throws Exception {
         _log.info("add OrdReturnPicMo:" + vo);
         svc.add(vo);
         Map<String, Object> result = new HashMap<>();
@@ -53,7 +53,7 @@ public class OrdReturnPicCtrl {
      * @mbg.generated
      */
     @PutMapping("/ord/returnpic")
-    Map<String, Object> modify(@RequestBody OrdReturnPicMo vo) throws Exception {
+    Map<String, Object> modify(OrdReturnPicMo vo) throws Exception {
         _log.info("modify OrdReturnPicMo:" + vo);
         svc.modify(vo);
         Map<String, Object> result = new HashMap<>();
@@ -81,7 +81,7 @@ public class OrdReturnPicCtrl {
      * @mbg.generated
      */
     @GetMapping("/ord/returnpic")
-    PageInfo<OrdReturnPicMo> list(@RequestBody OrdReturnPicMo qo, @RequestParam("pageNum") int pageNum, @RequestParam("pageSize") int pageSize) {
+    PageInfo<OrdReturnPicMo> list(OrdReturnPicMo qo, @RequestParam("pageNum") int pageNum, @RequestParam("pageSize") int pageSize) {
     		_log.info("list OrdReturnPicMo:" + qo+", pageNum = " + pageNum + ", pageSize = " + pageSize);
 
         if (pageSize > 50) {

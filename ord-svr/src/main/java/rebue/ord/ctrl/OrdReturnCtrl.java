@@ -41,7 +41,7 @@ public class OrdReturnCtrl {
 	 * @mbg.generated
 	 */
 	@PutMapping("/ord/return")
-	Map<String, Object> modify(@RequestBody OrdReturnMo vo) throws Exception {
+	Map<String, Object> modify(OrdReturnMo vo) throws Exception {
 		_log.info("modify OrdReturnMo:" + vo);
 		svc.modify(vo);
 		Map<String, Object> result = new HashMap<>();
@@ -73,7 +73,7 @@ public class OrdReturnCtrl {
 	 */
 	@SuppressWarnings("finally")
 	@PostMapping("/ord/return")
-	Map<String, Object> addEx(@RequestBody OrdOrderReturnTo vo) throws Exception {
+	Map<String, Object> addEx(OrdOrderReturnTo vo) throws Exception {
 		Map<String, Object> resultMap = new HashMap<String, Object>();
 		try {
 			resultMap = svc.addEx(vo);
@@ -111,7 +111,7 @@ public class OrdReturnCtrl {
 	 * @date 2018年4月21日 下午3:59:07
 	 */
 	@GetMapping("/ord/return")
-	PageInfo<OrdReturnRo> selectReturnPageList(@RequestBody OrdReturnMo mo, @RequestParam("pageNum") int pageNum,
+	PageInfo<OrdReturnRo> selectReturnPageList(OrdReturnMo mo, @RequestParam("pageNum") int pageNum,
 			@RequestParam("pageSize") int pageSize) {
 		_log.info("list OrdReturnMo:" + mo + ", pageNum = " + pageNum + ", pageSize = " + pageSize);
 
@@ -134,7 +134,7 @@ public class OrdReturnCtrl {
 	 * @date 2018年4月27日 下午3:31:38
 	 */
 	@PutMapping("/ord/return/reject")
-	Map<String, Object> rejectReturn(@RequestBody OrdReturnMo mo) {
+	Map<String, Object> rejectReturn(OrdReturnMo mo) {
 		_log.info("拒绝退货的参数为：{}", mo.toString());
 		Map<String, Object> resultMap = new HashMap<String, Object>();
 		try {

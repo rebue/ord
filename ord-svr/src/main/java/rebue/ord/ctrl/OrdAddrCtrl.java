@@ -65,7 +65,7 @@ public class OrdAddrCtrl {
 	 * 添加用户收货地址
 	 */
 	@PostMapping("/ord/addr")
-	Map<String, Object> add(@RequestBody OrdAddrMo vo) throws Exception {
+	Map<String, Object> add(OrdAddrMo vo) throws Exception {
 		_log.info("添加用户收货地址的参数为：{}", vo.toString());
 		int result = svc.add(vo);
 		_log.info("{}添加用户收货地址的返回值为：{}", vo.getUserId(), result);
@@ -86,7 +86,7 @@ public class OrdAddrCtrl {
 	 * 修改用户默认收货地址
 	 */
 	@PutMapping("/ord/addr/def")
-	Map<String, Object> modifyDef(@RequestBody OrdAddrMo vo) throws Exception {
+	Map<String, Object> modifyDef(OrdAddrMo vo) throws Exception {
 		_log.info("修改用户默认收货地址的参数为：{}", vo.toString());
 		return svc.updateDef(vo);
 	}
@@ -99,7 +99,7 @@ public class OrdAddrCtrl {
 	 * @date 2018年4月8日 下午4:25:03
 	 */
 	@PutMapping("/ord/addr")
-	Map<String, Object> modify(@RequestBody OrdAddrMo vo) {
+	Map<String, Object> modify(OrdAddrMo vo) {
 		_log.info("修改用户收货地址信息的参数为：{}", vo.toString());
 		return svc.update(vo);
 	}
@@ -108,7 +108,7 @@ public class OrdAddrCtrl {
 	 * 查询用户收货地址
 	 */
 	@GetMapping("/ord/addr")
-	List<OrdAddrMo> list(@RequestBody OrdAddrMo qo) {
+	List<OrdAddrMo> list(OrdAddrMo qo) {
 		_log.info("list OrdAddrMo:" + qo);
 		List<OrdAddrMo> result = svc.list(qo);
 		_log.info("result: " + result);

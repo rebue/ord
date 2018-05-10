@@ -62,7 +62,7 @@ public class OrdOrderCtrl {
 	 * @mbg.generated
 	 */
 	@GetMapping("/ord/order")
-	PageInfo<OrdOrderMo> list(@RequestBody OrdOrderMo qo,
+	PageInfo<OrdOrderMo> list(OrdOrderMo qo,
 			@RequestParam("pageNum") int pageNum,
 			@RequestParam("pageSize") int pageSize) {
 		_log.info("list OrdOrderMo:" + qo + ", pageNum = " + pageNum
@@ -96,7 +96,7 @@ public class OrdOrderCtrl {
 	 * 修改订单实际金额信息 2018年4月12日14:51:59
 	 */
 	@PutMapping("/ord/order")
-	Map<String, Object> modify(@RequestBody OrdOrderMo vo) throws Exception {
+	Map<String, Object> modify(OrdOrderMo vo) throws Exception {
 		_log.info("修改订单实际金额的参数为：{}", vo.toString());
 		return svc.updateOrderRealMoney(vo);
 	}
@@ -192,7 +192,7 @@ public class OrdOrderCtrl {
 	 */
 	@SuppressWarnings("finally")
 	@PutMapping("/ord/order/cancel")
-	Map<String, Object> cancellationOfOrder(@RequestBody OrdOrderMo qo) {
+	Map<String, Object> cancellationOfOrder(OrdOrderMo qo) {
 		_log.info("用户取消订单的参数为：{}", qo.toString());
 		Map<String, Object> resultMap = new HashMap<String, Object>();
 		try {
@@ -226,7 +226,7 @@ public class OrdOrderCtrl {
 	 */
 	@SuppressWarnings("finally")
 	@PutMapping("/ord/order/canceldelivery")
-	Map<String, Object> cancelDeliveryUpdateOrderState(@RequestBody OrdOrderMo qo) {
+	Map<String, Object> cancelDeliveryUpdateOrderState(OrdOrderMo qo) {
 		_log.info("用户取消订单的参数为：{}", qo.toString());
 		Map<String, Object> resultMap = new HashMap<String, Object>();
 		try {
@@ -259,7 +259,7 @@ public class OrdOrderCtrl {
 	 * @date 2018年4月13日 上午11:24:17
 	 */
 	@PutMapping("/ord/order/setupexpresscompany")
-	Map<String, Object> setUpExpressCompany(@RequestBody OrdOrderMo qo) {
+	Map<String, Object> setUpExpressCompany(OrdOrderMo qo) {
 		_log.info("设置快递公司的参数为：{}", qo.toString());
 		return svc.setUpExpressCompany(qo);
 	}
@@ -273,7 +273,7 @@ public class OrdOrderCtrl {
 	 */
 	@SuppressWarnings("finally")
 	@PutMapping("/ord/order/shipmentconfirmation")
-	Map<String, Object> shipmentConfirmation(@RequestBody OrdOrderMo qo) {
+	Map<String, Object> shipmentConfirmation(OrdOrderMo qo) {
 		_log.info("确认发货的参数为：{}", qo.toString());
 		Map<String, Object> resultMap = new HashMap<String, Object>();
 		try {
@@ -315,7 +315,7 @@ public class OrdOrderCtrl {
 	 */
 	@SuppressWarnings("finally")
 	@PutMapping("/ord/order/ordersignin")
-	Map<String, Object> orderSignIn(@RequestBody OrdOrderMo qo) {
+	Map<String, Object> orderSignIn(OrdOrderMo qo) {
 		_log.info("订单签收的参数为：{}", qo.toString());
 		Map<String, Object> resultMap = new HashMap<String, Object>();
 		try {
