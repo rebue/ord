@@ -18,9 +18,7 @@ import org.springframework.transaction.annotation.Transactional;
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
 
-import rebue.afc.returngoods.ro.ReturnGoodsByBuyerRo;
 import rebue.afc.returngoods.to.ReturnGoodsByBuyerTo;
-import rebue.afc.svr.feign.AfcReturnGoodsSvc;
 import rebue.ord.mapper.OrdReturnMapper;
 import rebue.ord.mo.OrdOrderDetailMo;
 import rebue.ord.mo.OrdOrderMo;
@@ -380,7 +378,6 @@ public class OrdReturnSvcImpl extends MybatisBaseSvcImpl<OrdReturnMo, java.lang.
 	 * @return
 	 * @date 2018年5月5日 下午3:26:49 1、判断参数是否齐全
 	 */
-	@SuppressWarnings("null")
 	@Override
 	@Transactional(readOnly = false, propagation = Propagation.REQUIRED)
 	public Map<String, Object> agreeToReturn(OrdOrderReturnTo mo) {
