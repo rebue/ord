@@ -688,7 +688,8 @@
   
   <!-- 确认收到货之后修改退货单信息 -->
   <update id="confirmReceiptOfGoods" parameterType="rebue.ord.mo.OrdReturnMo">
-  	UPDATE ORD_RETURN SET APPLICATION_STATE=3, REFUND_OP_ID=#{refundOpId,jdbcType=BIGINT}, REFUND_TIME=#{refundTime,jdbcType=TIMESTAMP}, 
-  	RECEIVE_OP_ID = #{receiveOpId,jdbcType=BIGINT}, RECEIVE_TIME = #{receiveTime,jdbcType=TIMESTAMP} WHERE RETURN_CODE = #{returnCode,jdbcType=BIGINT}
+  	UPDATE ORD_RETURN SET APPLICATION_STATE=3, REFUND_STATE = #{refundState,jdbcType=TINYINT}, REFUND_OP_ID=#{refundOpId,jdbcType=BIGINT}, REFUND_TIME=#{refundTime,jdbcType=TIMESTAMP}, 
+  	RECEIVE_OP_ID = #{receiveOpId,jdbcType=BIGINT}, RECEIVE_TIME = #{receiveTime,jdbcType=TIMESTAMP}, FINISH_OP_ID = #{finishOpId,jdbcType=BIGINT}, FINISH_TIME = #{finishTime,jdbcType=TIMESTAMP}
+  	 WHERE RETURN_CODE = #{returnCode,jdbcType=BIGINT}
   </update>
 </mapper>

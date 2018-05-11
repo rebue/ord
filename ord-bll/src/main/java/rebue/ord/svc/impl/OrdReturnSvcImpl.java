@@ -64,8 +64,9 @@ public class OrdReturnSvcImpl extends MybatisBaseSvcImpl<OrdReturnMo, java.lang.
 	@Resource
 	private OrdOrderDetailSvc ordOrderDetailSvc;
 
-	/*@Resource
-	private AfcReturnGoodsSvc afcReturnGoodsSvr;*/
+	/*
+	 * @Resource private AfcReturnGoodsSvc afcReturnGoodsSvr;
+	 */
 
 	/**
 	 * 添加用户退货信息 Title: addEx Description: 1、首先查询订单信息是是否存在和订单的状态 2、查询订单详情是否存在和是否可以退货
@@ -182,7 +183,7 @@ public class OrdReturnSvcImpl extends MybatisBaseSvcImpl<OrdReturnMo, java.lang.
 		ordReturnMo.setOrderDetailId(orderDetailId);
 		ordReturnMo.setReturnCount(returnNum);
 		ordReturnMo.setReturnRental(to.getReturnPrice());
-		ordReturnMo.setReturnType((byte) 2);
+		ordReturnMo.setReturnType(to.getReturnType());
 		ordReturnMo.setApplicationState((byte) 1);
 		ordReturnMo.setRefundState((byte) 1);
 		ordReturnMo.setReturnReason(to.getReturnReason());
@@ -377,49 +378,33 @@ public class OrdReturnSvcImpl extends MybatisBaseSvcImpl<OrdReturnMo, java.lang.
 	 * 同意退货 Title: agreeToReturn Description:
 	 * 
 	 * @return
-	 * @date 2018年5月5日 下午3:26:49
+	 * @date 2018年5月5日 下午3:26:49 1、判断参数是否齐全
 	 */
 	@SuppressWarnings("null")
-	public Map<String, Object> agreeToReturn(OrdReturnMo mo) {
+	@Override
+	@Transactional(readOnly = false, propagation = Propagation.REQUIRED)
+	public Map<String, Object> agreeToReturn(OrdOrderReturnTo mo) {
 		Map<String, Object> resultMap = new HashMap<String, Object>();
 		// 退货编号
 		Long returnCode = mo.getReturnCode();
-		returnCode = returnCode == null ? returnCode : 0L;
-
 		// 订单编号
-		Long orderId = mo.getOrderId();
-		orderId = orderId == null ? orderId : 0L;
-
+		Long orderId = mo.getOrderCode();
 		// 订单详情编号
 		Long orderDetailId = mo.getOrderDetailId();
-		orderDetailId = orderDetailId == null ? orderDetailId : 0L;
-
 		// 同意退货操作人编号
-		Long reviewOpId = mo.getReviewOpId();
-		reviewOpId = reviewOpId == null ? reviewOpId : 0L;
-
+		Long reviewOpId = mo.getOpId();
 		BigDecimal bd = new BigDecimal("0");
-
 		// 退货金额（余额）
-		BigDecimal returnAmount1 = mo.getReturnAmount1();
-		returnAmount1 = returnAmount1 == null ? returnAmount1 : bd;
-
+		BigDecimal returnAmount1 = new BigDecimal(String.valueOf(mo.getReturnAmount1()));
 		// 退货金额（返现金）
-		BigDecimal returnAmount2 = mo.getReturnAmount2();
-		returnAmount2 = returnAmount2 == null ? returnAmount2 : bd;
-
+		BigDecimal returnAmount2 = new BigDecimal(String.valueOf(mo.getReturnAmount2()));
 		// 扣减返现金额
-		BigDecimal subtractCashback = mo.getSubtractCashback();
-		subtractCashback = subtractCashback == null ? subtractCashback : bd;
-
+		BigDecimal subtractCashback = new BigDecimal(String.valueOf(mo.getSubtractCashback()));
 		// 退货总额 = 退货金额（余额） + 退货金额（返现金）
 		BigDecimal totalReturn = new BigDecimal(returnAmount1.add(returnAmount2).doubleValue());
 
-		// 退货数量
-		int returnCount = mo.getReturnCount();
-
-		if (returnCode == 0 || orderId == 0 || orderDetailId == 0 || reviewOpId == 0
-				|| subtractCashback.compareTo(bd) == -1 || returnCount == 0) {
+		if (returnCode == null || orderId == null || orderDetailId == null || reviewOpId == null
+				|| subtractCashback.compareTo(bd) == -1) {
 			_log.error("同意退货时出现参数为空的情况，同意退货失败");
 			resultMap.put("result", -1);
 			resultMap.put("msg", "参数不正确");
@@ -497,15 +482,15 @@ public class OrdReturnSvcImpl extends MybatisBaseSvcImpl<OrdReturnMo, java.lang.
 
 		// 订单退货总额
 		BigDecimal orderReturnTotal = orderList.get(0).getReturnTotal();
-		orderReturnTotal = orderReturnTotal == null ? orderReturnTotal : bd;
+		orderReturnTotal = orderReturnTotal == null ? bd : orderReturnTotal;
 
 		// 订单退货金额（余额）
 		BigDecimal orderReturnAmount1 = orderList.get(0).getReturnAmount1();
-		orderReturnAmount1 = orderReturnAmount1 == null ? orderReturnAmount1 : bd;
+		orderReturnAmount1 = orderReturnAmount1 == null ? bd : orderReturnAmount1;
 
 		// 订单退货金额（返现金）
 		BigDecimal orderReturnAmount2 = orderList.get(0).getReturnAmount2();
-		orderReturnAmount2 = orderReturnAmount2 == null ? orderReturnAmount2 : bd;
+		orderReturnAmount2 = orderReturnAmount2 == null ? bd : orderReturnAmount2;
 
 		orderMo.setReturnTotal(new BigDecimal(orderReturnTotal.add(totalReturn).doubleValue()));
 		orderMo.setReturnAmount1(new BigDecimal(orderReturnAmount1.add(returnAmount1).doubleValue()));
@@ -521,13 +506,16 @@ public class OrdReturnSvcImpl extends MybatisBaseSvcImpl<OrdReturnMo, java.lang.
 
 		// 订单详情退货数量
 		Integer orderDetailReturnCount = orderDetailList.get(0).getReturnCount();
-		orderDetailReturnCount = orderDetailReturnCount == null ? orderDetailReturnCount : 0;
+		orderDetailReturnCount = orderDetailReturnCount == null ? 0 : orderDetailReturnCount;
 
 		// 返现总额
 		BigDecimal cashBackTotal = orderDetailList.get(0).getCashbackTotal();
+		cashBackTotal = cashBackTotal == null ? bd : cashBackTotal;
 
+		Integer returnCount = returnList.get(0).getReturnCount();
+		returnCount = returnCount == null ? 0 : returnCount;
 		// 新退货数量
-		Integer newReturnCount = returnCount + orderDetailReturnCount;
+		Integer newReturnCount =  + orderDetailReturnCount;
 
 		// 新返现总额
 		BigDecimal newCashBackTotal = new BigDecimal(cashBackTotal.subtract(totalReturn).doubleValue());
@@ -544,7 +532,7 @@ public class OrdReturnSvcImpl extends MybatisBaseSvcImpl<OrdReturnMo, java.lang.
 		}
 
 		Date date = new Date();
-		ordReturnMo.setReviewOpId(mo.getReviewOpId());
+		ordReturnMo.setReviewOpId(reviewOpId);
 		ordReturnMo.setReviewTime(date);
 		ordReturnMo.setReturnRental(totalReturn);
 		ordReturnMo.setReturnAmount1(returnAmount1);
@@ -569,34 +557,28 @@ public class OrdReturnSvcImpl extends MybatisBaseSvcImpl<OrdReturnMo, java.lang.
 	 * @return
 	 * @date 2018年5月5日 下午3:41:42
 	 */
-	@SuppressWarnings("null")
+	@Override
+	@Transactional(readOnly = false, propagation = Propagation.REQUIRED)
 	public Map<String, Object> agreeToARefund(OrdOrderReturnTo to) {
 		Map<String, Object> resultMap = new HashMap<String, Object>();
 		// 退货编号
 		Long returnCode = to.getReturnCode();
-		returnCode = returnCode == null ? returnCode : 0L;
 		// 订单编号
 		Long orderId = to.getOrderCode();
-		orderId = orderId == null ? orderId : 0L;
 		// 订单详情编号
 		Long orderDetailId = to.getOrderDetailId();
-		orderDetailId = orderDetailId == null ? orderDetailId : 0L;
 		BigDecimal bd = new BigDecimal("0");
 		// 退货金额（余额）
 		BigDecimal returnAmount1 = new BigDecimal(to.getReturnAmount1());
-		returnAmount1 = returnAmount1 == null ? returnAmount1 : bd;
 		// 退货金额（返现金）
 		BigDecimal returnAmount2 = new BigDecimal(to.getReturnAmount2());
-		returnAmount2 = returnAmount2 == null ? returnAmount2 : bd;
 		// 扣减返现金额
 		BigDecimal subtractCashback = new BigDecimal(to.getSubtractCashback());
-		subtractCashback = subtractCashback == null ? subtractCashback : bd;
 		// 退货操作人
 		Long refundOpId = to.getOpId();
-		refundOpId = refundOpId == null ? refundOpId : 0L;
 
-		if (returnCode == 0 || orderId == 0 || orderDetailId == 0 || refundOpId == 0
-				|| subtractCashback.compareTo(bd) == 0) {
+		if (returnCode == null || orderId == null || orderDetailId == null || refundOpId == null
+				|| subtractCashback == null) {
 			_log.error("同意退款时出现参数不全");
 			resultMap.put("result", -1);
 			resultMap.put("msg", "参数不正确");
@@ -680,8 +662,12 @@ public class OrdReturnSvcImpl extends MybatisBaseSvcImpl<OrdReturnMo, java.lang.
 			return resultMap;
 		}
 
-		BigDecimal newOrderReturnTotal = new BigDecimal(
-				orderList.get(0).getReturnTotal().add(returnRental).doubleValue());
+		// 订单退货总额
+		BigDecimal returnTotal = orderList.get(0).getReturnTotal();
+		if (returnTotal == null) {
+			returnTotal = new BigDecimal("0");
+		}
+		BigDecimal newOrderReturnTotal = new BigDecimal(returnTotal.add(returnRental).doubleValue());
 		if (orderList.get(0).getRealMoney().compareTo(newOrderReturnTotal) == 0) {
 			orderMo.setOrderState((byte) -1);
 		}
@@ -699,7 +685,7 @@ public class OrdReturnSvcImpl extends MybatisBaseSvcImpl<OrdReturnMo, java.lang.
 
 		// 已退货数量
 		Integer returnCount = detailList.get(0).getReturnCount();
-		returnCount = returnCount == null ? returnCount : 0;
+		returnCount = returnCount == null ? 0 : returnCount;
 
 		// 新的退货数量
 		int newReturnCount = returnCount + to.getReturnNum();
@@ -710,13 +696,14 @@ public class OrdReturnSvcImpl extends MybatisBaseSvcImpl<OrdReturnMo, java.lang.
 		}
 
 		detailMo.setReturnCount(newReturnCount);
+		BigDecimal cashbackTotal = detailList.get(0).getCashbackTotal();
+		cashbackTotal = cashbackTotal == null ? bd : cashbackTotal;
 		// 新返现总额
-		BigDecimal newCashBackTotal = new BigDecimal(
-				detailList.get(0).getCashbackTotal().subtract(subtractCashback).doubleValue());
+		BigDecimal newCashBackTotal = new BigDecimal(cashbackTotal.subtract(subtractCashback).doubleValue());
 		detailMo.setCashbackTotal(newCashBackTotal);
 		_log.info("同意退款修改订单详情信息的参数为：{}", detailMo.toString());
 		// 修改订单详情退货数量和返现总额
-		int modifyReturnCountAndCashBackTotalResult = ordOrderDetailSvc.modifyReturnCountAndCashBackTotal(detailMo);
+		int	modifyReturnCountAndCashBackTotalResult = ordOrderDetailSvc.modifyReturnCountAndCashBackTotal(detailMo);
 		_log.info("同意退款修改订单详情信息的返回值为：{}", modifyReturnCountAndCashBackTotalResult);
 		if (modifyReturnCountAndCashBackTotalResult != 1) {
 			throw new RuntimeException("修改订单详情出错");
@@ -753,14 +740,14 @@ public class OrdReturnSvcImpl extends MybatisBaseSvcImpl<OrdReturnMo, java.lang.
 		goodsByBuyerTo.setIp(to.getIp());
 		goodsByBuyerTo.setMac(to.getMac());
 		_log.info("同意退款执行退款的参数为：{}", goodsByBuyerTo.toString());
-		// 退款
-		/*ReturnGoodsByBuyerRo returnGoodsByBuyerResult = afcReturnGoodsSvr.returnGoodsByBuyer(goodsByBuyerTo);
-		_log.info("同意退款执行退款的返回值为：{}", returnGoodsByBuyerResult);
-		int result = returnGoodsByBuyerResult.getResult().getCode();
-		if (result != 1) {
-			_log.error("同意退款退款时出现出错，退货编号为：{}", returnCode);
-			throw new RuntimeException(String.valueOf(result));
-		}*/
+		/*
+		 * // 退款 ReturnGoodsByBuyerRo returnGoodsByBuyerResult =
+		 * afcReturnGoodsSvr.returnGoodsByBuyer(goodsByBuyerTo);
+		 * _log.info("同意退款执行退款的返回值为：{}", returnGoodsByBuyerResult); int result =
+		 * returnGoodsByBuyerResult.getResult().getCode(); if (result != 1) {
+		 * _log.error("同意退款退款时出现出错，退货编号为：{}", returnCode); throw new
+		 * RuntimeException("v支付出错，退款失败"); }
+		 */
 		resultMap.put("result", 1);
 		resultMap.put("msg", "退款成功");
 		return resultMap;
@@ -772,14 +759,16 @@ public class OrdReturnSvcImpl extends MybatisBaseSvcImpl<OrdReturnMo, java.lang.
 	 * @return
 	 * @date 2018年5月5日 下午3:43:00
 	 */
+	@Override
+	@Transactional(readOnly = false, propagation = Propagation.REQUIRED)
 	public Map<String, Object> receivedAndRefunded(OrdOrderReturnTo to) {
 		Map<String, Object> resultMap = new HashMap<String, Object>();
 		// 退货编号
 		Long returnCode = to.getReturnCode();
-		returnCode = returnCode == null ? returnCode : 0L;
+		returnCode = returnCode == null ? 0L : returnCode;
 		// 操作人编号
 		Long opId = to.getOpId();
-		opId = opId == null ? opId : 0L;
+		opId = opId == null ? 0L : opId;
 		// ip地址
 		String ip = to.getIp();
 		// mac地址
@@ -873,14 +862,15 @@ public class OrdReturnSvcImpl extends MybatisBaseSvcImpl<OrdReturnMo, java.lang.
 
 		if (detailList.get(0).getReturnCount() == detailList.get(0).getBuyCount()) {
 			detailMo.setReturnState((byte) 2);
+			
 		} else {
 			detailMo.setReturnState((byte) 3);
 		}
 		// 订单详情ID
 		long detailId = detailList.get(0).getId();
-		_log.info("已收到货并退款修改订单详情退货状态的参数为：{}", detailId, returnState);
+		_log.info("已收到货并退款修改订单详情退货状态的参数为：{}，{}", detailId, detailMo.getReturnState());
 		// 根据订单详情ID修改退货状态
-		int modifyReturnStateResult = ordOrderDetailSvc.modifyReturnStateById(detailId, returnState);
+		int modifyReturnStateResult = ordOrderDetailSvc.modifyReturnStateById(detailId, detailMo.getReturnState());
 		_log.info("已收到货并退款修改订单详情退货状态的返回值为：{}", modifyReturnStateResult);
 		if (modifyReturnStateResult != 1) {
 			_log.error("已收到货并退款修改订单详情退货状态时出现错误，退货编号为：{}", returnCode);
@@ -891,6 +881,7 @@ public class OrdReturnSvcImpl extends MybatisBaseSvcImpl<OrdReturnMo, java.lang.
 		returnMo.setRefundTime(date);
 		returnMo.setReceiveOpId(opId);
 		returnMo.setReceiveTime(date);
+		returnMo.setRefundState((byte) 2);
 		_log.info("已收到货并退款确认收到货的参数为：{}", returnMo.toString());
 		// 确认收到货
 		int confirmReceiptOfGoodsResult = _mapper.confirmReceiptOfGoods(returnMo);
@@ -899,7 +890,7 @@ public class OrdReturnSvcImpl extends MybatisBaseSvcImpl<OrdReturnMo, java.lang.
 			_log.error("已收到货并退款确认收到货时出现错误，退货编号为：{}", returnCode);
 			throw new RuntimeException("确认收到货出错");
 		}
-		
+
 		ReturnGoodsByBuyerTo buyerTo = new ReturnGoodsByBuyerTo();
 		buyerTo.setUserId(returnList.get(0).getApplicationOpId());
 		buyerTo.setOpId(opId);
@@ -914,10 +905,16 @@ public class OrdReturnSvcImpl extends MybatisBaseSvcImpl<OrdReturnMo, java.lang.
 		buyerTo.setIp(ip);
 		_log.info("已收到货并退款退款并扣减返现金额的参数为：{}", buyerTo.toString());
 		// 退款并扣减返现金额
-		Map<String, Object> refundAndSubtractCashbackResult = /*afcReturnGoodsSvr.returnRefundAndSubtractCashback(buyerTo)*/new HashMap<>();
-		refundAndSubtractCashbackResult.put("result", 1);
-		refundAndSubtractCashbackResult.put("msg", "退款成功");
-		_log.info("已收到货并退款退款并扣减返现金额的返回值为：{}", refundAndSubtractCashbackResult.toString());
-		return refundAndSubtractCashbackResult;
+		/*
+		 * resultMap = afcReturnGoodsSvr.returnRefundAndSubtractCashback(buyerTo);
+		 * _log.info("已收到货并退款退款并扣减返现金额的返回值为：{}", resultMap.toString()); if
+		 * (!resultMap.get("result").equals("1")) {
+		 * _log.error("已收到货并退款退款并扣减返现金额时出错，退货编号为：{}", returnCode); throw new
+		 * RuntimeException("v支付出错，退款失败"); }
+		 */
+		resultMap.put("result", 1);
+		resultMap.put("msg", "退款成功");
+		_log.info("已收到货并退款退款并扣减返现金额的返回值为：{}", resultMap.toString());
+		return resultMap;
 	}
 }

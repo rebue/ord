@@ -11,7 +11,6 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
-import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -139,7 +138,7 @@ public class OrdReturnCtrl {
 		Map<String, Object> resultMap = new HashMap<String, Object>();
 		try {
 			return svc.rejectReturn(mo);
-		} catch (Exception e) {
+		} catch (RuntimeException e) {
 			String msg = e.getMessage();
 			if (msg.equals("修改订单详情信息出错")) {
 				resultMap.put("result", -8);
@@ -150,6 +149,116 @@ public class OrdReturnCtrl {
 			} else {
 				resultMap.put("result", -10);
 				resultMap.put("msg", "操作失败");
+			}
+			return resultMap;
+		}
+	}
+	
+	/**
+	 * 同意退款
+	 * Title: agreeToARefund
+	 * Description: 
+	 * @param to
+	 * @return
+	 * @date 2018年5月11日 下午2:59:49
+	 */
+	@PostMapping("/ord/return/agreetoarefund")
+	Map<String, Object> agreeToARefund(OrdOrderReturnTo to) {
+		Map<String, Object> resultMap = new HashMap<String, Object>();
+		try {
+			_log.info("同意退款的请求参数为：{}", to.toString());
+			resultMap = svc.agreeToARefund(to);
+			_log.info("同意退款的返回值为：{}", String.valueOf(resultMap));
+			return resultMap;
+		} catch (RuntimeException e) {
+			String msg = e.getMessage();
+			if (msg.equals("修改订单退货金额出错")) {
+				resultMap.put("result", -10);
+				resultMap.put("msg", msg);
+			} else if (msg.equals("修改订单详情出错")) {
+				resultMap.put("result", -11);
+				resultMap.put("msg", msg);
+			} else if (msg.equals("修改退货信息出错")) {
+				resultMap.put("result", -12);
+				resultMap.put("msg", msg);
+			} else if (msg.equals("v支付出错，退款失败")) {
+				resultMap.put("result", -13);
+				resultMap.put("msg", msg);
+			} else {
+				resultMap.put("result", -13);
+				resultMap.put("msg", "同意退款失败");
+			}
+			return resultMap;
+		}
+	}
+	
+	/**
+	 * 同意退货
+	 * Title: agreeToReturn
+	 * Description: 
+	 * @return
+	 * @date 2018年5月11日 下午3:29:33
+	 */
+	@PostMapping("/ord/return/agreetoreturn")
+	Map<String, Object> agreeToReturn(OrdOrderReturnTo to) {
+		Map<String, Object> resultMap = new HashMap<String, Object>();
+		try {
+			_log.info("同意退货的请求参数为：{}", to.toString());
+			resultMap = svc.agreeToReturn(to);
+			_log.info("同意退货的返回值为：{}", to.toString());
+			return resultMap;
+		} catch (RuntimeException e) {
+			String msg = e.getMessage();
+			if (msg.equals("修改订单退货金额错误")) {
+				resultMap.put("result", -8);
+				resultMap.put("msg", msg);
+			} else if (msg.equals("修改退货数量和返现总额出错")) {
+				resultMap.put("result", -9);
+				resultMap.put("msg", msg);
+			} else if (msg.equals("修改退货信息错误")) {
+				resultMap.put("result", -10);
+				resultMap.put("msg", msg);
+			} else {
+				resultMap.put("result", -11);
+				resultMap.put("msg", "操作失败");
+			}
+			return resultMap;
+		}
+	}
+	
+	/**
+	 * 已收到货并退款
+	 * Title: receivedAndRefunded
+	 * Description: 
+	 * @param to
+	 * @return
+	 * @date 2018年5月11日 下午3:01:21
+	 */
+	@PostMapping("/ord/return/receivedandrefunded")
+	Map<String, Object> receivedAndRefunded(OrdOrderReturnTo to) {
+		Map<String, Object> resultMap = new HashMap<String, Object>();
+		try {
+			_log.info("已收到货并退款的请求参数为：{}", to.toString());
+			resultMap = svc.receivedAndRefunded(to);
+			_log.info("已收到货并退款的返回值为：{}", String.valueOf(resultMap));
+			return resultMap;
+		} catch (RuntimeException e) {
+			String msg = e.getMessage();
+			if (msg.equals("修改订单状态出错")) {
+				resultMap.put("result", -8);
+				resultMap.put("msg", msg);
+			} else if (msg.equals("修改订单详情退货状态出错")) {
+				resultMap.put("result", -9);
+				resultMap.put("msg", msg);
+			} else if (msg.equals("确认收到货出错")) {
+				resultMap.put("result", -10);
+				resultMap.put("msg", msg);
+			} else if (msg.equals("v支付出错，退款失败")) {
+				resultMap.put("result", -11);
+				resultMap.put("msg", msg);
+			} else {
+				resultMap.put("result", -12);
+				resultMap.put("msg", "退款失败");
 			}
 			return resultMap;
 		}

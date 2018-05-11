@@ -1,6 +1,7 @@
 package rebue.ord.ctrl;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import javax.annotation.Resource;
@@ -78,20 +79,12 @@ public class OrdReturnPicCtrl {
 
     /**
      * 查询退货图片
-     * @mbg.generated
      */
     @GetMapping("/ord/returnpic")
-    PageInfo<OrdReturnPicMo> list(OrdReturnPicMo qo, @RequestParam("pageNum") int pageNum, @RequestParam("pageSize") int pageSize) {
-    		_log.info("list OrdReturnPicMo:" + qo+", pageNum = " + pageNum + ", pageSize = " + pageSize);
-
-        if (pageSize > 50) {
-            String msg = "pageSize不能大于50";
-            _log.error(msg);
-            throw new IllegalArgumentException(msg);
-        }
-
-        PageInfo<OrdReturnPicMo> result = svc.list(qo, pageNum, pageSize);
-        _log.info("result: " + result);
+    List<OrdReturnPicMo> list(OrdReturnPicMo qo) {
+    	_log.info("查询退货图片的参数为：{}", qo.toString());
+        List<OrdReturnPicMo> result = svc.list(qo);
+        _log.info("查询退货图片的返回值为：{}", String.valueOf(result));
         return result;
     }
 

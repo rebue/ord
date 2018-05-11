@@ -33,6 +33,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import javax.annotation.Resource;
+
+import org.apache.ibatis.annotations.Param;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import com.fasterxml.jackson.core.JsonParseException;
@@ -656,5 +658,21 @@ public class OrdOrderSvcImpl
 	public int modifyOrderStateByOderCode(long orderCode, byte orderState) {
 		_log.info("修改订单状态的参数为：{}，{}", orderCode, orderState);
 		return _mapper.modifyOrderStateByOderCode(orderCode, orderState);
+	}
+	
+	/**
+	 * 根据订单编号查询退货金额
+	 * Title: selectReturnAmountByOrderCode
+	 * Description: 
+	 * @param orderCode
+	 * @return
+	 * @date 2018年5月11日 上午11:14:42
+	 */
+	@Override
+	public OrdOrderMo selectReturnAmountByOrderCode(String orderCode) {
+		_log.info("根据订单编号查询退货金额的参数为：{}", orderCode);
+		OrdOrderMo orderMo = _mapper.selectReturnAmountByOrderCode(orderCode);
+		_log.info("根据订单编号查询退货金额的返回值为：{}", orderMo.toString());
+		return orderMo;
 	}
 }

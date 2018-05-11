@@ -84,10 +84,10 @@ public class OrdOrderCtrl {
 	 * 
 	 * @mbg.generated
 	 */
-	@GetMapping("/ord/order/{id}")
-	OrdOrderMo get(@PathVariable("id") java.lang.Long id) {
-		_log.info("get OrdOrderMo by id: " + id);
-		OrdOrderMo result = svc.getById(id);
+	@GetMapping("/ord/order/{orderCode}")
+	OrdOrderMo get(@PathVariable("orderCode") String orderCode) {
+		_log.info("get OrdOrderMo by id: " + orderCode);
+		OrdOrderMo result = svc.selectReturnAmountByOrderCode(orderCode);
 		_log.info("get: " + result);
 		return result;
 	}
