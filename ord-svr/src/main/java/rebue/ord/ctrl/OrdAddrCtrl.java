@@ -84,10 +84,20 @@ public class OrdAddrCtrl {
 	/**
 	 * 修改用户默认收货地址
 	 */
+	@SuppressWarnings("finally")
 	@PutMapping("/ord/addr/def")
 	Map<String, Object> modifyDef(OrdAddrMo vo) throws Exception {
 		_log.info("修改用户默认收货地址的参数为：{}", vo.toString());
-		return svc.updateDef(vo);
+		Map<String, Object> resultMap = new HashMap<>();
+		try {
+			resultMap = svc.updateDef(vo);
+			_log.info("修改用户默认收货地址的返回值为：{}", String.valueOf(resultMap));
+		} catch (RuntimeException e) {
+			resultMap.put("result", -1);
+			resultMap.put("msg", "设置失败");
+		} finally {
+			return resultMap;
+		}
 	}
 
 	/**
@@ -100,7 +110,22 @@ public class OrdAddrCtrl {
 	@PutMapping("/ord/addr")
 	Map<String, Object> modify(OrdAddrMo vo) {
 		_log.info("修改用户收货地址信息的参数为：{}", vo.toString());
-		return svc.update(vo);
+		Map<String, Object> resultMap = new HashMap<>();
+		try {
+			resultMap = svc.update(vo);
+			_log.info("修改用户收货地址信息的返回值为：{}", String.valueOf(resultMap));
+			return resultMap;
+		} catch (RuntimeException e) {
+			String msg = e.getMessage();
+			if (msg.equals("修改原默认收货地址失败")) {
+				resultMap.put("result", -1);
+				resultMap.put("msg", msg);
+			} else {
+				resultMap.put("result", -2);
+				resultMap.put("msg", "修改失败");
+			}
+			return resultMap;
+		}
 	}
 
 	/**

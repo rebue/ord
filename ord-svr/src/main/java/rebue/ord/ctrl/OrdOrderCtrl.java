@@ -83,10 +83,10 @@ public class OrdOrderCtrl {
 	 * 
 	 * @mbg.generated
 	 */
-	@GetMapping("/ord/order/{id}")
-	OrdOrderMo get(@PathVariable("id") java.lang.Long id) {
-		_log.info("get OrdOrderMo by id: " + id);
-		OrdOrderMo result = svc.getById(id);
+	@GetMapping("/ord/order/{orderCode}")
+	OrdOrderMo get(@PathVariable("orderCode") String orderCode) {
+		_log.info("get OrdOrderMo by id: " + orderCode);
+		OrdOrderMo result = svc.selectReturnAmountByOrderCode(orderCode);
 		_log.info("get: " + result);
 		return result;
 	}
@@ -143,10 +143,7 @@ public class OrdOrderCtrl {
 			resultMap = svc.placeOrder(orderJson);
 		} catch (RuntimeException e) {
 			String msg = e.getMessage();
-			if (msg.equals("收货地址不能为空")) {
-				resultMap.put("result", -1);
-				resultMap.put("msg", "收货地址不能为空");
-			} else if (msg.equals("生成订单出错")) {
+			if (msg.equals("生成订单出错")) {
 				resultMap.put("result", -2);
 				resultMap.put("msg", "生成订单出错");
 			} else if (msg.equals("生成订单详情出错")) {
@@ -175,7 +172,7 @@ public class OrdOrderCtrl {
 			} else {
 				_log.error(msg);
 				resultMap.put("result", -9);
-				resultMap.put("msg", msg);
+				resultMap.put("msg", "下订单失败");
 			}
 		} finally {
 			return resultMap;
@@ -198,13 +195,7 @@ public class OrdOrderCtrl {
 			resultMap = svc.cancellationOfOrder(qo);
 		} catch (RuntimeException e) {
 			String msg = e.getMessage();
-			if (msg.equals("订单不存在")) {
-				resultMap.put("result", -1);
-				resultMap.put("msg", "该订单不存在");
-			} else if (msg.equals("当前状态不允许取消")) {
-				resultMap.put("result", -2);
-				resultMap.put("msg", "当前状态不允许取消");
-			} else if (msg.equals("修改库存失败")) {
+			if (msg.equals("修改库存失败")) {
 				resultMap.put("result", -3);
 				resultMap.put("msg", "修改库存失败");
 			} else if (msg.equals("修改订单状态失败")) {
@@ -232,13 +223,7 @@ public class OrdOrderCtrl {
 			resultMap = svc.cancelDeliveryUpdateOrderState(qo);
 		} catch (RuntimeException e) {
 			String msg = e.getMessage();
-			if (msg.equals("订单不存在")) {
-				resultMap.put("result", -1);
-				resultMap.put("msg", "该订单不存在");
-			} else if (msg.equals("当前状态不允许取消")) {
-				resultMap.put("result", -2);
-				resultMap.put("msg", "当前状态不允许取消");
-			} else if (msg.equals("修改库存失败")) {
+			if (msg.equals("修改库存失败")) {
 				resultMap.put("result", -3);
 				resultMap.put("msg", "修改库存失败");
 			} else if (msg.equals("修改订单状态失败")) {
@@ -320,17 +305,8 @@ public class OrdOrderCtrl {
 		try {
 			resultMap = svc.orderSignIn(qo);
 		} catch (RuntimeException e) {
-			String msg = e.getMessage();
-			if (msg.equals("订单不存在")) {
-				resultMap.put("result", -1);
-				resultMap.put("msg", msg);
-			} else if (msg.equals("当前状态不允许签收")) {
-				resultMap.put("result", -2);
-				resultMap.put("msg", msg);
-			} else {
-				resultMap.put("result", -3);
-				resultMap.put("msg", msg);
-			}
+			resultMap.put("result", -3);
+			resultMap.put("msg", "签收失败");
 		} finally {
 			return resultMap;
 		}

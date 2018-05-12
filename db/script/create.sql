@@ -1,6 +1,6 @@
 /*==============================================================*/
 /* DBMS name:      MySQL 5.0                                    */
-/* Created on:     2018/5/5 16:19:54                            */
+/* Created on:     2018/5/10 17:41:24                           */
 /*==============================================================*/
 
 
@@ -47,8 +47,8 @@ create table ORD_ORDER
    ORDER_MONEY          decimal(50,4) not null comment '下单金额',
    REAL_MONEY           decimal(50,4) not null comment '实际金额',
    RETURN_TOTAL         decimal(50,4) comment '退货总额',
-   RETURN_AMOUNT1       decimal(50,4) comment '退货金额1（退到返现金额）',
-   RETURN_AMOUNT2       decimal(50,4) comment '退货总额2（退到余额）',
+   RETURN_AMOUNT1       decimal(50,4) comment '可退货金额1（退到返现金额）',
+   RETURN_AMOUNT2       decimal(50,4) comment '可退货总额2（退到余额）',
    ORDER_STATE          tinyint not null comment '订单状态（-1：作废  1：已下单（待支付）  2：已支付（待发货）  3：已发货（待签收）  4：已签收（待结算）  5：已结算  ））
             -1：作废
             1：已下单（待支付）
@@ -101,10 +101,10 @@ create table ORD_ORDER_DETAIL
    ONLINE_TITLE         varchar(200) not null comment '上线标题',
    SPEC_NAME            varchar(50) not null comment '规格名称',
    BUY_COUNT            int not null comment '购买数量',
-   BUY_PRICE            numeric(18,4) not null comment '购买价格',
-   CASHBACK_AMOUNT      numeric(18,4) not null comment '返现金额',
+   BUY_PRICE            numeric(50,4) not null comment '购买价格',
+   CASHBACK_AMOUNT      numeric(50,4) not null comment '返现金额',
    RETURN_COUNT         int comment '退货数量',
-   CASHBACK_TOTAL       decimal(18,4) comment '返现总额',
+   CASHBACK_TOTAL       decimal(50,4) comment '返现总额',
    BUY_UNIT             varchar(10) comment '购买单位',
    RETURN_STATE         tinyint not null comment '退货状态（0：未退货  1：退货中  2：已退货  3：部分已退）',
    primary key (ID)
@@ -143,6 +143,8 @@ create table ORD_RETURN
    REJECT_TIME          datetime comment '拒绝时间',
    FINISH_OP_ID         bigint comment '完成操作人',
    FINISH_TIME          datetime comment '完成时间',
+   RECEIVE_OP_ID        bigint comment '确认收到货操作人',
+   RECEIVE_TIME         datetime comment '确认收到货时间',
    primary key (ID)
 );
 

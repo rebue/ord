@@ -2,8 +2,6 @@ package rebue.ord.svc;
 
 import rebue.robotech.svc.MybatisBaseSvc;
 
-import java.math.BigDecimal;
-
 import rebue.ord.mo.OrdOrderDetailMo;
 
 public interface OrdOrderDetailSvc extends MybatisBaseSvc<OrdOrderDetailMo, java.lang.Long>{
@@ -19,6 +17,17 @@ public interface OrdOrderDetailSvc extends MybatisBaseSvc<OrdOrderDetailMo, java
 	 * @return
 	 * @date 2018年5月7日 上午9:54:27
 	 */
-	int modifyReturnCountAndCashBackTotal(long orderId, long orderDetailId, int returnCount, BigDecimal cashbackTotal);
+	int modifyReturnCountAndCashBackTotal(OrdOrderDetailMo mo);
+
+	/**
+	 * 根据详情ID修改退货状态
+	 * Title: modifyReturnStateById
+	 * Description: 
+	 * @param id
+	 * @param returnState
+	 * @return
+	 * @date 2018年5月8日 上午10:59:44
+	 */
+	int modifyReturnStateById(long id, byte returnState);
 
 }

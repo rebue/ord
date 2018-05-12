@@ -40,4 +40,34 @@ public interface OrdReturnSvc extends MybatisBaseSvc<OrdReturnMo, java.lang.Long
      * @date 2018年4月27日 下午3:10:47
      */
 	Map<String, Object> rejectReturn(OrdReturnMo record);
+
+	/**
+	 * 同意退货
+	 * Title: agreeToReturn
+	 * Description: 
+	 * @param mo
+	 * @return
+	 * @date 2018年5月11日 下午2:45:13
+	 */
+	Map<String, Object> agreeToReturn(OrdOrderReturnTo mo);
+
+	/**
+	 * 同意退款
+	 * Title: agreeToARefund
+	 * Description: 
+	 * @param to
+	 * @return
+	 * @date 2018年5月11日 下午2:45:36
+	 */
+	Map<String, Object> agreeToARefund(OrdOrderReturnTo to);
+
+	/**
+	 * 已收到货并退款
+	 * Title: receivedAndRefunded
+	 * Description: 
+	 * @param to
+	 * @return
+	 * @date 2018年5月11日 下午3:02:40
+	 */
+	Map<String, Object> receivedAndRefunded(OrdOrderReturnTo to);
 }
