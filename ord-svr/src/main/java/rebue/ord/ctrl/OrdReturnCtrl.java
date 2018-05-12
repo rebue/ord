@@ -80,19 +80,19 @@ public class OrdReturnCtrl {
 			String msg = e.getMessage();
 			if (msg.equals("添加退货信息失败")) {
 				_log.info(msg);
-				resultMap.put("result", -9);
+				resultMap.put("result", -7);
 				resultMap.put("msg", msg);
 			} else if (msg.equals("添加退货图片失败")) {
 				_log.info(msg);
-				resultMap.put("result", -10);
+				resultMap.put("result", -8);
 				resultMap.put("msg", msg);
 			} else if (msg.equals("修改订单详情状态失败")) {
 				_log.info(msg);
-				resultMap.put("result", -11);
+				resultMap.put("result", -9);
 				resultMap.put("msg", msg);
 			} else {
 				e.printStackTrace();
-				resultMap.put("result", -12);
+				resultMap.put("result", -10);
 				resultMap.put("msg", "提交失败");
 			}
 		} finally {
@@ -185,7 +185,7 @@ public class OrdReturnCtrl {
 				resultMap.put("result", -13);
 				resultMap.put("msg", msg);
 			} else {
-				resultMap.put("result", -13);
+				resultMap.put("result", -14);
 				resultMap.put("msg", "同意退款失败");
 			}
 			return resultMap;

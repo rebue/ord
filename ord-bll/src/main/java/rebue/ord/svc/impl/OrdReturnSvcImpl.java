@@ -138,13 +138,13 @@ public class OrdReturnSvcImpl extends MybatisBaseSvcImpl<OrdReturnMo, java.lang.
 		}
 		if (orderDetailList.size() == 0) {
 			_log.error("添加退货信息出现订单详情不存在，订单详情编号为：{}", orderDetailId);
-			resultMap.put("result", -5);
+			resultMap.put("result", -1);
 			resultMap.put("msg", "该订单不存在");
 			return resultMap;
 		}
 		if (orderDetailList.get(0).getReturnState() != 0) {
 			_log.error("添加退货信息出现订单详情退货状态不处于未退货状态，订单详情编号为：{}", orderDetailId);
-			resultMap.put("result", -6);
+			resultMap.put("result", -5);
 			resultMap.put("msg", "当前状态不允许退货");
 			return resultMap;
 		}
@@ -155,8 +155,8 @@ public class OrdReturnSvcImpl extends MybatisBaseSvcImpl<OrdReturnMo, java.lang.
 		int buyCount = orderDetailList.get(0).getBuyCount();
 		if (buyCount == returnCount) {
 			_log.error("添加退货信息出现订单详情退货数量等于购买数量，订单详情编号为：{}", orderDetailId);
-			resultMap.put("result", -7);
-			resultMap.put("msg", "该规格已退完");
+			resultMap.put("result", -6);
+			resultMap.put("msg", "该商品已退完");
 			return resultMap;
 		}
 		// 最新订单详情退货数量
@@ -329,7 +329,7 @@ public class OrdReturnSvcImpl extends MybatisBaseSvcImpl<OrdReturnMo, java.lang.
 		if (orderDetailMo.getId() == 0) {
 			_log.error("拒绝退货查询订单详情时出现订单详情不存在：退货编号为：{}", returnCode);
 			resultMap.put("result", -6);
-			resultMap.put("msg", "该用户 订单不存在");
+			resultMap.put("msg", "该订单不存在");
 			return resultMap;
 		}
 
