@@ -76,9 +76,7 @@ public class OrdAddrSvcImpl
 			int result = _mapper.updateByPrimaryKeySelective(mo);
 			if (result < 1) {
 				_log.error("{}修改原默认收货地址失败", mo.getUserId());
-				resultMap.put("result", result);
-				resultMap.put("msg", "设置失败");
-				return resultMap;
+				throw new RuntimeException("设置失败");
 			}
 		}
 		mo.setId(newId);
@@ -90,8 +88,7 @@ public class OrdAddrSvcImpl
 			resultMap.put("msg", "设置成功");
 		} else {
 			_log.error("{}修改用户收货地址失败", mo.getUserId());
-			resultMap.put("result", result);
-			resultMap.put("msg", "设置失败");
+			throw new RuntimeException("设置失败");
 		}
 		return resultMap;
 	}
@@ -114,8 +111,7 @@ public class OrdAddrSvcImpl
 				int result = _mapper.updateByPrimaryKeySelective(mo);
 				if (result < 1) {
 					_log.error("{}修改原默认收货地址失败", mo.getUserId());
-					resultMap.put("{}修改原默认收货地址失败", mo.getUserId());
-					return resultMap;
+					throw new RuntimeException("修改原默认收货地址失败");
 				}
 			}
 		}
@@ -131,8 +127,7 @@ public class OrdAddrSvcImpl
 			resultMap.put("msg", "修改成功");
 		} else {
 			_log.error("{}修改用户收货地址失败", mo.getUserId());
-			resultMap.put("result", result);
-			resultMap.put("msg", "修改失败");
+			throw new RuntimeException("修改失败");
 		}
 		return resultMap;
 	}

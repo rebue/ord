@@ -138,12 +138,13 @@ public class OrdOrderSvcImpl
 		List<OrdAddrMo> addrList = ordAddrSvc.list(addrMo);
 		_log.info("根据收货地址编号和用户编号获取用户收货地址信息的返回值为：{}", addrList.toString());
 		if (addrList.size() == 0) {
-			throw new RuntimeException("收货地址不能为空");
+			resultMap.put("result", -1);
+			resultMap.put("msg", "收货地址不能为空");
+			return resultMap;
 		}
 		String orderTitle = "";
 		if (orderList.size() > 1) {
-			orderTitle = String.valueOf(orderList.get(0).getOnlineTitle())
-					+ "等商品购买。。。";
+			orderTitle = String.valueOf(orderList.get(0).getOnlineTitle()) + "等商品购买。。。";
 		} else {
 			orderTitle = String.valueOf(orderList.get(0).getOnlineTitle());
 		}
@@ -278,14 +279,16 @@ public class OrdOrderSvcImpl
 				}
 				_log.info("查询用户订单信息hm里面的值为：{}", String.valueOf(hm));
 				OrdOrderDetailMo detailMo = new OrdOrderDetailMo();
-				detailMo.setOrderId(Long.parseLong(orderList.get(i)
-						.getOrderCode()));
-				List<OrdOrderDetailMo> orderDetailList = ordOrderDetailSvc
-						.list(detailMo);
+				detailMo.setOrderId(Long.parseLong(orderList.get(i).getOrderCode()));
+				_log.info("查询用户订单信息获取订单详情的参数为：{}", detailMo.toString());
+				/// 查询订单详情信息
+				List<OrdOrderDetailMo> orderDetailList = ordOrderDetailSvc.list(detailMo);
+				_log.info("查询用户订单信息获取订单详情的返回值为：{}", String.valueOf(orderDetailList));
 				List<OrderDetailRo> orderDetailRoList = new ArrayList<OrderDetailRo>();
 				for (OrdOrderDetailMo orderDetailMo : orderDetailList) {
 					List<OnlOnlinePicMo> onlinePicList = new ArrayList<OnlOnlinePicMo>();
 					try {
+						// 获取上线主图
 						onlinePicList = onlOnlinePicSvc.list(orderDetailMo.getOnlineId(), (byte) 1);
 					} catch (Exception e) {
 						e.printStackTrace();
@@ -337,11 +340,15 @@ public class OrdOrderSvcImpl
 		_log.info("用户查询订单信息的返回值为：{}", String.valueOf(orderList));
 		if (orderList.size() == 0) {
 			_log.error("由于订单：{}不存在，{}取消订单失败", orderCode, userId);
-			throw new RuntimeException("订单不存在");
+			resultMap.put("result", -1);
+			resultMap.put("msg", "订单不存在");
+			return resultMap;
 		}
 		if (orderList.get(0).getOrderState() != 1) {
 			_log.error("由于订单：{}处于非待支付状态，{}取消订单失败", orderCode, userId);
-			throw new RuntimeException("当前状态不允许取消");
+			resultMap.put("result", -2);
+			resultMap.put("msg", "当前状态不允许取消");
+			return resultMap;
 		}
 		// ==========================================查询用户订单信息结束=================================
 		
@@ -354,7 +361,7 @@ public class OrdOrderSvcImpl
 			_log.error("由于订单：{}不存在，{}取消订单失败", orderCode, userId);
 			resultMap.put("result", -1);
 			resultMap.put("msg", "订单不存在");
-			throw new RuntimeException("订单不存在");
+			return resultMap;
 		}
 		// 购买规格信息
 		List<Map<String, Object>> orderSpecList = new ArrayList<Map<String, Object>>();
@@ -463,20 +470,25 @@ public class OrdOrderSvcImpl
 		_log.info("用户查询订单信息的返回值为：{}", String.valueOf(orderList));
 		if (orderList.size() == 0) {
 			_log.error("由于订单：{}不存在，{}取消订单失败", orderCode, userId);
-			throw new RuntimeException("订单不存在");
+			resultMap.put("result", -1);
+			resultMap.put("msg", "订单不存在");
+			return resultMap;
 		}
 		if (orderList.get(0).getOrderState() != 2) {
 			_log.error("由于订单：{}处于非待发货状态，{}取消订单失败", orderCode, userId);
-			throw new RuntimeException("当前状态不允许取消");
+			resultMap.put("result", -2);
+			resultMap.put("msg", "当前状态不允许取消");
+			return resultMap;
 		}
 		OrdOrderDetailMo detailMo = new OrdOrderDetailMo();
 		detailMo.setOrderId(Long.parseLong(orderCode));
-		List<OrdOrderDetailMo> orderDetailList = ordOrderDetailSvc
-				.list(detailMo);
+		List<OrdOrderDetailMo> orderDetailList = ordOrderDetailSvc.list(detailMo);
 		_log.info("查询订单详情的返回值为：{}", String.valueOf(orderDetailList));
 		if (orderDetailList.size() == 0) {
 			_log.error("由于订单：{}不存在，{}取消订单失败", orderCode, userId);
-			throw new RuntimeException("订单不存在");
+			resultMap.put("result", -1);
+			resultMap.put("msg", "订单不存在");
+			return resultMap;
 		}
 		// 购买规格信息
 		List<Map<String, Object>> orderSpecList = new ArrayList<Map<String, Object>>();
@@ -609,11 +621,15 @@ public class OrdOrderSvcImpl
 		_log.info("用户查询订单信息的返回值为：{}", String.valueOf(orderList));
 		if (orderList.size() == 0) {
 			_log.error("由于订单：{}不存在，{}取消订单失败", orderCode, userId);
-			throw new RuntimeException("订单不存在");
+			resultMap.put("result", -1);
+			resultMap.put("msg", "订单不存在");
+			return resultMap;
 		}
 		if (orderList.get(0).getOrderState() != 3) {
 			_log.error("由于订单：{}处于非待签收状态，{}签收订单失败", orderCode, userId);
-			throw new RuntimeException("当前状态不允许签收");
+			resultMap.put("result", -2);
+			resultMap.put("msg", "当前状态不允许签收");
+			return resultMap;
 		}
 		Date date = new Date();
 		mo.setReceivedTime(date);
