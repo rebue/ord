@@ -81,6 +81,7 @@ public class OrdOrderSvcImpl
 	 */
 	@Resource
 	private OnlOnlineSpecSvc onlOnlineSpecSvc;
+	
 	/**
 	 */
 	@Resource
@@ -637,8 +638,9 @@ public class OrdOrderSvcImpl
 	 * @date 2018年5月7日 上午9:18:19
 	 */
 	@Override
-	@Transactional(readOnly = false, propagation = Propagation.REQUIRED)
+//	@Transactional(readOnly = false, propagation = Propagation.REQUIRED)
 	public int modifyReturnAmountByorderCode(OrdOrderMo mo) {
 		return _mapper.modifyReturnAmountByorderCode(mo);
 	}
+	
 }
