@@ -52,6 +52,12 @@
 			<artifactId>kdi-svr-feign</artifactId>
 			<version>1.0.0</version>
 		</dependency>
+		
+		<dependency>
+			<groupId>com.github.rebue.afc</groupId>
+			<artifactId>afc-svr-feign</artifactId>
+			<version>1.0.7</version>
+		</dependency>
 		<!-- <dependency> -->
 		<!-- <groupId>com.github.dozermapper</groupId> -->
 		<!-- <artifactId>dozer-spring-boot-starter</artifactId> -->
