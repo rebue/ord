@@ -46,7 +46,7 @@ import rebue.ord.ro.OrdOrderRo;
 import rebue.ord.ro.OrderDetailRo;
 import rebue.ord.svc.OrdAddrSvc;
 import rebue.ord.svc.OrdOrderDetailSvc;
-
+import java.math.BigDecimal;
 @Service
 /**
  * <pre>
@@ -210,6 +210,7 @@ public class OrdOrderSvcImpl
 			detailMo.setBuyPrice(orderList.get(i).getSalePrice());
 			detailMo.setCashbackAmount(orderList.get(i).getCashbackAmount());
 			detailMo.setReturnState((byte) 0);
+			detailMo.setCashbackTotal(new BigDecimal(String.valueOf(buyCount)).multiply(orderList.get(i).getCashbackAmount()));
 			_log.info("添加订单详情的参数为：{}", detailMo.toString());
 			int intserOrderDetailresult = ordOrderDetailSvc.add(detailMo);
 			_log.info("添加订单详情的返回值为：{}", intserOrderDetailresult);
