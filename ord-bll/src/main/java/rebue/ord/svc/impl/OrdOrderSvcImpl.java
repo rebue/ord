@@ -655,13 +655,11 @@ public class OrdOrderSvcImpl
 	 * @date 2018年5月7日 上午9:18:19
 	 */
 	@Override
-//	@Transactional(readOnly = false, propagation = Propagation.REQUIRED)
+	@Transactional(readOnly = false, propagation = Propagation.REQUIRED)
 	public int modifyReturnAmountByorderCode(OrdOrderMo mo) {
 		return _mapper.modifyReturnAmountByorderCode(mo);
 	}
 	
-<<<<<<< HEAD
-=======
 	/**
 	 * 根据订单编号修改订单状态
 	 * Title: modifyOrderStateByOderCode
@@ -693,5 +691,4 @@ public class OrdOrderSvcImpl
 		_log.info("根据订单编号查询退货金额的返回值为：{}", orderMo.toString());
 		return orderMo;
 	}
->>>>>>> branch 'master' of https://github.com/rebue/ord.git
 }
