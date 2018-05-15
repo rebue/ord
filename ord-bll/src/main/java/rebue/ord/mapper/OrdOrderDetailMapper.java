@@ -102,8 +102,6 @@ public interface OrdOrderDetailMapper
      */
     @Update("UPDATE ORD_ORDER_DETAIL SET RETURN_COUNT=#{returnCount,jdbcType=INTEGER}, CASHBACK_TOTAL=#{cashbackTotal,jdbcType=DECIMAL} WHERE ID=#{orderDetailId,jdbcType=BIGINT} AND ORDER_ID=#{orderId,jdbcType=BIGINT}")
     int modifyReturnCountAndCashBackTotal(@Param("orderId") long orderId, @Param("orderDetailId") long orderDetailId, @Param("returnCount") int returnCount, @Param("cashbackTotal") BigDecimal cashbackTotal);
-    
-    List<OrdOrderDetailMo> selectByOrderId(Long orderId);
 
 	/**
 	 * 根据订单编号订单详情ID修改退货数量和返现总额 Title: modifyReturnCountAndCashBackTotal

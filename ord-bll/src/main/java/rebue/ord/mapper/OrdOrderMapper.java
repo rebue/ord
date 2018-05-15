@@ -185,4 +185,15 @@ public interface OrdOrderMapper extends MybatisBaseMapper<OrdOrderMo, Long> {
 	 */
 	@Select("SELECT RETURN_TOTAL as returnTotal, RETURN_AMOUNT1 as returnAmount1, RETURN_AMOUNT2 as returnAmount2 FROM ORD_ORDER WHERE ORDER_CODE=#{orderCode,jdbcType=VARCHAR}")
 	OrdOrderMo selectReturnAmountByOrderCode(@Param("orderCode") String orderCode);
+	
+	/**
+	 * 根据订单编号修改订单
+	 * Title: updateByOrderCode
+	 * Description: 
+	 * @param OrdOrderMo
+	 * @return
+	 * @date 2018年5月15日
+	 */
+	int updateByOrderCode(OrdOrderMo record);
+	
 }

@@ -886,4 +886,115 @@
     </if>
   	WHERE ORDER_CODE=#{orderCode, jdbcType=VARCHAR}
   </update>
+  
+  <update id="updateByOrderCode" parameterType="rebue.ord.mo.OrdOrderMo">
+  
+    update ORD_ORDER
+    <set>
+      <if test="orderTitle != null">
+        ORDER_TITLE = #{orderTitle,jdbcType=VARCHAR},
+      </if>
+      <if test="orderMoney != null">
+        ORDER_MONEY = #{orderMoney,jdbcType=DECIMAL},
+      </if>
+      <if test="realMoney != null">
+        REAL_MONEY = #{realMoney,jdbcType=DECIMAL},
+      </if>
+      <if test="returnTotal != null">
+        RETURN_TOTAL = #{returnTotal,jdbcType=DECIMAL},
+      </if>
+      <if test="returnAmount1 != null">
+        RETURN_AMOUNT1 = #{returnAmount1,jdbcType=DECIMAL},
+      </if>
+      <if test="returnAmount2 != null">
+        RETURN_AMOUNT2 = #{returnAmount2,jdbcType=DECIMAL},
+      </if>
+      <if test="orderState != null">
+        ORDER_STATE = #{orderState,jdbcType=TINYINT},
+      </if>
+      <if test="userId != null">
+        USER_ID = #{userId,jdbcType=BIGINT},
+      </if>
+      <if test="userName != null">
+        USER_NAME = #{userName,jdbcType=VARCHAR},
+      </if>
+      <if test="orderTime != null">
+        ORDER_TIME = #{orderTime,jdbcType=TIMESTAMP},
+      </if>
+      <if test="payTime != null">
+        PAY_TIME = #{payTime,jdbcType=TIMESTAMP},
+      </if>
+      <if test="sendTime != null">
+        SEND_TIME = #{sendTime,jdbcType=TIMESTAMP},
+      </if>
+      <if test="receivedTime != null">
+        RECEIVED_TIME = #{receivedTime,jdbcType=TIMESTAMP},
+      </if>
+      <if test="closeTime != null">
+        CLOSE_TIME = #{closeTime,jdbcType=TIMESTAMP},
+      </if>
+      <if test="cancelTime != null">
+        CANCEL_TIME = #{cancelTime,jdbcType=TIMESTAMP},
+      </if>
+      <if test="logisticId != null">
+        LOGISTIC_ID = #{logisticId,jdbcType=BIGINT},
+      </if>
+      <if test="shipperCode != null">
+        SHIPPER_CODE = #{shipperCode,jdbcType=VARCHAR},
+      </if>
+      <if test="shipperName != null">
+        SHIPPER_NAME = #{shipperName,jdbcType=VARCHAR},
+      </if>
+      <if test="logisticCode != null">
+        LOGISTIC_CODE = #{logisticCode,jdbcType=VARCHAR},
+      </if>
+      <if test="receiverName != null">
+        RECEIVER_NAME = #{receiverName,jdbcType=VARCHAR},
+      </if>
+      <if test="receiverTel != null">
+        RECEIVER_TEL = #{receiverTel,jdbcType=VARCHAR},
+      </if>
+      <if test="receiverMobile != null">
+        RECEIVER_MOBILE = #{receiverMobile,jdbcType=VARCHAR},
+      </if>
+      <if test="receiverProvince != null">
+        RECEIVER_PROVINCE = #{receiverProvince,jdbcType=VARCHAR},
+      </if>
+      <if test="receiverCity != null">
+        RECEIVER_CITY = #{receiverCity,jdbcType=VARCHAR},
+      </if>
+      <if test="receiverExpArea != null">
+        RECEIVER_EXP_AREA = #{receiverExpArea,jdbcType=VARCHAR},
+      </if>
+      <if test="receiverAddress != null">
+        RECEIVER_ADDRESS = #{receiverAddress,jdbcType=VARCHAR},
+      </if>
+      <if test="receiverPostCode != null">
+        RECEIVER_POST_CODE = #{receiverPostCode,jdbcType=CHAR},
+      </if>
+      <if test="orderMessages != null">
+        ORDER_MESSAGES = #{orderMessages,jdbcType=VARCHAR},
+      </if>
+      <if test="modifyRealveryMoneyOpId != null">
+        MODIFY_REALVERY_MONEY_OP_ID = #{modifyRealveryMoneyOpId,jdbcType=BIGINT},
+      </if>
+      <if test="cancelingOrderOpId != null">
+        CANCELING_ORDER_OP_ID = #{cancelingOrderOpId,jdbcType=BIGINT},
+      </if>
+      <if test="canceldeliReason != null">
+        CANCELDELI_REASON = #{canceldeliReason,jdbcType=VARCHAR},
+      </if>
+      <if test="sendOpId != null">
+        SEND_OP_ID = #{sendOpId,jdbcType=BIGINT},
+      </if>
+      <if test="receivedOpId != null">
+        RECEIVED_OP_ID = #{receivedOpId,jdbcType=BIGINT},
+      </if>
+      <if test="cancelReason != null">
+        CANCEL_REASON = #{cancelReason,jdbcType=VARCHAR},
+      </if>
+    </set>
+    where ORDER_CODE = #{orderCode,jdbcType=VARCHAR}
+  </update>
+  
 </mapper>

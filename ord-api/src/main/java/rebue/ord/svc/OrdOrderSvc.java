@@ -125,5 +125,15 @@ public interface OrdOrderSvc extends MybatisBaseSvc<OrdOrderMo, java.lang.Long> 
 	 * @date 2018年5月11日 上午11:15:03
 	 */
 	OrdOrderMo selectReturnAmountByOrderCode(String orderCode);
+	
+	/**
+	 * 根据订单编号修改订单
+	 * Title: updateByOrderCode
+	 * Description: 
+	 * @param OrdOrderMo
+	 * @return
+	 * @date 2018年5月15日
+	 */
+	int updateByOrderCode(OrdOrderMo record);
 
 }

@@ -692,4 +692,19 @@ public class OrdOrderSvcImpl
 		_log.info("根据订单编号查询退货金额的返回值为：{}", orderMo.toString());
 		return orderMo;
 	}
+
+	@Override
+	/**
+	 * 根据订单编号修改订单
+	 * Title: updateByOrderCode
+	 * Description: 
+	 * @param OrdOrderMo
+	 * @return
+	 * @date 2018年5月15日
+	 */
+	public int updateByOrderCode(OrdOrderMo mo) {
+		int result = _mapper.updateByOrderCode(mo);
+		return result;
+	}
+	
 }
