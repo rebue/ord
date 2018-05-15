@@ -18,7 +18,6 @@ import org.springframework.transaction.annotation.Transactional;
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
 
-import rebue.afc.returngoods.to.ReturnGoodsByBuyerTo;
 import rebue.ord.mapper.OrdReturnMapper;
 import rebue.ord.mo.OrdOrderDetailMo;
 import rebue.ord.mo.OrdOrderMo;
@@ -725,18 +724,18 @@ public class OrdReturnSvcImpl extends MybatisBaseSvcImpl<OrdReturnMo, java.lang.
 			_log.error("同意退款修改退货信息时出现错误，退货编号为：{}", returnCode);
 			throw new RuntimeException("修改退货信息出错");
 		}
-		ReturnGoodsByBuyerTo goodsByBuyerTo = new ReturnGoodsByBuyerTo();
-		goodsByBuyerTo.setUserId(returnList.get(0).getApplicationOpId());
-		goodsByBuyerTo.setReturnGoodsOrderId(String.valueOf(returnCode));
-		goodsByBuyerTo.setSaleOrderId(String.valueOf(orderId));
-		goodsByBuyerTo.setTradeTitle("大卖网络商品退货");
-		goodsByBuyerTo.setTradeDetail(detailList.get(0).getOnlineTitle() + "-" + detailList.get(0).getSpecName());
-		goodsByBuyerTo.setBalanceAmount(returnAmount1.doubleValue());
-		goodsByBuyerTo.setCashbackAmount(returnAmount2.doubleValue());
-		goodsByBuyerTo.setOpId(refundOpId);
-		goodsByBuyerTo.setIp(to.getIp());
-		goodsByBuyerTo.setMac(to.getMac());
-		_log.info("同意退款执行退款的参数为：{}", goodsByBuyerTo.toString());
+//		ReturnGoodsByBuyerTo goodsByBuyerTo = new ReturnGoodsByBuyerTo();
+//		goodsByBuyerTo.setUserId(returnList.get(0).getApplicationOpId());
+//		goodsByBuyerTo.setReturnGoodsOrderId(String.valueOf(returnCode));
+//		goodsByBuyerTo.setSaleOrderId(String.valueOf(orderId));
+//		goodsByBuyerTo.setTradeTitle("大卖网络商品退货");
+//		goodsByBuyerTo.setTradeDetail(detailList.get(0).getOnlineTitle() + "-" + detailList.get(0).getSpecName());
+//		goodsByBuyerTo.setBalanceAmount(returnAmount1.doubleValue());
+//		goodsByBuyerTo.setCashbackAmount(returnAmount2.doubleValue());
+//		goodsByBuyerTo.setOpId(refundOpId);
+//		goodsByBuyerTo.setIp(to.getIp());
+//		goodsByBuyerTo.setMac(to.getMac());
+//		_log.info("同意退款执行退款的参数为：{}", goodsByBuyerTo.toString());
 		/*
 		 * // 退款 ReturnGoodsByBuyerRo returnGoodsByBuyerResult =
 		 * afcReturnGoodsSvr.returnGoodsByBuyer(goodsByBuyerTo);
@@ -888,19 +887,19 @@ public class OrdReturnSvcImpl extends MybatisBaseSvcImpl<OrdReturnMo, java.lang.
 			throw new RuntimeException("确认收到货出错");
 		}
 
-		ReturnGoodsByBuyerTo buyerTo = new ReturnGoodsByBuyerTo();
-		buyerTo.setUserId(returnList.get(0).getApplicationOpId());
-		buyerTo.setOpId(opId);
-		buyerTo.setSaleOrderId(String.valueOf(returnList.get(0).getOrderId()));
-		buyerTo.setReturnGoodsOrderId(returnCode.toString());
-		buyerTo.setTradeTitle("大卖网络-用户退货退款");
-		buyerTo.setTradeDetail(orderList.get(0).getOrderTitle());
-		buyerTo.setBalanceAmount(returnList.get(0).getReturnAmount1().doubleValue());
-		buyerTo.setCashbackAmount(returnList.get(0).getReturnAmount2().doubleValue());
-		buyerTo.setSubtractCashback(returnList.get(0).getSubtractCashback().doubleValue());
-		buyerTo.setMac(mac);
-		buyerTo.setIp(ip);
-		_log.info("已收到货并退款退款并扣减返现金额的参数为：{}", buyerTo.toString());
+//		ReturnGoodsByBuyerTo buyerTo = new ReturnGoodsByBuyerTo();
+//		buyerTo.setUserId(returnList.get(0).getApplicationOpId());
+//		buyerTo.setOpId(opId);
+//		buyerTo.setSaleOrderId(String.valueOf(returnList.get(0).getOrderId()));
+//		buyerTo.setReturnGoodsOrderId(returnCode.toString());
+//		buyerTo.setTradeTitle("大卖网络-用户退货退款");
+//		buyerTo.setTradeDetail(orderList.get(0).getOrderTitle());
+//		buyerTo.setBalanceAmount(returnList.get(0).getReturnAmount1().doubleValue());
+//		buyerTo.setCashbackAmount(returnList.get(0).getReturnAmount2().doubleValue());
+//		buyerTo.setSubtractCashback(returnList.get(0).getSubtractCashback().doubleValue());
+//		buyerTo.setMac(mac);
+//		buyerTo.setIp(ip);
+//		_log.info("已收到货并退款退款并扣减返现金额的参数为：{}", buyerTo.toString());
 		// 退款并扣减返现金额
 		/*
 		 * resultMap = afcReturnGoodsSvr.returnRefundAndSubtractCashback(buyerTo);

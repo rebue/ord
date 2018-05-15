@@ -60,8 +60,8 @@ public class VpayNotifySub implements ApplicationListener<ContextRefreshedEvent>
         try {
         	OrdOrderMo mo = new OrdOrderMo();
         	mo.setOrderCode(msg.getOrderId());
-        	mo.setReturnAmount1(BigDecimal.valueOf(msg.getPayChangeAmount1()));
-        	mo.setReturnAmount2(BigDecimal.valueOf(msg.getPayChangeAmount2()));
+        	mo.setReturnAmount1(msg.getPayChangeAmount1());
+        	mo.setReturnAmount2(msg.getPayChangeAmount2());
         	int result = ordOrderSvc.updateByOrderCode(mo);
         	if(result>0) {
         		return true;
