@@ -15,11 +15,11 @@ logging:
 eureka:
   client:
     service-url:
-      defaultZone: http://192.168.1.201:8761/eureka/
+      defaultZone: http://127.0.0.1:8761/eureka/
 
 spring:
   rabbitmq:
-      host: 192.168.1.201
+      host: 127.0.0.1
       port: 5672
       username: guest
       password: guest
