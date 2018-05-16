@@ -3,10 +3,7 @@ package rebue.ord.svc.impl;
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Date;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
-
 import javax.annotation.Resource;
 
 import org.slf4j.Logger;
@@ -18,12 +15,22 @@ import org.springframework.transaction.annotation.Transactional;
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
 
+import rebue.ord.dic.AddReturnDic;
+import rebue.ord.dic.AgreeToARefundDic;
+import rebue.ord.dic.AgreeToReturnDic;
+import rebue.ord.dic.ReceivedAndRefundedDic;
+import rebue.ord.dic.RejectReturnDic;
 import rebue.ord.mapper.OrdReturnMapper;
 import rebue.ord.mo.OrdOrderDetailMo;
 import rebue.ord.mo.OrdOrderMo;
 import rebue.ord.mo.OrdReturnMo;
 import rebue.ord.mo.OrdReturnPicMo;
+import rebue.ord.ro.AddReturnRo;
+import rebue.ord.ro.AgreeToARefundRo;
+import rebue.ord.ro.AgreeToReturnRo;
 import rebue.ord.ro.OrdReturnRo;
+import rebue.ord.ro.ReceivedAndRefundedRo;
+import rebue.ord.ro.RejectReturnRo;
 import rebue.ord.svc.OrdOrderDetailSvc;
 import rebue.ord.svc.OrdOrderSvc;
 import rebue.ord.svc.OrdReturnPicSvc;
@@ -76,9 +83,9 @@ public class OrdReturnSvcImpl extends MybatisBaseSvcImpl<OrdReturnMo, java.lang.
 	 */
 	@Override
 	@Transactional(readOnly = false, propagation = Propagation.REQUIRED)
-	public Map<String, Object> addEx(OrdOrderReturnTo to) {
+	public AddReturnRo addReturn(OrdOrderReturnTo to) {
 		_log.info("添加用户退货信息的参数为：{}", to.toString());
-		Map<String, Object> resultMap = new HashMap<String, Object>();
+		AddReturnRo addReturnRo = new AddReturnRo();
 		// 订单编号
 		long orderCode = to.getOrderCode();
 		// 订单详情Id
@@ -96,29 +103,29 @@ public class OrdReturnSvcImpl extends MybatisBaseSvcImpl<OrdReturnMo, java.lang.
 		List<OrdOrderMo> orderList = ordOrderSvc.list(orderMo);
 		if (orderList.size() == 0) {
 			_log.error("添加退货信息出现订单不存在，订单编号为：{}", orderCode);
-			resultMap.put("result", -1);
-			resultMap.put("msg", "该订单不存在");
-			return resultMap;
+			addReturnRo.setResult(AddReturnDic.ORDER_NOT_EXIST);
+			addReturnRo.setMsg("订单不存在");
+			return addReturnRo;
 		}
 		// 订单状态
 		byte orderState = orderList.get(0).getOrderState();
 		if (orderState == -1) {
 			_log.error("添加退货信息出现订单已取消，订单编号为：{}", orderCode);
-			resultMap.put("result", -2);
-			resultMap.put("msg", "该订单已取消");
-			return resultMap;
+			addReturnRo.setResult(AddReturnDic.ORDER_ALREADY_CANCEL);
+			addReturnRo.setMsg("订单已取消");
+			return addReturnRo;
 		}
 		if (orderState == 1) {
 			_log.error("添加退货信息出现订单未支付，订单编号为：{}", orderCode);
-			resultMap.put("result", -3);
-			resultMap.put("msg", "该订单未支付");
-			return resultMap;
+			addReturnRo.setResult(AddReturnDic.ORDER_NOT_PAY);
+			addReturnRo.setMsg("订单未支付");
+			return addReturnRo;
 		}
 		if (orderList.get(0).getRealMoney() == orderList.get(0).getReturnTotal()) {
 			_log.error("添加退货信息出现订单已全部退完，订单编号为：{}", orderCode);
-			resultMap.put("result", -4);
-			resultMap.put("msg", "该订单已全部退完");
-			return resultMap;
+			addReturnRo.setResult(AddReturnDic.ORDER_ALREADY_RETURN_FINISH);
+			addReturnRo.setMsg("该订单已全部退完");
+			return addReturnRo;
 		}
 		// =============================查询订单状态结束=============================
 
@@ -137,15 +144,15 @@ public class OrdReturnSvcImpl extends MybatisBaseSvcImpl<OrdReturnMo, java.lang.
 		}
 		if (orderDetailList.size() == 0) {
 			_log.error("添加退货信息出现订单详情不存在，订单详情编号为：{}", orderDetailId);
-			resultMap.put("result", -1);
-			resultMap.put("msg", "该订单不存在");
-			return resultMap;
+			addReturnRo.setResult(AddReturnDic.ORDER_NOT_EXIST);
+			addReturnRo.setMsg("订单不存在");
+			return addReturnRo;
 		}
 		if (orderDetailList.get(0).getReturnState() != 0) {
 			_log.error("添加退货信息出现订单详情退货状态不处于未退货状态，订单详情编号为：{}", orderDetailId);
-			resultMap.put("result", -5);
-			resultMap.put("msg", "当前状态不允许退货");
-			return resultMap;
+			addReturnRo.setResult(AddReturnDic.CURRENT_STATE_NOT_EXIST_RETURN);
+			addReturnRo.setMsg("当前状态不允许退货");
+			return addReturnRo;
 		}
 		// 订单详情退货数量
 		Integer returnCount = orderDetailList.get(0).getReturnCount();
@@ -154,17 +161,17 @@ public class OrdReturnSvcImpl extends MybatisBaseSvcImpl<OrdReturnMo, java.lang.
 		int buyCount = orderDetailList.get(0).getBuyCount();
 		if (buyCount == returnCount) {
 			_log.error("添加退货信息出现订单详情退货数量等于购买数量，订单详情编号为：{}", orderDetailId);
-			resultMap.put("result", -6);
-			resultMap.put("msg", "该商品已退完");
-			return resultMap;
+			addReturnRo.setResult(AddReturnDic.GOODS_ALREADY_RETURN_FINISH);
+			addReturnRo.setMsg("该商品已退完");
+			return addReturnRo;
 		}
 		// 最新订单详情退货数量
 		int newReturnCount = returnCount + returnNum;
 		if (buyCount < newReturnCount) {
 			_log.error("添加退货信息出现订单详情退货数量大于订单购买数量，订单详情编号为：{}", orderDetailId);
-			resultMap.put("result", -8);
-			resultMap.put("msg", "退货数量不能大于购买数量");
-			return resultMap;
+			addReturnRo.setResult(AddReturnDic.NOT_RETURN_COUNT_GR_BUY_COUNT);
+			addReturnRo.setMsg("退货数量不能大于购买数量");
+			return addReturnRo;
 		}
 		// =============================查询订单详情状态结束=============================
 
@@ -187,16 +194,13 @@ public class OrdReturnSvcImpl extends MybatisBaseSvcImpl<OrdReturnMo, java.lang.
 		ordReturnMo.setApplicationOpId(userId);
 		ordReturnMo.setApplicationTime(date);
 		_log.info("添加退货信息的参数为：{}", ordReturnMo.toString());
-		int insertReturnresult = 0;
-		try {
-			insertReturnresult = _mapper.insertSelective(ordReturnMo);
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
+		int insertReturnresult = _mapper.insertSelective(ordReturnMo);
 		_log.info("添加退货信息的返回值为：{}", insertReturnresult);
 		if (insertReturnresult < 1) {
 			_log.error("添加退货信息出错，返回值为：{}", insertReturnresult);
-			throw new RuntimeException("添加退货信息失败");
+			addReturnRo.setResult(AddReturnDic.ADD_RETURN_ERROR);
+			addReturnRo.setMsg("添加退货信息出错");
+			return addReturnRo;
 		}
 		// =============================添加退货信息结束=============================
 
@@ -226,9 +230,9 @@ public class OrdReturnSvcImpl extends MybatisBaseSvcImpl<OrdReturnMo, java.lang.
 			throw new RuntimeException("修改订单详情状态失败");
 		}
 		// =============================修改订单详情状态和数量结束=============================
-		resultMap.put("result", 1);
-		resultMap.put("msg", "提交成功");
-		return resultMap;
+		addReturnRo.setResult(AddReturnDic.SUCCESS);
+		addReturnRo.setMsg("提交成功");
+		return addReturnRo;
 	}
 
 	/**
@@ -256,9 +260,9 @@ public class OrdReturnSvcImpl extends MybatisBaseSvcImpl<OrdReturnMo, java.lang.
 	 */
 	@Override
 	@Transactional(readOnly = false, propagation = Propagation.REQUIRED)
-	public Map<String, Object> rejectReturn(OrdReturnMo record) {
+	public RejectReturnRo rejectReturn(OrdReturnMo record) {
 		_log.info("拒绝退货的请求参数为：{}", record.toString());
-		Map<String, Object> resultMap = new HashMap<String, Object>();
+		RejectReturnRo rejectReturnRo = new RejectReturnRo();
 		// 退货编号
 		long returnCode = record.getReturnCode();
 		// 订单编号
@@ -274,9 +278,9 @@ public class OrdReturnSvcImpl extends MybatisBaseSvcImpl<OrdReturnMo, java.lang.
 		if (returnCode == 0 || orderId == 0 || orderDetailId == 0 || rejectOpId == 0 || rejectReason.equals("")
 				|| rejectReason == null || rejectReason.equals("null")) {
 			_log.error("拒绝退货时出现参数不正确，退货编号为：{}", returnCode);
-			resultMap.put("result", -1);
-			resultMap.put("msg", "参数不正确");
-			return resultMap;
+			rejectReturnRo.setResult(RejectReturnDic.PARAM_NOT_CORRECT);
+			rejectReturnRo.setMsg("参数不正确");
+			return rejectReturnRo;
 		}
 
 		// ===================================拒绝退货第二步==============================
@@ -285,16 +289,16 @@ public class OrdReturnSvcImpl extends MybatisBaseSvcImpl<OrdReturnMo, java.lang.
 		_log.info("拒绝退货查询退货信息的返回值为：{}", String.valueOf(returnList));
 		if (returnList.size() == 0) {
 			_log.error("拒绝退货查询退货信息时出现退货信息为空，退货编号为：{}", returnCode);
-			resultMap.put("result", -2);
-			resultMap.put("msg", "退货信息不存在");
-			return resultMap;
+			rejectReturnRo.setResult(RejectReturnDic.RETURN_NOT_EXIST);
+			rejectReturnRo.setMsg("退货信息不存在");
+			return rejectReturnRo;
 		}
 
 		if (returnList.get(0).getApplicationState() != 1) {
 			_log.error("拒绝退货时出现退货状态不处于待审核状态，退货编号为：{}", returnCode);
-			resultMap.put("result", -3);
-			resultMap.put("msg", "当前状态不允许审核");
-			return resultMap;
+			rejectReturnRo.setResult(RejectReturnDic.CURRENT_STATE_NOT_EXIST_REJECT);
+			rejectReturnRo.setMsg("当前状态不允许拒绝");
+			return rejectReturnRo;
 		}
 
 		// ===================================拒绝退货第三步==============================
@@ -306,16 +310,16 @@ public class OrdReturnSvcImpl extends MybatisBaseSvcImpl<OrdReturnMo, java.lang.
 		_log.info("拒绝退货查询订单信息的返回值为：{}", String.valueOf(orderList));
 		if (orderList.size() == 0) {
 			_log.error("拒绝退货查询订单信息时出现订单信息不存在，退货编号为：{}", returnCode);
-			resultMap.put("result", -4);
-			resultMap.put("msg", "该用户订单不存在");
-			return resultMap;
+			rejectReturnRo.setResult(RejectReturnDic.ORDER_NOT_EXIST);
+			rejectReturnRo.setMsg("订单不存在");
+			return rejectReturnRo;
 		}
 
 		if (orderList.get(0).getOrderState() == -1) {
 			_log.error("拒绝退货时出现订单状态为取消状态，退货编号为：{}", returnCode);
-			resultMap.put("result", -5);
-			resultMap.put("msg", "该订单已取消，拒绝退货失败");
-			return resultMap;
+			rejectReturnRo.setResult(RejectReturnDic.ORDER_ALREADY_CANCEL);
+			rejectReturnRo.setMsg("该订单已取消，拒绝退货失败");
+			return rejectReturnRo;
 		}
 
 		// ===================================拒绝退货第四步==============================
@@ -327,16 +331,16 @@ public class OrdReturnSvcImpl extends MybatisBaseSvcImpl<OrdReturnMo, java.lang.
 		detailId = detailId == null ? 0 : detailId;
 		if (orderDetailMo.getId() == 0) {
 			_log.error("拒绝退货查询订单详情时出现订单详情不存在：退货编号为：{}", returnCode);
-			resultMap.put("result", -6);
-			resultMap.put("msg", "该订单不存在");
-			return resultMap;
+			rejectReturnRo.setResult(RejectReturnDic.ORDER_NOT_EXIST);
+			rejectReturnRo.setMsg("订单不存在");
+			return rejectReturnRo;
 		}
 
 		if (orderDetailMo.getReturnState() != 1) {
 			_log.error("拒绝退货时出现订单详情退货状态不处于退货中状态，退货编号为：{}", returnCode);
-			resultMap.put("result", -7);
-			resultMap.put("msg", "该退货订单已退货或该订单未退货");
-			return resultMap;
+			rejectReturnRo.setResult(RejectReturnDic.ORDER_ALREADY_RETURN_OR_NOT_RETURN);
+			rejectReturnRo.setMsg("该退货订单已退货或该订单未退货");
+			return rejectReturnRo;
 		}
 
 		// ===================================拒绝退货第五步==============================
@@ -350,7 +354,9 @@ public class OrdReturnSvcImpl extends MybatisBaseSvcImpl<OrdReturnMo, java.lang.
 		_log.info("拒绝退货修改订单详情信息的返回值为：{}", updateOrderDetailStateResult);
 		if (updateOrderDetailStateResult < 1) {
 			_log.error("拒绝退货修改订单详情信息出错，退货编号为{}", returnCode);
-			throw new RuntimeException("修改订单详情信息出错");
+			rejectReturnRo.setResult(RejectReturnDic.MODIFY_ORDER_DETAIL_ERROR);
+			rejectReturnRo.setMsg("修改订单详情信息出错");
+			return rejectReturnRo;
 		}
 
 		Date date = new Date();
@@ -366,9 +372,9 @@ public class OrdReturnSvcImpl extends MybatisBaseSvcImpl<OrdReturnMo, java.lang.
 			_log.error("拒绝退货时出现错误，退货编号为：{}", returnCode);
 			throw new RuntimeException("拒绝退货出错");
 		}
-		resultMap.put("result", 1);
-		resultMap.put("msg", "操作成功");
-		return resultMap;
+		rejectReturnRo.setResult(RejectReturnDic.SUCCESS);
+		rejectReturnRo.setMsg("操作成功");
+		return rejectReturnRo;
 	}
 
 	/**
@@ -379,8 +385,8 @@ public class OrdReturnSvcImpl extends MybatisBaseSvcImpl<OrdReturnMo, java.lang.
 	 */
 	@Override
 	@Transactional(readOnly = false, propagation = Propagation.REQUIRED)
-	public Map<String, Object> agreeToReturn(OrdOrderReturnTo mo) {
-		Map<String, Object> resultMap = new HashMap<String, Object>();
+	public AgreeToReturnRo agreeToReturn(OrdOrderReturnTo mo) {
+		AgreeToReturnRo agreeToReturnRo = new AgreeToReturnRo();
 		// 退货编号
 		Long returnCode = mo.getReturnCode();
 		// 订单编号
@@ -402,16 +408,16 @@ public class OrdReturnSvcImpl extends MybatisBaseSvcImpl<OrdReturnMo, java.lang.
 		if (returnCode == null || orderId == null || orderDetailId == null || reviewOpId == null
 				|| subtractCashback.compareTo(bd) == -1) {
 			_log.error("同意退货时出现参数为空的情况，同意退货失败");
-			resultMap.put("result", -1);
-			resultMap.put("msg", "参数不正确");
-			return resultMap;
+			agreeToReturnRo.setResult(AgreeToReturnDic.PARAM_NOT_CORRECT);
+			agreeToReturnRo.setMsg("参数不正确");
+			return agreeToReturnRo;
 		}
 
 		if (returnAmount1.compareTo(bd) == -1 && returnAmount2.compareTo(bd) == -1) {
 			_log.error("同意退货时出现退到余额和返现金都为空，退货编号为：{}", returnCode);
-			resultMap.put("result", -1);
-			resultMap.put("msg", "参数不正确");
-			return resultMap;
+			agreeToReturnRo.setResult(AgreeToReturnDic.PARAM_NOT_CORRECT);
+			agreeToReturnRo.setMsg("参数不正确");
+			return agreeToReturnRo;
 		}
 
 		OrdReturnMo ordReturnMo = new OrdReturnMo();
@@ -422,16 +428,16 @@ public class OrdReturnSvcImpl extends MybatisBaseSvcImpl<OrdReturnMo, java.lang.
 		_log.info("同意退货查询退货信息的返回值为：{}", String.valueOf(returnList));
 		if (returnList.size() == 0) {
 			_log.error("同意退货查询退货信息时出现找不到退货信息，退货编号为：{}", returnCode);
-			resultMap.put("result", -2);
-			resultMap.put("msg", "退货信息不存在");
-			return resultMap;
+			agreeToReturnRo.setResult(AgreeToReturnDic.RETURN_NOT_EXIST);
+			agreeToReturnRo.setMsg("退货信息不存在");
+			return agreeToReturnRo;
 		}
 
 		if (returnList.get(0).getApplicationState() != 1) {
 			_log.error("同意退货时出现退货订单已审核，退货编号为：{}", returnCode);
-			resultMap.put("result", -3);
-			resultMap.put("msg", "该退货单已审核");
-			return resultMap;
+			agreeToReturnRo.setResult(AgreeToReturnDic.RETURN_ALREADY_APPROVE);
+			agreeToReturnRo.setMsg("该退货单已审核");
+			return agreeToReturnRo;
 		}
 
 		OrdOrderMo orderMo = new OrdOrderMo();
@@ -443,16 +449,16 @@ public class OrdReturnSvcImpl extends MybatisBaseSvcImpl<OrdReturnMo, java.lang.
 
 		if (orderList.size() == 0) {
 			_log.error("同意退货查询订单信息时出现没有该订单，退货编号为：{}", returnCode);
-			resultMap.put("result", -4);
-			resultMap.put("msg", "没有找到该订单信息");
-			return resultMap;
+			agreeToReturnRo.setResult(AgreeToReturnDic.ORDER_NOT_EXIST);
+			agreeToReturnRo.setMsg("没有找到该订单信息");
+			return agreeToReturnRo;
 		}
 
 		if (orderList.get(0).getOrderState() == -1 || orderList.get(0).getOrderState() == 1) {
 			_log.error("同意退货时发现该订单未支付或已取消，退货编号为：{}", returnCode);
-			resultMap.put("result", -5);
-			resultMap.put("msg", "该订单未支付或已取消");
-			return resultMap;
+			agreeToReturnRo.setResult(AgreeToReturnDic.ORDER_NOT_PAY_OR_ALREADY_CANCEL);
+			agreeToReturnRo.setMsg("该订单未支付或已取消");
+			return agreeToReturnRo;
 		}
 
 		OrdOrderDetailMo orderDetailMo = new OrdOrderDetailMo();
@@ -464,16 +470,16 @@ public class OrdReturnSvcImpl extends MybatisBaseSvcImpl<OrdReturnMo, java.lang.
 		_log.info("同意退货查询订单详情信息的返回值为：{}", String.valueOf(orderDetailList));
 		if (orderDetailList.size() == 0) {
 			_log.error("同意退货查询订单详情信息时发现没有找到该订单详情信息，退货编号为：{}", returnCode);
-			resultMap.put("result", -6);
-			resultMap.put("msg", "没有找到该订单详情信息");
-			return resultMap;
+			agreeToReturnRo.setResult(AgreeToReturnDic.ORDER_DETAIL_NOT_NULL);
+			agreeToReturnRo.setMsg("没有找到该退货商品信息");
+			return agreeToReturnRo;
 		}
 
 		if (orderDetailList.get(0).getReturnState() != 1) {
 			_log.error("同意退货时发现该商品并未申请退货或已完成退货，退货编号为：{}", returnCode);
-			resultMap.put("result", -7);
-			resultMap.put("msg", "该商品未申请退货或已完成退货");
-			return resultMap;
+			agreeToReturnRo.setResult(AgreeToReturnDic.GOODS_NOT_APPLYFOR_RETURN_OR_ALREADY_FINISH);
+			agreeToReturnRo.setMsg("该商品未申请退货或已完成退货");
+			return agreeToReturnRo;
 		}
 
 		// 订单退货总额
@@ -497,7 +503,9 @@ public class OrdReturnSvcImpl extends MybatisBaseSvcImpl<OrdReturnMo, java.lang.
 		_log.info("同意退货修改订单退货金额的返回值为：{}", modifyReturnAmountResult);
 		if (modifyReturnAmountResult != 1) {
 			_log.error("同意退货修改订单退货金额时出现错误，退货编号为：{}", returnCode);
-			throw new RuntimeException("修改订单退货金额错误");
+			agreeToReturnRo.setResult(AgreeToReturnDic.MODIFY_ORDER_RETURN_AMOUNT_ERROR);
+			agreeToReturnRo.setMsg("修改订单退货金额错误");
+			return agreeToReturnRo;
 		}
 
 		// 订单详情退货数量
@@ -542,9 +550,10 @@ public class OrdReturnSvcImpl extends MybatisBaseSvcImpl<OrdReturnMo, java.lang.
 			_log.error("同意退货修改退货信息时出现错误，退货编号为：{}", returnCode);
 			throw new RuntimeException("修改退货信息错误");
 		}
-		resultMap.put("result", 1);
-		resultMap.put("msg", "审核成功");
-		return resultMap;
+		agreeToReturnRo.setResult(AgreeToReturnDic.SUCCESS);
+		agreeToReturnRo.setMsg("审核成功");
+		return agreeToReturnRo;
+		
 	}
 
 	/**
@@ -555,8 +564,8 @@ public class OrdReturnSvcImpl extends MybatisBaseSvcImpl<OrdReturnMo, java.lang.
 	 */
 	@Override
 	@Transactional(readOnly = false, propagation = Propagation.REQUIRED)
-	public Map<String, Object> agreeToARefund(OrdOrderReturnTo to) {
-		Map<String, Object> resultMap = new HashMap<String, Object>();
+	public AgreeToARefundRo agreeToARefund(OrdOrderReturnTo to) {
+		AgreeToARefundRo agreeToARefundRo = new AgreeToARefundRo();
 		// 退货编号
 		Long returnCode = to.getReturnCode();
 		// 订单编号
@@ -576,18 +585,18 @@ public class OrdReturnSvcImpl extends MybatisBaseSvcImpl<OrdReturnMo, java.lang.
 		if (returnCode == null || orderId == null || orderDetailId == null || refundOpId == null
 				|| subtractCashback == null) {
 			_log.error("同意退款时出现参数不全");
-			resultMap.put("result", -1);
-			resultMap.put("msg", "参数不正确");
-			return resultMap;
+			agreeToARefundRo.setResult(AgreeToARefundDic.PARAM_NOT_CORRECT);
+			agreeToARefundRo.setMsg("参数不正确");
+			return agreeToARefundRo;
 		}
 
 		// 退货总额
 		BigDecimal returnRental = new BigDecimal(returnAmount1.add(returnAmount2).doubleValue());
 		if (returnRental.compareTo(bd) == -1 || returnRental.compareTo(bd) == 0) {
 			_log.error("同意退款时出现退款金额为空，退货编号为：{}", returnCode);
-			resultMap.put("result", -2);
-			resultMap.put("msg", "退款金额不能为空");
-			return resultMap;
+			agreeToARefundRo.setResult(AgreeToARefundDic.REFUND_AMOUNT_NOT_NULL);
+			agreeToARefundRo.setMsg("退款金额不能为空");
+			return agreeToARefundRo;
 		}
 
 		OrdOrderMo orderMo = new OrdOrderMo();
@@ -598,16 +607,16 @@ public class OrdReturnSvcImpl extends MybatisBaseSvcImpl<OrdReturnMo, java.lang.
 		_log.info("同意退款查询订单信息的返回值为：{}", String.valueOf(orderList));
 		if (orderList.size() == 0) {
 			_log.error("同意退款查询订单时发现没有该订单，退货编号为：{}", returnCode);
-			resultMap.put("result", -3);
-			resultMap.put("msg", "没有发现该订单");
-			return resultMap;
+			agreeToARefundRo.setResult(AgreeToARefundDic.ORDER_NOT_EXIST);
+			agreeToARefundRo.setMsg("订单不存在");
+			return agreeToARefundRo;
 		}
 
 		if (orderList.get(0).getOrderState() == -1 || orderList.get(0).getOrderState() == 1) {
 			_log.error("同意退款时发现订单未支付或已取消，退货编号为：{}", returnCode);
-			resultMap.put("result", -4);
-			resultMap.put("msg", "该订单未支付或已取消");
-			return resultMap;
+			agreeToARefundRo.setResult(AgreeToARefundDic.ORDER_NOT_PAY_OR_ALREADY_CANCEL);
+			agreeToARefundRo.setMsg("该订单未支付或已取消");
+			return agreeToARefundRo;
 		}
 
 		OrdOrderDetailMo detailMo = new OrdOrderDetailMo();
@@ -619,16 +628,16 @@ public class OrdReturnSvcImpl extends MybatisBaseSvcImpl<OrdReturnMo, java.lang.
 		_log.info("同意退款查询订单详情的返回值为：{}", String.valueOf(detailList));
 		if (detailList.size() == 0) {
 			_log.error("同意退货查询订单详情时发现没有该详情信息，退货编号为：{}", returnCode);
-			resultMap.put("result", -5);
-			resultMap.put("msg", "用户未购买该商品");
-			return resultMap;
+			agreeToARefundRo.setResult(AgreeToARefundDic.USER_NOT_PURCHASE_THE_GOODS);
+			agreeToARefundRo.setMsg("用户未购买该商品");
+			return agreeToARefundRo;
 		}
 
 		if (detailList.get(0).getReturnState() != 1) {
 			_log.error("同意退款时发现用户未申请退款，退货编号为：{}", returnCode);
-			resultMap.put("result", -6);
-			resultMap.put("msg", "用户未申请退款");
-			return resultMap;
+			agreeToARefundRo.setResult(AgreeToARefundDic.USER_NOT_APPLYFOR_REFUND);
+			agreeToARefundRo.setMsg("用户未申请退款");
+			return agreeToARefundRo;
 		}
 
 		OrdReturnMo returnMo = new OrdReturnMo();
@@ -639,23 +648,23 @@ public class OrdReturnSvcImpl extends MybatisBaseSvcImpl<OrdReturnMo, java.lang.
 		_log.info("同意退款查询退货信息的返回值为：{}", String.valueOf(returnList));
 		if (returnList.size() == 0) {
 			_log.error("同意退款时发现没有该退款信息，退货编号为：{}", returnCode);
-			resultMap.put("result", -7);
-			resultMap.put("msg", "没有找到该退款信息");
-			return resultMap;
+			agreeToARefundRo.setResult(AgreeToARefundDic.RETURN_NOT_EXIST);
+			agreeToARefundRo.setMsg("没有找到该退款信息");
+			return agreeToARefundRo;
 		}
 
 		if (returnList.get(0).getApplicationState() != 1) {
 			_log.info("同意退款时发现该退货单不处于待审核状态，退货编号为：{}", returnCode);
-			resultMap.put("result", -8);
-			resultMap.put("msg", "该订单已退款或已取消申请");
-			return resultMap;
+			agreeToARefundRo.setResult(AgreeToARefundDic.ORDER_ALREADY_REFUND_OR_ALREADY_CANCEL_APPLYFOR);
+			agreeToARefundRo.setMsg("该订单已退款或已取消申请");
+			return agreeToARefundRo;
 		}
 
 		if (returnList.get(0).getRefundState() == 2) {
 			_log.error("同意退款时发现该退货单已退款，退货编号为：{}", returnCode);
-			resultMap.put("result", -9);
-			resultMap.put("msg", "该退款单已退款");
-			return resultMap;
+			agreeToARefundRo.setResult(AgreeToARefundDic.RETURN_ALREADY_REFUND);
+			agreeToARefundRo.setMsg("该退款单已退款");
+			return agreeToARefundRo;
 		}
 
 		// 订单退货总额
@@ -676,7 +685,9 @@ public class OrdReturnSvcImpl extends MybatisBaseSvcImpl<OrdReturnMo, java.lang.
 		_log.info("同意退款修改订单退货金额的返回值为：{}", modifyReturnAmountResult);
 		if (modifyReturnAmountResult != 1) {
 			_log.error("同意退款修改订单退货金额时出错，退货编号为：{}", returnCode);
-			throw new RuntimeException("修改订单退货金额出错");
+			agreeToARefundRo.setResult(AgreeToARefundDic.MODIFY_ORDER_RETURN_AMOUNT_ERROR);
+			agreeToARefundRo.setMsg("修改订单退货金额出错");
+			return agreeToARefundRo;
 		}
 
 		// 已退货数量
@@ -724,29 +735,9 @@ public class OrdReturnSvcImpl extends MybatisBaseSvcImpl<OrdReturnMo, java.lang.
 			_log.error("同意退款修改退货信息时出现错误，退货编号为：{}", returnCode);
 			throw new RuntimeException("修改退货信息出错");
 		}
-//		ReturnGoodsByBuyerTo goodsByBuyerTo = new ReturnGoodsByBuyerTo();
-//		goodsByBuyerTo.setUserId(returnList.get(0).getApplicationOpId());
-//		goodsByBuyerTo.setReturnGoodsOrderId(String.valueOf(returnCode));
-//		goodsByBuyerTo.setSaleOrderId(String.valueOf(orderId));
-//		goodsByBuyerTo.setTradeTitle("大卖网络商品退货");
-//		goodsByBuyerTo.setTradeDetail(detailList.get(0).getOnlineTitle() + "-" + detailList.get(0).getSpecName());
-//		goodsByBuyerTo.setBalanceAmount(returnAmount1.doubleValue());
-//		goodsByBuyerTo.setCashbackAmount(returnAmount2.doubleValue());
-//		goodsByBuyerTo.setOpId(refundOpId);
-//		goodsByBuyerTo.setIp(to.getIp());
-//		goodsByBuyerTo.setMac(to.getMac());
-//		_log.info("同意退款执行退款的参数为：{}", goodsByBuyerTo.toString());
-		/*
-		 * // 退款 ReturnGoodsByBuyerRo returnGoodsByBuyerResult =
-		 * afcReturnGoodsSvr.returnGoodsByBuyer(goodsByBuyerTo);
-		 * _log.info("同意退款执行退款的返回值为：{}", returnGoodsByBuyerResult); int result =
-		 * returnGoodsByBuyerResult.getResult().getCode(); if (result != 1) {
-		 * _log.error("同意退款退款时出现出错，退货编号为：{}", returnCode); throw new
-		 * RuntimeException("v支付出错，退款失败"); }
-		 */
-		resultMap.put("result", 1);
-		resultMap.put("msg", "退款成功");
-		return resultMap;
+		agreeToARefundRo.setResult(AgreeToARefundDic.SUCCESS);
+		agreeToARefundRo.setMsg("退款成功");
+		return agreeToARefundRo;
 	}
 
 	/**
@@ -757,8 +748,8 @@ public class OrdReturnSvcImpl extends MybatisBaseSvcImpl<OrdReturnMo, java.lang.
 	 */
 	@Override
 	@Transactional(readOnly = false, propagation = Propagation.REQUIRED)
-	public Map<String, Object> receivedAndRefunded(OrdOrderReturnTo to) {
-		Map<String, Object> resultMap = new HashMap<String, Object>();
+	public ReceivedAndRefundedRo receivedAndRefunded(OrdOrderReturnTo to) {
+		ReceivedAndRefundedRo receivedAndRefundedRo = new ReceivedAndRefundedRo();
 		// 退货编号
 		Long returnCode = to.getReturnCode();
 		returnCode = returnCode == null ? 0L : returnCode;
@@ -772,9 +763,9 @@ public class OrdReturnSvcImpl extends MybatisBaseSvcImpl<OrdReturnMo, java.lang.
 		if (returnCode == 0 || opId == 0 || ip == null || ip.equals("") || ip.equals("null") || mac == null
 				|| mac.equals("") || mac.equals("null")) {
 			_log.error("已收到货并退款时发现参数不全");
-			resultMap.put("result", -1);
-			resultMap.put("msg", "参数不正确");
-			return resultMap;
+			receivedAndRefundedRo.setResult(ReceivedAndRefundedDic.PARAM_NOT_CORRECT);
+			receivedAndRefundedRo.setMsg("参数不正确");
+			return receivedAndRefundedRo;
 		}
 
 		OrdReturnMo returnMo = new OrdReturnMo();
@@ -785,16 +776,16 @@ public class OrdReturnSvcImpl extends MybatisBaseSvcImpl<OrdReturnMo, java.lang.
 		_log.info("已收到货并退款查询退货信息的返回值为：{}", String.valueOf(returnList));
 		if (returnList.size() == 0) {
 			_log.error("已收到货并退款时发现退货信息为空，退货编号为：{}", returnCode);
-			resultMap.put("result", -2);
-			resultMap.put("msg", "没有找到该退货信息");
-			return resultMap;
+			receivedAndRefundedRo.setResult(ReceivedAndRefundedDic.RETURN_NOT_NULL);
+			receivedAndRefundedRo.setMsg("没有找到该退货信息");
+			return receivedAndRefundedRo;
 		}
 
 		if (returnList.get(0).getApplicationState() != 2) {
 			_log.error("已收到货并退款时发现退货状态不处于退货中，退货编号为：{}", returnCode);
-			resultMap.put("result", -3);
-			resultMap.put("msg", "当前状态不允许退款");
-			return resultMap;
+			receivedAndRefundedRo.setResult(ReceivedAndRefundedDic.CURRENT_STATE_NOT_EXIST_REFUND);
+			receivedAndRefundedRo.setMsg("当前状态不允许退款");
+			return receivedAndRefundedRo;
 		}
 
 		// 订单编号
@@ -807,16 +798,16 @@ public class OrdReturnSvcImpl extends MybatisBaseSvcImpl<OrdReturnMo, java.lang.
 		_log.info("已收到货并退款查询订单信息的返回值为：{}", String.valueOf(orderList));
 		if (orderList.size() == 0) {
 			_log.error("已收到货并退款查询订单信息时发现没有该订单，退货编号为：{}", returnCode);
-			resultMap.put("result", -4);
-			resultMap.put("msg", "没有找到该订单信息");
-			return resultMap;
+			receivedAndRefundedRo.setResult(ReceivedAndRefundedDic.ORDER_NOT_EXIST);
+			receivedAndRefundedRo.setMsg("没有找到该订单信息");
+			return receivedAndRefundedRo;
 		}
 
 		if (orderList.get(0).getOrderState() == -1 || orderList.get(0).getOrderState() == 1) {
 			_log.error("已收到货并退款时发现订单处于取消或待支付状态，退货编号为：{}", returnCode);
-			resultMap.put("result", -5);
-			resultMap.put("msg", "该订单已取消或未支付");
-			return resultMap;
+			receivedAndRefundedRo.setResult(ReceivedAndRefundedDic.ORDER_NOT_PAY_OR_ALREADY_CANCEL);
+			receivedAndRefundedRo.setMsg("该订单已取消或未支付");
+			return receivedAndRefundedRo;
 		}
 
 		// 订单详情ID
@@ -830,9 +821,9 @@ public class OrdReturnSvcImpl extends MybatisBaseSvcImpl<OrdReturnMo, java.lang.
 		_log.info("已收到货并退款查询订单详情信息的返回值为：{}", String.valueOf(detailList));
 		if (detailList.size() == 0) {
 			_log.error("已收到货并退款查询订单详情信息时发现订单详情信息为空，退货编号为：{}", returnCode);
-			resultMap.put("result", -6);
-			resultMap.put("msg", "该商品未购买");
-			return resultMap;
+			receivedAndRefundedRo.setResult(ReceivedAndRefundedDic.USER_NOT_PURCHASE_GOODS);
+			receivedAndRefundedRo.setMsg("该商品未购买");
+			return receivedAndRefundedRo;
 		}
 
 		// 退货状态
@@ -840,9 +831,9 @@ public class OrdReturnSvcImpl extends MybatisBaseSvcImpl<OrdReturnMo, java.lang.
 
 		if (returnState != 1) {
 			_log.error("已收到货并退款查询订单详情时发现退货状态不处于退货中，退货编号为：{}", returnCode);
-			resultMap.put("result", -7);
-			resultMap.put("msg", "该商品未申请或已完成退货");
-			return resultMap;
+			receivedAndRefundedRo.setResult(ReceivedAndRefundedDic.GOODS_NOT_APPLYFOR_OR_HAVE_FINISHED_RETURN);
+			receivedAndRefundedRo.setMsg("该商品未申请或已完成退货");
+			return receivedAndRefundedRo;
 		}
 
 		if (orderList.get(0).getReturnTotal().compareTo(orderList.get(0).getRealMoney()) == 0) {
@@ -852,7 +843,9 @@ public class OrdReturnSvcImpl extends MybatisBaseSvcImpl<OrdReturnMo, java.lang.
 			_log.info("已收到货并退款修改订单状态的返回值为：{}", modifyOrderStateResult);
 			if (modifyOrderStateResult != 1) {
 				_log.error("已收到货并退款修改订单状态出错，退货编号为：{}", returnCode);
-				throw new RuntimeException("修改订单状态出错");
+				receivedAndRefundedRo.setResult(ReceivedAndRefundedDic.MODIFY_ORDER_STATE_ERROR);
+				receivedAndRefundedRo.setMsg("修改订单状态出错");
+				return receivedAndRefundedRo;
 			}
 		}
 
@@ -886,31 +879,9 @@ public class OrdReturnSvcImpl extends MybatisBaseSvcImpl<OrdReturnMo, java.lang.
 			_log.error("已收到货并退款确认收到货时出现错误，退货编号为：{}", returnCode);
 			throw new RuntimeException("确认收到货出错");
 		}
-
-//		ReturnGoodsByBuyerTo buyerTo = new ReturnGoodsByBuyerTo();
-//		buyerTo.setUserId(returnList.get(0).getApplicationOpId());
-//		buyerTo.setOpId(opId);
-//		buyerTo.setSaleOrderId(String.valueOf(returnList.get(0).getOrderId()));
-//		buyerTo.setReturnGoodsOrderId(returnCode.toString());
-//		buyerTo.setTradeTitle("大卖网络-用户退货退款");
-//		buyerTo.setTradeDetail(orderList.get(0).getOrderTitle());
-//		buyerTo.setBalanceAmount(returnList.get(0).getReturnAmount1().doubleValue());
-//		buyerTo.setCashbackAmount(returnList.get(0).getReturnAmount2().doubleValue());
-//		buyerTo.setSubtractCashback(returnList.get(0).getSubtractCashback().doubleValue());
-//		buyerTo.setMac(mac);
-//		buyerTo.setIp(ip);
-//		_log.info("已收到货并退款退款并扣减返现金额的参数为：{}", buyerTo.toString());
-		// 退款并扣减返现金额
-		/*
-		 * resultMap = afcReturnGoodsSvr.returnRefundAndSubtractCashback(buyerTo);
-		 * _log.info("已收到货并退款退款并扣减返现金额的返回值为：{}", resultMap.toString()); if
-		 * (!resultMap.get("result").equals("1")) {
-		 * _log.error("已收到货并退款退款并扣减返现金额时出错，退货编号为：{}", returnCode); throw new
-		 * RuntimeException("v支付出错，退款失败"); }
-		 */
-		resultMap.put("result", 1);
-		resultMap.put("msg", "退款成功");
-		_log.info("已收到货并退款退款并扣减返现金额的返回值为：{}", resultMap.toString());
-		return resultMap;
+		_log.info("已收到货并退款退款并扣减返现金额的返回值为：{}", receivedAndRefundedRo.toString());
+		receivedAndRefundedRo.setResult(ReceivedAndRefundedDic.SUCCESS);
+		receivedAndRefundedRo.setMsg("退款成功");
+		return receivedAndRefundedRo;
 	}
 }

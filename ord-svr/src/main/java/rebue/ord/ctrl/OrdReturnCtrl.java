@@ -14,8 +14,18 @@ import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import rebue.ord.dic.AddReturnDic;
+import rebue.ord.dic.AgreeToARefundDic;
+import rebue.ord.dic.AgreeToReturnDic;
+import rebue.ord.dic.ReceivedAndRefundedDic;
+import rebue.ord.dic.RejectReturnDic;
 import rebue.ord.mo.OrdReturnMo;
+import rebue.ord.ro.AddReturnRo;
+import rebue.ord.ro.AgreeToARefundRo;
+import rebue.ord.ro.AgreeToReturnRo;
 import rebue.ord.ro.OrdReturnRo;
+import rebue.ord.ro.ReceivedAndRefundedRo;
+import rebue.ord.ro.RejectReturnRo;
 import rebue.ord.svc.OrdReturnSvc;
 
 import com.github.pagehelper.PageInfo;
@@ -72,31 +82,27 @@ public class OrdReturnCtrl {
 	 */
 	@SuppressWarnings("finally")
 	@PostMapping("/ord/return")
-	Map<String, Object> addEx(OrdOrderReturnTo vo) throws Exception {
-		Map<String, Object> resultMap = new HashMap<String, Object>();
+	AddReturnRo addReturn(OrdOrderReturnTo vo) throws Exception {
+		AddReturnRo addReturnRo = new AddReturnRo();
 		try {
-			resultMap = svc.addEx(vo);
+			addReturnRo = svc.addReturn(vo);
 		} catch (RuntimeException e) {
 			String msg = e.getMessage();
-			if (msg.equals("添加退货信息失败")) {
+			if (msg.equals("添加退货图片失败")) {
 				_log.info(msg);
-				resultMap.put("result", -7);
-				resultMap.put("msg", msg);
-			} else if (msg.equals("添加退货图片失败")) {
-				_log.info(msg);
-				resultMap.put("result", -8);
-				resultMap.put("msg", msg);
+				addReturnRo.setResult(AddReturnDic.ADD_RETURN_PIC);
+				addReturnRo.setMsg(msg);
 			} else if (msg.equals("修改订单详情状态失败")) {
 				_log.info(msg);
-				resultMap.put("result", -9);
-				resultMap.put("msg", msg);
+				addReturnRo.setResult(AddReturnDic.MODIFY_ORDER_DETAIL_STATE_ERROR);
+				addReturnRo.setMsg(msg);
 			} else {
 				e.printStackTrace();
-				resultMap.put("result", -10);
-				resultMap.put("msg", "提交失败");
+				addReturnRo.setResult(AddReturnDic.ERROR);
+				addReturnRo.setMsg("提交失败");
 			}
 		} finally {
-			return resultMap;
+			return addReturnRo;
 		}
 	}
 
@@ -133,134 +139,113 @@ public class OrdReturnCtrl {
 	 * @date 2018年4月27日 下午3:31:38
 	 */
 	@PutMapping("/ord/return/reject")
-	Map<String, Object> rejectReturn(OrdReturnMo mo) {
+	RejectReturnRo rejectReturn(OrdReturnMo mo) {
 		_log.info("拒绝退货的参数为：{}", mo.toString());
-		Map<String, Object> resultMap = new HashMap<String, Object>();
+		RejectReturnRo rejectReturnRo = new RejectReturnRo();
 		try {
 			return svc.rejectReturn(mo);
 		} catch (RuntimeException e) {
-			String msg = e.getMessage();
-			if (msg.equals("修改订单详情信息出错")) {
-				resultMap.put("result", -8);
-				resultMap.put("msg", msg);
-			} else if (msg.equals("拒绝退货出错")) {
-				resultMap.put("result", -9);
-				resultMap.put("msg", msg);
-			} else {
-				resultMap.put("result", -10);
-				resultMap.put("msg", "操作失败");
-			}
-			return resultMap;
+			rejectReturnRo.setResult(RejectReturnDic.ERROR);
+			rejectReturnRo.setMsg("操作失败");
+			return rejectReturnRo;
 		}
 	}
-	
+
 	/**
-	 * 同意退款
-	 * Title: agreeToARefund
-	 * Description: 
+	 * 同意退款 Title: agreeToARefund Description:
+	 * 
 	 * @param to
 	 * @return
 	 * @date 2018年5月11日 下午2:59:49
 	 */
 	@PostMapping("/ord/return/agreetoarefund")
-	Map<String, Object> agreeToARefund(OrdOrderReturnTo to) {
-		Map<String, Object> resultMap = new HashMap<String, Object>();
+	AgreeToARefundRo agreeToARefund(OrdOrderReturnTo to) {
+		AgreeToARefundRo agreeToARefundRo = new AgreeToARefundRo();
 		try {
 			_log.info("同意退款的请求参数为：{}", to.toString());
-			resultMap = svc.agreeToARefund(to);
-			_log.info("同意退款的返回值为：{}", String.valueOf(resultMap));
-			return resultMap;
+			agreeToARefundRo = svc.agreeToARefund(to);
+			_log.info("同意退款的返回值为：{}", agreeToARefundRo.toString());
+			return agreeToARefundRo;
 		} catch (RuntimeException e) {
 			String msg = e.getMessage();
-			if (msg.equals("修改订单退货金额出错")) {
-				resultMap.put("result", -10);
-				resultMap.put("msg", msg);
-			} else if (msg.equals("修改订单详情出错")) {
-				resultMap.put("result", -11);
-				resultMap.put("msg", msg);
+			if (msg.equals("修改订单详情出错")) {
+				agreeToARefundRo.setResult(AgreeToARefundDic.MODIFY_ORDER_DETAIL_ERROR);
+				agreeToARefundRo.setMsg(msg);
 			} else if (msg.equals("修改退货信息出错")) {
-				resultMap.put("result", -12);
-				resultMap.put("msg", msg);
+				agreeToARefundRo.setResult(AgreeToARefundDic.MODIFY_RETURN_ERROR);
+				agreeToARefundRo.setMsg(msg);
 			} else if (msg.equals("v支付出错，退款失败")) {
-				resultMap.put("result", -13);
-				resultMap.put("msg", msg);
+				agreeToARefundRo.setResult(AgreeToARefundDic.V_PAY_ERROR);
+				agreeToARefundRo.setMsg(msg);
 			} else {
-				resultMap.put("result", -14);
-				resultMap.put("msg", "同意退款失败");
+				agreeToARefundRo.setResult(AgreeToARefundDic.ERROR);
+				agreeToARefundRo.setMsg("同意退款失败");
 			}
-			return resultMap;
+			return agreeToARefundRo;
 		}
 	}
-	
+
 	/**
-	 * 同意退货
-	 * Title: agreeToReturn
-	 * Description: 
+	 * 同意退货 Title: agreeToReturn Description:
+	 * 
 	 * @return
 	 * @date 2018年5月11日 下午3:29:33
 	 */
 	@PostMapping("/ord/return/agreetoreturn")
-	Map<String, Object> agreeToReturn(OrdOrderReturnTo to) {
-		Map<String, Object> resultMap = new HashMap<String, Object>();
+	AgreeToReturnRo agreeToReturn(OrdOrderReturnTo to) {
+		AgreeToReturnRo agreeToReturnRo = new AgreeToReturnRo();
 		try {
 			_log.info("同意退货的请求参数为：{}", to.toString());
-			resultMap = svc.agreeToReturn(to);
-			_log.info("同意退货的返回值为：{}", to.toString());
-			return resultMap;
+			agreeToReturnRo = svc.agreeToReturn(to);
+			_log.info("同意退货的返回值为：{}", agreeToReturnRo.toString());
+			return agreeToReturnRo;
 		} catch (RuntimeException e) {
 			String msg = e.getMessage();
-			if (msg.equals("修改订单退货金额错误")) {
-				resultMap.put("result", -8);
-				resultMap.put("msg", msg);
-			} else if (msg.equals("修改退货数量和返现总额出错")) {
-				resultMap.put("result", -9);
-				resultMap.put("msg", msg);
+			if (msg.equals("修改退货数量和返现总额出错")) {
+				agreeToReturnRo.setResult(AgreeToReturnDic.MODIFY_RETURN_COUNT_AND_CASHBACK_TOTAL_AMOUNT_ERROR);
+				agreeToReturnRo.setMsg(msg);
 			} else if (msg.equals("修改退货信息错误")) {
-				resultMap.put("result", -10);
-				resultMap.put("msg", msg);
+				agreeToReturnRo.setResult(AgreeToReturnDic.MODIFY_RETURN_ERROR);
+				agreeToReturnRo.setMsg(msg);
 			} else {
-				resultMap.put("result", -11);
-				resultMap.put("msg", "操作失败");
+				agreeToReturnRo.setResult(AgreeToReturnDic.ERROR);
+				agreeToReturnRo.setMsg("操作失败");
 			}
-			return resultMap;
+			return agreeToReturnRo;
 		}
 	}
-	
+
 	/**
-	 * 已收到货并退款
-	 * Title: receivedAndRefunded
-	 * Description: 
+	 * 已收到货并退款 Title: receivedAndRefunded Description:
+	 * 
 	 * @param to
 	 * @return
 	 * @date 2018年5月11日 下午3:01:21
 	 */
 	@PostMapping("/ord/return/receivedandrefunded")
-	Map<String, Object> receivedAndRefunded(OrdOrderReturnTo to) {
-		Map<String, Object> resultMap = new HashMap<String, Object>();
+	ReceivedAndRefundedRo receivedAndRefunded(OrdOrderReturnTo to) {
+		ReceivedAndRefundedRo receivedAndRefundedRo = new ReceivedAndRefundedRo();
 		try {
 			_log.info("已收到货并退款的请求参数为：{}", to.toString());
-			resultMap = svc.receivedAndRefunded(to);
-			_log.info("已收到货并退款的返回值为：{}", String.valueOf(resultMap));
-			return resultMap;
+			receivedAndRefundedRo = svc.receivedAndRefunded(to);
+			_log.info("已收到货并退款的返回值为：{}", receivedAndRefundedRo.toString());
+			return receivedAndRefundedRo;
 		} catch (RuntimeException e) {
 			String msg = e.getMessage();
-			if (msg.equals("修改订单状态出错")) {
-				resultMap.put("result", -8);
-				resultMap.put("msg", msg);
-			} else if (msg.equals("修改订单详情退货状态出错")) {
-				resultMap.put("result", -9);
-				resultMap.put("msg", msg);
+			if (msg.equals("修改订单详情退货状态出错")) {
+				receivedAndRefundedRo.setResult(ReceivedAndRefundedDic.MODIFY_ORDER_DETAIL_ERROR);
+				receivedAndRefundedRo.setMsg(msg);
 			} else if (msg.equals("确认收到货出错")) {
-				resultMap.put("result", -10);
-				resultMap.put("msg", msg);
+				receivedAndRefundedRo.setResult(ReceivedAndRefundedDic.CONFIRM_RECEIPT_OF_GOODS_ERROR);
+				receivedAndRefundedRo.setMsg(msg);
 			} else if (msg.equals("v支付出错，退款失败")) {
-				resultMap.put("result", -11);
-				resultMap.put("msg", msg);
+				receivedAndRefundedRo.setResult(ReceivedAndRefundedDic.V_PAY_ERROR);
+				receivedAndRefundedRo.setMsg(msg);
 			} else {
-				resultMap.put("result", -12);
-				resultMap.put("msg", "退款失败");
+				receivedAndRefundedRo.setResult(ReceivedAndRefundedDic.ERROR);
+				receivedAndRefundedRo.setMsg("退款失败");
 			}
-			return resultMap;
+			return receivedAndRefundedRo;
 		}
 	}
 }

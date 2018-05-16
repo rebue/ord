@@ -2,6 +2,15 @@ package rebue.ord.svc;
 
 import rebue.robotech.svc.MybatisBaseSvc;
 import rebue.ord.mo.OrdOrderMo;
+import rebue.ord.ro.CancelDeliveryRo;
+import rebue.ord.ro.CancellationOfOrderRo;
+import rebue.ord.ro.ModifyOrderRealMoneyRo;
+import rebue.ord.ro.OrderSignInRo;
+import rebue.ord.ro.SetUpExpressCompanyRo;
+import rebue.ord.ro.ShipmentConfirmationRo;
+import rebue.ord.ro.UsersToPlaceTheOrderRo;
+import rebue.ord.to.OrderSignInTo;
+
 import java.beans.IntrospectionException;
 import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
@@ -22,8 +31,8 @@ public interface OrdOrderSvc extends MybatisBaseSvc<OrdOrderMo, java.lang.Long> 
 	 * @throws JsonParseException
 	 * @date 2018年4月9日 上午10:54:22
 	 */
-	Map<String, Object> placeOrder(String orderJson) throws JsonParseException,
-			JsonMappingException, IOException;
+	UsersToPlaceTheOrderRo usersToPlaceTheOrder(String orderJson)
+			throws JsonParseException, JsonMappingException, IOException;
 
 	/**
 	 * 查询用户订单信息 Title: selectOrderInfo Description:
@@ -37,10 +46,8 @@ public interface OrdOrderSvc extends MybatisBaseSvc<OrdOrderMo, java.lang.Long> 
 	 * @throws IllegalAccessException
 	 * @date 2018年4月9日 下午4:48:40
 	 */
-	List<Map<String, Object>> selectOrderInfo(Map<String, Object> map)
-			throws ParseException, IntrospectionException,
-			IllegalAccessException, IllegalArgumentException,
-			InvocationTargetException;
+	List<Map<String, Object>> selectOrderInfo(Map<String, Object> map) throws ParseException, IntrospectionException,
+			IllegalAccessException, IllegalArgumentException, InvocationTargetException;
 
 	/**
 	 * 取消订单 Title: cancellationOfOrder Description:
@@ -48,7 +55,7 @@ public interface OrdOrderSvc extends MybatisBaseSvc<OrdOrderMo, java.lang.Long> 
 	 * @return
 	 * @date 2018年4月9日 下午6:49:19
 	 */
-	Map<String, Object> cancellationOfOrder(OrdOrderMo mo);
+	CancellationOfOrderRo cancellationOfOrder(OrdOrderMo mo);
 
 	/**
 	 * 修改订单实际金额 Title: updateOrderRealMoney Description:
@@ -57,7 +64,7 @@ public interface OrdOrderSvc extends MybatisBaseSvc<OrdOrderMo, java.lang.Long> 
 	 * @return
 	 * @date 2018年4月12日 下午2:59:53
 	 */
-	Map<String, Object> updateOrderRealMoney(OrdOrderMo mo);
+	ModifyOrderRealMoneyRo modifyOrderRealMoney(OrdOrderMo mo);
 
 	/**
 	 * 设置快递公司 Title: setUpExpressCompany Description:
@@ -66,7 +73,7 @@ public interface OrdOrderSvc extends MybatisBaseSvc<OrdOrderMo, java.lang.Long> 
 	 * @return
 	 * @date 2018年4月13日 上午11:23:14
 	 */
-	Map<String, Object> setUpExpressCompany(OrdOrderMo mo);
+	SetUpExpressCompanyRo setUpExpressCompany(OrdOrderMo mo);
 
 	/**
 	 * 取消发货 Title: cancelDeliveryUpdateOrderState Description:
@@ -75,7 +82,7 @@ public interface OrdOrderSvc extends MybatisBaseSvc<OrdOrderMo, java.lang.Long> 
 	 * @return
 	 * @date 2018年4月13日 下午2:59:19
 	 */
-	Map<String, Object> cancelDeliveryUpdateOrderState(OrdOrderMo mo);
+	CancelDeliveryRo cancelDelivery(OrdOrderMo mo);
 
 	/**
 	 * 确认发货 Title: sendAndPrint Description:
@@ -84,7 +91,7 @@ public interface OrdOrderSvc extends MybatisBaseSvc<OrdOrderMo, java.lang.Long> 
 	 * @return
 	 * @date 2018年4月13日 下午6:19:09
 	 */
-	Map<String, Object> shipmentConfirmation(OrdOrderMo mo);
+	ShipmentConfirmationRo shipmentConfirmation(OrdOrderMo mo);
 
 	/**
 	 * 订单签收 Title: orderSignIn Description:
@@ -93,12 +100,11 @@ public interface OrdOrderSvc extends MybatisBaseSvc<OrdOrderMo, java.lang.Long> 
 	 * @return
 	 * @date 2018年4月14日 下午2:29:58
 	 */
-	Map<String, Object> orderSignIn(OrdOrderMo mo);
+	OrderSignInRo orderSignIn(OrderSignInTo mo);
 
 	/**
-	 * 根据退货编号修改退货金额
-	 * Title: modifyReturnAmountByorderCode
-	 * Description: 
+	 * 根据退货编号修改退货金额 Title: modifyReturnAmountByorderCode Description:
+	 * 
 	 * @param mo
 	 * @return
 	 * @date 2018年5月7日 上午9:18:51
@@ -106,9 +112,8 @@ public interface OrdOrderSvc extends MybatisBaseSvc<OrdOrderMo, java.lang.Long> 
 	int modifyReturnAmountByorderCode(OrdOrderMo mo);
 
 	/**
-	 * 根据订单编号修改订单状态
-	 * Title: modifyOrderStateByOderCode
-	 * Description: 
+	 * 根据订单编号修改订单状态 Title: modifyOrderStateByOderCode Description:
+	 * 
 	 * @param orderCode
 	 * @param orderState
 	 * @return
@@ -117,19 +122,17 @@ public interface OrdOrderSvc extends MybatisBaseSvc<OrdOrderMo, java.lang.Long> 
 	int modifyOrderStateByOderCode(long orderCode, byte orderState);
 
 	/**
-	 * 根据订单编号查询退货金额
-	 * Title: selectReturnAmountByOrderCode
-	 * Description: 
+	 * 根据订单编号查询退货金额 Title: selectReturnAmountByOrderCode Description:
+	 * 
 	 * @param orderCode
 	 * @return
 	 * @date 2018年5月11日 上午11:15:03
 	 */
 	OrdOrderMo selectReturnAmountByOrderCode(String orderCode);
-	
+
 	/**
-	 * 根据订单编号修改订单
-	 * Title: updateByOrderCode
-	 * Description: 
+	 * 根据订单编号修改订单 Title: updateByOrderCode Description:
+	 * 
 	 * @param OrdOrderMo
 	 * @return
 	 * @date 2018年5月15日

@@ -2,9 +2,12 @@ package rebue.ord.svc;
 
 import rebue.robotech.svc.MybatisBaseSvc;
 import rebue.ord.mo.OrdReturnMo;
+import rebue.ord.ro.AddReturnRo;
+import rebue.ord.ro.AgreeToARefundRo;
+import rebue.ord.ro.AgreeToReturnRo;
 import rebue.ord.ro.OrdReturnRo;
-
-import java.util.Map;
+import rebue.ord.ro.ReceivedAndRefundedRo;
+import rebue.ord.ro.RejectReturnRo;
 
 import com.github.pagehelper.PageInfo;
 
@@ -19,7 +22,7 @@ public interface OrdReturnSvc extends MybatisBaseSvc<OrdReturnMo, java.lang.Long
 	 * @return
 	 * @date 2018年4月19日 下午2:53:00
 	 */
-	Map<String, Object> addEx(OrdOrderReturnTo to);
+	AddReturnRo addReturn(OrdOrderReturnTo to);
 
 	/**
      * 查询分页列表信息
@@ -39,7 +42,7 @@ public interface OrdReturnSvc extends MybatisBaseSvc<OrdReturnMo, java.lang.Long
      * @return
      * @date 2018年4月27日 下午3:10:47
      */
-	Map<String, Object> rejectReturn(OrdReturnMo record);
+    RejectReturnRo rejectReturn(OrdReturnMo record);
 
 	/**
 	 * 同意退货
@@ -49,7 +52,7 @@ public interface OrdReturnSvc extends MybatisBaseSvc<OrdReturnMo, java.lang.Long
 	 * @return
 	 * @date 2018年5月11日 下午2:45:13
 	 */
-	Map<String, Object> agreeToReturn(OrdOrderReturnTo mo);
+    AgreeToReturnRo agreeToReturn(OrdOrderReturnTo mo);
 
 	/**
 	 * 同意退款
@@ -59,7 +62,7 @@ public interface OrdReturnSvc extends MybatisBaseSvc<OrdReturnMo, java.lang.Long
 	 * @return
 	 * @date 2018年5月11日 下午2:45:36
 	 */
-	Map<String, Object> agreeToARefund(OrdOrderReturnTo to);
+    AgreeToARefundRo agreeToARefund(OrdOrderReturnTo to);
 
 	/**
 	 * 已收到货并退款
@@ -69,5 +72,5 @@ public interface OrdReturnSvc extends MybatisBaseSvc<OrdReturnMo, java.lang.Long
 	 * @return
 	 * @date 2018年5月11日 下午3:02:40
 	 */
-	Map<String, Object> receivedAndRefunded(OrdOrderReturnTo to);
+    ReceivedAndRefundedRo receivedAndRefunded(OrdOrderReturnTo to);
 }
