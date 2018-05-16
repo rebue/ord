@@ -92,17 +92,6 @@ public interface OrdOrderDetailMapper
      */
     boolean existSelective(OrdOrderDetailMo record);
     
-    /**
-     * 根据订单编号订单详情ID修改退货数量和返现总额
-     * Title: modifyReturnCountAndCashBackTotal
-     * Description: 
-     * @param record
-     * @return
-     * @date 2018年5月7日 上午9:46:55
-     */
-    @Update("UPDATE ORD_ORDER_DETAIL SET RETURN_COUNT=#{returnCount,jdbcType=INTEGER}, CASHBACK_TOTAL=#{cashbackTotal,jdbcType=DECIMAL} WHERE ID=#{orderDetailId,jdbcType=BIGINT} AND ORDER_ID=#{orderId,jdbcType=BIGINT}")
-    int modifyReturnCountAndCashBackTotal(@Param("orderId") long orderId, @Param("orderDetailId") long orderDetailId, @Param("returnCount") int returnCount, @Param("cashbackTotal") BigDecimal cashbackTotal);
-
 	/**
 	 * 根据订单编号订单详情ID修改退货数量和返现总额 Title: modifyReturnCountAndCashBackTotal
 	 * Description:
