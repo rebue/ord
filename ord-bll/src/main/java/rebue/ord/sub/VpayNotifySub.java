@@ -60,8 +60,13 @@ public class VpayNotifySub implements ApplicationListener<ContextRefreshedEvent>
         	mo.setReturnAmount2(msg.getPayChangeAmount2());
         	int result = ordOrderSvc.updateByOrderCode(mo);
         	if(result>0) {
+        		_log.info("更新订单可返金额成功！");
         		return true;
+        	}else if(result == 0){
+        		_log.info("订单不存在");
+        		return false;
         	}else {
+        		_log.info("更新订单可返金额失败！");
         		return false;
         	}
             

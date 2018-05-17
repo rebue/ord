@@ -61,9 +61,14 @@ public class PayNotifySub implements ApplicationListener<ContextRefreshedEvent> 
         	byte orderState = (byte)2;
         	int result = ordOrderSvc.modifyOrderStateByOderCode(orderCode,orderState);
             if(result>0) {
+            	_log.info("修改订单状态成功！");
             	return true;
-            }else {
+            }else if (result==0) {
+            	_log.info("订单不存在！");
                 return false;
+            }else {
+            	_log.info("修改订单状态失败！");
+            	return false;
             }
        
         } catch (DuplicateKeyException e) {
