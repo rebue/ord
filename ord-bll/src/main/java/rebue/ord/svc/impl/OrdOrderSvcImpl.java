@@ -670,7 +670,7 @@ public class OrdOrderSvcImpl extends MybatisBaseSvcImpl<OrdOrderMo, java.lang.Lo
 		Date date = new Date();
 		Calendar calendar = Calendar.getInstance();
 		calendar.setTime(date);
-		calendar.add(Calendar.HOUR, settleBuyerCashbackTime);
+		calendar.add(Calendar.MINUTE, settleBuyerCashbackTime);
 		Date buyerCashbackDate = calendar.getTime();
 		
 		AddSettleTasksTo settleTasksTo = new AddSettleTasksTo();
@@ -758,6 +758,7 @@ public class OrdOrderSvcImpl extends MybatisBaseSvcImpl<OrdOrderMo, java.lang.Lo
 	 * @date 2018年5月11日 上午11:14:42
 	 */
 	@Override
+	@Transactional(readOnly = false, propagation = Propagation.REQUIRED)
 	public OrdOrderMo selectReturnAmountByOrderCode(String orderCode) {
 		_log.info("根据订单编号查询退货金额的参数为：{}", orderCode);
 		OrdOrderMo orderMo = _mapper.selectReturnAmountByOrderCode(orderCode);
@@ -773,9 +774,25 @@ public class OrdOrderSvcImpl extends MybatisBaseSvcImpl<OrdOrderMo, java.lang.Lo
 	 * @return
 	 * @date 2018年5月15日
 	 */
+	@Transactional(readOnly = false, propagation = Propagation.REQUIRED)
 	public int updateByOrderCode(OrdOrderMo mo) {
 		int result = _mapper.updateByOrderCode(mo);
 		return result;
 	}
 
+	/**
+	 * 结算完成
+	 * Title: finishSettlement
+	 * Description: 
+	 * @param closeTime
+	 * @param orderCode
+	 * @return
+	 * @date 2018年5月17日 下午3:18:49
+	 */
+	@Override
+	@Transactional(readOnly = false, propagation = Propagation.REQUIRED)
+	public int finishSettlement(Date closeTime, String orderCode) {
+		_log.info("结算完成的参数为：{}，{}", closeTime, orderCode);
+		return _mapper.finishSettlement(closeTime, orderCode);
+	}
 }

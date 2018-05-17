@@ -1,6 +1,5 @@
 package rebue.ord.mapper;
 
-import java.math.BigDecimal;
 import java.util.List;
 import org.apache.ibatis.annotations.Mapper;
 import rebue.ord.mo.OrdOrderDetailMo;

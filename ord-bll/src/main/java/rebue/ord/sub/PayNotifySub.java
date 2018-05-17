@@ -65,7 +65,7 @@ public class PayNotifySub implements ApplicationListener<ContextRefreshedEvent> 
             	return true;
             }else if (result==0) {
             	_log.info("订单不存在！");
-                return false;
+                return true;
             }else {
             	_log.info("修改订单状态失败！");
             	return false;

@@ -15,6 +15,7 @@ import java.beans.IntrospectionException;
 import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
 import java.text.ParseException;
+import java.util.Date;
 import java.util.List;
 import java.util.Map;
 import com.fasterxml.jackson.core.JsonParseException;
@@ -138,5 +139,16 @@ public interface OrdOrderSvc extends MybatisBaseSvc<OrdOrderMo, java.lang.Long> 
 	 * @date 2018年5月15日
 	 */
 	int updateByOrderCode(OrdOrderMo record);
+
+	/**
+	 * 结算完成
+	 * Title: finishSettlement
+	 * Description: 
+	 * @param closeTime
+	 * @param orderCode
+	 * @return
+	 * @date 2018年5月17日 下午3:19:25
+	 */
+	int finishSettlement(Date closeTime, String orderCode);
 
 }

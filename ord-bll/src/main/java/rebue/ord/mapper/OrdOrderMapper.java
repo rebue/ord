@@ -1,5 +1,6 @@
 package rebue.ord.mapper;
 
+import java.util.Date;
 import java.util.List;
 import org.apache.ibatis.annotations.Mapper;
 import rebue.ord.mo.OrdOrderMo;
@@ -195,5 +196,15 @@ public interface OrdOrderMapper extends MybatisBaseMapper<OrdOrderMo, Long> {
 	 * @date 2018年5月15日
 	 */
 	int updateByOrderCode(OrdOrderMo record);
+	
+	/**
+	 * 完成结算
+	 * Title: finishSettlement
+	 * Description: 
+	 * @return
+	 * @date 2018年5月17日 下午3:07:55
+	 */
+	@Update("UPDATE ORD_ORDER SET ORDER_STATE=5, CLOSE_TIME=#{closeTime,jdbcType=TIMESTAMP} WHERE ORDER_CODE=#{orderCode,jdbcType=VARCHAR} AND ORDER_STATE=4")
+	int finishSettlement(@Param("closeTime") Date closeTime, @Param("orderCode") String orderCode);
 	
 }

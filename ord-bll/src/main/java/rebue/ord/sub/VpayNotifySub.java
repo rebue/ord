@@ -64,7 +64,7 @@ public class VpayNotifySub implements ApplicationListener<ContextRefreshedEvent>
         		return true;
         	}else if(result == 0){
         		_log.info("订单不存在");
-        		return false;
+        		return true;
         	}else {
         		_log.info("更新订单可返金额失败！");
         		return false;
