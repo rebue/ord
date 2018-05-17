@@ -28,6 +28,7 @@ public enum OrderSignInDic implements EnumBase {
 	/** 订单详情不存在 **/
 	ORDER_DETAIL_NOT_EXIST(-3),
 	
+	/** 添加结算失败 **/
 	ADD_SETTLEMENT_ERROR(-4),
 
 	/** 签收失败 **/

@@ -1,6 +1,5 @@
 package rebue.ord.sub;
 
-import java.math.BigDecimal;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import javax.annotation.Resource;
@@ -14,7 +13,6 @@ import org.springframework.context.event.ContextRefreshedEvent;
 import org.springframework.dao.DuplicateKeyException;
 import org.springframework.stereotype.Service;
 
-import rebue.afc.svc.AfcPaySvc;
 import rebue.afc.vpay.co.VpayNotifyCo;
 import rebue.afc.vpay.ro.VpayNotifyRo;
 import rebue.ord.mo.OrdOrderMo;
@@ -28,8 +26,6 @@ import rebue.sbs.rabbit.RabbitConsumer;
 public class VpayNotifySub implements ApplicationListener<ContextRefreshedEvent> {
     private final static Logger _log = LoggerFactory.getLogger(VpayNotifySub.class);
     private static AtomicInteger count      = new AtomicInteger();
-    @Resource
-    private AfcPaySvc           paySvc;
     @Resource
     private RabbitConsumer      consumer;
     @Resource

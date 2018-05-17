@@ -15,8 +15,22 @@ import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import rebue.ord.dic.CancelDeliveryDic;
+import rebue.ord.dic.CancellationOfOrderDic;
+import rebue.ord.dic.OrderSignInDic;
+import rebue.ord.dic.ShipmentConfirmationDic;
+import rebue.ord.dic.UsersToPlaceTheOrderDic;
 import rebue.ord.mo.OrdOrderMo;
+import rebue.ord.ro.CancelDeliveryRo;
+import rebue.ord.ro.CancellationOfOrderRo;
+import rebue.ord.ro.ModifyOrderRealMoneyRo;
+import rebue.ord.ro.OrderSignInRo;
+import rebue.ord.ro.SetUpExpressCompanyRo;
+import rebue.ord.ro.ShipmentConfirmationRo;
+import rebue.ord.ro.UsersToPlaceTheOrderRo;
 import rebue.ord.svc.OrdOrderSvc;
+import rebue.ord.to.OrderSignInTo;
+
 import com.github.pagehelper.PageInfo;
 import java.util.List;
 import java.beans.IntrospectionException;
@@ -31,8 +45,7 @@ public class OrdOrderCtrl {
 	/**
 	 * @mbg.generated
 	 */
-	private final static Logger _log = LoggerFactory
-			.getLogger(OrdOrderCtrl.class);
+	private final static Logger _log = LoggerFactory.getLogger(OrdOrderCtrl.class);
 
 	/**
 	 * @mbg.generated
@@ -61,11 +74,9 @@ public class OrdOrderCtrl {
 	 * @mbg.generated
 	 */
 	@GetMapping("/ord/order")
-	PageInfo<OrdOrderMo> list(OrdOrderMo qo,
-			@RequestParam("pageNum") int pageNum,
+	PageInfo<OrdOrderMo> list(OrdOrderMo qo, @RequestParam("pageNum") int pageNum,
 			@RequestParam("pageSize") int pageSize) {
-		_log.info("list OrdOrderMo:" + qo + ", pageNum = " + pageNum
-				+ ", pageSize = " + pageSize);
+		_log.info("list OrdOrderMo:" + qo + ", pageNum = " + pageNum + ", pageSize = " + pageSize);
 
 		if (pageSize > 50) {
 			String msg = "pageSize不能大于50";
@@ -95,9 +106,9 @@ public class OrdOrderCtrl {
 	 * 修改订单实际金额信息 2018年4月12日14:51:59
 	 */
 	@PutMapping("/ord/order")
-	Map<String, Object> modify(OrdOrderMo vo) throws Exception {
+	ModifyOrderRealMoneyRo modifyOrderRealMoney(OrdOrderMo vo) throws Exception {
 		_log.info("修改订单实际金额的参数为：{}", vo.toString());
-		return svc.updateOrderRealMoney(vo);
+		return svc.modifyOrderRealMoney(vo);
 	}
 
 	/**
@@ -113,10 +124,8 @@ public class OrdOrderCtrl {
 	 * @date 2018年4月9日 下午3:06:37
 	 */
 	@GetMapping("/ord/order/info")
-	List<Map<String, Object>> orderInfo(@RequestParam Map<String, Object> map)
-			throws ParseException, IllegalAccessException,
-			IllegalArgumentException, InvocationTargetException,
-			IntrospectionException {
+	List<Map<String, Object>> orderInfo(@RequestParam Map<String, Object> map) throws ParseException,
+			IllegalAccessException, IllegalArgumentException, InvocationTargetException, IntrospectionException {
 		_log.info("查询订单信息的参数为：{}", map.toString());
 		List<Map<String, Object>> list = svc.selectOrderInfo(map);
 		_log.info("查询订单信息的返回值：{}", String.valueOf(list));
@@ -135,47 +144,44 @@ public class OrdOrderCtrl {
 	 */
 	@SuppressWarnings("finally")
 	@PostMapping("/ord/order")
-	Map<String, Object> placeOrder(String orderJson) throws JsonParseException,
-			JsonMappingException, IOException {
+	UsersToPlaceTheOrderRo usersToPlaceTheOrder(String orderJson)
+			throws JsonParseException, JsonMappingException, IOException {
 		_log.info("用户下订单的参数为：{}", orderJson);
-		Map<String, Object> resultMap = new HashMap<String, Object>();
+		UsersToPlaceTheOrderRo placeTheOrderRo = new UsersToPlaceTheOrderRo();
 		try {
-			resultMap = svc.placeOrder(orderJson);
+			placeTheOrderRo = svc.usersToPlaceTheOrder(orderJson);
 		} catch (RuntimeException e) {
 			String msg = e.getMessage();
-			if (msg.equals("生成订单出错")) {
-				resultMap.put("result", -2);
-				resultMap.put("msg", "生成订单出错");
-			} else if (msg.equals("生成订单详情出错")) {
-				resultMap.put("result", -3);
-				resultMap.put("msg", "生成订单详情出错");
+			if (msg.equals("生成订单详情出错")) {
+				placeTheOrderRo.setResult(UsersToPlaceTheOrderDic.CREATE_ORDER_DETAIL_ERROR);
+				placeTheOrderRo.setMsg(msg);
 			} else if (msg.contains("未上线")) {
 				_log.error(msg);
-				resultMap.put("result", -4);
-				resultMap.put("msg", msg);
+				placeTheOrderRo.setResult(UsersToPlaceTheOrderDic.GOODS_NOT_ONLINE);
+				placeTheOrderRo.setMsg(msg);
 			} else if (msg.contains("购物车中找不到")) {
 				_log.error(msg);
-				resultMap.put("result", -5);
-				resultMap.put("msg", msg);
+				placeTheOrderRo.setResult(UsersToPlaceTheOrderDic.GOODS_NOT_EXIST_CART);
+				placeTheOrderRo.setMsg(msg);
 			} else if (msg.contains("扣减上线数量失败")) {
 				_log.error(msg);
-				resultMap.put("result", -6);
-				resultMap.put("msg", msg);
+				placeTheOrderRo.setResult(UsersToPlaceTheOrderDic.SUBTRACT_ONLINE_COUNT_ERROR);
+				placeTheOrderRo.setMsg(msg);
 			} else if (msg.equals("删除购物车失败")) {
 				_log.error(msg);
-				resultMap.put("result", -7);
-				resultMap.put("msg", msg);
+				placeTheOrderRo.setResult(UsersToPlaceTheOrderDic.DELETE_CART_ERROR);
+				placeTheOrderRo.setMsg(msg);
 			} else if (msg.contains("库存不足")) {
 				_log.error(msg);
-				resultMap.put("result", -8);
-				resultMap.put("msg", msg);
+				placeTheOrderRo.setResult(UsersToPlaceTheOrderDic.INSUFFICIENT_INVENTORY);
+				placeTheOrderRo.setMsg(msg);
 			} else {
 				_log.error(msg);
-				resultMap.put("result", -9);
-				resultMap.put("msg", "下订单失败");
+				placeTheOrderRo.setResult(UsersToPlaceTheOrderDic.ERROR);
+				placeTheOrderRo.setMsg("下订单失败");
 			}
 		} finally {
-			return resultMap;
+			return placeTheOrderRo;
 		}
 	}
 
@@ -188,22 +194,22 @@ public class OrdOrderCtrl {
 	 */
 	@SuppressWarnings("finally")
 	@PutMapping("/ord/order/cancel")
-	Map<String, Object> cancellationOfOrder(OrdOrderMo qo) {
+	CancellationOfOrderRo cancellationOfOrder(OrdOrderMo qo) {
 		_log.info("用户取消订单的参数为：{}", qo.toString());
-		Map<String, Object> resultMap = new HashMap<String, Object>();
+		CancellationOfOrderRo cancellationOfOrderRo = new CancellationOfOrderRo();
 		try {
-			resultMap = svc.cancellationOfOrder(qo);
+			cancellationOfOrderRo = svc.cancellationOfOrder(qo);
 		} catch (RuntimeException e) {
 			String msg = e.getMessage();
-			if (msg.equals("修改库存失败")) {
-				resultMap.put("result", -3);
-				resultMap.put("msg", "修改库存失败");
-			} else if (msg.equals("修改订单状态失败")) {
-				resultMap.put("result", -4);
-				resultMap.put("msg", "修改订单状态失败");
+			if (msg.equals("修改订单状态失败")) {
+				cancellationOfOrderRo.setResult(CancellationOfOrderDic.MODIFY_ORDER_STATE_ERROR);
+				cancellationOfOrderRo.setMsg(msg);
+			} else {
+				cancellationOfOrderRo.setResult(CancellationOfOrderDic.ERROR);
+				cancellationOfOrderRo.setMsg("取消订单失败");
 			}
 		} finally {
-			return resultMap;
+			return cancellationOfOrderRo;
 		}
 	}
 
@@ -216,22 +222,22 @@ public class OrdOrderCtrl {
 	 */
 	@SuppressWarnings("finally")
 	@PutMapping("/ord/order/canceldelivery")
-	Map<String, Object> cancelDeliveryUpdateOrderState(OrdOrderMo qo) {
+	CancelDeliveryRo cancelDelivery(OrdOrderMo qo) {
 		_log.info("用户取消订单的参数为：{}", qo.toString());
-		Map<String, Object> resultMap = new HashMap<String, Object>();
+		CancelDeliveryRo cancelDeliveryRo = new CancelDeliveryRo();
 		try {
-			resultMap = svc.cancelDeliveryUpdateOrderState(qo);
+			cancelDeliveryRo = svc.cancelDelivery(qo);
 		} catch (RuntimeException e) {
 			String msg = e.getMessage();
-			if (msg.equals("修改库存失败")) {
-				resultMap.put("result", -3);
-				resultMap.put("msg", "修改库存失败");
-			} else if (msg.equals("修改订单状态失败")) {
-				resultMap.put("result", -4);
-				resultMap.put("msg", "修改订单状态失败");
+			if (msg.equals("修改订单状态失败")) {
+				cancelDeliveryRo.setResult(CancelDeliveryDic.MODIFY_ORDER_STATE_ERROR);
+				cancelDeliveryRo.setMsg(msg);
+			} else {
+				cancelDeliveryRo.setResult(CancelDeliveryDic.ERROR);
+				cancelDeliveryRo.setMsg("取消发货失败");
 			}
 		} finally {
-			return resultMap;
+			return cancelDeliveryRo;
 		}
 	}
 
@@ -243,7 +249,7 @@ public class OrdOrderCtrl {
 	 * @date 2018年4月13日 上午11:24:17
 	 */
 	@PutMapping("/ord/order/setupexpresscompany")
-	Map<String, Object> setUpExpressCompany(OrdOrderMo qo) {
+	SetUpExpressCompanyRo setUpExpressCompany(OrdOrderMo qo) {
 		_log.info("设置快递公司的参数为：{}", qo.toString());
 		return svc.setUpExpressCompany(qo);
 	}
@@ -257,36 +263,32 @@ public class OrdOrderCtrl {
 	 */
 	@SuppressWarnings("finally")
 	@PutMapping("/ord/order/shipmentconfirmation")
-	Map<String, Object> shipmentConfirmation(OrdOrderMo qo) {
+	ShipmentConfirmationRo shipmentConfirmation(OrdOrderMo qo) {
 		_log.info("确认发货的参数为：{}", qo.toString());
-		Map<String, Object> resultMap = new HashMap<String, Object>();
+		ShipmentConfirmationRo confirmationRo = new ShipmentConfirmationRo();
 		try {
-			resultMap = svc.shipmentConfirmation(qo);
+			confirmationRo = svc.shipmentConfirmation(qo);
 		} catch (RuntimeException e) {
 			String msg = e.getMessage();
-			if (msg.equals("确认发货失败")) {
-				resultMap.put("result", -1);
-				resultMap.put("msg", msg);
-				_log.error(msg);
-			} else if (msg.equals("调用快递电子面单参数错误")) {
-				resultMap.put("result", -2);
-				resultMap.put("msg", msg);
+			if (msg.equals("调用快递电子面单参数错误")) {
+				confirmationRo.setResult(ShipmentConfirmationDic.PARAN_ERROR);
+				confirmationRo.setMsg(msg);
 				_log.error(msg);
 			} else if (msg.equals("该订单已发货")) {
-				resultMap.put("result", -3);
-				resultMap.put("msg", msg);
+				confirmationRo.setResult(ShipmentConfirmationDic.ORDER_ALREADY_SHIPMENTS);
+				confirmationRo.setMsg(msg);
 				_log.error(msg);
 			} else if (msg.equals("调用快递电子面单失败")) {
-				resultMap.put("result", -4);
-				resultMap.put("msg", msg);
+				confirmationRo.setResult(ShipmentConfirmationDic.INVOKE_ERROR);
+				confirmationRo.setMsg(msg);
 				_log.error(msg);
 			} else {
-				resultMap.put("result", -5);
-				resultMap.put("msg", "确认发货失败");
+				confirmationRo.setResult(ShipmentConfirmationDic.ERROR);
+				confirmationRo.setMsg("确认发货失败");
 				_log.error(msg);
 			}
 		} finally {
-			return resultMap;
+			return confirmationRo;
 		}
 	}
 
@@ -299,18 +301,17 @@ public class OrdOrderCtrl {
 	 */
 	@SuppressWarnings("finally")
 	@PutMapping("/ord/order/ordersignin")
-	Map<String, Object> orderSignIn(OrdOrderMo qo) {
+	OrderSignInRo orderSignIn(OrderSignInTo qo) {
 		_log.info("订单签收的参数为：{}", qo.toString());
-		Map<String, Object> resultMap = new HashMap<String, Object>();
+		OrderSignInRo orderSignInRo = new OrderSignInRo();
 		try {
-			resultMap = svc.orderSignIn(qo);
+			orderSignInRo = svc.orderSignIn(qo);
 		} catch (RuntimeException e) {
-			resultMap.put("result", -3);
-			resultMap.put("msg", "签收失败");
+			orderSignInRo.setResult(OrderSignInDic.ERROR);
+			orderSignInRo.setMsg("签收失败");
 		} finally {
-			return resultMap;
+			return orderSignInRo;
 		}
 	}
-	
-	
+
 }

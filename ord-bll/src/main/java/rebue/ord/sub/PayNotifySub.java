@@ -15,7 +15,6 @@ import org.springframework.stereotype.Service;
 
 import rebue.afc.co.PayNotifyCo;
 import rebue.afc.ro.PayNotifyRo;
-import rebue.afc.svc.AfcPaySvc;
 import rebue.ord.svc.OrdOrderSvc;
 import rebue.sbs.rabbit.RabbitConsumer;
 
@@ -27,9 +26,6 @@ public class PayNotifySub implements ApplicationListener<ContextRefreshedEvent> 
     private final static Logger _log = LoggerFactory.getLogger(PayNotifySub.class);
 
     private static AtomicInteger count      = new AtomicInteger();
-
-    @Resource
-    private AfcPaySvc           paySvc;
 
     @Resource
     private RabbitConsumer      consumer;
