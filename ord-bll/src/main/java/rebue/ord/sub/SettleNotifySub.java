@@ -7,6 +7,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.context.ApplicationListener;
 import org.springframework.context.event.ContextRefreshedEvent;
 import org.springframework.dao.DuplicateKeyException;
+import org.springframework.stereotype.Service;
 
 import rebue.afc.co.SettleNotifyCo;
 import rebue.afc.ro.SettleNotifyRo;
@@ -14,12 +15,16 @@ import rebue.ord.svc.OrdOrderSvc;
 import rebue.sbs.rabbit.RabbitConsumer;
 
 /**
- * 创建时间：2018年5月17日 下午2:59:44 项目名称：ord-bll
+ * 创建时间：2018年5月17日 下午2:59:44 
+ * 项目名称：ord-bll
  * 
  * @author daniel
  * @version 1.0
- * @since JDK 1.8 文件名称：SettleNotifySub.java 类说明： 订阅结算完成通知-修改订单状态
+ * @since JDK 1.8 
+ * 文件名称：SettleNotifySub.java 
+ * 类说明： 订阅结算完成通知-修改订单状态
  */
+@Service
 public class SettleNotifySub implements ApplicationListener<ContextRefreshedEvent> {
 
 	private final static Logger _log = LoggerFactory.getLogger(SettleNotifySub.class);
@@ -52,9 +57,10 @@ public class SettleNotifySub implements ApplicationListener<ContextRefreshedEven
 						int finishSettlementResult = ordOrderSvc.finishSettlement(msg.getSettleTime(), msg.getOrderId());
 						_log.info("结算完成通知修改订单状态的返回值为：{}", finishSettlementResult);
 						if (finishSettlementResult != 1) {
-							_log.error("结算完成通知修改订单状态时出现错误，参数为：{}", msg.toString());
-							return false;
+							_log.error("结算完成通知修改订单状态时出现错误，参数为：{}", msg);
+							return true;
 						}
+						_log.info("结算完成通知修改订单状态成功返回，订单编号为：{}", msg.getOrderId());
 						return true;
 					} catch (DuplicateKeyException e) {
 						_log.warn("收到重复的消息: " + msg, e);

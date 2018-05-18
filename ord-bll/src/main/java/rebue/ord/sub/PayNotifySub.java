@@ -23,60 +23,62 @@ import rebue.sbs.rabbit.RabbitConsumer;
  */
 @Service
 public class PayNotifySub implements ApplicationListener<ContextRefreshedEvent> {
-    private final static Logger _log = LoggerFactory.getLogger(PayNotifySub.class);
+	private final static Logger _log = LoggerFactory.getLogger(PayNotifySub.class);
 
-    private static AtomicInteger count      = new AtomicInteger();
+	private static AtomicInteger count = new AtomicInteger();
 
-    @Resource
-    private RabbitConsumer      consumer;
+	@Resource
+	private RabbitConsumer consumer;
 
-    @Resource
-    private Mapper              dozerMapper;
-    
-    @Resource
-    private OrdOrderSvc           ordOrderSvc;
+	@Resource
+	private Mapper dozerMapper;
 
-    @Override
-    public void onApplicationEvent(ContextRefreshedEvent event) {
-        // 防止里面的代码被运行两次
-    	  if (!(event.getApplicationContext() instanceof AnnotationConfigServletWebServerApplicationContext))
-              return;
-          if (count.incrementAndGet() > 1)
-              return;
+	@Resource
+	private OrdOrderSvc ordOrderSvc;
 
-        _log.info("订阅支付完成的通知");
-        consumer.bind(PayNotifyCo.PAY_NOTIFY_EXCHANGE_NAME, PayNotifyCo.PAY_NOTIFY_QUEUE_NAME, PayNotifyRo.class, (ro) -> {
-            _log.info("收到支付完成的通知: {}", ro);
-            PayNotifyRo msg = dozerMapper.map(ro, PayNotifyRo.class);
-            return handlePayNotify(msg);
-        });
-    }
+	@Override
+	public void onApplicationEvent(ContextRefreshedEvent event) {
+		// 防止里面的代码被运行两次
+		if (!(event.getApplicationContext() instanceof AnnotationConfigServletWebServerApplicationContext))
+			return;
+		if (count.incrementAndGet() > 1)
+			return;
 
-    /**
-     * 处理支付完成的通知
-     */
-    private boolean handlePayNotify(PayNotifyRo msg) {
-        try {
-        	long orderCode = Long.parseLong(msg.getOrderId());
-        	byte orderState = (byte)2;
-        	int result = ordOrderSvc.modifyOrderStateByOderCode(orderCode,orderState);
-            if(result>0) {
-            	_log.info("修改订单状态成功！");
-            	return true;
-            }else if (result==0) {
-            	_log.info("订单不存在！");
-                return true;
-            }else {
-            	_log.info("修改订单状态失败！");
-            	return false;
-            }
-       
-        } catch (DuplicateKeyException e) {
-            _log.warn("收到重复的消息: " + msg, e);
-            return true;
-        } catch (Exception e) {
-            _log.error("处理支付完成通知出现异常", e);
-            return false;
-        }
-    }
+		_log.info("订阅支付完成的通知");
+		consumer.bind(PayNotifyCo.PAY_NOTIFY_EXCHANGE_NAME, PayNotifyCo.PAY_NOTIFY_QUEUE_NAME, PayNotifyRo.class,
+				(ro) -> {
+					_log.info("收到支付完成的通知: {}", ro);
+					PayNotifyRo msg = dozerMapper.map(ro, PayNotifyRo.class);
+					return handlePayNotify(msg);
+				});
+	}
+
+	/**
+	 * 处理支付完成的通知
+	 */
+	private boolean handlePayNotify(PayNotifyRo msg) {
+		try {
+			_log.info("v支付订单支付完成通知修改订单信息的参数为：", msg);
+			// 订单支付
+			int result = ordOrderSvc.orderPay(msg.getOrderId(), msg.getPayTime());
+			_log.info("v支付订单支付完成通知修改订单信息的返回值为：{}", result);
+			if (result > 0) {
+				_log.info("修改订单状态成功！");
+				return true;
+			} else if (result == 0) {
+				_log.info("订单不存在！");
+				return true;
+			} else {
+				_log.info("修改订单状态失败！");
+				return false;
+			}
+
+		} catch (DuplicateKeyException e) {
+			_log.warn("收到重复的消息: " + msg, e);
+			return true;
+		} catch (Exception e) {
+			_log.error("处理支付完成通知出现异常", e);
+			return false;
+		}
+	}
 }

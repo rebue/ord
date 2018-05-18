@@ -64,7 +64,7 @@ public class OrdAddrSvcImpl
 	@Transactional(readOnly = false, propagation = Propagation.REQUIRED)
 	public Map<String, Object> updateDef(OrdAddrMo mo) {
 		Map<String, Object> resultMap = new HashMap<String, Object>();
-		_log.info("修改用户默认收货地址的参数为：{}", mo.toString());
+		_log.info("修改用户默认收货地址的参数为：{}", mo);
 		List<OrdAddrMo> list = _mapper.selectSelective(mo);
 		long newId = mo.getId();
 		boolean isDef = mo.getIsDef();
@@ -107,7 +107,7 @@ public class OrdAddrSvcImpl
 			if (list.size() != 0) {
 				mo.setId(list.get(0).getId());
 				mo.setIsDef(false);
-				_log.info("修改默认收货地址的参数为：{}", mo.toString());
+				_log.info("修改默认收货地址的参数为：{}", mo);
 				int result = _mapper.updateByPrimaryKeySelective(mo);
 				if (result < 1) {
 					_log.error("{}修改原默认收货地址失败", mo.getUserId());
@@ -119,7 +119,7 @@ public class OrdAddrSvcImpl
 		mo.setOpTime(date);
 		mo.setId(newId);
 		mo.setIsDef(newisDef);
-		_log.info("修改用户收货地址的参数为：{}", mo.toString());
+		_log.info("修改用户收货地址的参数为：{}", mo);
 		int result = _mapper.updateByPrimaryKeySelective(mo);
 		if (result > 0) {
 			_log.info("{}修改用户收货地址成功", mo.getUserId());

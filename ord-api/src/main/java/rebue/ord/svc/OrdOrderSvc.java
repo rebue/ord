@@ -151,4 +151,15 @@ public interface OrdOrderSvc extends MybatisBaseSvc<OrdOrderMo, java.lang.Long> 
 	 */
 	int finishSettlement(Date closeTime, String orderCode);
 
+	/**
+	 * 订单支付
+	 * Title: orderPay
+	 * Description: 
+	 * @param orderCode
+	 * @param payTime
+	 * @return
+	 * @date 2018年5月18日 上午11:21:01
+	 */
+	int orderPay(String orderCode, Date payTime);
+
 }

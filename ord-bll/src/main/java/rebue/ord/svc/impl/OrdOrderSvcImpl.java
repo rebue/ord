@@ -159,7 +159,7 @@ public class OrdOrderSvcImpl extends MybatisBaseSvcImpl<OrdOrderMo, java.lang.Lo
 		OrdAddrMo addrMo = new OrdAddrMo();
 		addrMo.setId(orderList.get(0).getAddress());
 		addrMo.setUserId(orderList.get(0).getUserId());
-		_log.info("获取用户收货地址信息的参数为：{}", addrMo.toString());
+		_log.info("获取用户收货地址信息的参数为：{}", addrMo);
 		List<OrdAddrMo> addrList = ordAddrSvc.list(addrMo);
 		_log.info("根据收货地址编号和用户编号获取用户收货地址信息的返回值为：{}", addrList.toString());
 		if (addrList.size() == 0) {
@@ -235,7 +235,7 @@ public class OrdOrderSvcImpl extends MybatisBaseSvcImpl<OrdOrderMo, java.lang.Lo
 			detailMo.setReturnState((byte) 0);
 			detailMo.setCashbackTotal(
 					new BigDecimal(String.valueOf(buyCount)).multiply(orderList.get(i).getCashbackAmount()));
-			_log.info("添加订单详情的参数为：{}", detailMo.toString());
+			_log.info("添加订单详情的参数为：{}", detailMo);
 			int intserOrderDetailresult = ordOrderDetailSvc.add(detailMo);
 			_log.info("添加订单详情的返回值为：{}", intserOrderDetailresult);
 			if (intserOrderDetailresult < 1) {
@@ -399,7 +399,7 @@ public class OrdOrderSvcImpl extends MybatisBaseSvcImpl<OrdOrderMo, java.lang.Lo
 		_log.info("查询并修改上线规格信息的参数为：{}", String.valueOf(orderSpecList));
 		// 查询并修改上线规格信息
 		ModifyOnlineSpecInfoRo specMap = onlOnlineSpecSvc.modifyOnlineSpecInfo(orderSpecList);
-		_log.info("查询并修改上线规格信息的返回值为：{}", specMap.toString());
+		_log.info("查询并修改上线规格信息的返回值为：{}", specMap);
 		int specResult = specMap.getResult().getCode();
 		if (specResult < 1) {
 			_log.info("取消订单时出现修改上线规格信息出错，返回值为：{}", specResult);
@@ -412,7 +412,7 @@ public class OrdOrderSvcImpl extends MybatisBaseSvcImpl<OrdOrderMo, java.lang.Lo
 
 		// ==========================================用户取消订单并修改状态开始=================================
 		mo.setCancelTime(date);
-		_log.info("取消订单并修改状态的参数为：", mo.toString());
+		_log.info("取消订单并修改状态的参数为：", mo);
 		int updateResult = _mapper.cancellationOrderUpdateOrderState(mo);
 		_log.info("取消订单并修改状态的返回值为：{}", updateResult);
 		if (updateResult < 1) {
@@ -437,7 +437,7 @@ public class OrdOrderSvcImpl extends MybatisBaseSvcImpl<OrdOrderMo, java.lang.Lo
 	@Transactional(readOnly = false, propagation = Propagation.REQUIRED)
 	public ModifyOrderRealMoneyRo modifyOrderRealMoney(OrdOrderMo mo) {
 		ModifyOrderRealMoneyRo modifyOrderRealMoneyRo = new ModifyOrderRealMoneyRo();
-		_log.info("修改订单实际金额的参数为：{}", mo.toString());
+		_log.info("修改订单实际金额的参数为：{}", mo);
 		int result = _mapper.updateOrderRealMoney(mo);
 		_log.info("修改订单实际金额的返回值为：{}", result);
 		if (result < 1) {
@@ -461,7 +461,7 @@ public class OrdOrderSvcImpl extends MybatisBaseSvcImpl<OrdOrderMo, java.lang.Lo
 	@Transactional(readOnly = false, propagation = Propagation.REQUIRED)
 	public SetUpExpressCompanyRo setUpExpressCompany(OrdOrderMo mo) {
 		SetUpExpressCompanyRo expressCompanyRo = new SetUpExpressCompanyRo();
-		_log.info("设置快递公司的参数为：{}", mo.toString());
+		_log.info("设置快递公司的参数为：{}", mo);
 		int result = _mapper.setUpExpressCompany(mo);
 		_log.info("设置快递公司的返回值为：{}", result);
 		if (result < 1) {
@@ -527,7 +527,7 @@ public class OrdOrderSvcImpl extends MybatisBaseSvcImpl<OrdOrderMo, java.lang.Lo
 		_log.info("查询并修改上线规格信息的参数为：{}", String.valueOf(orderSpecList));
 		// 查询并修改上线规格信息
 		ModifyOnlineSpecInfoRo specMap = onlOnlineSpecSvc.modifyOnlineSpecInfo(orderSpecList);
-		_log.info("查询并修改上线规格信息的返回值为：{}", specMap.toString());
+		_log.info("查询并修改上线规格信息的返回值为：{}", specMap);
 		int specResult = specMap.getResult().getCode();
 		if (specResult < 1) {
 			_log.info("取消订单时出现修改上线规格信息出错，返回值为：{}", specResult);
@@ -561,7 +561,7 @@ public class OrdOrderSvcImpl extends MybatisBaseSvcImpl<OrdOrderMo, java.lang.Lo
 		ShipmentConfirmationRo confirmationRo = new ShipmentConfirmationRo();
 		Date date = new Date();
 		mo.setSendTime(date);
-		_log.info("确认发货并修改订单状态的参数为：{}", mo.toString());
+		_log.info("确认发货并修改订单状态的参数为：{}", mo);
 		int result = _mapper.shipmentConfirmation(mo);
 		_log.info("确认发货并修改订单状态的返回值为：{}", result);
 		if (result < 1) {
@@ -668,11 +668,12 @@ public class OrdOrderSvcImpl extends MybatisBaseSvcImpl<OrdOrderMo, java.lang.Lo
 		}
 
 		Date date = new Date();
+		_log.info("订单签收的时间为：{}", date);
 		Calendar calendar = Calendar.getInstance();
 		calendar.setTime(date);
 		calendar.add(Calendar.MINUTE, settleBuyerCashbackTime);
 		Date buyerCashbackDate = calendar.getTime();
-		
+		_log.info("订单签收的执行返款的时间为：{}", buyerCashbackDate);
 		AddSettleTasksTo settleTasksTo = new AddSettleTasksTo();
 		settleTasksTo.setOrderId(orderCode);
 		settleTasksTo.setBuyerAccountId(userId);
@@ -687,7 +688,7 @@ public class OrdOrderSvcImpl extends MybatisBaseSvcImpl<OrdOrderMo, java.lang.Lo
 			settleTasksDetailTo.setSettleBuyerCashbackAmount(ordOrderDetailMo.getCashbackTotal());
 			settleTasksDetailTo.setSettleBuyerCashbackTitle("大卖网络-用户返款");
 			settleTasksDetailTo.setSettleBuyerCashbackDetail(ordOrderDetailMo.getOnlineTitle());
-			_log.info("订单签收添加结算的参数为：{}", settleTasksTo.toString());
+			_log.info("订单签收添加结算的参数为：{}", settleTasksTo);
 			addSettleTasksDetailList.add(settleTasksDetailTo);
 		}
 		settleTasksTo.setDetails(addSettleTasksDetailList);
@@ -695,7 +696,7 @@ public class OrdOrderSvcImpl extends MybatisBaseSvcImpl<OrdOrderMo, java.lang.Lo
 		
 		// 添加结算
 		AddSettleTasksRo addSettleTasksRo = afcSettleTaskSvc.addSettleTasks(settleTasksTo);
-		_log.info("订单签收添加结算的返回值为：{}", addSettleTasksRo.toString());
+		_log.info("订单签收添加结算的返回值为：{}", addSettleTasksRo);
 		if (addSettleTasksRo.getResult().getCode() != 1) {
 			_log.error("订单签收添加结算时出现错误，订单编号为：{}", orderCode);
 			orderSignInRo.setResult(OrderSignInDic.ADD_SETTLEMENT_ERROR);
@@ -707,7 +708,8 @@ public class OrdOrderSvcImpl extends MybatisBaseSvcImpl<OrdOrderMo, java.lang.Lo
 		orderMo.setOrderCode(orderCode);
 		orderMo.setUserId(userId);
 		orderMo.setReceivedTime(date);
-		_log.info("订单签收的参数为：{}", orderMo.toString());
+		orderMo.setReceivedOpId(userId);
+		_log.info("订单签收的参数为：{}", orderMo);
 		int signInResult = _mapper.orderSignIn(orderMo);
 		_log.info("订单签收的返回值为：{}", signInResult);
 		if (signInResult < 1) {
@@ -794,5 +796,21 @@ public class OrdOrderSvcImpl extends MybatisBaseSvcImpl<OrdOrderMo, java.lang.Lo
 	public int finishSettlement(Date closeTime, String orderCode) {
 		_log.info("结算完成的参数为：{}，{}", closeTime, orderCode);
 		return _mapper.finishSettlement(closeTime, orderCode);
+	}
+	
+	/**
+	 * 订单支付
+	 * Title: orderPay
+	 * Description: 
+	 * @param orderCode
+	 * @param payTime
+	 * @return
+	 * @date 2018年5月18日 上午11:20:37
+	 */
+	@Override
+	@Transactional(readOnly = false, propagation = Propagation.REQUIRED)
+	public int orderPay(String orderCode, Date payTime) {
+		_log.info("订单支付的参数为：{}，{}", orderCode, payTime);
+		return _mapper.orderPay(orderCode, payTime);
 	}
 }
