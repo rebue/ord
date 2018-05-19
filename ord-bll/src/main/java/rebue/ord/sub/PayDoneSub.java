@@ -1,7 +1,5 @@
 package rebue.ord.sub;
 
-import java.util.concurrent.atomic.AtomicInteger;
-
 import javax.annotation.Resource;
 
 import org.dozer.Mapper;
@@ -13,8 +11,8 @@ import org.springframework.context.event.ContextRefreshedEvent;
 import org.springframework.dao.DuplicateKeyException;
 import org.springframework.stereotype.Service;
 
-import rebue.afc.co.PayNotifyCo;
-import rebue.afc.ro.PayNotifyRo;
+import rebue.afc.co.AfcExchangeCo;
+import rebue.afc.msg.PayDoneMsg;
 import rebue.ord.svc.OrdOrderSvc;
 import rebue.sbs.rabbit.RabbitConsumer;
 
@@ -22,10 +20,13 @@ import rebue.sbs.rabbit.RabbitConsumer;
  * 订阅支付完成的通知修改订单状态
  */
 @Service
-public class PayNotifySub implements ApplicationListener<ContextRefreshedEvent> {
-	private final static Logger _log = LoggerFactory.getLogger(PayNotifySub.class);
+public class PayDoneSub implements ApplicationListener<ContextRefreshedEvent> {
+	private final static Logger _log = LoggerFactory.getLogger(PayDoneSub.class);
 
-	private static AtomicInteger count = new AtomicInteger();
+	/**
+	 * 处理V支付完成通知的队列
+	 */
+	private final static String PAY_DONE_QUEUE_NAME = "rebue.ord.pay.done.queue";
 
 	@Resource
 	private RabbitConsumer consumer;
@@ -41,22 +42,18 @@ public class PayNotifySub implements ApplicationListener<ContextRefreshedEvent> 
 		// 防止里面的代码被运行两次
 		if (!(event.getApplicationContext() instanceof AnnotationConfigServletWebServerApplicationContext))
 			return;
-		if (count.incrementAndGet() > 1)
-			return;
 
 		_log.info("订阅支付完成的通知");
-		consumer.bind(PayNotifyCo.PAY_NOTIFY_EXCHANGE_NAME, PayNotifyCo.PAY_NOTIFY_QUEUE_NAME, PayNotifyRo.class,
-				(ro) -> {
-					_log.info("收到支付完成的通知: {}", ro);
-					PayNotifyRo msg = dozerMapper.map(ro, PayNotifyRo.class);
-					return handlePayNotify(msg);
-				});
+		consumer.bind(AfcExchangeCo.PAY_DONE_EXCHANGE_NAME, PAY_DONE_QUEUE_NAME, PayDoneMsg.class, (msg) -> {
+			_log.info("收到支付完成的通知: {}", msg);
+			return handlePayNotify(msg);
+		});
 	}
 
 	/**
 	 * 处理支付完成的通知
 	 */
-	private boolean handlePayNotify(PayNotifyRo msg) {
+	private boolean handlePayNotify(PayDoneMsg msg) {
 		try {
 			_log.info("v支付订单支付完成通知修改订单信息的参数为：", msg);
 			// 订单支付

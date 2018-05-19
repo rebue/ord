@@ -764,7 +764,7 @@ public class OrdOrderSvcImpl extends MybatisBaseSvcImpl<OrdOrderMo, java.lang.Lo
 	public OrdOrderMo selectReturnAmountByOrderCode(String orderCode) {
 		_log.info("根据订单编号查询退货金额的参数为：{}", orderCode);
 		OrdOrderMo orderMo = _mapper.selectReturnAmountByOrderCode(orderCode);
-		_log.info("根据订单编号查询退货金额的返回值为：{}", orderMo.toString());
+		_log.info("根据订单编号查询退货金额的返回值为：{}", orderMo);
 		return orderMo;
 	}
 

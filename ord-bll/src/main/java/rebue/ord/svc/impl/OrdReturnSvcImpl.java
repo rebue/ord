@@ -15,6 +15,9 @@ import org.springframework.transaction.annotation.Transactional;
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
 
+import rebue.afc.ro.RefundRo;
+import rebue.afc.svr.feign.AfcRefundSvc;
+import rebue.afc.to.RefundTo;
 import rebue.ord.dic.AddReturnDic;
 import rebue.ord.dic.AgreeToARefundDic;
 import rebue.ord.dic.AgreeToReturnDic;
@@ -68,9 +71,8 @@ public class OrdReturnSvcImpl extends MybatisBaseSvcImpl<OrdReturnMo, java.lang.
 	@Resource
 	private OrdOrderDetailSvc ordOrderDetailSvc;
 
-	/*
-	 * @Resource private AfcReturnGoodsSvc afcReturnGoodsSvr;
-	 */
+	@Resource
+	private AfcRefundSvc afcRefundSvc;
 
 	/**
 	 * 添加用户退货信息 Title: addEx Description: 1、首先查询订单信息是是否存在和订单的状态 2、查询订单详情是否存在和是否可以退货
@@ -619,6 +621,13 @@ public class OrdReturnSvcImpl extends MybatisBaseSvcImpl<OrdReturnMo, java.lang.
 			agreeToARefundRo.setMsg("该订单未支付或已取消");
 			return agreeToARefundRo;
 		}
+		
+		// 退款至用户的返现金 
+		BigDecimal returnCashbackToBuyer = returnAmount2;
+		// 如果已签收待结算则扣减返现金
+		if (orderList.get(0).getOrderState() <= 3 ) {
+			returnCashbackToBuyer = returnAmount2.subtract(subtractCashback).setScale(4, BigDecimal.ROUND_HALF_UP);
+		}
 
 		OrdOrderDetailMo detailMo = new OrdOrderDetailMo();
 		detailMo.setOrderId(orderId);
@@ -736,6 +745,27 @@ public class OrdReturnSvcImpl extends MybatisBaseSvcImpl<OrdReturnMo, java.lang.
 			_log.error("同意退款修改退货信息时出现错误，退货编号为：{}", returnCode);
 			throw new RuntimeException("修改退货信息出错");
 		}
+		
+		RefundTo refundTo = new RefundTo();
+		refundTo.setOrderId(String.valueOf(orderId));
+		refundTo.setOrderDetailId(String.valueOf(orderDetailId));
+		refundTo.setBuyerAccountId(returnList.get(0).getApplicationOpId());
+		refundTo.setTradeTitle("用户退货-退款");
+		refundTo.setTradeDetail(detailList.get(0).getOnlineTitle());
+		refundTo.setReturnBalanceToBuyer(returnAmount1);
+		refundTo.setReturnCashbackToBuyer(returnCashbackToBuyer);
+		refundTo.setOpId(refundOpId);
+		refundTo.setMac(to.getMac());
+		refundTo.setIp(to.getIp());
+		
+		_log.info("已收到货并退款执行退款的参数为：{}", refundTo);
+		// 退货退款
+		RefundRo refundResult = afcRefundSvc.refund(refundTo);
+		_log.info("已收到货并退款执行退款的返回值为：{}", refundResult);
+		if (refundResult.getResult().getCode() != 1) {
+			_log.error("已收到货并退款执行退款出错，退货编号为：{}", returnCode);
+			throw new RuntimeException("v支付出错，退款失败");
+		}
 		agreeToARefundRo.setResult(AgreeToARefundDic.SUCCESS);
 		agreeToARefundRo.setMsg("退款成功");
 		return agreeToARefundRo;
@@ -810,6 +840,12 @@ public class OrdReturnSvcImpl extends MybatisBaseSvcImpl<OrdReturnMo, java.lang.
 			receivedAndRefundedRo.setMsg("该订单已取消或未支付");
 			return receivedAndRefundedRo;
 		}
+		
+		// 退到返现金的金额
+		BigDecimal returnCashbackToBuyer = returnList.get(0).getReturnAmount2();
+		if (orderList.get(0).getOrderState() <= 3) {
+			returnCashbackToBuyer = returnList.get(0).getReturnAmount2().subtract(returnList.get(0).getSubtractCashback()).setScale(4, BigDecimal.ROUND_HALF_UP);
+		}
 
 		// 订单详情ID
 		long orderDetailId = returnList.get(0).getOrderDetailId();
@@ -872,7 +908,7 @@ public class OrdReturnSvcImpl extends MybatisBaseSvcImpl<OrdReturnMo, java.lang.
 		returnMo.setReceiveOpId(opId);
 		returnMo.setReceiveTime(date);
 		returnMo.setRefundState((byte) 2);
-		_log.info("已收到货并退款确认收到货的参数为：{}", returnMo.toString());
+		_log.info("已收到货并退款确认收到货的参数为：{}", returnMo);
 		// 确认收到货
 		int confirmReceiptOfGoodsResult = _mapper.confirmReceiptOfGoods(returnMo);
 		_log.info("已收到货并退款确认收到货的返回值为：{}", confirmReceiptOfGoodsResult);
@@ -880,7 +916,28 @@ public class OrdReturnSvcImpl extends MybatisBaseSvcImpl<OrdReturnMo, java.lang.
 			_log.error("已收到货并退款确认收到货时出现错误，退货编号为：{}", returnCode);
 			throw new RuntimeException("确认收到货出错");
 		}
-		_log.info("已收到货并退款退款并扣减返现金额的返回值为：{}", receivedAndRefundedRo.toString());
+		_log.info("已收到货并退款退款并扣减返现金额的返回值为：{}", receivedAndRefundedRo);
+		
+		RefundTo refundTo = new RefundTo();
+		refundTo.setOrderId(String.valueOf(orderId));
+		refundTo.setOrderDetailId(String.valueOf(orderDetailId));
+		refundTo.setBuyerAccountId(returnList.get(0).getApplicationOpId());
+		refundTo.setTradeTitle("用户退货-退款");
+		refundTo.setTradeDetail(detailList.get(0).getOnlineTitle());
+		refundTo.setReturnBalanceToBuyer(returnList.get(0).getReturnAmount1());
+		refundTo.setReturnCashbackToBuyer(returnCashbackToBuyer);
+		refundTo.setOpId(opId);
+		refundTo.setMac(mac);
+		refundTo.setIp(ip);
+		
+		_log.info("已收到货并退款执行退款的参数为：{}", refundTo);
+		// 退货退款
+		RefundRo refundResult = afcRefundSvc.refund(refundTo);
+		_log.info("已收到货并退款执行退款的返回值为：{}", refundResult);
+		if (refundResult.getResult().getCode() != 1) {
+			_log.error("已收到货并退款执行退款出错，退货编号为：{}", returnCode);
+			throw new RuntimeException("v支付出错，退款失败");
+		}
 		receivedAndRefundedRo.setResult(ReceivedAndRefundedDic.SUCCESS);
 		receivedAndRefundedRo.setMsg("退款成功");
 		return receivedAndRefundedRo;
