@@ -1,2 +1,7 @@
 ord:
-  settle-buyer-cashback-time: 72
+  # 执行用户返款时间（按小时计算）
+  settle-buyer-cashback-time: 2
+  # 执行取消用户订单时间（按分钟计算）
+  cancel-order-time: 60
+  # 执行用户订单签收时间（按小时计算）
+  signin-order-time: 2
