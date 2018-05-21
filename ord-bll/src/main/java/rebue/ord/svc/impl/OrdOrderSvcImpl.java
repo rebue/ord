@@ -835,4 +835,16 @@ public class OrdOrderSvcImpl extends MybatisBaseSvcImpl<OrdOrderMo, java.lang.Lo
 		return _mapper.orderPay(orderCode, payTime);
 	}
 
+	/***
+	 * 根据订单编号查询订单状态
+	 * Title: selectOrderStateByOrderCode
+	 * Description: 
+	 * @param orderCode
+	 * @return
+	 * @date 2018年5月21日 下午5:00:25
+	 */
+	@Override
+	public byte selectOrderStateByOrderCode(String orderCode) {
+		return _mapper.selectOrderStateByOrderCode(orderCode);
+	}
 }

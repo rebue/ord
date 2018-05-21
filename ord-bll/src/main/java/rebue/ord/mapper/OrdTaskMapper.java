@@ -1,7 +1,11 @@
 package rebue.ord.mapper;
 
+import java.util.Date;
 import java.util.List;
 import org.apache.ibatis.annotations.Mapper;
+import org.apache.ibatis.annotations.Param;
+import org.apache.ibatis.annotations.Update;
+
 import rebue.ord.mo.OrdTaskMo;
 import rebue.robotech.mapper.MybatisBaseMapper;
 
@@ -86,4 +90,14 @@ public interface OrdTaskMapper extends MybatisBaseMapper<OrdTaskMo, Long> {
      * @mbg.generated 2018-05-21 11:37:33
      */
     boolean existSelective(OrdTaskMo record);
+    
+    /**
+     * 执行订单签收任务
+     * Title: executeSignInOrderTask
+     * Description: 
+     * @return
+     * @date 2018年5月21日 下午2:11:18
+     */
+    @Update("update ORD_TASK set EXECUTE_STATE=#{doneState}, EXECUTE_FACT_TIME=#{executeFactTime,jdbcType=TIMESTAMP} where where ID=#{id} and EXECUTE_STATE=#{noneState}")
+    int executeSignInOrderTask(@Param("executeFactTime") Date executeFactTime, @Param("id") long id, @Param("doneState") Byte doneState, @Param("noneState") Byte noneState);
 }
