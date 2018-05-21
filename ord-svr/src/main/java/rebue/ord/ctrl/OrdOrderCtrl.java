@@ -107,7 +107,7 @@ public class OrdOrderCtrl {
 	 */
 	@PutMapping("/ord/order")
 	ModifyOrderRealMoneyRo modifyOrderRealMoney(OrdOrderMo vo) throws Exception {
-		_log.info("修改订单实际金额的参数为：{}", vo.toString());
+		_log.info("修改订单实际金额的参数为：{}", vo);
 		return svc.modifyOrderRealMoney(vo);
 	}
 
@@ -195,7 +195,7 @@ public class OrdOrderCtrl {
 	@SuppressWarnings("finally")
 	@PutMapping("/ord/order/cancel")
 	CancellationOfOrderRo cancellationOfOrder(OrdOrderMo qo) {
-		_log.info("用户取消订单的参数为：{}", qo.toString());
+		_log.info("用户取消订单的参数为：{}", qo);
 		CancellationOfOrderRo cancellationOfOrderRo = new CancellationOfOrderRo();
 		try {
 			cancellationOfOrderRo = svc.cancellationOfOrder(qo);
@@ -223,7 +223,7 @@ public class OrdOrderCtrl {
 	@SuppressWarnings("finally")
 	@PutMapping("/ord/order/canceldelivery")
 	CancelDeliveryRo cancelDelivery(OrdOrderMo qo) {
-		_log.info("用户取消订单的参数为：{}", qo.toString());
+		_log.info("用户取消订单的参数为：{}", qo);
 		CancelDeliveryRo cancelDeliveryRo = new CancelDeliveryRo();
 		try {
 			cancelDeliveryRo = svc.cancelDelivery(qo);
@@ -250,7 +250,7 @@ public class OrdOrderCtrl {
 	 */
 	@PutMapping("/ord/order/setupexpresscompany")
 	SetUpExpressCompanyRo setUpExpressCompany(OrdOrderMo qo) {
-		_log.info("设置快递公司的参数为：{}", qo.toString());
+		_log.info("设置快递公司的参数为：{}", qo);
 		return svc.setUpExpressCompany(qo);
 	}
 
@@ -264,10 +264,11 @@ public class OrdOrderCtrl {
 	@SuppressWarnings("finally")
 	@PutMapping("/ord/order/shipmentconfirmation")
 	ShipmentConfirmationRo shipmentConfirmation(OrdOrderMo qo) {
-		_log.info("确认发货的参数为：{}", qo.toString());
+		_log.info("确认发货的参数为：{}", qo);
 		ShipmentConfirmationRo confirmationRo = new ShipmentConfirmationRo();
 		try {
 			confirmationRo = svc.shipmentConfirmation(qo);
+			_log.info("确认发货的返回值为：{}", confirmationRo);
 		} catch (RuntimeException e) {
 			String msg = e.getMessage();
 			if (msg.equals("调用快递电子面单参数错误")) {

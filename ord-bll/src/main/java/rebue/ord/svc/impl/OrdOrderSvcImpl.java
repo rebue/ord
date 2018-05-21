@@ -9,6 +9,7 @@ import rebue.ord.dic.CancelDeliveryDic;
 import rebue.ord.dic.CancellationOfOrderDic;
 import rebue.ord.dic.ModifyOrderRealMoneyDic;
 import rebue.ord.dic.OrderSignInDic;
+import rebue.ord.dic.OrderStateDic;
 import rebue.ord.dic.SetUpExpressCompanyDic;
 import rebue.ord.dic.ShipmentConfirmationDic;
 import rebue.ord.dic.UsersToPlaceTheOrderDic;
@@ -205,7 +206,7 @@ public class OrdOrderSvcImpl extends MybatisBaseSvcImpl<OrdOrderMo, java.lang.Lo
 		_log.info("添加订单信息的参数为：{}", orderMo);
 		int insertOrderResult = add(orderMo);
 		_log.info("添加订单信息的返回值为：{}", insertOrderResult);
-		if (insertOrderResult < 1) {
+		if (insertOrderResult != 1) {
 			_log.error("{}添加订单信息失败", userId);
 			placeTheOrderRo.setResult(UsersToPlaceTheOrderDic.CREATE_ORDER_ERROR);
 			placeTheOrderRo.setMsg("生成订单出错");
@@ -238,23 +239,20 @@ public class OrdOrderSvcImpl extends MybatisBaseSvcImpl<OrdOrderMo, java.lang.Lo
 			_log.info("添加订单详情的参数为：{}", detailMo);
 			int intserOrderDetailresult = ordOrderDetailSvc.add(detailMo);
 			_log.info("添加订单详情的返回值为：{}", intserOrderDetailresult);
-			if (intserOrderDetailresult < 1) {
+			if (intserOrderDetailresult != 1) {
 				_log.error("{}添加订单详情失败", userId);
 				throw new RuntimeException("生成订单详情出错");
 			}
 		}
 		_log.info("删除购物车和修改上线数量的参数为：{}", String.valueOf(cartAndSpecList));
-		Map<String, Object> deleteAndUpdateMap = new HashMap<String, Object>();
-		try {
-			deleteAndUpdateMap = onlOnlineSpecSvc
-					.deleteCartAndUpdateOnlineCount(mapper.writeValueAsString(cartAndSpecList));
-		} catch (Exception e) {
-			_log.error("删除购物车和修改上线数量失败");
-			e.printStackTrace();
+		Map<String, Object> deleteAndUpdateMap = onlOnlineSpecSvc.deleteCartAndUpdateOnlineCount(mapper.writeValueAsString(cartAndSpecList));
+		if (deleteAndUpdateMap == null || deleteAndUpdateMap.size() == 0) {
+			_log.error("{}删除购物车和修改上线数量失败", userId);
+			throw new RuntimeException(String.valueOf(deleteAndUpdateMap.get("msg")));
 		}
 		_log.info("删除购物车和修改上线数量的返回值为：{}", String.valueOf(deleteAndUpdateMap));
 		int deleteAndUpdateResult = Integer.parseInt(String.valueOf(deleteAndUpdateMap.get("result")));
-		if (deleteAndUpdateResult < 1) {
+		if (deleteAndUpdateResult != 1) {
 			_log.error("{}删除购物车和修改上线数量失败", userId);
 			throw new RuntimeException(String.valueOf(deleteAndUpdateMap.get("msg")));
 		}
@@ -332,6 +330,8 @@ public class OrdOrderSvcImpl extends MybatisBaseSvcImpl<OrdOrderMo, java.lang.Lo
 					orderDetailRo.setBuyUnit(orderDetailMo.getBuyUnit());
 					orderDetailRo.setReturnState(orderDetailMo.getReturnState());
 					orderDetailRo.setGoodsQsmm(onlinePicList.get(0).getPicPath());
+					orderDetailRo.setReturnCount(orderDetailMo.getReturnCount());
+					orderDetailRo.setCashbackTotal(orderDetailMo.getCashbackTotal());
 					orderDetailRoList.add(orderDetailRo);
 				}
 				hm.put("items", orderDetailRoList);
@@ -365,7 +365,7 @@ public class OrdOrderSvcImpl extends MybatisBaseSvcImpl<OrdOrderMo, java.lang.Lo
 			cancellationOfOrderRo.setMsg("订单不存在");
 			return cancellationOfOrderRo;
 		}
-		if (orderList.get(0).getOrderState() != 1) {
+		if (orderList.get(0).getOrderState() != OrderStateDic.ALREADY_PLACE_AN_ORDER.getCode()) {
 			_log.error("由于订单：{}处于非待支付状态，{}取消订单失败", orderCode, userId);
 			cancellationOfOrderRo.setResult(CancellationOfOrderDic.CURRENT_STATE_NOT_EXIST_CANCEL);
 			cancellationOfOrderRo.setMsg("当前状态不允许取消");
@@ -401,7 +401,7 @@ public class OrdOrderSvcImpl extends MybatisBaseSvcImpl<OrdOrderMo, java.lang.Lo
 		ModifyOnlineSpecInfoRo specMap = onlOnlineSpecSvc.modifyOnlineSpecInfo(orderSpecList);
 		_log.info("查询并修改上线规格信息的返回值为：{}", specMap);
 		int specResult = specMap.getResult().getCode();
-		if (specResult < 1) {
+		if (specResult != 1) {
 			_log.info("取消订单时出现修改上线规格信息出错，返回值为：{}", specResult);
 			cancellationOfOrderRo.setResult(CancellationOfOrderDic.MODIFY_SPEC_COUNT_ERROR);
 			cancellationOfOrderRo.setMsg("修改规格数量失败");
@@ -415,7 +415,7 @@ public class OrdOrderSvcImpl extends MybatisBaseSvcImpl<OrdOrderMo, java.lang.Lo
 		_log.info("取消订单并修改状态的参数为：", mo);
 		int updateResult = _mapper.cancellationOrderUpdateOrderState(mo);
 		_log.info("取消订单并修改状态的返回值为：{}", updateResult);
-		if (updateResult < 1) {
+		if (updateResult != 1) {
 			_log.error("{}取消订单：{}失败", userId, orderCode);
 			throw new RuntimeException("修改订单状态失败");
 		}
@@ -491,13 +491,13 @@ public class OrdOrderSvcImpl extends MybatisBaseSvcImpl<OrdOrderMo, java.lang.Lo
 		List<OrdOrderMo> orderList = _mapper.selectOrderInfo(map);
 		_log.info("用户查询订单信息的返回值为：{}", String.valueOf(orderList));
 		if (orderList.size() == 0) {
-			_log.error("由于订单：{}不存在，{}取消订单失败", orderCode, userId);
+			_log.error("由于订单：{}不存在，{}取消发货失败", orderCode, userId);
 			cancelDeliveryRo.setResult(CancelDeliveryDic.ORDER_NOT_EXIST);
 			cancelDeliveryRo.setMsg("订单不存在");
 			return cancelDeliveryRo;
 		}
-		if (orderList.get(0).getOrderState() != 2) {
-			_log.error("由于订单：{}处于非待发货状态，{}取消订单失败", orderCode, userId);
+		if (orderList.get(0).getOrderState() != OrderStateDic.ALREADY_PAY.getCode()) {
+			_log.error("由于订单：{}处于非待发货状态，{}取消发货失败", orderCode, userId);
 			cancelDeliveryRo.setResult(CancelDeliveryDic.CURRENT_STATE_NOT_EXIST_CANCEL);
 			cancelDeliveryRo.setMsg("当前状态不允许取消");
 			return cancelDeliveryRo;
@@ -507,7 +507,7 @@ public class OrdOrderSvcImpl extends MybatisBaseSvcImpl<OrdOrderMo, java.lang.Lo
 		List<OrdOrderDetailMo> orderDetailList = ordOrderDetailSvc.list(detailMo);
 		_log.info("查询订单详情的返回值为：{}", String.valueOf(orderDetailList));
 		if (orderDetailList.size() == 0) {
-			_log.error("由于订单：{}不存在，{}取消订单失败", orderCode, userId);
+			_log.error("由于订单：{}不存在，{}取消发货失败", orderCode, userId);
 			cancelDeliveryRo.setResult(CancelDeliveryDic.ORDER_NOT_EXIST);
 			cancelDeliveryRo.setMsg("订单不存在");
 			return cancelDeliveryRo;
@@ -538,11 +538,11 @@ public class OrdOrderSvcImpl extends MybatisBaseSvcImpl<OrdOrderMo, java.lang.Lo
 		Date date = new Date();
 		mo.setCancelTime(date);
 		int updateResult = _mapper.cancelDeliveryUpdateOrderState(mo);
-		if (updateResult < 1) {
-			_log.error("{}取消订单：{}失败", userId, orderCode);
+		if (updateResult != 1) {
+			_log.error("{}取消发货：{}失败", userId, orderCode);
 			throw new RuntimeException("修改订单状态失败");
 		}
-		_log.info("{}取消订单：{}成功", userId, orderCode);
+		_log.info("{}发货订单：{}成功", userId, orderCode);
 		cancelDeliveryRo.setResult(CancelDeliveryDic.SUCCESS);
 		cancelDeliveryRo.setMsg("取消发货成功");
 		return cancelDeliveryRo;
@@ -564,7 +564,7 @@ public class OrdOrderSvcImpl extends MybatisBaseSvcImpl<OrdOrderMo, java.lang.Lo
 		_log.info("确认发货并修改订单状态的参数为：{}", mo);
 		int result = _mapper.shipmentConfirmation(mo);
 		_log.info("确认发货并修改订单状态的返回值为：{}", result);
-		if (result < 1) {
+		if (result != 1) {
 			_log.error("确认发货出现异常，返回值为：{}", result);
 			confirmationRo.setResult(ShipmentConfirmationDic.ERROR);
 			confirmationRo.setMsg("确认发货失败");
@@ -647,7 +647,7 @@ public class OrdOrderSvcImpl extends MybatisBaseSvcImpl<OrdOrderMo, java.lang.Lo
 			orderSignInRo.setMsg("订单不存在");
 			return orderSignInRo;
 		}
-		if (orderList.get(0).getOrderState() != 3) {
+		if (orderList.get(0).getOrderState() != OrderStateDic.ALREADY_DELIVER_GOODS.getCode()) {
 			_log.error("由于订单：{}处于非待签收状态，{}签收订单失败", orderCode, userId);
 			orderSignInRo.setResult(OrderSignInDic.CURRENT_STATE_NOT_EXIST_CANCEL);
 			orderSignInRo.setMsg("当前状态不允许签收");

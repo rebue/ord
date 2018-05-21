@@ -38,8 +38,14 @@ public class OrderDetailRo {
 	/** 返现金额 **/
 	private BigDecimal cashbackAmount;
 
+	/** 返现总额 **/
+	private BigDecimal cashbackTotal;
+
 	/** 购买单位 **/
 	private String buyUnit;
+
+	/** 退货数量 **/
+	private Integer returnCount;
 
 	/** 退货状态（0：未退货 1：退货中 2：已退货） **/
 	private Byte returnState;
@@ -51,22 +57,12 @@ public class OrderDetailRo {
 		super();
 	}
 
-	public OrderDetailRo(Long id, Long orderId, Long onlineId, Long produceId, String onlineTitle, String specName,
-			Integer buyCount, BigDecimal buyPrice, BigDecimal cashbackAmount, String buyUnit, Byte returnState,
-			String goodsQsmm) {
-		super();
-		this.id = id;
-		this.orderId = orderId;
-		this.onlineId = onlineId;
-		this.produceId = produceId;
-		this.onlineTitle = onlineTitle;
-		this.specName = specName;
-		this.buyCount = buyCount;
-		this.buyPrice = buyPrice;
-		this.cashbackAmount = cashbackAmount;
-		this.buyUnit = buyUnit;
-		this.returnState = returnState;
-		this.goodsQsmm = goodsQsmm;
+	public Integer getReturnCount() {
+		return returnCount;
+	}
+
+	public void setReturnCount(Integer returnCount) {
+		this.returnCount = returnCount;
 	}
 
 	public Long getId() {
@@ -141,6 +137,14 @@ public class OrderDetailRo {
 		this.cashbackAmount = cashbackAmount;
 	}
 
+	public BigDecimal getCashbackTotal() {
+		return cashbackTotal;
+	}
+
+	public void setCashbackTotal(BigDecimal cashbackTotal) {
+		this.cashbackTotal = cashbackTotal;
+	}
+
 	public String getBuyUnit() {
 		return buyUnit;
 	}
@@ -169,8 +173,9 @@ public class OrderDetailRo {
 	public String toString() {
 		return "OrderDetailRo [id=" + id + ", orderId=" + orderId + ", onlineId=" + onlineId + ", produceId="
 				+ produceId + ", onlineTitle=" + onlineTitle + ", specName=" + specName + ", buyCount=" + buyCount
-				+ ", buyPrice=" + buyPrice + ", cashbackAmount=" + cashbackAmount + ", buyUnit=" + buyUnit
-				+ ", returnState=" + returnState + ", goodsQsmm=" + goodsQsmm + "]";
+				+ ", buyPrice=" + buyPrice + ", cashbackAmount=" + cashbackAmount + ", cashbackTotal=" + cashbackTotal
+				+ ", buyUnit=" + buyUnit + ", returnCount=" + returnCount + ", returnState=" + returnState
+				+ ", goodsQsmm=" + goodsQsmm + "]";
 	}
 
 }
