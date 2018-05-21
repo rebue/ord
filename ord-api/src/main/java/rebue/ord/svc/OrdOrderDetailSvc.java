@@ -1,15 +1,16 @@
 package rebue.ord.svc;
 
 import rebue.robotech.svc.MybatisBaseSvc;
-
 import rebue.ord.mo.OrdOrderDetailMo;
 
-public interface OrdOrderDetailSvc extends MybatisBaseSvc<OrdOrderDetailMo, java.lang.Long>{
+public interface OrdOrderDetailSvc
+		extends
+			MybatisBaseSvc<OrdOrderDetailMo, java.lang.Long> {
 
 	/**
-	 * 根据订单编号、详情ID修改退货数量、返现总额
-	 * Title: modifyReturnCountAndCashBackTotal
-	 * Description: 
+	 * 根据订单编号、详情ID修改退货数量、返现总额 Title: modifyReturnCountAndCashBackTotal
+	 * Description:
+	 * 
 	 * @param orderId
 	 * @param orderDetailId
 	 * @param returnCount
@@ -20,9 +21,8 @@ public interface OrdOrderDetailSvc extends MybatisBaseSvc<OrdOrderDetailMo, java
 	int modifyReturnCountAndCashBackTotal(OrdOrderDetailMo mo);
 
 	/**
-	 * 根据详情ID修改退货状态
-	 * Title: modifyReturnStateById
-	 * Description: 
+	 * 根据详情ID修改退货状态 Title: modifyReturnStateById Description:
+	 * 
 	 * @param id
 	 * @param returnState
 	 * @return

@@ -10,7 +10,6 @@ import rebue.ord.ro.SetUpExpressCompanyRo;
 import rebue.ord.ro.ShipmentConfirmationRo;
 import rebue.ord.ro.UsersToPlaceTheOrderRo;
 import rebue.ord.to.OrderSignInTo;
-
 import java.beans.IntrospectionException;
 import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
@@ -47,8 +46,10 @@ public interface OrdOrderSvc extends MybatisBaseSvc<OrdOrderMo, java.lang.Long> 
 	 * @throws IllegalAccessException
 	 * @date 2018年4月9日 下午4:48:40
 	 */
-	List<Map<String, Object>> selectOrderInfo(Map<String, Object> map) throws ParseException, IntrospectionException,
-			IllegalAccessException, IllegalArgumentException, InvocationTargetException;
+	List<Map<String, Object>> selectOrderInfo(Map<String, Object> map)
+			throws ParseException, IntrospectionException,
+			IllegalAccessException, IllegalArgumentException,
+			InvocationTargetException;
 
 	/**
 	 * 取消订单 Title: cancellationOfOrder Description:
@@ -141,9 +142,8 @@ public interface OrdOrderSvc extends MybatisBaseSvc<OrdOrderMo, java.lang.Long> 
 	int updateByOrderCode(OrdOrderMo record);
 
 	/**
-	 * 结算完成
-	 * Title: finishSettlement
-	 * Description: 
+	 * 结算完成 Title: finishSettlement Description:
+	 * 
 	 * @param closeTime
 	 * @param orderCode
 	 * @return
@@ -152,9 +152,8 @@ public interface OrdOrderSvc extends MybatisBaseSvc<OrdOrderMo, java.lang.Long> 
 	int finishSettlement(Date closeTime, String orderCode);
 
 	/**
-	 * 订单支付
-	 * Title: orderPay
-	 * Description: 
+	 * 订单支付 Title: orderPay Description:
+	 * 
 	 * @param orderCode
 	 * @param payTime
 	 * @return
