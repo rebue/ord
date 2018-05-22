@@ -8,6 +8,13 @@ import rebue.ord.ro.AgreeToReturnRo;
 import rebue.ord.ro.OrdReturnRo;
 import rebue.ord.ro.ReceivedAndRefundedRo;
 import rebue.ord.ro.RejectReturnRo;
+
+import java.beans.IntrospectionException;
+import java.lang.reflect.InvocationTargetException;
+import java.text.ParseException;
+import java.util.List;
+import java.util.Map;
+
 import com.github.pagehelper.PageInfo;
 import rebue.ord.to.OrdOrderReturnTo;
 
@@ -69,5 +76,22 @@ public interface OrdReturnSvc
 	 * @date 2018年5月11日 下午3:02:40
 	 */
 	ReceivedAndRefundedRo receivedAndRefunded(OrdOrderReturnTo to);
+	
+	/**
+	 * 查询用户退货订单信息 Title: selectOrderInfo Description:
+	 * 
+	 * @param mo
+	 * @return
+	 * @throws ParseException
+	 * @throws IntrospectionException
+	 * @throws InvocationTargetException
+	 * @throws IllegalArgumentException
+	 * @throws IllegalAccessException
+	 * @date 2018年4月9日 下午4:48:40
+	 */
+	List<Map<String, Object>> selectOrderReturnInfo(Map<String, Object> map)
+			throws ParseException, IntrospectionException,
+			IllegalAccessException, IllegalArgumentException,
+			InvocationTargetException;
 
 }

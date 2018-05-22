@@ -9,10 +9,22 @@ import rebue.ord.mo.OrdReturnMo;
 import rebue.ord.svc.OrdReturnSvc;
 
 import rebue.robotech.svc.impl.MybatisBaseSvcImpl;
+
+import java.beans.BeanInfo;
+import java.beans.IntrospectionException;
+import java.beans.Introspector;
+import java.beans.PropertyDescriptor;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 import java.math.BigDecimal;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+
 import javax.annotation.Resource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -21,6 +33,7 @@ import com.github.pagehelper.PageInfo;
 import rebue.afc.ro.RefundRo;
 import rebue.afc.svr.feign.AfcRefundSvc;
 import rebue.afc.to.RefundTo;
+import rebue.onl.mo.OnlOnlinePicMo;
 import rebue.ord.dic.AddReturnDic;
 import rebue.ord.dic.AgreeToARefundDic;
 import rebue.ord.dic.AgreeToReturnDic;
@@ -34,6 +47,7 @@ import rebue.ord.ro.AddReturnRo;
 import rebue.ord.ro.AgreeToARefundRo;
 import rebue.ord.ro.AgreeToReturnRo;
 import rebue.ord.ro.OrdReturnRo;
+import rebue.ord.ro.OrderDetailRo;
 import rebue.ord.ro.ReceivedAndRefundedRo;
 import rebue.ord.ro.RejectReturnRo;
 import rebue.ord.svc.OrdOrderDetailSvc;
@@ -882,6 +896,66 @@ public class OrdReturnSvcImpl
 		receivedAndRefundedRo.setResult(ReceivedAndRefundedDic.SUCCESS);
 		receivedAndRefundedRo.setMsg("退款成功");
 		return receivedAndRefundedRo;
+	}
+
+	@Override
+	public List<Map<String, Object>> selectOrderReturnInfo(Map<String, Object> map) throws ParseException,
+			IntrospectionException, IllegalAccessException, IllegalArgumentException, InvocationTargetException {
+		// TODO Auto-generated method stub
+		List<Map<String, Object>> list = new ArrayList<Map<String, Object>>();
+		_log.info("查询用户退货订单信息的参数为：{}", map.toString());
+		OrdReturnMo mo = new OrdReturnMo();
+		mo.setApplicationState((byte) map.get("applicationState"));
+		List<OrdReturnMo> orderReturnList = _mapper.selectSelective(mo);
+		_log.info("获取到的用户退货订单信息为：{}", String.valueOf(orderReturnList));
+		SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+		if (orderReturnList.size() != 0) {
+			for (int i = 0; i < orderReturnList.size(); i++) {
+				Map<String, Object> hm = new HashMap<String, Object>();
+				String l = simpleDateFormat.format(orderReturnList.get(i).getApplicationTime());
+				Date date = simpleDateFormat.parse(l);
+				long ts = date.getTime();
+				_log.info("转换时间得到的时间戳为：{}", ts);
+				hm.put("dateline", ts / 1000);
+				hm.put("finishDate", ts / 1000 + 86400);
+				hm.put("system", System.currentTimeMillis() / 1000);
+				OrdReturnMo obj = orderReturnList.get(i);
+				BeanInfo beanInfo = Introspector.getBeanInfo(obj.getClass());
+				PropertyDescriptor[] propertyDescriptors = beanInfo.getPropertyDescriptors();
+				for (PropertyDescriptor property : propertyDescriptors) {
+					String key = property.getName();
+					if (!key.equals("class")) {
+						Method getter = property.getReadMethod();
+						Object value = getter.invoke(obj);
+						hm.put(key, value);
+					}
+				}
+				_log.info("查询用户订单信息hm里面的值为：{}", String.valueOf(hm));
+				List<OrdReturnRo> ordReturnRoList = new ArrayList<OrdReturnRo>();
+				for (OrdReturnRo ordReturnRo : ordReturnRoList) {
+					ordReturnRo.setId(mo.getId());
+					ordReturnRo.setReturnCode(mo.getReturnCode());
+					ordReturnRo.setOrderId(mo.getOrderId());
+					ordReturnRo.setOrderDetailId(mo.getOrderDetailId());
+					ordReturnRo.setReturnCount(mo.getReturnCount());
+					ordReturnRo.setReturnRental(mo.getReturnRental());
+					ordReturnRo.setReturnAmount1(mo.getReturnAmount1());
+					ordReturnRo.setReturnAmount2(mo.getReturnAmount2());
+					ordReturnRo.setReturnType(mo.getReturnType());
+					ordReturnRo.setApplicationState(mo.getApplicationState());
+					ordReturnRo.setRefundState(mo.getRefundState());
+					ordReturnRo.setReturnReason(mo.getReturnReason());
+					ordReturnRo.setApplicationOpId(mo.getApplicationOpId());
+					ordReturnRo.setCancelOpId(mo.getCancelOpId());
+					ordReturnRo.setCancelTime(mo.getCancelTime());
+					ordReturnRoList.add(ordReturnRo);
+				}
+				hm.put("items", ordReturnRoList);
+				list.add(i, hm);
+			}
+		}
+		_log.info("最新获取用户退货订单信息的返回值为：{}", String.valueOf(list));
+		return list;
 	}
 
 }
