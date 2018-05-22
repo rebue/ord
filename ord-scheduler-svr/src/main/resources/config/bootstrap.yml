@@ -2,5 +2,5 @@ spring:
   application:
     name: ord-scheduler-svr
   profiles:
-    active: dev
+    active: prod
     
