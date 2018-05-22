@@ -19,6 +19,7 @@ import rebue.ord.svc.OrdOrderSvc;
 import rebue.ord.svc.OrdTaskSvc;
 import rebue.ord.to.OrderSignInTo;
 import rebue.robotech.svc.impl.MybatisBaseSvcImpl;
+import rebue.wheel.NetUtils;
 
 @Service
 /**
@@ -88,7 +89,9 @@ public class OrdTaskSvcImpl extends MybatisBaseSvcImpl<OrdTaskMo, java.lang.Long
 			try {
 				OrderSignInTo orderSignInTo = new OrderSignInTo();
 				orderSignInTo.setOrderCode(ordTaskMo.getOrderId());
-				_log.info("执行订单签收任务订单签收的参数为：{}", ordTaskMo.getOrderId());
+				orderSignInTo.setIp(NetUtils.getFirstIpOfLocalHost());
+				orderSignInTo.setMac(NetUtils.getFirstMacAddrOfLocalHost());
+				_log.info("执行订单签收任务订单签收的参数为：{}", ordTaskMo);
 				// 订单签收
 				OrderSignInRo orderSignInRo = ordOrderSvc.orderSignIn(orderSignInTo);
 				_log.info("执行订单签收任务订单签收的返回值为：{}", orderSignInRo);
