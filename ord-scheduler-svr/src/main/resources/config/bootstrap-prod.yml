@@ -40,4 +40,3 @@ endpoints:
   bus-refresh:
     enabled: true
 
-appid: 0

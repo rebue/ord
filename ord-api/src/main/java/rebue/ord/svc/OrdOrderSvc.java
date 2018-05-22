@@ -161,4 +161,14 @@ public interface OrdOrderSvc extends MybatisBaseSvc<OrdOrderMo, java.lang.Long> 
 	 */
 	int orderPay(String orderCode, Date payTime);
 
+	/**
+	 * 根据订单编号查询订单状态
+	 * Title: selectOrderStateByOrderCode
+	 * Description: 
+	 * @param orderCode
+	 * @return
+	 * @date 2018年5月21日 下午5:01:46
+	 */
+	byte selectOrderStateByOrderCode(String orderCode);
+
 }
