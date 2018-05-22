@@ -18,5 +18,7 @@ public interface OrdTaskSvc extends MybatisBaseSvc<OrdTaskMo, java.lang.Long>{
 	 * @date 2018年5月21日 下午3:30:46
 	 */
 	void executeSignInOrderTask(long id);
-
+	
+	//执行取消订单任务
+	void executeCancelOrderTask(long id);
 }

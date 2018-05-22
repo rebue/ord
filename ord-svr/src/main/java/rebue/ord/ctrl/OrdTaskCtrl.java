@@ -7,6 +7,7 @@ import javax.annotation.Resource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -56,5 +57,20 @@ public class OrdTaskCtrl {
 	@PutMapping("/ord/task/signin")
 	void executeSignInOrderTask(@RequestParam("id") long id) {
 		ordTaskSvc.executeSignInOrderTask(id);
+	}
+	
+	/**
+	 * 执行取消订单任务 Title: executeSignInOrderTask Description:
+	 * 
+	 * @param executeFactTime
+	 * @param id
+	 * @param doneState
+	 * @param noneState
+	 * @return
+	 * @date 2018年5月21日 下午3:30:46
+	 */
+	@PutMapping("/ord/task/cancleOrder")
+	void executeCancelOrderTask(@RequestParam("id") long id) {
+		ordTaskSvc.executeCancelOrderTask(id);
 	}
 }

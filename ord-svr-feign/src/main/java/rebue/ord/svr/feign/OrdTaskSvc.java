@@ -43,4 +43,8 @@ public interface OrdTaskSvc {
 	 */
 	@PutMapping("/ord/task/signin")
 	void executeSignInOrderTask(@RequestParam("id") long id);
+	
+	//执行订单取消任务
+	@PutMapping("/ord/task/cancleOrder")
+	void executeCancelOrderTask(@RequestParam("id") long id);
 }
