@@ -32,8 +32,8 @@ public class SignInOrderTasks {
 	public void executeTasks() {
 		_log.info("定时执行需要自动签收订单的任务");
 		try {
-			// 获取所有需要执行订单签收的任务
-			List<OrdTaskMo> list = taskSvc.list((byte) TaskExecuteStateDic.NOT_EXECUTE.getCode(), (byte) 2);
+			// 获取所有需要执行订单签收的任务 
+			List<OrdTaskMo> list = taskSvc.list(TaskExecuteStateDic.NOT_EXECUTE.getCode(), 2);
 			_log.info("获取到的订单签收任务为：{}", String.valueOf(list));
 			for (OrdTaskMo taskMo : list) {
 				try {
