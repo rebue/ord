@@ -1,6 +1,10 @@
 package rebue.ord.ctrl;
 
+import java.beans.IntrospectionException;
+import java.lang.reflect.InvocationTargetException;
+import java.text.ParseException;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import javax.annotation.Resource;
@@ -247,5 +251,14 @@ public class OrdReturnCtrl {
 			}
 			return receivedAndRefundedRo;
 		}
+	}
+	
+	@GetMapping("/ord/order/returnInfo")
+	List<Map<String, Object>> orderInfo(@RequestParam Map<String, Object> map) throws ParseException,
+			IllegalAccessException, IllegalArgumentException, InvocationTargetException, IntrospectionException {
+		_log.info("查询退货订单信息的参数为：{}", map.toString());
+		List<Map<String, Object>> list = svc.selectOrderReturnInfo(map);
+		_log.info("查询退货订单信息的返回值：{}", String.valueOf(list));
+		return list;
 	}
 }

@@ -45,4 +45,7 @@ public interface OrdTaskSvc {
 	 */
 	@PostMapping("/ord/task/signin")
 	void executeSignInOrderTask(@RequestParam("id") long id);
+	
+	@PostMapping("/ord/task/cancleOrder")
+	void executeCancelOrderTask(@RequestParam("id") long id);
 }
