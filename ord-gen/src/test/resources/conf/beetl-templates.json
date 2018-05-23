@@ -10,11 +10,5 @@
 		"targetDir": "../ord-bll/src/main/java/${modulePath}/svc/impl/",
 		"targetFile": "${entityName}SvcImpl.java",
 		"backup": false
-	},
-	{
-		"templateName": "ctrl.btl",
-		"targetDir": "../ord-svr/src/main/java/${modulePath}/ctrl/",
-		"targetFile": "${entityName}Ctrl.java",
-		"backup": false
 	}
 ]

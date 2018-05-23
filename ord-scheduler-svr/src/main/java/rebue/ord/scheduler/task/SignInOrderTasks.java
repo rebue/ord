@@ -6,10 +6,11 @@ import javax.annotation.Resource;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
+import rebue.ord.dic.TaskExecuteStateDic;
 import rebue.ord.mo.OrdTaskMo;
-import rebue.ord.svr.feign.OrdOrderSvc;
 import rebue.ord.svr.feign.OrdTaskSvc;
 
 /**
@@ -25,25 +26,15 @@ public class SignInOrderTasks {
 	private final static Logger _log = LoggerFactory.getLogger(SignInOrderTasks.class);
 
 	@Resource
-	OrdOrderSvc orderSvc;
-
-	@Resource
 	OrdTaskSvc taskSvc;
 
+	@Scheduled(fixedDelayString = "${ord.scheduler.tradeFixedDelay}")
 	public void executeTasks() {
 		_log.info("定时执行需要自动签收订单的任务");
 		try {
-<<<<<<< HEAD
-			OrdTaskMo ordTaskMo = new OrdTaskMo();
-			ordTaskMo.setExecuteState((byte) 0);
-			ordTaskMo.setTaskType((byte) 2);
-			// 获取所有需要执行订单签收的任务
-			List<OrdTaskMo> list = taskSvc.list(ordTaskMo);
-=======
 			// 获取所有需要执行订单签收的任务 
 			List<OrdTaskMo> list = taskSvc.list(TaskExecuteStateDic.NOT_EXECUTE.getCode(), 2);
 			_log.info("获取到的订单签收任务为：{}", String.valueOf(list));
->>>>>>> branch 'master' of https://github.com/rebue/ord.git
 			for (OrdTaskMo taskMo : list) {
 				try {
 					taskSvc.executeSignInOrderTask(taskMo.getId());

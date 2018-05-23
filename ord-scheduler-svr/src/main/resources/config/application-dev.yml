@@ -1,4 +1,4 @@
-afc:
+ord:
   scheduler:
     # 交易任务执行的间隔（毫秒）
-    tradeFixedDelay: 3000
+    tradeFixedDelay: 10000
