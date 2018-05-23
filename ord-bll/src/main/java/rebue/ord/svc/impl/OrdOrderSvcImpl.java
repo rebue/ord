@@ -347,12 +347,8 @@ public class OrdOrderSvcImpl extends MybatisBaseSvcImpl<OrdOrderMo, java.lang.Lo
 				_log.info("查询用户订单信息获取订单详情的返回值为：{}", String.valueOf(orderDetailList));
 				List<OrderDetailRo> orderDetailRoList = new ArrayList<OrderDetailRo>();
 				for (OrdOrderDetailMo orderDetailMo : orderDetailList) {
-					List<OnlOnlinePicMo> onlinePicList = new ArrayList<OnlOnlinePicMo>();
-					try {
-						onlinePicList = onlOnlinePicSvc.list(orderDetailMo.getOnlineId(), (byte) 1);
-					} catch (Exception e) {
-						e.printStackTrace();
-					}
+					_log.info("查询用户订单信息开始获取商品主图");
+					List<OnlOnlinePicMo> onlinePicList = onlOnlinePicSvc.list(orderDetailMo.getOnlineId(), (byte) 1);
 					_log.info("获取商品主图的返回值为{}", String.valueOf(onlinePicList));
 					OrderDetailRo orderDetailRo = new OrderDetailRo();
 					orderDetailRo.setId(orderDetailMo.getId());
