@@ -98,6 +98,6 @@ public interface OrdTaskMapper extends MybatisBaseMapper<OrdTaskMo, Long> {
      * @return
      * @date 2018年5月21日 下午2:11:18
      */
-    @Update("update ORD_TASK set EXECUTE_STATE=#{doneState}, EXECUTE_FACT_TIME=#{executeFactTime,jdbcType=TIMESTAMP} where where ID=#{id} and EXECUTE_STATE=#{noneState}")
+    @Update("update ORD_TASK set EXECUTE_STATE=#{doneState}, EXECUTE_FACT_TIME=#{executeFactTime,jdbcType=TIMESTAMP} where ID=#{id} and EXECUTE_STATE=#{noneState}")
     int executeSignInOrderTask(@Param("executeFactTime") Date executeFactTime, @Param("id") long id, @Param("doneState") Byte doneState, @Param("noneState") Byte noneState);
 }
