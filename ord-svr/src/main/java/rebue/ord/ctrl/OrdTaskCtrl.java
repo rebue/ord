@@ -68,7 +68,7 @@ public class OrdTaskCtrl {
 	 * @return
 	 * @date 2018年5月21日 下午3:30:46
 	 */
-	@PutMapping("/ord/task/cancleOrder")
+	@PostMapping("/ord/task/cancleOrder")
 	void executeCancelOrderTask(@RequestParam("id") long id) {
 		ordTaskSvc.executeCancelOrderTask(id);
 	}
