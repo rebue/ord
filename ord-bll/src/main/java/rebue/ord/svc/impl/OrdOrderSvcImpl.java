@@ -586,7 +586,7 @@ public class OrdOrderSvcImpl extends MybatisBaseSvcImpl<OrdOrderMo, java.lang.Lo
 		
 		Calendar calendar = Calendar.getInstance();
 		calendar.setTime(date);
-		calendar.add(Calendar.MINUTE, signinOrderTime);
+		calendar.add(Calendar.HOUR, signinOrderTime);
 		// 取消订单的时间
 		Date executePlanTime = calendar.getTime();
 		
