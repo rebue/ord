@@ -6,10 +6,10 @@ import javax.annotation.Resource;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
 import rebue.ord.mo.OrdTaskMo;
-import rebue.ord.svr.feign.OrdOrderSvc;
 import rebue.ord.svr.feign.OrdTaskSvc;
 
 /**
@@ -17,7 +17,7 @@ import rebue.ord.svr.feign.OrdTaskSvc;
  * 
  * @author jjl
  * @version 1.0
- * @since JDK 1.8 文件名称：SignInTasks.java 类说明： 取消订单任务
+ * @since JDK 1.8  类说明： 取消订单任务
  */
 @Component
 public class CancleOrderTasks {
@@ -25,11 +25,9 @@ public class CancleOrderTasks {
 	private final static Logger _log = LoggerFactory.getLogger(CancleOrderTasks.class);
 
 	@Resource
-	OrdOrderSvc orderSvc;
-
-	@Resource
 	OrdTaskSvc taskSvc;
 
+	@Scheduled(fixedDelayString = "${ord.scheduler.tradeFixedDelay}")
 	public void executeTasks() {
 		_log.info("定时执行需要自动取消订单的任务");
 		try {
