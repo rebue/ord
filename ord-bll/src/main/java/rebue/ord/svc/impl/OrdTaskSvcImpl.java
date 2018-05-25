@@ -131,7 +131,7 @@ public class OrdTaskSvcImpl extends MybatisBaseSvcImpl<OrdTaskMo, java.lang.Long
 		// 根据订单编号查询订单状态
 		byte orderState = ordOrderSvc.selectOrderStateByOrderCode(ordTaskMo.getOrderId());
 		_log.info("执行订单取消任务根据订单编号查询订单状态的返回值为：{}", orderState);
-		if (orderState == OrderStateDic.ALREADY_DELIVER_GOODS.getCode()) {
+		if (orderState == OrderStateDic.ALREADY_PLACE_AN_ORDER.getCode()) {
 			try {
 				OrdOrderMo ordOrderMo = new OrdOrderMo();
 				ordOrderMo.setOrderCode(ordTaskMo.getOrderId());
