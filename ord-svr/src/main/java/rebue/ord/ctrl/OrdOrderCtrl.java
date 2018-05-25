@@ -84,7 +84,7 @@ public class OrdOrderCtrl {
 			throw new IllegalArgumentException(msg);
 		}
 
-		PageInfo<OrdOrderMo> result = svc.list(qo, pageNum, pageSize);
+		PageInfo<OrdOrderMo> result = svc.list(qo, pageNum, pageSize, "ORDER_TIME desc");
 		_log.info("result: " + result);
 		return result;
 	}
