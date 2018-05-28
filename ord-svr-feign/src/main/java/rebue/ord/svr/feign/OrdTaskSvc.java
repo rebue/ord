@@ -7,7 +7,6 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 
-import rebue.ord.mo.OrdTaskMo;
 import rebue.sbs.feign.FeignConfig;
 
 /**
@@ -23,14 +22,16 @@ import rebue.sbs.feign.FeignConfig;
 public interface OrdTaskSvc {
 
 	/**
-	 * 查询订单任务信息 Title: list Description:
-	 * 
-	 * @param qo
+	 * 查询订单任务数量
+	 * Title: getByExecutePlanTimeBeforeNow
+	 * Description: 
+	 * @param executeState
+	 * @param taskType
 	 * @return
-	 * @date 2018年5月21日 下午3:24:56
+	 * @date 2018年5月28日 上午11:00:40
 	 */
 	@GetMapping(value = "/ord/task")
-	List<OrdTaskMo> list(@RequestParam("executeState") byte executeState, @RequestParam("taskType") byte taskType);
+	List<Long> getByExecutePlanTimeBeforeNow(@RequestParam("executeState") byte executeState, @RequestParam("taskType") byte taskType);
 
 
 	/**
