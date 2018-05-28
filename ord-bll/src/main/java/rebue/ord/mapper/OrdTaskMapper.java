@@ -4,6 +4,7 @@ import java.util.Date;
 import java.util.List;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
+import org.apache.ibatis.annotations.Select;
 import org.apache.ibatis.annotations.Update;
 
 import rebue.ord.mo.OrdTaskMo;
@@ -90,6 +91,19 @@ public interface OrdTaskMapper extends MybatisBaseMapper<OrdTaskMo, Long> {
      * @mbg.generated 2018-05-21 11:37:33
      */
     boolean existSelective(OrdTaskMo record);
+    
+    /**
+     * 查询订单任务数量
+     * Title: selectByExecutePlanTimeBeforeNow
+     * Description: 
+     * @param executeState
+     * @param taskType
+     * @return
+     * @date 2018年5月28日 上午10:40:02
+     */
+    @Select("select ID from ORD_TASK where EXECUTE_STATE=${executeState} and TASK_TYPE=${taskType} and EXECUTE_PLAN_TIME <= SYSDATE()")
+	List<Long> selectByExecutePlanTimeBeforeNow(@Param("executeState")  byte executeState, @Param("taskType") byte taskType);
+     
     
     /**
      * 执行订单签收任务

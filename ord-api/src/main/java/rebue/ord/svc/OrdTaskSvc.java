@@ -2,6 +2,8 @@ package rebue.ord.svc;
 
 import rebue.robotech.svc.MybatisBaseSvc;
 
+import java.util.List;
+
 import rebue.ord.mo.OrdTaskMo;
 
 public interface OrdTaskSvc extends MybatisBaseSvc<OrdTaskMo, java.lang.Long>{
@@ -21,4 +23,15 @@ public interface OrdTaskSvc extends MybatisBaseSvc<OrdTaskMo, java.lang.Long>{
 	
 	//执行取消订单任务
 	void executeCancelOrderTask(long id);
+
+	/**
+	 * 根据订单任务状态和任务类型查询订单任务数量
+	 * Title: getByExecutePlanTimeBeforeNow
+	 * Description: 
+	 * @param executeState
+	 * @param taskType
+	 * @return
+	 * @date 2018年5月28日 上午10:51:47
+	 */
+	List<Long> getByExecutePlanTimeBeforeNow(byte executeState, byte taskType);
 }

@@ -10,7 +10,6 @@ import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
 import rebue.ord.dic.TaskExecuteStateDic;
-import rebue.ord.mo.OrdTaskMo;
 import rebue.ord.svr.feign.OrdTaskSvc;
 
 /**
@@ -34,11 +33,11 @@ public class SignInOrderTasks {
 		try {
 
 			// 获取所有需要执行订单签收的任务
-			List<OrdTaskMo> list = taskSvc.list((byte) TaskExecuteStateDic.NOT_EXECUTE.getCode(), (byte) 2);
+			List<Long> list = taskSvc.getByExecutePlanTimeBeforeNow((byte) TaskExecuteStateDic.NOT_EXECUTE.getCode(), (byte) 2);
 			_log.info("获取到的订单签收任务为：{}", String.valueOf(list));
-			for (OrdTaskMo taskMo : list) {
+			for (Long id : list) {
 				try {
-					taskSvc.executeSignInOrderTask(taskMo.getId());
+					taskSvc.executeSignInOrderTask(id);
                 } catch (RuntimeException e) {
                 	_log.info("执行订单签收失败，返回值为：{}", e);
                 }

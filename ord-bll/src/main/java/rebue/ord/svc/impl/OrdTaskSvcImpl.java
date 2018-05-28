@@ -1,6 +1,7 @@
 package rebue.ord.svc.impl;
 
 import java.util.Date;
+import java.util.List;
 
 import javax.annotation.Resource;
 
@@ -150,5 +151,14 @@ public class OrdTaskSvcImpl extends MybatisBaseSvcImpl<OrdTaskMo, java.lang.Long
 		_mapper.executeSignInOrderTask(executeFactTime, id, (byte) TaskExecuteStateDic.ALREADY_EXECUTE.getCode(),
 				(byte) TaskExecuteStateDic.NOT_EXECUTE.getCode());
 		
+	}
+	
+	/**
+	 * 根据任务状态和任务类型查询任务数量
+	 */
+	@Override
+	public List<Long> getByExecutePlanTimeBeforeNow(byte executeState, byte taskType) {
+		_log.info("根据任务状态查询和任务类型查询任务数量的参数为：executeState===={}， taskType========={}", executeState, taskType);
+		return _mapper.selectByExecutePlanTimeBeforeNow(executeState, taskType);
 	}
 }

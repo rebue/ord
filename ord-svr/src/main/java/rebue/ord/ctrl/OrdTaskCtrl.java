@@ -11,7 +11,6 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-import rebue.ord.mo.OrdTaskMo;
 import rebue.ord.svc.OrdTaskSvc;
 
 /**
@@ -30,17 +29,20 @@ public class OrdTaskCtrl {
 	private OrdTaskSvc ordTaskSvc;
 
 	/**
-	 * 查询订单任务信息 Title: list Description:
-	 * 
-	 * @param qo
+	 * 查询订单任务数量
+	 * Title: getByExecutePlanTimeBeforeNow
+	 * Description: 
+	 * @param executeState
+	 * @param taskType
 	 * @return
-	 * @date 2018年5月21日 下午3:24:56
+	 * @date 2018年5月28日 上午11:00:40
 	 */
 	@GetMapping(value = "/ord/task")
-	List<OrdTaskMo> list(OrdTaskMo qo) {
-		_log.info("查询订单任务信息的参数为：{}", qo);
-		return ordTaskSvc.list(qo);
+	List<Long> getByExecutePlanTimeBeforeNow(@RequestParam("executeState") byte executeState, @RequestParam("taskType") byte taskType) {
+		_log.info("查询订单任务数量的参数为：{}， {}", executeState, taskType);
+		return ordTaskSvc.getByExecutePlanTimeBeforeNow(executeState, taskType);
 	}
+	
 
 	/**
 	 * 执行订单签收任务 Title: executeSignInOrderTask Description:
