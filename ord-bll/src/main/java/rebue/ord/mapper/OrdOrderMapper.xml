@@ -846,7 +846,7 @@
   <!-- 用户取消订单修改订单状态 -->
   <update id="cancellationOrderUpdateOrderState" parameterType="rebue.ord.mo.OrdOrderMo">
   	UPDATE ORD_ORDER SET ORDER_STATE = -1, CANCELING_ORDER_OP_ID = #{cancelingOrderOpId,jdbcType=BIGINT}, CANCEL_REASON = #{cancelReason,jdbcType=VARCHAR} 
-  	WHERE ORDER_CODE=${orderCode} AND USER_ID=${userId}  AND ORDER_STATE=1
+  	WHERE ORDER_CODE=${orderCode} AND ORDER_STATE=#{orderState,jdbcType=TINYINT}
   </update>
   
   <!-- 修改订单实际金额 -->
@@ -875,7 +875,7 @@
   <!-- 订单签收 -->
   <update id="orderSignIn" parameterType="rebue.ord.mo.OrdOrderMo">
   	UPDATE ORD_ORDER SET ORDER_STATE=4, RECEIVED_TIME=#{receivedTime,jdbcType=TIMESTAMP}, RECEIVED_OP_ID=#{receivedOpId,jdbcType=BIGINT} 
-  	WHERE USER_ID=#{userId,jdbcType=BIGINT} AND ORDER_CODE=#{orderCode, jdbcType=VARCHAR} AND ORDER_STATE=3
+  	WHERE ORDER_CODE=#{orderCode, jdbcType=VARCHAR} AND ORDER_STATE=#{orderState,jdbcType=TINYINT}
   </update>
   
   <!-- 修改退货金额 -->

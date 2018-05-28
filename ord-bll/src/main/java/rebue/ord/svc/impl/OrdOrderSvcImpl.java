@@ -430,6 +430,7 @@ public class OrdOrderSvcImpl extends MybatisBaseSvcImpl<OrdOrderMo, java.lang.Lo
 		}
 		Date date = new Date();
 		mo.setCancelTime(date);
+		mo.setOrderState((byte) OrderStateDic.ALREADY_PLACE_AN_ORDER.getCode());
 		_log.info("取消订单并修改状态的参数为：", mo);
 		int updateResult = _mapper.cancellationOrderUpdateOrderState(mo);
 		_log.info("取消订单并修改状态的返回值为：{}", updateResult);
@@ -734,6 +735,7 @@ public class OrdOrderSvcImpl extends MybatisBaseSvcImpl<OrdOrderMo, java.lang.Lo
 		orderMo.setUserId(userId);
 		orderMo.setReceivedTime(date);
 		orderMo.setReceivedOpId(userId);
+		orderMo.setOrderState((byte) OrderStateDic.ALREADY_DELIVER_GOODS.getCode());
 		_log.info("订单签收的参数为：{}", orderMo);
 		int signInResult = _mapper.orderSignIn(orderMo);
 		_log.info("订单签收的返回值为：{}", signInResult);
