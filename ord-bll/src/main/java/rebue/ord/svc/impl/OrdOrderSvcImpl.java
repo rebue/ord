@@ -20,11 +20,14 @@ import rebue.ord.dic.SetUpExpressCompanyDic;
 import rebue.ord.dic.ShipmentConfirmationDic;
 import rebue.ord.dic.UsersToPlaceTheOrderDic;
 import rebue.ord.to.OrderSignInTo;
+import rebue.afc.dic.SettleTaskExecuteStateDic;
+import rebue.afc.dic.TradeTypeDic;
 import rebue.afc.mo.AfcSettleTaskMo;
 import rebue.afc.ro.AddSettleTasksRo;
 import rebue.afc.svr.feign.AfcSettleTaskSvc;
 import rebue.afc.to.AddSettleTasksDetailTo;
 import rebue.afc.to.AddSettleTasksTo;
+import rebue.afc.to.GetCashBackTaskTo;
 import rebue.kdi.ro.EOrderRo;
 import rebue.kdi.svr.feign.KdiSvc;
 import rebue.kdi.to.EOrderTo;
@@ -861,8 +864,12 @@ public class OrdOrderSvcImpl extends MybatisBaseSvcImpl<OrdOrderMo, java.lang.Lo
 			IntrospectionException, IllegalAccessException, IllegalArgumentException, InvocationTargetException {
 		List<Map<String, Object>> list = new ArrayList<Map<String, Object>>();
 		_log.info("查询用户待返现任务的参数为：{}", map.toString());
-//		long accountId = Long.parseLong(String.valueOf(map.get("userId")));
-		 List<AfcSettleTaskMo> cashBackList = afcSettleTaskSvc.getCashBackTask(map);
+		long accountId = Long.parseLong(String.valueOf(map.get("userId")));
+		byte executeState = (byte)SettleTaskExecuteStateDic.NONE.getCode();
+		byte tradType = (byte)SettleTaskExecuteStateDic.NONE.getCode();
+		byte start = Byte.parseByte(String.valueOf(map.get("start")));
+		byte limit = Byte.parseByte(String.valueOf(map.get("limit")));
+		 List<AfcSettleTaskMo> cashBackList = afcSettleTaskSvc.getCashBackTask(accountId,executeState,tradType,start,limit);
 		_log.info("获取到的用户待返现任务信息为：{}", String.valueOf(cashBackList));
 		SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
 		if (cashBackList.size() != 0) {
