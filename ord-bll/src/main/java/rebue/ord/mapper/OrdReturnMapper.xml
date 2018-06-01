@@ -664,6 +664,9 @@
     <if test="orderId != null and orderId != ''">
       and a.ORDER_ID = #{orderId,jdbcType=BIGINT}
     </if>
+    <if test="applicationState != null and applicationState != ''">
+      and APPLICATION_STATE = #{applicationState,jdbcType=TINYINT}
+    </if>
     ORDER BY APPLICATION_TIME DESC
   </select>
   <!-- 退货通过 -->
