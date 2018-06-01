@@ -87,6 +87,7 @@ public class OrdOrderCtrl {
 		PageInfo<OrdOrderMo> result = svc.list(qo, pageNum, pageSize, "ORDER_TIME desc");
 		_log.info("result: " + result);
 		return result;
+		
 	}
 
 	/**
@@ -313,6 +314,22 @@ public class OrdOrderCtrl {
 		} finally {
 			return orderSignInRo;
 		}
+	}
+	
+	/**
+	 * 获取用户待返订单:
+	 * 
+	 * @param qo
+	 * @return
+	 * @date 2018年4月14日 下午2:30:53
+	 */
+	@GetMapping("/ord/order/getCashBackOrders")
+	List<Map<String, Object>> getCashBackOrders(@RequestParam Map<String, Object> map) throws ParseException,
+			IllegalAccessException, IllegalArgumentException, InvocationTargetException, IntrospectionException {
+		_log.info("查询订单信息的参数为：{}", map.toString());
+		List<Map<String, Object>> list = svc.getCashBackOrder(map);
+		_log.info("查询订单信息的返回值：{}", String.valueOf(list));
+		return list;
 	}
 
 }

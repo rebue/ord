@@ -170,5 +170,22 @@ public interface OrdOrderSvc extends MybatisBaseSvc<OrdOrderMo, java.lang.Long> 
 	 * @date 2018年5月21日 下午5:01:46
 	 */
 	byte selectOrderStateByOrderCode(String orderCode);
+	
+	/**
+	 * 查询用户待返现订单信息 Title: selectOrderInfo Description:
+	 * 
+	 * @param mo
+	 * @return
+	 * @throws ParseException
+	 * @throws IntrospectionException
+	 * @throws InvocationTargetException
+	 * @throws IllegalArgumentException
+	 * @throws IllegalAccessException
+	 * @date 2018年4月9日 下午4:48:40
+	 */
+	List<Map<String, Object>> getCashBackOrder(Map<String, Object> map)
+			throws ParseException, IntrospectionException,
+			IllegalAccessException, IllegalArgumentException,
+			InvocationTargetException;
 
 }
