@@ -27,7 +27,6 @@ import rebue.afc.ro.AddSettleTasksRo;
 import rebue.afc.svr.feign.AfcSettleTaskSvc;
 import rebue.afc.to.AddSettleTasksDetailTo;
 import rebue.afc.to.AddSettleTasksTo;
-import rebue.afc.to.GetCashBackTaskTo;
 import rebue.kdi.ro.EOrderRo;
 import rebue.kdi.svr.feign.KdiSvc;
 import rebue.kdi.to.EOrderTo;
@@ -102,10 +101,10 @@ public class OrdOrderSvcImpl extends MybatisBaseSvcImpl<OrdOrderMo, java.lang.Lo
 	 */
 	@Resource
 	private OrdOrderDetailSvc ordOrderDetailSvc;
-	
+
 	@Resource
 	private OrdTaskSvc ordTaskSvc;
-	
+
 	/**
 	 */
 	@Resource
@@ -140,7 +139,7 @@ public class OrdOrderSvcImpl extends MybatisBaseSvcImpl<OrdOrderMo, java.lang.Lo
 	 */
 	@Value("${ord.cancel-order-time}")
 	private int cancelOrderTime;
-	
+
 	/**
 	 * 执行用户订单签收时间
 	 */
@@ -265,7 +264,7 @@ public class OrdOrderSvcImpl extends MybatisBaseSvcImpl<OrdOrderMo, java.lang.Lo
 				throw new RuntimeException("生成订单详情出错");
 			}
 		}
-		
+
 		Calendar calendar = Calendar.getInstance();
 		calendar.setTime(date);
 		calendar.add(Calendar.MINUTE, cancelOrderTime);
@@ -325,13 +324,34 @@ public class OrdOrderSvcImpl extends MybatisBaseSvcImpl<OrdOrderMo, java.lang.Lo
 		if (orderList.size() != 0) {
 			for (int i = 0; i < orderList.size(); i++) {
 				Map<String, Object> hm = new HashMap<String, Object>();
-				String l = simpleDateFormat.format(orderList.get(i).getOrderTime());
-				Date date = simpleDateFormat.parse(l);
-				long ts = date.getTime();
-				_log.info("转换时间得到的时间戳为：{}", ts);
-				hm.put("dateline", ts / 1000);
-				hm.put("finishDate", ts / 1000 + 86400);
-				hm.put("system", System.currentTimeMillis() / 1000);
+				// 下单时间
+				String orderTime = simpleDateFormat.format(orderList.get(i).getOrderTime());
+				Date date = new Date();
+				date = simpleDateFormat.parse(orderTime);
+				long orderTimes = date.getTime();
+				_log.info("转换下单时间得到的时间戳为：{}", orderTimes);
+				if (orderList.get(i).getSendTime() != null) {
+					// 发货时间
+					String sendTime = simpleDateFormat.format(orderList.get(i).getSendTime());
+					date = new Date();
+					date = simpleDateFormat.parse(sendTime);
+					long sendTimes = date.getTime();
+					_log.info("转换发货时间得到的时间戳为：{}", orderTimes);
+					hm.put("sendTimes", sendTimes / 1000);
+				}
+
+				if (orderList.get(i).getReceivedTime() != null) {
+					// 签收时间
+					String receivedTime = simpleDateFormat.format(orderList.get(i).getReceivedTime());
+					date = new Date();
+					date = simpleDateFormat.parse(receivedTime);
+					long receivedTimes = date.getTime();
+					_log.info("转换发货时间得到的时间戳为：{}", receivedTimes);
+					hm.put("receivedTimes", receivedTimes / 1000);
+				}
+
+				hm.put("orderTimes", orderTimes / 1000);
+				hm.put("system", System.currentTimeMillis() / 1000); // 系统时间戳
 				OrdOrderMo obj = orderList.get(i);
 				BeanInfo beanInfo = Introspector.getBeanInfo(obj.getClass());
 				PropertyDescriptor[] propertyDescriptors = beanInfo.getPropertyDescriptors();
@@ -578,13 +598,13 @@ public class OrdOrderSvcImpl extends MybatisBaseSvcImpl<OrdOrderMo, java.lang.Lo
 		ShipmentConfirmationRo confirmationRo = new ShipmentConfirmationRo();
 		Date date = new Date();
 		mo.setSendTime(date);
-		
+
 		Calendar calendar = Calendar.getInstance();
 		calendar.setTime(date);
 		calendar.add(Calendar.HOUR, signinOrderTime);
 		// 取消订单的时间
 		Date executePlanTime = calendar.getTime();
-		
+
 		OrdTaskMo ordTaskMo = new OrdTaskMo();
 		ordTaskMo.setExecutePlanTime(executePlanTime);
 		ordTaskMo.setExecuteState((byte) 0);
@@ -598,7 +618,7 @@ public class OrdOrderSvcImpl extends MybatisBaseSvcImpl<OrdOrderMo, java.lang.Lo
 			_log.error("确认发货添加签收任务时出错，订单编号为：{}", mo.getOrderCode());
 			throw new RuntimeException("添加签收任务出错");
 		}
-		
+
 		String shipperCode = mo.getShipperCode();
 		EOrderTo eOrderTo = new EOrderTo();
 		eOrderTo.setOrderId(Long.parseLong(mo.getOrderCode()));
@@ -639,7 +659,7 @@ public class OrdOrderSvcImpl extends MybatisBaseSvcImpl<OrdOrderMo, java.lang.Lo
 			_log.error("调用快递电子面单失败");
 			throw new RuntimeException("调用快递电子面单失败");
 		}
-		
+
 		mo.setOrderState((byte) OrderStateDic.ALREADY_PAY.getCode());
 		mo.setLogisticCode(eOrderRo.getLogisticCode());
 		mo.setLogisticId(eOrderRo.getLogisticId());
@@ -653,7 +673,7 @@ public class OrdOrderSvcImpl extends MybatisBaseSvcImpl<OrdOrderMo, java.lang.Lo
 			return confirmationRo;
 		}
 		_log.info("确认发货成功，返回值为：{}", result);
-		
+
 		_log.info("调用快递电子面单成功，返回值为：{}", result);
 		confirmationRo.setResult(ShipmentConfirmationDic.SUCCESS);
 		confirmationRo.setMsg("确认发货成功");
@@ -843,9 +863,8 @@ public class OrdOrderSvcImpl extends MybatisBaseSvcImpl<OrdOrderMo, java.lang.Lo
 	}
 
 	/***
-	 * 根据订单编号查询订单状态
-	 * Title: selectOrderStateByOrderCode
-	 * Description: 
+	 * 根据订单编号查询订单状态 Title: selectOrderStateByOrderCode Description:
+	 * 
 	 * @param orderCode
 	 * @return
 	 * @date 2018年5月21日 下午5:00:25
@@ -854,7 +873,7 @@ public class OrdOrderSvcImpl extends MybatisBaseSvcImpl<OrdOrderMo, java.lang.Lo
 	public byte selectOrderStateByOrderCode(String orderCode) {
 		return _mapper.selectOrderStateByOrderCode(orderCode);
 	}
-	
+
 	/**
 	 * 查询用户待返现订单信息 2018年5月29日
 	 * 
@@ -874,7 +893,8 @@ public class OrdOrderSvcImpl extends MybatisBaseSvcImpl<OrdOrderMo, java.lang.Lo
 		byte tradType = (byte)TradeTypeDic.SETTLE_CASHBACK.getCode();
 		byte pageNum = Byte.parseByte(String.valueOf(map.get("pageNum")));
 		byte pageSize = Byte.parseByte(String.valueOf(map.get("pageSize")));
-		 List<AfcSettleTaskMo> cashBackList = afcSettleTaskSvc.getCashBackTask(accountId,executeState,tradType,pageNum,pageSize);
+		List<AfcSettleTaskMo> cashBackList = afcSettleTaskSvc.getCashBackTask(accountId, executeState, tradType,
+				pageNum, pageSize);
 		_log.info("获取到的用户待返现任务信息为：{}", String.valueOf(cashBackList));
 		SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
 		if (cashBackList.size() != 0) {
@@ -883,7 +903,7 @@ public class OrdOrderSvcImpl extends MybatisBaseSvcImpl<OrdOrderMo, java.lang.Lo
 				_log.info("获取定单信息的订单号为：{}", cashBackList.get(i).getOrderId());
 				mo.setOrderCode(cashBackList.get(i).getOrderId());
 				List<OrdOrderMo> orderInfo = _mapper.selectSelective(mo);
-				if(orderInfo.size()==0) {
+				if (orderInfo.size() == 0) {
 					_log.info("根据订单号查询订单为空：{}");
 					continue;
 				}
@@ -896,7 +916,7 @@ public class OrdOrderSvcImpl extends MybatisBaseSvcImpl<OrdOrderMo, java.lang.Lo
 				hm.put("dateline", ts / 1000);
 				hm.put("finishDate", ts / 1000 + 86400);
 				hm.put("system", System.currentTimeMillis() / 1000);
-				
+
 				OrdOrderMo obj = orderInfo.get(0);
 				BeanInfo beanInfo = Introspector.getBeanInfo(obj.getClass());
 				PropertyDescriptor[] propertyDescriptors = beanInfo.getPropertyDescriptors();
