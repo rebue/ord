@@ -871,7 +871,7 @@ public class OrdOrderSvcImpl extends MybatisBaseSvcImpl<OrdOrderMo, java.lang.Lo
 		_log.info("查询用户待返现任务的参数为：{}", map.toString());
 		long accountId = Long.parseLong(String.valueOf(map.get("userId")));
 		byte executeState = (byte)SettleTaskExecuteStateDic.NONE.getCode();
-		byte tradType = (byte)SettleTaskExecuteStateDic.NONE.getCode();
+		byte tradType = (byte)TradeTypeDic.SETTLE_CASHBACK.getCode();
 		byte pageNum = Byte.parseByte(String.valueOf(map.get("pageNum")));
 		byte pageSize = Byte.parseByte(String.valueOf(map.get("pageSize")));
 		 List<AfcSettleTaskMo> cashBackList = afcSettleTaskSvc.getCashBackTask(accountId,executeState,tradType,pageNum,pageSize);
