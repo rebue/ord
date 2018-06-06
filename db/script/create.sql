@@ -1,6 +1,6 @@
 /*==============================================================*/
 /* DBMS name:      MySQL 5.0                                    */
-/* Created on:     2018/5/21 11:17:37                           */
+/* Created on:     2018/6/6 10:39:01                            */
 /*==============================================================*/
 
 
@@ -109,6 +109,7 @@ create table ORD_ORDER_DETAIL
    CASHBACK_TOTAL       decimal(50,4) comment '返现总额',
    BUY_UNIT             varchar(10) comment '购买单位',
    RETURN_STATE         tinyint not null comment '退货状态（0：未退货  1：退货中  2：已退货  3：部分已退）',
+   USER_ID              bigint not null comment '用户ID',
    primary key (ID)
 );
 
@@ -132,6 +133,7 @@ create table ORD_RETURN
    APPLICATION_STATE    tinyint not null comment '申请状态（-1：已取消  1：待审核  2：退货中  3：已退货   4：已拒绝）',
    REFUND_STATE         tinyint not null comment '退款状态（1：未退款  2、已退款）',
    RETURN_REASON        varchar(500) not null comment '退货原因',
+   USER_ID              bigint not null comment '用户ID',
    APPLICATION_OP_ID    bigint not null comment '申请操作人',
    APPLICATION_TIME     datetime not null comment '申请时间',
    CANCEL_OP_ID         bigint comment '取消操作人',
@@ -170,12 +172,13 @@ alter table ORD_RETURN_PIC comment '退货图片';
 /*==============================================================*/
 create table ORD_TASK
 (
-   EXECUTE_STATE        tinyint not null default 0 comment '执行状态(-1:取消；0:未执行；1:已执行)',
    ID                   bigint not null comment '任务ID',
+   EXECUTE_STATE        tinyint not null default 0 comment '执行状态(-1:取消；0:未执行；1:已执行)',
    EXECUTE_PLAN_TIME    datetime not null comment '计划执行时间',
    EXECUTE_FACT_TIME    datetime comment '实际执行时间',
-   TASK_TYPE            tinyint comment '任务类型（1：取消订单  2：订单签收）',
-   ORDER_ID             varchar(150) not null comment '订单ID(销售订单ID)'
+   TASK_TYPE            tinyint not null comment '任务类型（1：取消订单  2：订单签收）',
+   ORDER_ID             varchar(150) not null comment '订单ID(销售订单ID)',
+   primary key (ID)
 );
 
 alter table ORD_TASK comment '订单任务';
