@@ -78,18 +78,19 @@ public interface OrdReturnSvc
 	ReceivedAndRefundedRo receivedAndRefunded(OrdOrderReturnTo to);
 	
 	/**
-	 * 查询用户退货订单信息 Title: selectOrderInfo Description:
-	 * 
+	 * 查询用户退货中订单信息 Title: selectOrderInfo Description:
 	 * @param mo
-	 * @return
-	 * @throws ParseException
-	 * @throws IntrospectionException
-	 * @throws InvocationTargetException
-	 * @throws IllegalArgumentException
-	 * @throws IllegalAccessException
-	 * @date 2018年4月9日 下午4:48:40
 	 */
-	List<Map<String, Object>> selectOrderReturnInfo(Map<String, Object> map)
+	List<Map<String, Object>> selectReturningInfo(Map<String, Object> map)
+			throws ParseException, IntrospectionException,
+			IllegalAccessException, IllegalArgumentException,
+			InvocationTargetException;
+	
+	/**
+	 * 查询用户退货完成订单信息 Title: selectOrderInfo Description:
+	 * @param mo
+	 */
+	List<Map<String, Object>> selectReturnInfo(Map<String, Object> map)
 			throws ParseException, IntrospectionException,
 			IllegalAccessException, IllegalArgumentException,
 			InvocationTargetException;
