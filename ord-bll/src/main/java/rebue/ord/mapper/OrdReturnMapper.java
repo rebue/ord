@@ -1,6 +1,8 @@
 package rebue.ord.mapper;
 
 import java.util.List;
+import java.util.Map;
+
 import org.apache.ibatis.annotations.Mapper;
 import rebue.ord.mo.OrdReturnMo;
 import rebue.robotech.mapper.MybatisBaseMapper;
@@ -132,4 +134,15 @@ public interface OrdReturnMapper extends MybatisBaseMapper<OrdReturnMo, Long> {
 	 * @date 2018年5月8日 上午11:39:22
 	 */
 	int confirmReceiptOfGoods(OrdReturnMo record);
+	
+	/**
+	 * 根据用户ID查询用户退货中订单
+	 */
+	List<OrdReturnMo> selectReturningOrder(Map<String, Object> map);
+	
+	/**
+	 * 根据用户ID查询用户退货完成订单
+	 */
+	List<OrdReturnMo> selectReturnOrder(Map<String, Object> map);
+	
 }

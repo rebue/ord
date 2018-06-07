@@ -247,7 +247,6 @@
     from ORD_ORDER_DETAIL
   </select>
   
-  </select>
   <select id="existByPrimaryKey" parameterType="java.lang.Long" resultType="boolean">
     <!--
       WARNING - @mbg.generated

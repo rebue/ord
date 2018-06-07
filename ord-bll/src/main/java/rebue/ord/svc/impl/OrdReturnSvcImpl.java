@@ -1,15 +1,5 @@
 package rebue.ord.svc.impl;
 
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Propagation;
-import org.springframework.transaction.annotation.Transactional;
-
-import rebue.ord.mapper.OrdReturnMapper;
-import rebue.ord.mo.OrdReturnMo;
-import rebue.ord.svc.OrdReturnSvc;
-
-import rebue.robotech.svc.impl.MybatisBaseSvcImpl;
-
 import java.beans.BeanInfo;
 import java.beans.IntrospectionException;
 import java.beans.Introspector;
@@ -26,32 +16,46 @@ import java.util.List;
 import java.util.Map;
 
 import javax.annotation.Resource;
+
+import org.dozer.Mapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Propagation;
+import org.springframework.transaction.annotation.Transactional;
+
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
+
 import rebue.afc.ro.RefundRo;
 import rebue.afc.svr.feign.AfcRefundSvc;
 import rebue.afc.to.RefundTo;
+import rebue.onl.mo.OnlOnlinePicMo;
+import rebue.onl.svr.feign.OnlOnlinePicSvc;
 import rebue.ord.dic.AddReturnDic;
 import rebue.ord.dic.AgreeToARefundDic;
 import rebue.ord.dic.AgreeToReturnDic;
 import rebue.ord.dic.OrderStateDic;
 import rebue.ord.dic.ReceivedAndRefundedDic;
 import rebue.ord.dic.RejectReturnDic;
+import rebue.ord.mapper.OrdReturnMapper;
 import rebue.ord.mo.OrdOrderDetailMo;
 import rebue.ord.mo.OrdOrderMo;
+import rebue.ord.mo.OrdReturnMo;
 import rebue.ord.mo.OrdReturnPicMo;
 import rebue.ord.ro.AddReturnRo;
 import rebue.ord.ro.AgreeToARefundRo;
 import rebue.ord.ro.AgreeToReturnRo;
 import rebue.ord.ro.OrdReturnRo;
+import rebue.ord.ro.OrderDetailRo;
 import rebue.ord.ro.ReceivedAndRefundedRo;
 import rebue.ord.ro.RejectReturnRo;
 import rebue.ord.svc.OrdOrderDetailSvc;
 import rebue.ord.svc.OrdOrderSvc;
 import rebue.ord.svc.OrdReturnPicSvc;
+import rebue.ord.svc.OrdReturnSvc;
 import rebue.ord.to.OrdOrderReturnTo;
+import rebue.robotech.svc.impl.MybatisBaseSvcImpl;
 
 @Service
 /**
@@ -92,6 +96,12 @@ public class OrdReturnSvcImpl extends MybatisBaseSvcImpl<OrdReturnMo, java.lang.
 	 */
 	@Resource
 	private AfcRefundSvc afcRefundSvc;
+	
+	@Resource
+	private Mapper dozerMapper;
+	
+	@Resource
+	private OnlOnlinePicSvc onlOnlinePicSvc;
 
 	/**
 	 * @mbg.generated
@@ -209,6 +219,7 @@ public class OrdReturnSvcImpl extends MybatisBaseSvcImpl<OrdReturnMo, java.lang.
 		ordReturnMo.setReturnReason(to.getReturnReason());
 		ordReturnMo.setApplicationOpId(userId);
 		ordReturnMo.setApplicationTime(date);
+		ordReturnMo.setUserId(userId);
 		_log.info("添加退货信息的参数为：{}", ordReturnMo);
 		int insertReturnresult = _mapper.insertSelective(ordReturnMo);
 		_log.info("添加退货信息的返回值为：{}", insertReturnresult);
@@ -825,15 +836,12 @@ public class OrdReturnSvcImpl extends MybatisBaseSvcImpl<OrdReturnMo, java.lang.
 	}
 
 	@Override
-	public List<Map<String, Object>> selectOrderReturnInfo(Map<String, Object> map) throws ParseException,
+	public List<Map<String, Object>> selectReturningInfo(Map<String, Object> map) throws ParseException,
 			IntrospectionException, IllegalAccessException, IllegalArgumentException, InvocationTargetException {
-		// TODO Auto-generated method stub
+		_log.info("查询用户退货中订单信息的参数为：{}", map.toString());
 		List<Map<String, Object>> list = new ArrayList<Map<String, Object>>();
-		_log.info("查询用户退货订单信息的参数为：{}", map.toString());
-		OrdReturnMo mo = new OrdReturnMo();
-		mo.setApplicationState((byte) map.get("applicationState"));
-		List<OrdReturnMo> orderReturnList = _mapper.selectSelective(mo);
-		_log.info("获取到的用户退货订单信息为：{}", String.valueOf(orderReturnList));
+		List<OrdReturnMo> orderReturnList = _mapper.selectReturningOrder(map);
+		_log.info("查询的结果为: {}", String.valueOf(orderReturnList));		
 		SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
 		if (orderReturnList.size() != 0) {
 			for (int i = 0; i < orderReturnList.size(); i++) {
@@ -856,27 +864,100 @@ public class OrdReturnSvcImpl extends MybatisBaseSvcImpl<OrdReturnMo, java.lang.
 						hm.put(key, value);
 					}
 				}
-				_log.info("查询用户订单信息hm里面的值为：{}", String.valueOf(hm));
-				List<OrdReturnRo> ordReturnRoList = new ArrayList<OrdReturnRo>();
-				for (OrdReturnRo ordReturnRo : ordReturnRoList) {
-					ordReturnRo.setId(mo.getId());
-					ordReturnRo.setReturnCode(mo.getReturnCode());
-					ordReturnRo.setOrderId(mo.getOrderId());
-					ordReturnRo.setOrderDetailId(mo.getOrderDetailId());
-					ordReturnRo.setReturnCount(mo.getReturnCount());
-					ordReturnRo.setReturnRental(mo.getReturnRental());
-					ordReturnRo.setReturnAmount1(mo.getReturnAmount1());
-					ordReturnRo.setReturnAmount2(mo.getReturnAmount2());
-					ordReturnRo.setReturnType(mo.getReturnType());
-					ordReturnRo.setApplicationState(mo.getApplicationState());
-					ordReturnRo.setRefundState(mo.getRefundState());
-					ordReturnRo.setReturnReason(mo.getReturnReason());
-					ordReturnRo.setApplicationOpId(mo.getApplicationOpId());
-					ordReturnRo.setCancelOpId(mo.getCancelOpId());
-					ordReturnRo.setCancelTime(mo.getCancelTime());
-					ordReturnRoList.add(ordReturnRo);
+				_log.info("查询用户退货订单信息hm里面的值为：{}", String.valueOf(hm));
+				OrdOrderDetailMo detailMo = new OrdOrderDetailMo();
+				detailMo.setId(Long.parseLong(String.valueOf(orderReturnList.get(i).getOrderDetailId())));
+				_log.info("查询用户退货订单获取订单详情的参数为：{}", detailMo.toString());
+				List<OrdOrderDetailMo> orderDetailList = ordOrderDetailSvc.list(detailMo);
+				_log.info("查询用户订单信息获取订单详情的返回值为：{}", String.valueOf(orderDetailList));
+				List<OrderDetailRo> orderDetailRoList = new ArrayList<OrderDetailRo>();
+				for (OrdOrderDetailMo orderDetailMo : orderDetailList) {
+					_log.info("查询用户订单信息开始获取商品主图");
+					List<OnlOnlinePicMo> onlinePicList = onlOnlinePicSvc.list(orderDetailMo.getOnlineId(), (byte) 1);
+					_log.info("获取商品主图的返回值为{}", String.valueOf(onlinePicList));
+					OrderDetailRo orderDetailRo = new OrderDetailRo();
+					orderDetailRo.setId(orderDetailMo.getId());
+					orderDetailRo.setOrderId(orderDetailMo.getOrderId());
+					orderDetailRo.setOnlineId(orderDetailMo.getOnlineId());
+					orderDetailRo.setProduceId(orderDetailMo.getProduceId());
+					orderDetailRo.setOnlineTitle(orderDetailMo.getOnlineTitle());
+					orderDetailRo.setSpecName(orderDetailMo.getSpecName());
+					orderDetailRo.setBuyCount(orderDetailMo.getBuyCount());
+					orderDetailRo.setBuyPrice(orderDetailMo.getBuyPrice());
+					orderDetailRo.setCashbackAmount(orderDetailMo.getCashbackAmount());
+					orderDetailRo.setBuyUnit(orderDetailMo.getBuyUnit());
+					orderDetailRo.setReturnState(orderDetailMo.getReturnState());
+					orderDetailRo.setGoodsQsmm(onlinePicList.get(0).getPicPath());
+					orderDetailRo.setReturnCount(orderDetailMo.getReturnCount());
+					orderDetailRo.setCashbackTotal(orderDetailMo.getCashbackTotal());
+					orderDetailRoList.add(orderDetailRo);
 				}
-				hm.put("items", ordReturnRoList);
+				hm.put("items", orderDetailRoList);
+				list.add(i, hm);
+			}
+		}
+		_log.info("最新获取用户退货订单信息的返回值为：{}", String.valueOf(list));
+		return list;
+	}
+	
+	@Override
+	public List<Map<String, Object>> selectReturnInfo(Map<String, Object> map) throws ParseException,
+			IntrospectionException, IllegalAccessException, IllegalArgumentException, InvocationTargetException {
+		_log.info("查询用户退货中订单信息的参数为：{}", map.toString());
+		List<Map<String, Object>> list = new ArrayList<Map<String, Object>>();
+		List<OrdReturnMo> orderReturnList = _mapper.selectReturnOrder(map);
+		_log.info("查询的结果为: {}", String.valueOf(orderReturnList));		
+		SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+		if (orderReturnList.size() != 0) {
+			for (int i = 0; i < orderReturnList.size(); i++) {
+				Map<String, Object> hm = new HashMap<String, Object>();
+				String l = simpleDateFormat.format(orderReturnList.get(i).getApplicationTime());
+				Date date = simpleDateFormat.parse(l);
+				long ts = date.getTime();
+				_log.info("转换时间得到的时间戳为：{}", ts);
+				hm.put("dateline", ts / 1000);
+				hm.put("finishDate", ts / 1000 + 86400);
+				hm.put("system", System.currentTimeMillis() / 1000);
+				OrdReturnMo obj = orderReturnList.get(i);
+				BeanInfo beanInfo = Introspector.getBeanInfo(obj.getClass());
+				PropertyDescriptor[] propertyDescriptors = beanInfo.getPropertyDescriptors();
+				for (PropertyDescriptor property : propertyDescriptors) {
+					String key = property.getName();
+					if (!key.equals("class")) {
+						Method getter = property.getReadMethod();
+						Object value = getter.invoke(obj);
+						hm.put(key, value);
+					}
+				}
+				_log.info("查询用户退货订单信息hm里面的值为：{}", String.valueOf(hm));
+				OrdOrderDetailMo detailMo = new OrdOrderDetailMo();
+				detailMo.setId(Long.parseLong(String.valueOf(orderReturnList.get(i).getOrderDetailId())));
+				_log.info("查询用户待返现订单获取订单详情的参数为：{}", detailMo.toString());
+				List<OrdOrderDetailMo> orderDetailList = ordOrderDetailSvc.list(detailMo);
+				_log.info("查询用户订单信息获取订单详情的返回值为：{}", String.valueOf(orderDetailList));
+				List<OrderDetailRo> orderDetailRoList = new ArrayList<OrderDetailRo>();
+				for (OrdOrderDetailMo orderDetailMo : orderDetailList) {
+					_log.info("查询用户订单信息开始获取商品主图");
+					List<OnlOnlinePicMo> onlinePicList = onlOnlinePicSvc.list(orderDetailMo.getOnlineId(), (byte) 1);
+					_log.info("获取商品主图的返回值为{}", String.valueOf(onlinePicList));
+					OrderDetailRo orderDetailRo = new OrderDetailRo();
+					orderDetailRo.setId(orderDetailMo.getId());
+					orderDetailRo.setOrderId(orderDetailMo.getOrderId());
+					orderDetailRo.setOnlineId(orderDetailMo.getOnlineId());
+					orderDetailRo.setProduceId(orderDetailMo.getProduceId());
+					orderDetailRo.setOnlineTitle(orderDetailMo.getOnlineTitle());
+					orderDetailRo.setSpecName(orderDetailMo.getSpecName());
+					orderDetailRo.setBuyCount(orderDetailMo.getBuyCount());
+					orderDetailRo.setBuyPrice(orderDetailMo.getBuyPrice());
+					orderDetailRo.setCashbackAmount(orderDetailMo.getCashbackAmount());
+					orderDetailRo.setBuyUnit(orderDetailMo.getBuyUnit());
+					orderDetailRo.setReturnState(orderDetailMo.getReturnState());
+					orderDetailRo.setGoodsQsmm(onlinePicList.get(0).getPicPath());
+					orderDetailRo.setReturnCount(orderDetailMo.getReturnCount());
+					orderDetailRo.setCashbackTotal(orderDetailMo.getCashbackTotal());
+					orderDetailRoList.add(orderDetailRo);
+				}
+				hm.put("items", orderDetailRoList);
 				list.add(i, hm);
 			}
 		}

@@ -917,7 +917,6 @@ public class OrdOrderSvcImpl extends MybatisBaseSvcImpl<OrdOrderMo, java.lang.Lo
 				hm.put("dateline", ts / 1000);
 				hm.put("finishDate", ts / 1000 + 86400);
 				hm.put("system", System.currentTimeMillis() / 1000);
-
 				OrdOrderMo obj = orderInfo.get(0);
 				BeanInfo beanInfo = Introspector.getBeanInfo(obj.getClass());
 				PropertyDescriptor[] propertyDescriptors = beanInfo.getPropertyDescriptors();

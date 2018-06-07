@@ -253,11 +253,20 @@ public class OrdReturnCtrl {
 		}
 	}
 	
-	@GetMapping("/ord/order/returnInfo")
-	List<Map<String, Object>> orderInfo(@RequestParam Map<String, Object> map) throws ParseException,
+	@GetMapping("/ord/order/returningInfo")
+	List<Map<String, Object>> getReturningInfo(@RequestParam Map<String, Object> map) throws ParseException,
 			IllegalAccessException, IllegalArgumentException, InvocationTargetException, IntrospectionException {
-		_log.info("查询退货订单信息的参数为：{}", map.toString());
-		List<Map<String, Object>> list = svc.selectOrderReturnInfo(map);
+		_log.info("查询用户退货中订单信息的参数为：{}", map.toString());
+		List<Map<String, Object>> list = svc.selectReturningInfo(map);
+		_log.info("查询退货订单信息的返回值：{}", String.valueOf(list));
+		return list;
+	}
+	
+	@GetMapping("/ord/order/returnInfo")
+	List<Map<String, Object>> getReturnInfo(@RequestParam Map<String, Object> map) throws ParseException,
+			IllegalAccessException, IllegalArgumentException, InvocationTargetException, IntrospectionException {
+		_log.info("查询用户退货完成订单信息的参数为：{}", map.toString());
+		List<Map<String, Object>> list = svc.selectReturnInfo(map);
 		_log.info("查询退货订单信息的返回值：{}", String.valueOf(list));
 		return list;
 	}
