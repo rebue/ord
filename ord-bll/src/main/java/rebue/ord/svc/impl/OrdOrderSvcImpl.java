@@ -27,9 +27,9 @@ import rebue.afc.ro.AddSettleTasksRo;
 import rebue.afc.svr.feign.AfcSettleTaskSvc;
 import rebue.afc.to.AddSettleTasksDetailTo;
 import rebue.afc.to.AddSettleTasksTo;
+import rebue.kdi.mo.KdiLogisticMo;
 import rebue.kdi.ro.EOrderRo;
 import rebue.kdi.svr.feign.KdiSvc;
-import rebue.kdi.to.EOrderTo;
 import rebue.onl.mo.OnlOnlinePicMo;
 import rebue.onl.ro.DeleteCartAndModifyInventoryRo;
 import rebue.onl.ro.ModifyOnlineSpecInfoRo;
@@ -620,34 +620,21 @@ public class OrdOrderSvcImpl extends MybatisBaseSvcImpl<OrdOrderMo, java.lang.Lo
 			throw new RuntimeException("添加签收任务出错");
 		}
 
-		String shipperCode = mo.getShipperCode();
-		EOrderTo eOrderTo = new EOrderTo();
-		eOrderTo.setOrderId(Long.parseLong(mo.getOrderCode()));
-		eOrderTo.setShipperCode(shipperCode);
-		eOrderTo.setOrderTitle(mo.getOrderTitle());
-		String senderName = "余蓓蓓";
-		if (shipperCode.equals("HTKY")) {
-			senderName = "微薄利";
-		}
-		eOrderTo.setSenderName(senderName);
-		eOrderTo.setSenderMobile("13657882081");
-		eOrderTo.setSenderProvince("广西壮族自治区");
-		eOrderTo.setSenderCity("南宁市");
-		eOrderTo.setSenderExpArea("西乡塘区");
-		eOrderTo.setSenderAddress("安吉华尔街工谷微薄利商超1楼wboly.com");
-		eOrderTo.setReceiverName(mo.getReceiverName());
-		eOrderTo.setReceiverMobile(mo.getReceiverMobile());
-		eOrderTo.setReceiverProvince(mo.getReceiverProvince());
-		eOrderTo.setReceiverCity(mo.getReceiverCity());
-		eOrderTo.setReceiverExpArea(mo.getReceiverExpArea());
-		eOrderTo.setReceiverAddress(mo.getReceiverAddress());
-		if (shipperCode.equals("YZPY")) {
-			eOrderTo.setSenderPostCode("530001");
-			eOrderTo.setReceiverPostCode(mo.getReceiverPostCode());
-		}
-		_log.info("调用快递电子面单的参数为：{}", eOrderTo.toString());
-		EOrderRo eOrderRo = kdiSvc.eorder(eOrderTo);
-		_log.info("调用快递电子面单的返回值为：{}", eOrderRo.toString());
+		KdiLogisticMo logisticMo = new KdiLogisticMo();
+		logisticMo.setShipperCode(mo.getShipperCode());
+		logisticMo.setOrderId(Long.parseLong(mo.getOrderCode()));
+		logisticMo.setOrderTitle(mo.getOrderTitle());
+		logisticMo.setReceiverName(mo.getReceiverName());
+		logisticMo.setReceiverProvince(mo.getReceiverProvince());
+		logisticMo.setReceiverCity(mo.getReceiverCity());
+		logisticMo.setReceiverExpArea(mo.getReceiverExpArea());
+		logisticMo.setReceiverAddress(mo.getReceiverAddress());
+		logisticMo.setReceiverPostCode(mo.getReceiverPostCode());
+		logisticMo.setReceiverTel(mo.getReceiverTel());
+		logisticMo.setReceiverMobile(mo.getReceiverMobile());
+		_log.info("调用快递电子面单的参数为：{}", logisticMo);
+		EOrderRo eOrderRo = kdiSvc.exaddKdiLogistic(logisticMo);
+		_log.info("调用快递电子面单的返回值为：{}", eOrderRo);
 		if (eOrderRo.getResult().getCode() == -1) {
 			_log.error("调用快递电子面单出现参数错误");
 			throw new RuntimeException("调用快递电子面单参数错误");
