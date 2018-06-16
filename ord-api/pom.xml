@@ -25,6 +25,12 @@
 			<groupId>com.github.rebue.robotech</groupId>
 			<artifactId>robotech-api</artifactId>
 		</dependency>
+		
+		<dependency>
+			<groupId>com.github.rebue.kdi</groupId>
+			<artifactId>kdi-api</artifactId>
+			<version>1.0.0</version>
+		</dependency>
 
 		<dependency>
 			<groupId>io.springfox</groupId>

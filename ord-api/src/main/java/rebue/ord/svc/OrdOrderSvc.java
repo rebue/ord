@@ -10,6 +10,8 @@ import rebue.ord.ro.SetUpExpressCompanyRo;
 import rebue.ord.ro.ShipmentConfirmationRo;
 import rebue.ord.ro.UsersToPlaceTheOrderRo;
 import rebue.ord.to.OrderSignInTo;
+import rebue.ord.to.ShipmentConfirmationTo;
+
 import java.beans.IntrospectionException;
 import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
@@ -93,7 +95,7 @@ public interface OrdOrderSvc extends MybatisBaseSvc<OrdOrderMo, java.lang.Long> 
 	 * @return
 	 * @date 2018年4月13日 下午6:19:09
 	 */
-	ShipmentConfirmationRo shipmentConfirmation(OrdOrderMo mo);
+	ShipmentConfirmationRo shipmentConfirmation(ShipmentConfirmationTo mo);
 
 	/**
 	 * 订单签收 Title: orderSignIn Description:

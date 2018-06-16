@@ -30,6 +30,7 @@ import rebue.ord.ro.ShipmentConfirmationRo;
 import rebue.ord.ro.UsersToPlaceTheOrderRo;
 import rebue.ord.svc.OrdOrderSvc;
 import rebue.ord.to.OrderSignInTo;
+import rebue.ord.to.ShipmentConfirmationTo;
 
 import com.github.pagehelper.PageInfo;
 import java.util.List;
@@ -264,7 +265,7 @@ public class OrdOrderCtrl {
 	 */
 	@SuppressWarnings("finally")
 	@PutMapping("/ord/order/shipmentconfirmation")
-	ShipmentConfirmationRo shipmentConfirmation(OrdOrderMo qo) {
+	ShipmentConfirmationRo shipmentConfirmation(ShipmentConfirmationTo qo) {
 		_log.info("确认发货的参数为：{}", qo);
 		ShipmentConfirmationRo confirmationRo = new ShipmentConfirmationRo();
 		try {

@@ -20,6 +20,7 @@ import rebue.ord.dic.SetUpExpressCompanyDic;
 import rebue.ord.dic.ShipmentConfirmationDic;
 import rebue.ord.dic.UsersToPlaceTheOrderDic;
 import rebue.ord.to.OrderSignInTo;
+import rebue.ord.to.ShipmentConfirmationTo;
 import rebue.afc.dic.SettleTaskExecuteStateDic;
 import rebue.afc.dic.TradeTypeDic;
 import rebue.afc.mo.AfcSettleTaskMo;
@@ -29,6 +30,7 @@ import rebue.afc.to.AddSettleTasksDetailTo;
 import rebue.afc.to.AddSettleTasksTo;
 import rebue.kdi.mo.KdiLogisticMo;
 import rebue.kdi.ro.EOrderRo;
+import rebue.kdi.ro.ExaddKdiLogisticRo;
 import rebue.kdi.svr.feign.KdiSvc;
 import rebue.onl.mo.OnlOnlinePicMo;
 import rebue.onl.ro.DeleteCartAndModifyInventoryRo;
@@ -53,6 +55,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import javax.annotation.Resource;
+
+import org.dozer.Mapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import com.fasterxml.jackson.core.JsonParseException;
@@ -145,6 +149,9 @@ public class OrdOrderSvcImpl extends MybatisBaseSvcImpl<OrdOrderMo, java.lang.Lo
 	 */
 	@Value("${ord.signin-order-time}")
 	private int signinOrderTime;
+	
+	@Resource
+	private Mapper dozerMapper;
 
 	/**
 	 * @mbg.generated
@@ -595,8 +602,9 @@ public class OrdOrderSvcImpl extends MybatisBaseSvcImpl<OrdOrderMo, java.lang.Lo
 	 */
 	@Override
 	@Transactional(readOnly = false, propagation = Propagation.REQUIRED)
-	public ShipmentConfirmationRo shipmentConfirmation(OrdOrderMo mo) {
+	public ShipmentConfirmationRo shipmentConfirmation(ShipmentConfirmationTo to) {
 		ShipmentConfirmationRo confirmationRo = new ShipmentConfirmationRo();
+		OrdOrderMo mo = dozerMapper.map(to, OrdOrderMo.class);
 		Date date = new Date();
 		mo.setSendTime(date);
 
@@ -621,6 +629,7 @@ public class OrdOrderSvcImpl extends MybatisBaseSvcImpl<OrdOrderMo, java.lang.Lo
 		}
 
 		KdiLogisticMo logisticMo = new KdiLogisticMo();
+		logisticMo.setShipperId(to.getShipperId());
 		logisticMo.setShipperCode(mo.getShipperCode());
 		logisticMo.setOrderId(Long.parseLong(mo.getOrderCode()));
 		logisticMo.setOrderTitle(mo.getOrderTitle());
@@ -633,24 +642,26 @@ public class OrdOrderSvcImpl extends MybatisBaseSvcImpl<OrdOrderMo, java.lang.Lo
 		logisticMo.setReceiverTel(mo.getReceiverTel());
 		logisticMo.setReceiverMobile(mo.getReceiverMobile());
 		_log.info("调用快递电子面单的参数为：{}", logisticMo);
-		EOrderRo eOrderRo = kdiSvc.exaddKdiLogistic(logisticMo);
-		_log.info("调用快递电子面单的返回值为：{}", eOrderRo);
-		if (eOrderRo.getResult().getCode() == -1) {
+		ExaddKdiLogisticRo exaddKdiLogisticRo = kdiSvc.exaddKdiLogistic(logisticMo);
+		_log.info("调用快递电子面单的返回值为：{}", exaddKdiLogisticRo);
+		if (exaddKdiLogisticRo.getResult().getCode() == -1) {
 			_log.error("调用快递电子面单出现参数错误");
 			throw new RuntimeException("调用快递电子面单参数错误");
 		}
-		if (eOrderRo.getResult().getCode() == -2) {
+		if (exaddKdiLogisticRo.getResult().getCode() == -2) {
 			_log.error("重复调用快递电子面单");
 			throw new RuntimeException("该订单已发货");
 		}
-		if (eOrderRo.getResult().getCode() == -3) {
+		if (exaddKdiLogisticRo.getResult().getCode() == -3) {
 			_log.error("调用快递电子面单失败");
 			throw new RuntimeException("调用快递电子面单失败");
 		}
 
 		mo.setOrderState((byte) OrderStateDic.ALREADY_PAY.getCode());
-		mo.setLogisticCode(eOrderRo.getLogisticCode());
-		mo.setLogisticId(eOrderRo.getLogisticId());
+		mo.setLogisticCode(exaddKdiLogisticRo.getLogisticCode());
+		mo.setLogisticId(exaddKdiLogisticRo.getLogisticId());
+		mo.setShipperCode(exaddKdiLogisticRo.getShipperCode());
+		mo.setShipperName(exaddKdiLogisticRo.getShipperName());
 		_log.info("确认发货并修改订单状态的参数为：{}", mo);
 		int result = _mapper.shipmentConfirmation(mo);
 		_log.info("确认发货并修改订单状态的返回值为：{}", result);
@@ -665,10 +676,10 @@ public class OrdOrderSvcImpl extends MybatisBaseSvcImpl<OrdOrderMo, java.lang.Lo
 		_log.info("调用快递电子面单成功，返回值为：{}", result);
 		confirmationRo.setResult(ShipmentConfirmationDic.SUCCESS);
 		confirmationRo.setMsg("确认发货成功");
-		confirmationRo.setLogisticId(eOrderRo.getLogisticId());
-		confirmationRo.setLogisticCode(eOrderRo.getLogisticCode());
-		confirmationRo.setPrintPage(eOrderRo.getPrintPage());
-		confirmationRo.setFailReason(eOrderRo.getFailReason());
+		confirmationRo.setLogisticId(exaddKdiLogisticRo.getLogisticId());
+		confirmationRo.setLogisticCode(exaddKdiLogisticRo.getLogisticCode());
+		confirmationRo.setPrintPage(exaddKdiLogisticRo.getPrintPage());
+		confirmationRo.setFailReason(exaddKdiLogisticRo.getFailReason());
 		return confirmationRo;
 	}
 
