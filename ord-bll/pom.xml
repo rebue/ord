@@ -1,4 +1,5 @@
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 	<modelVersion>4.0.0</modelVersion>
 
@@ -7,7 +8,7 @@
 		<artifactId>ord</artifactId>
 		<version>1.0.0</version>
 	</parent>
-	
+
 	<artifactId>ord-bll</artifactId>
 
 	<dependencies>
@@ -30,33 +31,30 @@
 			<groupId>com.github.rebue.sbs</groupId>
 			<artifactId>redis-spring-boot-starter</artifactId>
 		</dependency>
-		
+
 		<dependency>
 			<groupId>com.github.rebue.sbs</groupId>
 			<artifactId>rabbit-spring-boot-starter</artifactId>
 		</dependency>
-		
+
 		<dependency>
 			<groupId>com.github.rebue.sbs</groupId>
 			<artifactId>dozer-spring-boot-starter</artifactId>
 		</dependency>
-		
+
 		<dependency>
 			<groupId>com.github.rebue.onl</groupId>
 			<artifactId>onl-svr-feign</artifactId>
-			<version>1.0.0</version>
 		</dependency>
-		
+
 		<dependency>
 			<groupId>com.github.rebue.afc</groupId>
 			<artifactId>afc-svr-feign</artifactId>
-			<version>1.0.7</version>
 		</dependency>
-		
+
 		<dependency>
 			<groupId>com.github.rebue.kdi</groupId>
 			<artifactId>kdi-svr-feign</artifactId>
-			<version>1.0.0</version>
 		</dependency>
 		<!-- <dependency> -->
 		<!-- <groupId>com.github.dozermapper</groupId> -->
@@ -82,6 +80,11 @@
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter-amqp</artifactId>
 		</dependency>
+
+<!-- 		<dependency> -->
+<!-- 			<groupId>com.github.rebue.kdi</groupId> -->
+<!-- 			<artifactId>kdi-api</artifactId> -->
+<!-- 		</dependency> -->
 
 	</dependencies>
 </project>

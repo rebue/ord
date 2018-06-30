@@ -29,7 +29,6 @@
 		<dependency>
 			<groupId>com.github.rebue.kdi</groupId>
 			<artifactId>kdi-api</artifactId>
-			<version>1.0.0</version>
 		</dependency>
 
 		<dependency>
