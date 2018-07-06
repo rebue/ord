@@ -1,44 +1,4 @@
 package rebue.ord.svc.impl;
-
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Propagation;
-import org.springframework.transaction.annotation.Transactional;
-
-import rebue.ord.mapper.OrdOrderMapper;
-import rebue.ord.mo.OrdOrderMo;
-import rebue.ord.mo.OrdTaskMo;
-import rebue.ord.svc.OrdOrderSvc;
-import rebue.ord.svc.OrdTaskSvc;
-import rebue.robotech.svc.impl.MybatisBaseSvcImpl;
-import org.springframework.beans.factory.annotation.Value;
-import rebue.ord.dic.CancelDeliveryDic;
-import rebue.ord.dic.CancellationOfOrderDic;
-import rebue.ord.dic.ModifyOrderRealMoneyDic;
-import rebue.ord.dic.OrderSignInDic;
-import rebue.ord.dic.OrderStateDic;
-import rebue.ord.dic.SetUpExpressCompanyDic;
-import rebue.ord.dic.ShipmentConfirmationDic;
-import rebue.ord.dic.UsersToPlaceTheOrderDic;
-import rebue.ord.to.OrderSignInTo;
-import rebue.ord.to.ShipmentConfirmationTo;
-import rebue.afc.dic.SettleTaskExecuteStateDic;
-import rebue.afc.dic.TradeTypeDic;
-import rebue.afc.mo.AfcSettleTaskMo;
-import rebue.afc.ro.AddSettleTasksRo;
-import rebue.afc.svr.feign.AfcSettleTaskSvc;
-import rebue.afc.to.AddSettleTasksDetailTo;
-import rebue.afc.to.AddSettleTasksTo;
-import rebue.kdi.mo.KdiLogisticMo;
-import rebue.kdi.ro.EOrderRo;
-import rebue.kdi.ro.ExaddKdiLogisticRo;
-import rebue.kdi.svr.feign.KdiSvc;
-import rebue.onl.mo.OnlOnlinePicMo;
-import rebue.onl.ro.DeleteCartAndModifyInventoryRo;
-import rebue.onl.ro.ModifyOnlineSpecInfoRo;
-import rebue.onl.svr.feign.OnlCartSvc;
-import rebue.onl.svr.feign.OnlOnlinePicSvc;
-import rebue.onl.svr.feign.OnlOnlineSpecSvc;
-import rebue.onl.svr.feign.OnlOnlineSvc;
 import java.beans.BeanInfo;
 import java.beans.IntrospectionException;
 import java.beans.Introspector;
@@ -46,6 +6,7 @@ import java.beans.PropertyDescriptor;
 import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.math.BigDecimal;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -55,16 +16,49 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import javax.annotation.Resource;
-
 import org.dozer.Mapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Propagation;
+import org.springframework.transaction.annotation.Transactional;
 import com.fasterxml.jackson.core.JsonParseException;
 import com.fasterxml.jackson.databind.JavaType;
 import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import rebue.afc.dic.SettleTaskExecuteStateDic;
+import rebue.afc.dic.TradeTypeDic;
+import rebue.afc.mo.AfcSettleTaskMo;
+import rebue.afc.ro.AddSettleTasksRo;
+import rebue.afc.svr.feign.AfcSettleTaskSvc;
+import rebue.afc.to.AddSettleTasksDetailTo;
+import rebue.afc.to.AddSettleTasksTo;
+import rebue.kdi.mo.KdiCompanyMo;
+import rebue.kdi.mo.KdiSenderMo;
+import rebue.kdi.ro.EOrderRo;
+import rebue.kdi.svr.feign.KdiSvc;
+import rebue.kdi.to.EOrderTo;
+import rebue.onl.mo.OnlOnlinePicMo;
+import rebue.onl.ro.DeleteCartAndModifyInventoryRo;
+import rebue.onl.ro.ModifyOnlineSpecInfoRo;
+import rebue.onl.svr.feign.OnlCartSvc;
+import rebue.onl.svr.feign.OnlOnlinePicSvc;
+import rebue.onl.svr.feign.OnlOnlineSpecSvc;
+import rebue.onl.svr.feign.OnlOnlineSvc;
+import rebue.ord.dic.CancelDeliveryDic;
+import rebue.ord.dic.CancellationOfOrderDic;
+import rebue.ord.dic.ModifyOrderRealMoneyDic;
+import rebue.ord.dic.OrderSignInDic;
+import rebue.ord.dic.OrderStateDic;
+import rebue.ord.dic.SetUpExpressCompanyDic;
+import rebue.ord.dic.ShipmentConfirmationDic;
+import rebue.ord.dic.UsersToPlaceTheOrderDic;
+import rebue.ord.mapper.OrdOrderMapper;
 import rebue.ord.mo.OrdAddrMo;
 import rebue.ord.mo.OrdOrderDetailMo;
+import rebue.ord.mo.OrdOrderMo;
+import rebue.ord.mo.OrdTaskMo;
 import rebue.ord.ro.CancelDeliveryRo;
 import rebue.ord.ro.CancellationOfOrderRo;
 import rebue.ord.ro.ModifyOrderRealMoneyRo;
@@ -76,7 +70,11 @@ import rebue.ord.ro.ShipmentConfirmationRo;
 import rebue.ord.ro.UsersToPlaceTheOrderRo;
 import rebue.ord.svc.OrdAddrSvc;
 import rebue.ord.svc.OrdOrderDetailSvc;
-import java.math.BigDecimal;
+import rebue.ord.svc.OrdOrderSvc;
+import rebue.ord.svc.OrdTaskSvc;
+import rebue.ord.to.OrderSignInTo;
+import rebue.ord.to.ShipmentConfirmationTo;
+import rebue.robotech.svc.impl.MybatisBaseSvcImpl;
 
 @Service
 /**
@@ -607,7 +605,6 @@ public class OrdOrderSvcImpl extends MybatisBaseSvcImpl<OrdOrderMo, java.lang.Lo
 		OrdOrderMo mo = dozerMapper.map(to, OrdOrderMo.class);
 		Date date = new Date();
 		mo.setSendTime(date);
-
 		Calendar calendar = Calendar.getInstance();
 		calendar.setTime(date);
 		calendar.add(Calendar.HOUR, signinOrderTime);
@@ -627,41 +624,57 @@ public class OrdOrderSvcImpl extends MybatisBaseSvcImpl<OrdOrderMo, java.lang.Lo
 			_log.error("确认发货添加签收任务时出错，订单编号为：{}", mo.getOrderCode());
 			throw new RuntimeException("添加签收任务出错");
 		}
-
-		KdiLogisticMo logisticMo = new KdiLogisticMo();
-		logisticMo.setShipperId(to.getShipperId());
-		logisticMo.setShipperCode(mo.getShipperCode());
-		logisticMo.setOrderId(Long.parseLong(mo.getOrderCode()));
-		logisticMo.setOrderTitle(mo.getOrderTitle());
-		logisticMo.setReceiverName(mo.getReceiverName());
-		logisticMo.setReceiverProvince(mo.getReceiverProvince());
-		logisticMo.setReceiverCity(mo.getReceiverCity());
-		logisticMo.setReceiverExpArea(mo.getReceiverExpArea());
-		logisticMo.setReceiverAddress(mo.getReceiverAddress());
-		logisticMo.setReceiverPostCode(mo.getReceiverPostCode());
-		logisticMo.setReceiverTel(mo.getReceiverTel());
-		logisticMo.setReceiverMobile(mo.getReceiverMobile());
-		_log.info("调用快递电子面单的参数为：{}", logisticMo);
-		ExaddKdiLogisticRo exaddKdiLogisticRo = kdiSvc.exaddKdiLogistic(logisticMo);
-		_log.info("调用快递电子面单的返回值为：{}", exaddKdiLogisticRo);
-		if (exaddKdiLogisticRo.getResult().getCode() == -1) {
+		EOrderTo eoderTo=new EOrderTo();
+		eoderTo.setShipperId(to.getShipperId());
+		eoderTo.setOrderId(Long.parseLong(mo.getOrderCode()));
+		eoderTo.setOrderTitle(mo.getOrderTitle());
+		eoderTo.setReceiverName(mo.getReceiverName());
+		eoderTo.setReceiverProvince(mo.getReceiverProvince());
+		eoderTo.setReceiverCity(mo.getReceiverCity());
+		eoderTo.setReceiverExpArea(mo.getReceiverExpArea());
+		eoderTo.setReceiverAddress(mo.getReceiverAddress());
+		eoderTo.setReceiverPostCode(mo.getReceiverPostCode());
+		eoderTo.setReceiverTel(mo.getReceiverTel());
+		eoderTo.setReceiverMobile(mo.getReceiverMobile());
+		//获取并手动设置默认发件人的信息
+		KdiSenderMo  kdiSenderMo =new KdiSenderMo();
+		kdiSenderMo.setIsDefault(true);
+		Map<String,Object> map =new HashMap<>();
+		map.put("mo", kdiSenderMo);
+		_log.info("获取默认发件人的参数为：{}", String.valueOf(map));
+		List<KdiSenderMo> senderInfo = kdiSvc.getSenderInfo(map);
+		_log.info("获取默认发件人返回值为：{}", senderInfo);
+		if(senderInfo==null ) {
+			_log.info("默认发件人为null");
+			return null;
+		}else {
+			eoderTo.setSenderName(senderInfo.get(0).getSenderName());
+			eoderTo.setSenderMobile(senderInfo.get(0).getSenderMobile());
+			eoderTo.setSenderTel(senderInfo.get(0).getSenderTel());
+			eoderTo.setSenderProvince(senderInfo.get(0).getSenderProvince());
+			eoderTo.setSenderCity(senderInfo.get(0).getSenderCity());
+			eoderTo.setSenderAddress(senderInfo.get(0).getSenderAddress());
+			eoderTo.setSenderExpArea(senderInfo.get(0).getSenderExpArea());
+		}
+		_log.info("调用快递电子面单的参数为：{}", eoderTo);
+		EOrderRo eOrderRo = kdiSvc.eorder(eoderTo);
+		_log.info("调用快递电子面单的返回值为：{}", eOrderRo);
+		if (eOrderRo.getResult().getCode() == -1) {
 			_log.error("调用快递电子面单出现参数错误");
 			throw new RuntimeException("调用快递电子面单参数错误");
 		}
-		if (exaddKdiLogisticRo.getResult().getCode() == -2) {
+		if (eOrderRo.getResult().getCode() == -2) {
 			_log.error("重复调用快递电子面单");
 			throw new RuntimeException("该订单已发货");
 		}
-		if (exaddKdiLogisticRo.getResult().getCode() == -3) {
+		if (eOrderRo.getResult().getCode() == -3) {
 			_log.error("调用快递电子面单失败");
 			throw new RuntimeException("调用快递电子面单失败");
 		}
 
 		mo.setOrderState((byte) OrderStateDic.ALREADY_PAY.getCode());
-		mo.setLogisticCode(exaddKdiLogisticRo.getLogisticCode());
-		mo.setLogisticId(exaddKdiLogisticRo.getLogisticId());
-		mo.setShipperCode(exaddKdiLogisticRo.getShipperCode());
-		mo.setShipperName(exaddKdiLogisticRo.getShipperName());
+		mo.setLogisticCode(eOrderRo.getLogisticCode());
+		mo.setLogisticId(eOrderRo.getLogisticId());
 		_log.info("确认发货并修改订单状态的参数为：{}", mo);
 		int result = _mapper.shipmentConfirmation(mo);
 		_log.info("确认发货并修改订单状态的返回值为：{}", result);
@@ -676,10 +689,24 @@ public class OrdOrderSvcImpl extends MybatisBaseSvcImpl<OrdOrderMo, java.lang.Lo
 		_log.info("调用快递电子面单成功，返回值为：{}", result);
 		confirmationRo.setResult(ShipmentConfirmationDic.SUCCESS);
 		confirmationRo.setMsg("确认发货成功");
-		confirmationRo.setLogisticId(exaddKdiLogisticRo.getLogisticId());
-		confirmationRo.setLogisticCode(exaddKdiLogisticRo.getLogisticCode());
-		confirmationRo.setPrintPage(exaddKdiLogisticRo.getPrintPage());
-		confirmationRo.setFailReason(exaddKdiLogisticRo.getFailReason());
+		confirmationRo.setLogisticId(eOrderRo.getLogisticId());
+		confirmationRo.setLogisticCode(eOrderRo.getLogisticCode());
+		confirmationRo.setPrintPage(eOrderRo.getPrintPage());
+		confirmationRo.setFailReason(eOrderRo.getFailReason());
+		//获取并设置快递公司
+		List<KdiCompanyMo> CompanyList = kdiSvc.kdiCompanyList();
+		_log.info("获取到的所以快递公司：{}", CompanyList);
+		OrdOrderMo  ordOrderMo=new OrdOrderMo();
+		if(CompanyList!=null) {
+			for (int i = 0; i < CompanyList.size(); i++) {
+				if(CompanyList.get(i).getId().equals(to.getShipperId())) {
+					ordOrderMo.setShipperName(CompanyList.get(i).getCompanyName());
+					ordOrderMo.setOrderCode(to.getOrderCode());
+				}
+			}
+			SetUpExpressCompanyRo setResult=setUpExpressCompany(ordOrderMo);
+			_log.info("设置快递公司的返回值为：{}", setResult);
+		}
 		return confirmationRo;
 	}
 

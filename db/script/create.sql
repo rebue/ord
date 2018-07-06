@@ -1,6 +1,6 @@
 /*==============================================================*/
 /* DBMS name:      MySQL 5.0                                    */
-/* Created on:     2018/6/6 10:39:01                            */
+/* Created on:     2018/7/3 16:29:09                            */
 /*==============================================================*/
 
 
@@ -67,7 +67,7 @@ create table ORD_ORDER
    CLOSE_TIME           datetime comment '结算时间',
    CANCEL_TIME          datetime comment '作废时间',
    LOGISTIC_ID          bigint comment '物流订单ID',
-   SHIPPER_CODE         varchar(10) comment '快递公司编号',
+   SHIPPER_ID           bigint comment '快递公司ID',
    SHIPPER_NAME         varchar(100) comment '快递公司名称',
    LOGISTIC_CODE        varchar(30) comment '快递单号',
    RECEIVER_NAME        varchar(30) comment '收件人名称',
@@ -86,7 +86,7 @@ create table ORD_ORDER
    RECEIVED_OP_ID       bigint comment '签收人',
    CANCEL_REASON        varchar(300) comment '作废原因',
    primary key (ID),
-   key AK_SHIPPER_LOGISTIC_CODE (SHIPPER_CODE, LOGISTIC_CODE)
+   key AK_SHIPPER_LOGISTIC_CODE (SHIPPER_ID, LOGISTIC_CODE)
 );
 
 alter table ORD_ORDER comment '订单信息';
