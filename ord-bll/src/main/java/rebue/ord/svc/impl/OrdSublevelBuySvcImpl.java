@@ -1,11 +1,14 @@
 package rebue.ord.svc.impl;
 
+
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
-import rebue.ord.mapper.OrdReturnPicMapper;
-import rebue.ord.mo.OrdReturnPicMo;
-import rebue.ord.svc.OrdReturnPicSvc;
+
+import rebue.ord.mapper.OrdSublevelBuyMapper;
+import rebue.ord.mo.OrdSublevelBuyMo;
+import rebue.ord.svc.OrdSublevelBuySvc;
+
 import rebue.robotech.svc.impl.MybatisBaseSvcImpl;
 
 @Service
@@ -21,18 +24,19 @@ import rebue.robotech.svc.impl.MybatisBaseSvcImpl;
  * </pre>
  */
 @Transactional(readOnly = true, propagation = Propagation.SUPPORTS)
-public class OrdReturnPicSvcImpl extends MybatisBaseSvcImpl<OrdReturnPicMo, java.lang.Long, OrdReturnPicMapper> implements OrdReturnPicSvc {
+public class OrdSublevelBuySvcImpl extends MybatisBaseSvcImpl<OrdSublevelBuyMo, java.lang.Long, OrdSublevelBuyMapper> implements OrdSublevelBuySvc {
 
     /**
      * @mbg.generated
      */
     @Override
     @Transactional(readOnly = false, propagation = Propagation.REQUIRED)
-    public int add(OrdReturnPicMo mo) {
+    public int add(OrdSublevelBuyMo mo) {
         // 如果id为空那么自动生成分布式id
         if (mo.getId() == null || mo.getId() == 0) {
             mo.setId(_idWorker.getId());
         }
         return super.add(mo);
     }
+
 }

@@ -2,15 +2,12 @@ package rebue.ord.svc.impl;
 
 import java.util.Date;
 import java.util.List;
-
 import javax.annotation.Resource;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
-
 import rebue.ord.dic.OrderStateDic;
 import rebue.ord.dic.TaskExecuteStateDic;
 import rebue.ord.mapper.OrdTaskMapper;
@@ -39,126 +36,117 @@ import rebue.wheel.NetUtils;
 @Transactional(readOnly = true, propagation = Propagation.SUPPORTS)
 public class OrdTaskSvcImpl extends MybatisBaseSvcImpl<OrdTaskMo, java.lang.Long, OrdTaskMapper> implements OrdTaskSvc {
 
-	private final static Logger _log = LoggerFactory.getLogger(OrdTaskSvcImpl.class);
+    /**
+     * @mbg.generated
+     */
+    @Override
+    @Transactional(readOnly = false, propagation = Propagation.REQUIRED)
+    public int add(OrdTaskMo mo) {
+        // 如果id为空那么自动生成分布式id
+        if (mo.getId() == null || mo.getId() == 0) {
+            mo.setId(_idWorker.getId());
+        }
+        return super.add(mo);
+    }
 
-	@Resource
-	private OrdOrderSvc ordOrderSvc;
+    private static final Logger _log = LoggerFactory.getLogger(OrdTaskSvcImpl.class);
 
-	/**
-	 * @mbg.generated
-	 */
-	@Override
-	@Transactional(readOnly = false, propagation = Propagation.REQUIRED)
-	public int add(OrdTaskMo mo) {
-		// 如果id为空那么自动生成分布式id
-		if (mo.getId() == null || mo.getId() == 0) {
-			mo.setId(_idWorker.getId());
-		}
-		return super.add(mo);
-	}
+    @Resource
+    private OrdOrderSvc ordOrderSvc;
 
-	/**
-	 * 执行订单签收任务 Title: executeSignInOrderTask Description:
-	 * 
-	 * @param executeFactTime
-	 * @param id
-	 * @param doneState
-	 * @param noneState
-	 * @return
-	 * @date 2018年5月21日 下午3:30:06
-	 */
-	@Override
-	@Transactional(readOnly = false, propagation = Propagation.REQUIRED)
-	public void executeSignInOrderTask(long id) {
-		_log.info("执行订单签收任务获取任务信息的参数为：{}", id);
-		// 获取任务信息
-		OrdTaskMo ordTaskMo = _mapper.selectByPrimaryKey(id);
-		_log.info("执行订单签收任务获取任务信息的返回值为:{}", ordTaskMo);
-		if (ordTaskMo == null) {
-			_log.error("执行订单签收任务时发现任务不存在，任务编号为：{}", id);
-			throw new RuntimeException("任务不存在");
-		}
+    /**
+     *  执行订单签收任务 Title: executeSignInOrderTask Description:
+     *
+     *  @param executeFactTime
+     *  @param id
+     *  @param doneState
+     *  @param noneState
+     *  @return
+     *  @date 2018年5月21日 下午3:30:06
+     */
+    @Override
+    @Transactional(readOnly = false, propagation = Propagation.REQUIRED)
+    public void executeSignInOrderTask(long id) {
+        _log.info("执行订单签收任务获取任务信息的参数为：{}", id);
+        // 获取任务信息
+        OrdTaskMo ordTaskMo = _mapper.selectByPrimaryKey(id);
+        _log.info("执行订单签收任务获取任务信息的返回值为:{}", ordTaskMo);
+        if (ordTaskMo == null) {
+            _log.error("执行订单签收任务时发现任务不存在，任务编号为：{}", id);
+            throw new RuntimeException("任务不存在");
+        }
+        if (ordTaskMo.getExecuteState() != TaskExecuteStateDic.NOT_EXECUTE.getCode()) {
+            _log.error("执行订单签收任务时发现该任务不处于待执行状态，任务id为：{}", id);
+            throw new RuntimeException("订单不处于待执行状态");
+        }
+        _log.info("执行订单签收任务根据订单编号查询订单状态的参数为：{}", ordTaskMo.getOrderId());
+        // 根据订单编号查询订单状态
+        byte orderState = ordOrderSvc.selectOrderStateByOrderCode(ordTaskMo.getOrderId());
+        _log.info("执行订单签收任务根据订单编号查询订单状态的返回值为：{}", orderState);
+        if (orderState == OrderStateDic.ALREADY_DELIVER_GOODS.getCode()) {
+            try {
+                OrderSignInTo orderSignInTo = new OrderSignInTo();
+                orderSignInTo.setOrderCode(ordTaskMo.getOrderId());
+                orderSignInTo.setIp(NetUtils.getFirstIpOfLocalHost());
+                orderSignInTo.setMac(NetUtils.getFirstMacAddrOfLocalHost());
+                _log.info("执行订单签收任务订单签收的参数为：{}", ordTaskMo);
+                // 订单签收
+                OrderSignInRo orderSignInRo = ordOrderSvc.orderSignIn(orderSignInTo);
+                _log.info("执行订单签收任务订单签收的返回值为：{}", orderSignInRo);
+            } catch (RuntimeException e) {
+                _log.error("执行订单签收任务订单签收时出错", e);
+                throw new RuntimeException("订单签收出错");
+            }
+        }
+        Date executeFactTime = new Date();
+        _log.info("执行订单签收任务的参数为：{}", id);
+        _mapper.executeSignInOrderTask(executeFactTime, id, (byte) TaskExecuteStateDic.ALREADY_EXECUTE.getCode(), (byte) TaskExecuteStateDic.NOT_EXECUTE.getCode());
+    }
 
-		if (ordTaskMo.getExecuteState() != TaskExecuteStateDic.NOT_EXECUTE.getCode()) {
-			_log.error("执行订单签收任务时发现该任务不处于待执行状态，任务id为：{}", id);
-			throw new RuntimeException("订单不处于待执行状态");
-		}
-		
-		_log.info("执行订单签收任务根据订单编号查询订单状态的参数为：{}", ordTaskMo.getOrderId());
-		// 根据订单编号查询订单状态
-		byte orderState = ordOrderSvc.selectOrderStateByOrderCode(ordTaskMo.getOrderId());
-		_log.info("执行订单签收任务根据订单编号查询订单状态的返回值为：{}", orderState);
-		if (orderState == OrderStateDic.ALREADY_DELIVER_GOODS.getCode()) {
-			try {
-				OrderSignInTo orderSignInTo = new OrderSignInTo();
-				orderSignInTo.setOrderCode(ordTaskMo.getOrderId());
-				orderSignInTo.setIp(NetUtils.getFirstIpOfLocalHost());
-				orderSignInTo.setMac(NetUtils.getFirstMacAddrOfLocalHost());
-				_log.info("执行订单签收任务订单签收的参数为：{}", ordTaskMo);
-				// 订单签收
-				OrderSignInRo orderSignInRo = ordOrderSvc.orderSignIn(orderSignInTo);
-				_log.info("执行订单签收任务订单签收的返回值为：{}", orderSignInRo);
-			} catch (RuntimeException e) {
-				_log.error("执行订单签收任务订单签收时出错", e);
-				throw new RuntimeException("订单签收出错");
-			}
-		}
+    // 执行取消订单任务
+    @Override
+    @Transactional(readOnly = false, propagation = Propagation.REQUIRED)
+    public void executeCancelOrderTask(long id) {
+        _log.info("执行订单取消任务获取任务信息的参数为：{}", id);
+        // 获取任务信息
+        OrdTaskMo ordTaskMo = _mapper.selectByPrimaryKey(id);
+        _log.info("执行订单取消任务获取任务信息的返回值为:{}", ordTaskMo);
+        if (ordTaskMo == null) {
+            _log.error("执行订单取消任务时发现任务不存在，任务编号为：{}", id);
+            throw new RuntimeException("任务不存在");
+        }
+        if (ordTaskMo.getExecuteState() != TaskExecuteStateDic.NOT_EXECUTE.getCode()) {
+            _log.error("执行订单取消任务时发现该任务不处于待执行状态，任务id为：{}", id);
+            throw new RuntimeException("订单不处于待执行状态");
+        }
+        _log.info("执行订单取消任务根据订单编号查询订单状态的参数为：{}", ordTaskMo.getOrderId());
+        // 根据订单编号查询订单状态
+        byte orderState = ordOrderSvc.selectOrderStateByOrderCode(ordTaskMo.getOrderId());
+        _log.info("执行订单取消任务根据订单编号查询订单状态的返回值为：{}", orderState);
+        if (orderState == OrderStateDic.ALREADY_PLACE_AN_ORDER.getCode()) {
+            try {
+                OrdOrderMo ordOrderMo = new OrdOrderMo();
+                ordOrderMo.setOrderCode(ordTaskMo.getOrderId());
+                _log.info("执行订单取消任务订单签收的参数为：{}", ordTaskMo.getOrderId());
+                // 订单取消
+                CancellationOfOrderRo cancelRo = ordOrderSvc.cancellationOfOrder(ordOrderMo);
+                _log.info("执行订单取消任务订单签收的返回值为：{}", cancelRo);
+            } catch (RuntimeException e) {
+                _log.error("执行订单取消任务订单时出错", e);
+                throw new RuntimeException("订单取消出错");
+            }
+        }
+        Date executeFactTime = new Date();
+        _log.info("执行订单取消任务的参数为：{}", id);
+        _mapper.executeSignInOrderTask(executeFactTime, id, (byte) TaskExecuteStateDic.ALREADY_EXECUTE.getCode(), (byte) TaskExecuteStateDic.NOT_EXECUTE.getCode());
+    }
 
-		Date executeFactTime = new Date();
-		_log.info("执行订单签收任务的参数为：{}", id);
-		_mapper.executeSignInOrderTask(executeFactTime, id, (byte) TaskExecuteStateDic.ALREADY_EXECUTE.getCode(),
-				(byte) TaskExecuteStateDic.NOT_EXECUTE.getCode());
-	}
-
-	//执行取消订单任务
-	@Override
-	@Transactional(readOnly = false, propagation = Propagation.REQUIRED)
-	public void executeCancelOrderTask(long id) {
-		_log.info("执行订单取消任务获取任务信息的参数为：{}", id);
-		// 获取任务信息
-		OrdTaskMo ordTaskMo = _mapper.selectByPrimaryKey(id);
-		_log.info("执行订单取消任务获取任务信息的返回值为:{}", ordTaskMo);
-		if (ordTaskMo == null) {
-			_log.error("执行订单取消任务时发现任务不存在，任务编号为：{}", id);
-			throw new RuntimeException("任务不存在");
-		}
-
-		if (ordTaskMo.getExecuteState() != TaskExecuteStateDic.NOT_EXECUTE.getCode()) {
-			_log.error("执行订单取消任务时发现该任务不处于待执行状态，任务id为：{}", id);
-			throw new RuntimeException("订单不处于待执行状态");
-		}
-		
-		_log.info("执行订单取消任务根据订单编号查询订单状态的参数为：{}", ordTaskMo.getOrderId());
-		// 根据订单编号查询订单状态
-		byte orderState = ordOrderSvc.selectOrderStateByOrderCode(ordTaskMo.getOrderId());
-		_log.info("执行订单取消任务根据订单编号查询订单状态的返回值为：{}", orderState);
-		if (orderState == OrderStateDic.ALREADY_PLACE_AN_ORDER.getCode()) {
-			try {
-				OrdOrderMo ordOrderMo = new OrdOrderMo();
-				ordOrderMo.setOrderCode(ordTaskMo.getOrderId());
-				_log.info("执行订单取消任务订单签收的参数为：{}", ordTaskMo.getOrderId());
-				// 订单取消
-				CancellationOfOrderRo cancelRo = ordOrderSvc.cancellationOfOrder(ordOrderMo);
-				_log.info("执行订单取消任务订单签收的返回值为：{}", cancelRo);
-			} catch (RuntimeException e) {
-				_log.error("执行订单取消任务订单时出错", e);
-				throw new RuntimeException("订单取消出错");
-			}
-		}
-
-		Date executeFactTime = new Date();
-		_log.info("执行订单取消任务的参数为：{}", id);
-		_mapper.executeSignInOrderTask(executeFactTime, id, (byte) TaskExecuteStateDic.ALREADY_EXECUTE.getCode(),
-				(byte) TaskExecuteStateDic.NOT_EXECUTE.getCode());
-		
-	}
-	
-	/**
-	 * 根据任务状态和任务类型查询任务数量
-	 */
-	@Override
-	public List<Long> getByExecutePlanTimeBeforeNow(byte executeState, byte taskType) {
-		_log.info("根据任务状态查询和任务类型查询任务数量的参数为：executeState===={}， taskType========={}", executeState, taskType);
-		return _mapper.selectByExecutePlanTimeBeforeNow(executeState, taskType);
-	}
+    /**
+     *  根据任务状态和任务类型查询任务数量
+     */
+    @Override
+    public List<Long> getByExecutePlanTimeBeforeNow(byte executeState, byte taskType) {
+        _log.info("根据任务状态查询和任务类型查询任务数量的参数为：executeState===={}， taskType========={}", executeState, taskType);
+        return _mapper.selectByExecutePlanTimeBeforeNow(executeState, taskType);
+    }
 }

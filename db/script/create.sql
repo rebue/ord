@@ -1,6 +1,6 @@
 /*==============================================================*/
 /* DBMS name:      MySQL 5.0                                    */
-/* Created on:     2018/7/3 16:29:09                            */
+/* Created on:     2018/9/7 17:45:39                            */
 /*==============================================================*/
 
 
@@ -13,6 +13,8 @@ drop table if exists ORD_ORDER_DETAIL;
 drop table if exists ORD_RETURN;
 
 drop table if exists ORD_RETURN_PIC;
+
+drop table if exists ORD_SUBLEVEL_BUY;
 
 drop table if exists ORD_TASK;
 
@@ -67,7 +69,7 @@ create table ORD_ORDER
    CLOSE_TIME           datetime comment '结算时间',
    CANCEL_TIME          datetime comment '作废时间',
    LOGISTIC_ID          bigint comment '物流订单ID',
-   SHIPPER_ID           bigint comment '快递公司ID',
+   SHIPPER_CODE         varchar(10) comment '快递公司编号',
    SHIPPER_NAME         varchar(100) comment '快递公司名称',
    LOGISTIC_CODE        varchar(30) comment '快递单号',
    RECEIVER_NAME        varchar(30) comment '收件人名称',
@@ -86,7 +88,7 @@ create table ORD_ORDER
    RECEIVED_OP_ID       bigint comment '签收人',
    CANCEL_REASON        varchar(300) comment '作废原因',
    primary key (ID),
-   key AK_SHIPPER_LOGISTIC_CODE (SHIPPER_ID, LOGISTIC_CODE)
+   key AK_SHIPPER_LOGISTIC_CODE (SHIPPER_CODE, LOGISTIC_CODE)
 );
 
 alter table ORD_ORDER comment '订单信息';
@@ -100,10 +102,13 @@ create table ORD_ORDER_DETAIL
    ORDER_ID             bigint not null comment '订单ID',
    ONLINE_ID            bigint not null comment '上线ID',
    PRODUCE_ID           bigint not null comment '产品ID',
+   SUBJECT_TYPE         tinyint not null default 0 comment '版块类型（0：普通，1：全返）',
+   CASHBACK_COMMISSION_SLOT tinyint comment '返现佣金名额',
+   CASHBACK_COMMISSION_STATE tinyint comment '返现佣金状态（0：匹配中，1：待返，2：已返）',
    ONLINE_TITLE         varchar(200) not null comment '上线标题',
    SPEC_NAME            varchar(50) not null comment '规格名称',
    BUY_COUNT            int not null comment '购买数量',
-   BUY_PRICE            numeric(50,4) not null comment '购买价格',
+   BUY_PRICE            numeric(50,4) not null comment '购买价格（单价）',
    CASHBACK_AMOUNT      numeric(50,4) not null comment '返现金额',
    RETURN_COUNT         int comment '退货数量',
    CASHBACK_TOTAL       decimal(50,4) comment '返现总额',
@@ -168,6 +173,19 @@ create table ORD_RETURN_PIC
 alter table ORD_RETURN_PIC comment '退货图片';
 
 /*==============================================================*/
+/* Table: ORD_SUBLEVEL_BUY                                      */
+/*==============================================================*/
+create table ORD_SUBLEVEL_BUY
+(
+   ID                   bigint not null comment '下级购买信息ID',
+   ORDER_DETAIL_ID      bigint not null comment '订单详情ID',
+   SUBLEVEL_USER_ID     bigint not null comment '下级买家ID',
+   primary key (ID)
+);
+
+alter table ORD_SUBLEVEL_BUY comment '下级购买信息';
+
+/*==============================================================*/
 /* Table: ORD_TASK                                              */
 /*==============================================================*/
 create table ORD_TASK
@@ -182,4 +200,19 @@ create table ORD_TASK
 );
 
 alter table ORD_TASK comment '订单任务';
+
+alter table ORD_ORDER_DETAIL add constraint FK_Relationship_1 foreign key (ORDER_ID)
+      references ORD_ORDER (ID) on delete restrict on update restrict;
+
+alter table ORD_RETURN add constraint FK_Relationship_2 foreign key (ORDER_DETAIL_ID)
+      references ORD_ORDER_DETAIL (ID) on delete restrict on update restrict;
+
+alter table ORD_RETURN add constraint FK_Relationship_3 foreign key (ORDER_ID)
+      references ORD_ORDER (ID) on delete restrict on update restrict;
+
+alter table ORD_RETURN_PIC add constraint FK_Relationship_4 foreign key (RETURN_ID)
+      references ORD_RETURN (ID) on delete restrict on update restrict;
+
+alter table ORD_SUBLEVEL_BUY add constraint FK_Relationship_5 foreign key (ORDER_DETAIL_ID)
+      references ORD_ORDER_DETAIL (ID) on delete restrict on update restrict;
 

@@ -3,9 +3,7 @@ package rebue.ord.ctrl;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-
 import javax.annotation.Resource;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -14,21 +12,21 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RestController;
-
 import rebue.ord.mo.OrdReturnPicMo;
 import rebue.ord.svc.OrdReturnPicSvc;
 
 @RestController
 public class OrdReturnPicCtrl {
-    /**
-     * @mbg.generated
-     */
-    private final static Logger _log = LoggerFactory.getLogger(OrdReturnPicCtrl.class);
 
     /**
      * @mbg.generated
      */
-	@Resource
+    private static final Logger _log = LoggerFactory.getLogger(OrdReturnPicCtrl.class);
+
+    /**
+     * @mbg.generated
+     */
+    @Resource
     private OrdReturnPicSvc svc;
 
     /**
@@ -67,21 +65,10 @@ public class OrdReturnPicCtrl {
     @DeleteMapping("/ord/returnpic/{id}")
     Map<String, Object> del(@PathVariable("id") java.lang.Long id) {
         _log.info("save OrdReturnPicMo:" + id);
-        svc.del(id);		
+        svc.del(id);
         Map<String, Object> result = new HashMap<>();
         result.put("success", true);
         _log.info("delete OrdReturnPicMo success!");
-        return result;
-    }
-
-    /**
-     * 查询退货图片
-     */
-    @GetMapping("/ord/returnpic")
-    List<OrdReturnPicMo> list(OrdReturnPicMo qo) {
-    	_log.info("查询退货图片的参数为：{}", qo.toString());
-        List<OrdReturnPicMo> result = svc.list(qo);
-        _log.info("查询退货图片的返回值为：{}", String.valueOf(result));
         return result;
     }
 
@@ -97,4 +84,14 @@ public class OrdReturnPicCtrl {
         return result;
     }
 
+    /**
+     * 查询退货图片
+     */
+    @GetMapping("/ord/returnpic")
+    List<OrdReturnPicMo> list(OrdReturnPicMo qo) {
+        _log.info("查询退货图片的参数为：{}", qo.toString());
+        List<OrdReturnPicMo> result = svc.list(qo);
+        _log.info("查询退货图片的返回值为：{}", String.valueOf(result));
+        return result;
+    }
 }

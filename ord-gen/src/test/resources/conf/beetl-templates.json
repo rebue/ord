@@ -3,18 +3,21 @@
 		"templateName": "svc.btl",
 		"targetDir": "../ord-api/src/main/java/${modulePath}/svc/",
 		"targetFile": "${entityName}Svc.java",
+		"isGenTargetOnMiddleTable": true,
 		"backup": false
 	},
 	{
 		"templateName": "svc-impl.btl",
 		"targetDir": "../ord-bll/src/main/java/${modulePath}/svc/impl/",
 		"targetFile": "${entityName}SvcImpl.java",
+		"isGenTargetOnMiddleTable": true,
 		"backup": false
 	},
 	{
 		"templateName": "ctrl.btl",
 		"targetDir": "../ord-svr/src/main/java/${modulePath}/ctrl/",
 		"targetFile": "${entityName}Ctrl.java",
+		"isGenTargetOnMiddleTable": true,
 		"backup": false
 	}
 ]
