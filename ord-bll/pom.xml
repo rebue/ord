@@ -6,7 +6,7 @@
 	<parent>
 		<groupId>com.github.rebue.ord</groupId>
 		<artifactId>ord</artifactId>
-		<version>1.0.0</version>
+		<version>1.0.8</version>
 	</parent>
 
 	<artifactId>ord-bll</artifactId>
