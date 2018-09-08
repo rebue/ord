@@ -95,6 +95,19 @@ public class OrdOrderRo {
 	 * 订单留言
 	 */
 	private String orderMessages;
+	
+	/**
+	 * 商品类型
+	 */
+	private Byte subjectType;
+
+	public Byte getSubjectType() {
+		return subjectType;
+	}
+
+	public void setSubjectType(Byte subjectType) {
+		this.subjectType = subjectType;
+	}
 
 	public OrdOrderRo() {
 		super();
@@ -267,7 +280,8 @@ public class OrdOrderRo {
 				+ ", picPath=" + picPath + ", number=" + number + ", salePrice=" + salePrice + ", cashbackAmount="
 				+ cashbackAmount + ", totalPrice=" + totalPrice + ", totalBack=" + totalBack + ", totalNumber="
 				+ totalNumber + ", address=" + address + ", userId=" + userId + ", userName=" + userName
-				+ ", orderMessages=" + orderMessages + "]";
+				+ ", orderMessages=" + orderMessages + ", subjectType=" + subjectType + "]";
 	}
+
 
 }
