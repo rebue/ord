@@ -2,6 +2,10 @@
 .project
 target
 .settings
+logs
+.DS_Store
 *.pdb
 *.ldb
-*.log
+*.gz
+*.log.gz
+*.class
