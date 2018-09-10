@@ -289,6 +289,7 @@ public class OrdOrderSvcImpl extends MybatisBaseSvcImpl<OrdOrderMo, java.lang.Lo
             } else {
                 _log.info("全返商品添加订单详情");
                 for (int j = 0; j < buyCount; j++) {
+                	
                     OrdOrderDetailMo detailMo = new OrdOrderDetailMo();
                     detailMo.setId(_idWorker.getId());
                     detailMo.setOrderId(orderId);
@@ -298,10 +299,11 @@ public class OrdOrderSvcImpl extends MybatisBaseSvcImpl<OrdOrderMo, java.lang.Lo
                     detailMo.setSpecName(OnlineSpec);
                     detailMo.setBuyCount(1);
                     detailMo.setBuyPrice(orderList.get(i).getSalePrice());
-                    detailMo.setCashbackAmount(orderList.get(i).getCashbackAmount());
+                    detailMo.setCashbackAmount(new BigDecimal("0"));
                     detailMo.setReturnState((byte) 0);
+                   
                     detailMo.setUserId(userId);
-                    detailMo.setCashbackTotal(new BigDecimal(String.valueOf(buyCount)).multiply(orderList.get(i).getCashbackAmount()));
+                    detailMo.setCashbackTotal(new BigDecimal("0"));
                     _log.info("添加订单详情的参数为：{}", detailMo);
                     int intserOrderDetailresult = ordOrderDetailSvc.add(detailMo);
                     _log.info("添加订单详情的返回值为：{}", intserOrderDetailresult);

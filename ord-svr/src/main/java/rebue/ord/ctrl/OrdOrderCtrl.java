@@ -143,6 +143,7 @@ public class OrdOrderCtrl {
         } catch (RuntimeException e) {
             String msg = e.getMessage();
             if (msg.equals("生成订单详情出错")) {
+            	 _log.error(msg);
                 placeTheOrderRo.setResult(UsersToPlaceTheOrderDic.CREATE_ORDER_DETAIL_ERROR);
                 placeTheOrderRo.setMsg(msg);
             } else if (msg.contains("未上线")) {
@@ -171,6 +172,7 @@ public class OrdOrderCtrl {
                 placeTheOrderRo.setMsg("下订单失败");
             }
         } finally {
+        	 _log.info("返回值为：{}", placeTheOrderRo);
             return placeTheOrderRo;
         }
     }
