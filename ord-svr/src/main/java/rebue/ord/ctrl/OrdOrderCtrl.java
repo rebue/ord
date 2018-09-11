@@ -18,6 +18,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import rebue.ord.dic.CancelDeliveryDic;
@@ -186,7 +187,7 @@ public class OrdOrderCtrl {
      */
     @SuppressWarnings("finally")
     @PutMapping("/ord/order/cancel")
-    CancellationOfOrderRo cancellationOfOrder(OrdOrderMo qo) {
+    CancellationOfOrderRo cancellationOfOrder(@RequestBody OrdOrderMo qo) {
         _log.info("用户取消订单的参数为：{}", qo);
         CancellationOfOrderRo cancellationOfOrderRo = new CancellationOfOrderRo();
         try {
@@ -214,7 +215,7 @@ public class OrdOrderCtrl {
      */
     @SuppressWarnings("finally")
     @PutMapping("/ord/order/canceldelivery")
-    CancelDeliveryRo cancelDelivery(OrdOrderMo qo) {
+    CancelDeliveryRo cancelDelivery(@RequestBody OrdOrderMo qo) {
         _log.info("用户取消订单的参数为：{}", qo);
         CancelDeliveryRo cancelDeliveryRo = new CancelDeliveryRo();
         try {
