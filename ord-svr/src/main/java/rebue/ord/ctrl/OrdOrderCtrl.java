@@ -99,7 +99,7 @@ public class OrdOrderCtrl {
      *  修改订单实际金额信息 2018年4月12日14:51:59
      */
     @PutMapping("/ord/order")
-    ModifyOrderRealMoneyRo modifyOrderRealMoney(OrdOrderMo vo) throws Exception {
+    ModifyOrderRealMoneyRo modifyOrderRealMoney(@RequestBody OrdOrderMo vo) throws Exception {
         _log.info("修改订单实际金额的参数为：{}", vo);
         return svc.modifyOrderRealMoney(vo);
     }

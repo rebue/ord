@@ -839,7 +839,7 @@
   
   <!-- 修改订单实际金额 -->
   <update id="updateOrderRealMoney" parameterType="rebue.ord.mo.OrdOrderMo">
-  	UPDATE ORD_ORDER SET REAL_MONEY=#{realMoney,jdbcType=DECIMAL},  MODIFY_REAL_MONEY_OP_ID = #{modifyRealMoneyOpId,jdbcType=BIGINT} 
+  	UPDATE ORD_ORDER SET REAL_MONEY=#{realMoney,jdbcType=DECIMAL},  MODIFY_REALVERY_MONEY_OP_ID = #{modifyRealveryMoneyOpId,jdbcType=BIGINT} 
   	WHERE ORDER_CODE = #{orderCode, jdbcType=VARCHAR} AND USER_ID = #{userId,jdbcType=BIGINT} AND ORDER_STATE=1
   </update>
   
