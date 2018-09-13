@@ -257,7 +257,7 @@ public class OrdOrderCtrl {
      */
     @SuppressWarnings("finally")
     @PutMapping("/ord/order/shipmentconfirmation")
-    ShipmentConfirmationRo shipmentConfirmation(ShipmentConfirmationTo qo) {
+    ShipmentConfirmationRo shipmentConfirmation( @RequestBody ShipmentConfirmationTo qo) {
         _log.info("确认发货的参数为：{}", qo);
         ShipmentConfirmationRo confirmationRo = new ShipmentConfirmationRo();
         try {
