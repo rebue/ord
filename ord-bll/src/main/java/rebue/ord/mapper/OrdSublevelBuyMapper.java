@@ -56,4 +56,9 @@ public interface OrdSublevelBuyMapper extends MybatisBaseMapper<OrdSublevelBuyMo
     @mbg.generated 自动生成，如需修改，请删除本行
      */
     boolean existSelective(OrdSublevelBuyMo record);
+    
+    /**
+     * 根据上级ID更新购买关系
+     */
+    int updateByOrderDetailId(OrdSublevelBuyMo mo);
 }

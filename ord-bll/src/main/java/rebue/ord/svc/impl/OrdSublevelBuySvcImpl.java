@@ -1,6 +1,8 @@
 package rebue.ord.svc.impl;
 
 
+import javax.annotation.Resource;
+
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
@@ -26,6 +28,7 @@ import rebue.robotech.svc.impl.MybatisBaseSvcImpl;
 @Transactional(readOnly = true, propagation = Propagation.SUPPORTS)
 public class OrdSublevelBuySvcImpl extends MybatisBaseSvcImpl<OrdSublevelBuyMo, java.lang.Long, OrdSublevelBuyMapper> implements OrdSublevelBuySvc {
 
+	
     /**
      * @mbg.generated
      */
@@ -38,5 +41,11 @@ public class OrdSublevelBuySvcImpl extends MybatisBaseSvcImpl<OrdSublevelBuyMo, 
         }
         return super.add(mo);
     }
+
+	@Override
+	public int updateByOrderDetailId(OrdSublevelBuyMo mo) {
+		
+		return _mapper.updateByOrderDetailId(mo);
+	}
 
 }

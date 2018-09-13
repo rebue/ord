@@ -65,6 +65,7 @@ import rebue.ord.mapper.OrdOrderMapper;
 import rebue.ord.mo.OrdAddrMo;
 import rebue.ord.mo.OrdOrderDetailMo;
 import rebue.ord.mo.OrdOrderMo;
+import rebue.ord.mo.OrdSublevelBuyMo;
 import rebue.ord.mo.OrdTaskMo;
 import rebue.ord.ro.CancelDeliveryRo;
 import rebue.ord.ro.CancellationOfOrderRo;
@@ -78,6 +79,7 @@ import rebue.ord.ro.UsersToPlaceTheOrderRo;
 import rebue.ord.svc.OrdAddrSvc;
 import rebue.ord.svc.OrdOrderDetailSvc;
 import rebue.ord.svc.OrdOrderSvc;
+import rebue.ord.svc.OrdSublevelBuySvc;
 import rebue.ord.svc.OrdTaskSvc;
 import rebue.ord.to.OrdOrderTo;
 import rebue.ord.to.OrderSignInTo;
@@ -166,6 +168,11 @@ public class OrdOrderSvcImpl extends MybatisBaseSvcImpl<OrdOrderMo, java.lang.Lo
      */
     @Resource
     private SucUserSvc    sucUserSvc;
+    
+    /**
+     */
+    @Resource
+    private OrdSublevelBuySvc    subLevelBuySvc;
 
     /**
      * 买家返款时间
@@ -303,6 +310,22 @@ public class OrdOrderSvcImpl extends MybatisBaseSvcImpl<OrdOrderMo, java.lang.Lo
                 	_log.info("获取用户购买关系");
                 	String buyRelation = sucUserSvc.getBuyRelation(id, onlineId);
                 	_log.info("获取用户购买关系返回值为："+buyRelation);
+                	if(buyRelation !=null&&buyRelation !="") {
+                		//根据产品上线ID查找购买关系用户的购买记录，看是否有符合要求的订单详情记录
+                		OrdOrderDetailMo mo = new OrdOrderDetailMo();
+                    	mo.setOnlineId(onlineId);
+                    	mo.setBuyPrice(orderList.get(i).getSalePrice());
+                    	mo.setUserId(Long.parseLong(buyRelation));
+                    	OrdOrderDetailMo promoterDetail = ordOrderDetailSvc.getFullReturnDetail(mo);
+                    	_log.info("获取用户购买关系订单详情的返回值为：{}"+promoterDetail);
+                    	if(promoterDetail !=null) {
+                    		//在下级购买信息表中更新购买关系
+                    		OrdSublevelBuyMo subLeverBuyMo = new OrdSublevelBuyMo();
+                    		subLeverBuyMo.setOrderDetailId(promoterDetail.getId());
+                    		subLeverBuyMo.setSublevelUserId(id);
+                    		
+                    	}
+                	}
                 	_log.info("获取用户注册关系参数：{}"+id);
                 	SucRegRo sucReg = sucUserSvc.getRegInfo(id);
                 	_log.info("获取用户注册关系返回值为："+sucReg.toString());
@@ -325,6 +348,15 @@ public class OrdOrderSvcImpl extends MybatisBaseSvcImpl<OrdOrderMo, java.lang.Lo
                     if (intserOrderDetailresult != 1) {
                         _log.error("{}添加订单详情失败", id);
                         throw new RuntimeException("生成订单详情出错");
+                    }
+                    _log.info("在下级购买信息表中添加记录");
+                    OrdSublevelBuyMo subLeverBuyMo = new OrdSublevelBuyMo();
+                    subLeverBuyMo.setId(_idWorker.getId());
+                    subLeverBuyMo.setOrderDetailId(detailMo.getId());
+                    int addSubLeverBuyResult = subLevelBuySvc.add(subLeverBuyMo);
+                    if (addSubLeverBuyResult != 1) {
+                        _log.error("{}添加下级购买信息失败", id);
+                        throw new RuntimeException("生成下级购买信息出错");
                     }
                 }
             }

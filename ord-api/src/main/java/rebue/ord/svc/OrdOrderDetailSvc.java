@@ -1,5 +1,7 @@
 package rebue.ord.svc;
 
+import java.math.BigDecimal;
+
 import rebue.ord.mo.OrdOrderDetailMo;
 import rebue.robotech.svc.MybatisBaseSvc;
 
@@ -27,4 +29,11 @@ public interface OrdOrderDetailSvc extends MybatisBaseSvc<OrdOrderDetailMo, java
      *  @date 2018年5月8日 上午10:59:44
      */
     int modifyReturnStateById(long id, byte returnState);
+    
+    /**
+     * 根据上线ID及价格查找上家用户全返商品,如有多个则找到时间最早的一个商品详情，以确定上家
+     */
+    
+    OrdOrderDetailMo getFullReturnDetail(OrdOrderDetailMo mo);
+    
 }

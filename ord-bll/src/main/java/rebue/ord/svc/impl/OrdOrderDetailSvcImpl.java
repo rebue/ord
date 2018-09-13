@@ -1,5 +1,7 @@
 package rebue.ord.svc.impl;
 
+import java.math.BigDecimal;
+
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
@@ -66,4 +68,18 @@ public class OrdOrderDetailSvcImpl extends MybatisBaseSvcImpl<OrdOrderDetailMo, 
     public int modifyReturnStateById(long id, byte returnState) {
         return _mapper.modifyReturnStateById(returnState, id);
     }
+    
+    /**
+     * 根据上线ID及价格查找用户全返商品,如有多个则找到时间最早的一个商品详情
+     */
+	@Override
+	public OrdOrderDetailMo getFullReturnDetail(OrdOrderDetailMo mo) {
+		return _mapper.getFullReturnDetail(mo);
+	}
 }
+
+
+
+
+
+
