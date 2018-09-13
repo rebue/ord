@@ -83,6 +83,8 @@ import rebue.ord.to.OrdOrderTo;
 import rebue.ord.to.OrderSignInTo;
 import rebue.ord.to.ShipmentConfirmationTo;
 import rebue.robotech.svc.impl.MybatisBaseSvcImpl;
+import rebue.suc.ro.SucRegRo;
+import rebue.suc.svr.feign.SucUserSvc;
 
 @Service
 /**
@@ -159,6 +161,11 @@ public class OrdOrderSvcImpl extends MybatisBaseSvcImpl<OrdOrderMo, java.lang.Lo
      */
     @Resource
     private AfcSettleTaskSvc    afcSettleTaskSvc;
+    
+    /**
+     */
+    @Resource
+    private SucUserSvc    sucUserSvc;
 
     /**
      * 买家返款时间
@@ -220,14 +227,14 @@ public class OrdOrderSvcImpl extends MybatisBaseSvcImpl<OrdOrderMo, java.lang.Lo
         }
         Date date = new Date();
         long orderId = _idWorker.getId();
-        long userId = orderList.get(0).getUserId();
+        long id = orderList.get(0).getUserId();
         OrdOrderMo orderMo = new OrdOrderMo();
         orderMo.setOrderCode(String.valueOf(orderId));
         orderMo.setOrderTitle(orderTitle);
         orderMo.setOrderMoney(orderList.get(0).getTotalPrice());
         orderMo.setRealMoney(orderList.get(0).getTotalPrice());
         orderMo.setOrderState((byte) 1);
-        orderMo.setUserId(userId);
+        orderMo.setUserId(id);
         orderMo.setUserName(orderList.get(0).getUserName());
         orderMo.setOrderTime(date);
         orderMo.setReceiverName(addrList.get(0).getReceiverName());
@@ -250,7 +257,7 @@ public class OrdOrderSvcImpl extends MybatisBaseSvcImpl<OrdOrderMo, java.lang.Lo
         int insertOrderResult = add(orderMo);
         _log.info("添加订单信息的返回值为：{}", insertOrderResult);
         if (insertOrderResult != 1) {
-            _log.error("{}添加订单信息失败", userId);
+            _log.error("{}添加订单信息失败", id);
             placeTheOrderRo.setResult(UsersToPlaceTheOrderDic.CREATE_ORDER_ERROR);
             placeTheOrderRo.setMsg("生成订单出错");
             return placeTheOrderRo;
@@ -280,19 +287,25 @@ public class OrdOrderSvcImpl extends MybatisBaseSvcImpl<OrdOrderMo, java.lang.Lo
                 detailMo.setBuyPrice(orderList.get(i).getSalePrice());
                 detailMo.setCashbackAmount(orderList.get(i).getCashbackAmount());
                 detailMo.setReturnState((byte) 0);
-                detailMo.setUserId(userId);
+                detailMo.setUserId(id);
                 detailMo.setCashbackTotal(new BigDecimal(String.valueOf(buyCount)).multiply(orderList.get(i).getCashbackAmount()));
                 _log.info("添加订单详情的参数为：{}", detailMo);
                 int intserOrderDetailresult = ordOrderDetailSvc.add(detailMo);
                 _log.info("添加订单详情的返回值为：{}", intserOrderDetailresult);
                 if (intserOrderDetailresult != 1) {
-                    _log.error("{}添加订单详情失败", userId);
+                    _log.error("{}添加订单详情失败", id);
                     throw new RuntimeException("生成订单详情出错");
                 }
             } else {
                 _log.info("全返商品添加订单详情");
                 for (int j = 0; j < buyCount; j++) {
-                	
+                	//获取用户购买关系
+                	_log.info("获取用户购买关系");
+                	String buyRelation = sucUserSvc.getBuyRelation(id, onlineId);
+                	_log.info("获取用户购买关系返回值为："+buyRelation);
+                	_log.info("获取用户注册关系参数：{}"+id);
+                	SucRegRo sucReg = sucUserSvc.getRegInfo(id);
+                	_log.info("获取用户注册关系返回值为："+sucReg.toString());
                     OrdOrderDetailMo detailMo = new OrdOrderDetailMo();
                     detailMo.setId(_idWorker.getId());
                     detailMo.setOrderId(orderId);
@@ -304,14 +317,13 @@ public class OrdOrderSvcImpl extends MybatisBaseSvcImpl<OrdOrderMo, java.lang.Lo
                     detailMo.setBuyPrice(orderList.get(i).getSalePrice());
                     detailMo.setCashbackAmount(new BigDecimal("0"));
                     detailMo.setReturnState((byte) 0);
-                   
-                    detailMo.setUserId(userId);
+                    detailMo.setUserId(id);
                     detailMo.setCashbackTotal(new BigDecimal("0"));
                     _log.info("添加订单详情的参数为：{}", detailMo);
                     int intserOrderDetailresult = ordOrderDetailSvc.add(detailMo);
                     _log.info("添加订单详情的返回值为：{}", intserOrderDetailresult);
                     if (intserOrderDetailresult != 1) {
-                        _log.error("{}添加订单详情失败", userId);
+                        _log.error("{}添加订单详情失败", id);
                         throw new RuntimeException("生成订单详情出错");
                     }
                 }
@@ -332,19 +344,19 @@ public class OrdOrderSvcImpl extends MybatisBaseSvcImpl<OrdOrderMo, java.lang.Lo
         int taskAddResult = ordTaskSvc.add(ordTaskMo);
         _log.info("用户下订单添加取消订单任务的返回值为：{}", taskAddResult);
         if (taskAddResult != 1) {
-            _log.error("用户下订单添加取消订单任务时出现错误，用户编号为：{}", userId);
+            _log.error("用户下订单添加取消订单任务时出现错误，用户编号为：{}", id);
             throw new RuntimeException("添加取消订单任务失败");
         }
         _log.info("删除购物车和修改上线数量的参数为：{}", String.valueOf(cartAndSpecList));
         Map<String, Object> deleteAndUpdateMap = onlOnlineSpecSvc.deleteCartAndUpdateOnlineCount(objectMapper.writeValueAsString(cartAndSpecList));
         if (deleteAndUpdateMap == null || deleteAndUpdateMap.size() == 0) {
-            _log.error("{}删除购物车和修改上线数量失败", userId);
+            _log.error("{}删除购物车和修改上线数量失败", id);
             throw new RuntimeException(String.valueOf(deleteAndUpdateMap.get("msg")));
         }
         _log.info("删除购物车和修改上线数量的返回值为：{}", String.valueOf(deleteAndUpdateMap));
         int deleteAndUpdateResult = Integer.parseInt(String.valueOf(deleteAndUpdateMap.get("result")));
         if (deleteAndUpdateResult != 1) {
-            _log.error("{}删除购物车和修改上线数量失败", userId);
+            _log.error("{}删除购物车和修改上线数量失败", id);
             throw new RuntimeException(String.valueOf(deleteAndUpdateMap.get("msg")));
         }
         placeTheOrderRo.setOrderId(orderId);

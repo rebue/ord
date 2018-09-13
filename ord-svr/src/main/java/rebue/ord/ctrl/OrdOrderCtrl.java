@@ -35,6 +35,7 @@ import rebue.ord.ro.SetUpExpressCompanyRo;
 import rebue.ord.ro.ShipmentConfirmationRo;
 import rebue.ord.ro.UsersToPlaceTheOrderRo;
 import rebue.ord.svc.OrdOrderSvc;
+import rebue.ord.to.OrdOrderTo;
 import rebue.ord.to.OrderSignInTo;
 import rebue.ord.to.ShipmentConfirmationTo;
 
@@ -71,14 +72,14 @@ public class OrdOrderCtrl {
      * @mbg.generated
      */
     @GetMapping("/ord/order")
-    PageInfo<OrdOrderMo> list(OrdOrderMo qo, @RequestParam("pageNum") int pageNum, @RequestParam("pageSize") int pageSize) {
-        _log.info("list OrdOrderMo:" + qo + ", pageNum = " + pageNum + ", pageSize = " + pageSize);
+    PageInfo<OrdOrderMo> list(OrdOrderTo to, @RequestParam("pageNum") int pageNum, @RequestParam("pageSize") int pageSize) {
+        _log.info("list OrdOrderMo:" + to + ", pageNum = " + pageNum + ", pageSize = " + pageSize);
         if (pageSize > 50) {
             String msg = "pageSize不能大于50";
             _log.error(msg);
             throw new IllegalArgumentException(msg);
         }
-        PageInfo<OrdOrderMo> result = svc.list(qo, pageNum, pageSize);
+        PageInfo<OrdOrderMo> result = svc.orderList(to, pageNum, pageSize);
         _log.info("result: " + result);
         return result;
     }
