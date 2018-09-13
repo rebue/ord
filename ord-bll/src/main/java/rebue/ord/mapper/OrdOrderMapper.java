@@ -8,6 +8,7 @@ import org.apache.ibatis.annotations.Param;
 import org.apache.ibatis.annotations.Select;
 import org.apache.ibatis.annotations.Update;
 import rebue.ord.mo.OrdOrderMo;
+import rebue.ord.to.OrdOrderTo;
 import rebue.robotech.mapper.MybatisBaseMapper;
 
 @Mapper
@@ -194,4 +195,10 @@ public interface OrdOrderMapper extends MybatisBaseMapper<OrdOrderMo, Long> {
      */
     @Select("select ORDER_STATE from ORD_ORDER where ORDER_CODE = #{orderCode,jdbcType=VARCHAR}")
     byte selectOrderStateByOrderCode(@Param("orderCode") String orderCode);
+    /**
+     * 分页查询订单信息
+     * @param to
+     * @return
+     */
+	List<OrdOrderMo> orderList(OrdOrderTo to);
 }

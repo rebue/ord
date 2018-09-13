@@ -31,6 +31,8 @@ import com.fasterxml.jackson.core.JsonParseException;
 import com.fasterxml.jackson.databind.JavaType;
 import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.github.pagehelper.PageHelper;
+import com.github.pagehelper.PageInfo;
 
 import rebue.afc.dic.SettleTaskExecuteStateDic;
 import rebue.afc.dic.TradeTypeDic;
@@ -77,6 +79,7 @@ import rebue.ord.svc.OrdAddrSvc;
 import rebue.ord.svc.OrdOrderDetailSvc;
 import rebue.ord.svc.OrdOrderSvc;
 import rebue.ord.svc.OrdTaskSvc;
+import rebue.ord.to.OrdOrderTo;
 import rebue.ord.to.OrderSignInTo;
 import rebue.ord.to.ShipmentConfirmationTo;
 import rebue.robotech.svc.impl.MybatisBaseSvcImpl;
@@ -1023,4 +1026,14 @@ public class OrdOrderSvcImpl extends MybatisBaseSvcImpl<OrdOrderMo, java.lang.Lo
         _log.info("最新获取用户订单信息的返回值为：{}", String.valueOf(list));
         return list;
     }
+    
+    /**
+     * 分页查询订单
+     */
+	@Override
+	public PageInfo<OrdOrderMo> orderList(OrdOrderTo to, int pageNum, int pageSize) {
+		_log.info("获取订单的参数为: {}", to);
+		_log.info("orderList: ro-{}; pageNum-{}; pageSize-{}", to, pageNum, pageSize);
+		return PageHelper.startPage(pageNum, pageSize).doSelectPageInfo(() -> _mapper.orderList(to));
+	}
 }

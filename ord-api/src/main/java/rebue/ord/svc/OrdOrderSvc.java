@@ -1,7 +1,7 @@
 package rebue.ord.svc;
-
 import com.fasterxml.jackson.core.JsonParseException;
 import com.fasterxml.jackson.databind.JsonMappingException;
+import com.github.pagehelper.PageInfo;
 import java.beans.IntrospectionException;
 import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
@@ -17,6 +17,7 @@ import rebue.ord.ro.OrderSignInRo;
 import rebue.ord.ro.SetUpExpressCompanyRo;
 import rebue.ord.ro.ShipmentConfirmationRo;
 import rebue.ord.ro.UsersToPlaceTheOrderRo;
+import rebue.ord.to.OrdOrderTo;
 import rebue.ord.to.OrderSignInTo;
 import rebue.ord.to.ShipmentConfirmationTo;
 import rebue.robotech.svc.MybatisBaseSvc;
@@ -181,4 +182,13 @@ public interface OrdOrderSvc extends MybatisBaseSvc<OrdOrderMo, java.lang.Long> 
      *  @date 2018年4月9日 下午4:48:40
      */
     List<Map<String, Object>> getCashBackOrder(Map<String, Object> map) throws ParseException, IntrospectionException, IllegalAccessException, IllegalArgumentException, InvocationTargetException;
+    
+    /**
+     * 分页查询订单
+     * @param to
+     * @param pageNum
+     * @param pageSize
+     * @return
+     */
+	PageInfo<OrdOrderMo>  orderList (OrdOrderTo to ,int pageNum, int pageSize);
 }
