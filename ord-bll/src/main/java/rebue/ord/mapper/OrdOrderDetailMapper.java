@@ -86,7 +86,6 @@ public interface OrdOrderDetailMapper extends MybatisBaseMapper<OrdOrderDetailMo
      */
     
     OrdOrderDetailMo getFullReturnDetail(OrdOrderDetailMo mo);
-    
 
 }
 

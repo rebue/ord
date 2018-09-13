@@ -45,7 +45,7 @@ public class OrdSublevelBuySvcImpl extends MybatisBaseSvcImpl<OrdSublevelBuyMo, 
 	@Override
 	public int updateByOrderDetailId(OrdSublevelBuyMo mo) {
 		
-		return _mapper.updateByOrderDetailId(mo);
+		return _mapper.updateByOrderDetailId(mo.getOrderDetailId(),mo.getSublevelUserId());
 	}
 
 }

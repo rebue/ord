@@ -2,6 +2,8 @@ package rebue.ord.mapper;
 
 import java.util.List;
 import org.apache.ibatis.annotations.Mapper;
+import org.apache.ibatis.annotations.Update;
+
 import rebue.ord.mo.OrdSublevelBuyMo;
 import rebue.robotech.mapper.MybatisBaseMapper;
 
@@ -58,7 +60,8 @@ public interface OrdSublevelBuyMapper extends MybatisBaseMapper<OrdSublevelBuyMo
     boolean existSelective(OrdSublevelBuyMo record);
     
     /**
-     * 根据上级ID更新购买关系
+     * 根据上线ID更新购买关系
      */
-    int updateByOrderDetailId(OrdSublevelBuyMo mo);
+    @Update("UPDATE ORD_SUBLEVEL SET SUBLEVEL_USER_ID =#{sublevelUserId,jdbcType=BIGINT} WHERE ORDER_DETAIL_ID = {orderDetailId,jdbcType=BIGINT}") 
+    int updateByOrderDetailId(Long orderDetailId,Long sublevelUserId);
 }
