@@ -444,6 +444,58 @@
     AND ood.ORDER_ID = oo.ID and ood.CASHBACK_COMMISSION_SLOT &lt; 2  ORDER BY oo.ORDER_TIME ASC limit 1
   </select>
   
+<select id="getOtherFullReturnDetail" parameterType="rebue.ord.mo.OrdOrderDetailMo" resultMap="BaseResultMap">
+  	 SELECT  ood.ID, ood.ORDER_ID, ood.ONLINE_ID, ood.PRODUCE_ID, ood.ONLINE_TITLE, ood.SPEC_NAME, ood.BUY_COUNT, ood.BUY_PRICE, 
+    ood.CASHBACK_AMOUNT, ood.RETURN_COUNT, ood.CASHBACK_TOTAL, ood.BUY_UNIT, RETURN_STATE, ood.USER_ID, ood.CASHBACK_COMMISSION_SLOT, 
+    ood.CASHBACK_COMMISSION_STATE,oo.ORDER_TIME
+    from ORD_ORDER_DETAIL ood AND ORD_ORDER oo
+     <where>
+      <if test="id != null">
+        and ood.ID = #{id,jdbcType=BIGINT}
+      </if>
+      <if test="orderId != null">
+        and ood.ORDER_ID = #{orderId,jdbcType=BIGINT}
+      </if>
+      <if test="onlineId != null">
+        and ood.ONLINE_ID = #{onlineId,jdbcType=BIGINT}
+      </if>
+      <if test="produceId != null">
+        and ood.PRODUCE_ID = #{produceId,jdbcType=BIGINT}
+      </if>
+      <if test="onlineTitle != null and onlineTitle != ''">
+        and ood.ONLINE_TITLE = #{onlineTitle,jdbcType=VARCHAR}
+      </if>
+      <if test="specName != null and specName != ''">
+        and ood.SPEC_NAME = #{specName,jdbcType=VARCHAR}
+      </if>
+      <if test="buyCount != null">
+        and ood.BUY_COUNT = #{buyCount,jdbcType=INTEGER}
+      </if>
+      <if test="buyPrice != null">
+        and ood.BUY_PRICE = #{buyPrice,jdbcType=DECIMAL}
+      </if>
+      <if test="cashbackAmount != null">
+        and ood.CASHBACK_AMOUNT = #{cashbackAmount,jdbcType=DECIMAL}
+      </if>
+      <if test="returnCount != null">
+        and ood.RETURN_COUNT = #{returnCount,jdbcType=INTEGER}
+      </if>
+      <if test="cashbackTotal != null">
+        and ood.CASHBACK_TOTAL = #{cashbackTotal,jdbcType=DECIMAL}
+      </if>
+      <if test="buyUnit != null and buyUnit != ''">
+        and ood.BUY_UNIT = #{buyUnit,jdbcType=VARCHAR}
+      </if>
+      <if test="returnState != null">
+        and ood.RETURN_STATE = #{returnState,jdbcType=TINYINT}
+      </if>
+      <if test="userId != null">
+        and ood.USER_ID = #{userId,jdbcType=BIGINT}
+      </if>
+    </where>
+    AND ood.ORDER_ID = oo.ID and ood.CASHBACK_COMMISSION_SLOT = 2  ORDER BY oo.ORDER_TIME ASC limit 1
+  </select>
+  
   <update id="updateCashbackSlot" parameterType="rebue.ord.mo.OrdOrderDetailMo">
   		UPDATE ORD_ORDER_DETAIL SET CASHBACK_COMMISSION_SLOT = #{cashbackCommissionSlot+1,jdbcType=TINYINT} WHERE ID = #{id,jdbcType=BIGINT}
   		AND CASHBACK_COMMISSION_SLOT = #{cashbackCommissionSlot,jdbcType=TINYINT}

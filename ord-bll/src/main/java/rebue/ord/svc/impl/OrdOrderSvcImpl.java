@@ -208,11 +208,9 @@ public class OrdOrderSvcImpl extends MybatisBaseSvcImpl<OrdOrderMo, java.lang.Lo
 	 */
 	@Override
 	@Transactional(readOnly = false, propagation = Propagation.REQUIRED)
-	public UsersToPlaceTheOrderRo usersToPlaceTheOrder(String orderJson)
-			throws JsonParseException, JsonMappingException, IOException {
+	public UsersToPlaceTheOrderRo usersToPlaceTheOrder(String orderJson) throws JsonParseException, JsonMappingException, IOException {
 		UsersToPlaceTheOrderRo placeTheOrderRo = new UsersToPlaceTheOrderRo();
 		JavaType javaType = objectMapper.getTypeFactory().constructParametricType(ArrayList.class, OrdOrderRo.class);
-
 		List<OrdOrderRo> orderList = objectMapper.readValue(orderJson, javaType);
 		_log.info("用户下单的参数为：{}", orderList.toString());
 		OrdAddrMo addrMo = new OrdAddrMo();
@@ -308,16 +306,28 @@ public class OrdOrderSvcImpl extends MybatisBaseSvcImpl<OrdOrderMo, java.lang.Lo
 			} else {
 				_log.info("全返商品添加订单详情");
 				for (int j = 0; j < buyCount; j++) {
-
+					_log.info("获取用户购买关系上家");
+					boolean getBuyRelationResult = getAndUpdateBuyRelation(id,onlineId,orderList.get(j).getSalePrice());
+					_log.info("获取用户购买关系的返回值为：{}"+getBuyRelationResult);
+					if(getBuyRelationResult==false) {
+						_log.info("获取用户注册关系上家");
+						boolean getRegRelationResult = getAndUpdateRegRelation(id,onlineId,orderList.get(j).getSalePrice());
+						_log.info("获取用户注册关系的返回值为：{}"+getRegRelationResult);
+						if (getRegRelationResult==false) {
+							_log.info("获取其它关系上家");
+							boolean getOtherRelationResult = getAndUpdateOtherRelation(id,onlineId,orderList.get(j).getSalePrice());
+							_log.info("获取其它关系的返回值为：{}"+getOtherRelationResult);
+						}
+					}
 					OrdOrderDetailMo detailMo = new OrdOrderDetailMo();
 					detailMo.setId(_idWorker.getId());
 					detailMo.setOrderId(orderId);
 					detailMo.setOnlineId(onlineId);
-					detailMo.setProduceId(orderList.get(i).getProductId());
-					detailMo.setOnlineTitle(orderList.get(i).getOnlineTitle());
+					detailMo.setProduceId(orderList.get(j).getProductId());
+					detailMo.setOnlineTitle(orderList.get(j).getOnlineTitle());
 					detailMo.setSpecName(OnlineSpec);
 					detailMo.setBuyCount(1);
-					detailMo.setBuyPrice(orderList.get(i).getSalePrice());
+					detailMo.setBuyPrice(orderList.get(j).getSalePrice());
 					detailMo.setCashbackAmount(new BigDecimal("0"));
 					detailMo.setReturnState((byte) 0);
 					detailMo.setUserId(id);
@@ -381,7 +391,7 @@ public class OrdOrderSvcImpl extends MybatisBaseSvcImpl<OrdOrderMo, java.lang.Lo
 	/**
      * 获取购买关系并更新购买关系表
      */
-    
+	@Transactional(readOnly = false, propagation = Propagation.REQUIRED)
     public boolean getAndUpdateBuyRelation(long id , long onlineId,BigDecimal buyPrice) {
     	//获取用户购买关系
     	_log.info("获取用户购买关系");
@@ -426,7 +436,8 @@ public class OrdOrderSvcImpl extends MybatisBaseSvcImpl<OrdOrderMo, java.lang.Lo
      * @param buyPrice
      * @return
      */
-    public boolean getAndUpdateRegRelation(long id , long onlineId,BigDecimal buyPrice) {
+	@Transactional(readOnly = false, propagation = Propagation.REQUIRED)
+    public boolean getAndUpdateRegRelation(long id ,long onlineId,BigDecimal buyPrice) {
     	_log.info("获取用户注册关系参数：{}"+id);
     	SucRegRo sucReg = sucUserSvc.getRegInfo(id);
     	_log.info("获取用户注册关系返回值为："+sucReg.toString());
@@ -462,20 +473,36 @@ public class OrdOrderSvcImpl extends MybatisBaseSvcImpl<OrdOrderMo, java.lang.Lo
     }
     
     /**
-     * 获取除购买关系和注册关系外的上家,并更新购买关系表
+     * 获取除购买关系和注册关系外的一个购买上家,并更新购买关系表
      */
-    public boolean getAndUpdateNormalRelation(long id , long onlineId,BigDecimal buyPrice) {
-    	
+	@Transactional(readOnly = false, propagation = Propagation.REQUIRED)
+    public boolean getAndUpdateOtherRelation(long id , long onlineId,BigDecimal buyPrice) {
     	//根据产品上线ID和价格查找订单详情记录，看是否有符合要求的订单详情
     	OrdOrderDetailMo mo = new OrdOrderDetailMo();
     	mo.setOnlineId(onlineId);
     	mo.setBuyPrice(buyPrice);
-    	OrdOrderDetailMo orderDetailMo = ordOrderDetailSvc.getFullReturnDetail(mo);
-    	return  true;
-    	
+    	OrdOrderDetailMo orderDetailMo = ordOrderDetailSvc.getOtherFullReturnDetail(mo);
+    	_log.info("获取上家订单详情的返回值为：{}"+orderDetailMo);
+    	if(orderDetailMo==null) {
+    		return false;
+    	}
+		//更新购买关系订单详情的返现名额
+		int updateOrderDetailResult = ordOrderDetailSvc.updateCashbackSlot(orderDetailMo);
+		if (updateOrderDetailResult != 1) {
+            _log.error("{}更新订单详情返现名额失败", id);
+            throw new RuntimeException("更新订单详情返现名额失败");
+        }
+		//在下级购买信息表中更新购买关系
+		OrdSublevelBuyMo subLeverBuyMo = new OrdSublevelBuyMo();
+		subLeverBuyMo.setOrderDetailId(orderDetailMo.getId());
+		subLeverBuyMo.setSublevelUserId(id);
+		int updateSubLeverResult = subLevelBuySvc.updateByOrderDetailId(subLeverBuyMo);
+		if (updateSubLeverResult != 1) {
+			_log.error("{}更新下级购买关系失败", id);
+            throw new RuntimeException("更新下级购买关系失败");
+        }
+    	return true;
     }
-    
-    
 
 	/**
 	 * 查询用户订单信息 2018年4月9日16:49:17
