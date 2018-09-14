@@ -76,6 +76,19 @@ public class OrdOrderDetailSvcImpl extends MybatisBaseSvcImpl<OrdOrderDetailMo, 
 	public OrdOrderDetailMo getFullReturnDetail(OrdOrderDetailMo mo) {
 		return _mapper.getFullReturnDetail(mo);
 	}
+	
+	@Override
+	public OrdOrderDetailMo getOtherFullReturnDetail(OrdOrderDetailMo mo) {
+		return null;
+		
+	}
+
+	@Override
+	public int updateCashbackSlot(OrdOrderDetailMo mo) {
+		return _mapper.updateCashbackSlot(mo);
+	}
+	
+	
 }
 
 

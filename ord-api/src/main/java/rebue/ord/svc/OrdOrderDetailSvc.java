@@ -36,4 +36,15 @@ public interface OrdOrderDetailSvc extends MybatisBaseSvc<OrdOrderDetailMo, java
     
     OrdOrderDetailMo getFullReturnDetail(OrdOrderDetailMo mo);
     
+    /**
+     * 根据上线ID及价格查找除购买关系和注册关系外的全返商品详情，如有多个则找到时间最早的且返佣名额为2个的一个商品详情，以确定上家
+     */
+    
+    OrdOrderDetailMo getOtherFullReturnDetail(OrdOrderDetailMo mo);
+    
+    /**
+     * 更新订单详情的返佣名额字段
+     */
+    int updateCashbackSlot(OrdOrderDetailMo mo);
+    
 }

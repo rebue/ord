@@ -86,6 +86,12 @@ public interface OrdOrderDetailMapper extends MybatisBaseMapper<OrdOrderDetailMo
      */
     
     OrdOrderDetailMo getFullReturnDetail(OrdOrderDetailMo mo);
+    
+    /**
+     * 修改订单详情全返佣金名额
+     */
+    
+    int updateCashbackSlot(OrdOrderDetailMo mo);
 
 }
 

@@ -441,7 +441,17 @@
         and ood.USER_ID = #{userId,jdbcType=BIGINT}
       </if>
     </where>
-    AND ood.ORDER_ID = oo.ID  ORDER BY oo.ORDER_TIME ASC limit 1
+    AND ood.ORDER_ID = oo.ID and ood.CASHBACK_COMMISSION_SLOT &lt; 2  ORDER BY oo.ORDER_TIME ASC limit 1
   </select>
   
+  <update id="updateCashbackSlot" parameterType="rebue.ord.mo.OrdOrderDetailMo">
+  		UPDATE ORD_ORDER_DETAIL SET CASHBACK_COMMISSION_SLOT = #{cashbackCommissionSlot+1,jdbcType=TINYINT} WHERE ID = #{id,jdbcType=BIGINT}
+  		AND CASHBACK_COMMISSION_SLOT = #{cashbackCommissionSlot,jdbcType=TINYINT}
+  </update>
+  
 </mapper>
+
+
+
+
+

@@ -10,5 +10,5 @@ public interface OrdSublevelBuySvc extends MybatisBaseSvc<OrdSublevelBuyMo, java
 	 */
 	
 	int updateByOrderDetailId (OrdSublevelBuyMo mo);
-
+	
 }
