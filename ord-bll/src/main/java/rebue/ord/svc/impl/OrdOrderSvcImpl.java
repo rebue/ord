@@ -42,7 +42,6 @@ import rebue.afc.svr.feign.AfcSettleTaskSvc;
 import rebue.afc.to.AddSettleTasksDetailTo;
 import rebue.afc.to.AddSettleTasksTo;
 import rebue.kdi.mo.KdiCompanyMo;
-import rebue.kdi.mo.KdiSenderMo;
 import rebue.kdi.ro.EOrderRo;
 import rebue.kdi.svr.feign.KdiSvc;
 import rebue.kdi.to.EOrderTo;
@@ -792,6 +791,7 @@ public class OrdOrderSvcImpl extends MybatisBaseSvcImpl<OrdOrderMo, java.lang.Lo
 		}
 		EOrderTo eoderTo = new EOrderTo();
 		eoderTo.setShipperId(to.getShipperId());
+        eoderTo.setShipperCode(to.getShipperCode());
 		eoderTo.setOrderId(Long.parseLong(mo.getOrderCode()));
 		eoderTo.setOrderTitle(mo.getOrderTitle());
 		eoderTo.setReceiverName(mo.getReceiverName());
@@ -802,26 +802,17 @@ public class OrdOrderSvcImpl extends MybatisBaseSvcImpl<OrdOrderMo, java.lang.Lo
 		eoderTo.setReceiverPostCode(mo.getReceiverPostCode());
 		eoderTo.setReceiverTel(mo.getReceiverTel());
 		eoderTo.setReceiverMobile(mo.getReceiverMobile());
-		// 获取并手动设置默认发件人的信息
-		KdiSenderMo kdiSenderMo = new KdiSenderMo();
-		kdiSenderMo.setIsDefault(true);
-		Map<String, Object> map = new HashMap<>();
-		map.put("mo", kdiSenderMo);
-		_log.info("获取默认发件人的参数为：{}", String.valueOf(map));
-		List<KdiSenderMo> senderInfo = kdiSvc.getSenderInfo(map);
-		_log.info("获取默认发件人返回值为：{}", senderInfo);
-		if (senderInfo == null) {
-			_log.info("默认发件人为null");
-			return null;
-		} else {
-			eoderTo.setSenderName(senderInfo.get(0).getSenderName());
-			eoderTo.setSenderMobile(senderInfo.get(0).getSenderMobile());
-			eoderTo.setSenderTel(senderInfo.get(0).getSenderTel());
-			eoderTo.setSenderProvince(senderInfo.get(0).getSenderProvince());
-			eoderTo.setSenderCity(senderInfo.get(0).getSenderCity());
-			eoderTo.setSenderAddress(senderInfo.get(0).getSenderAddress());
-			eoderTo.setSenderExpArea(senderInfo.get(0).getSenderExpArea());
-		}
+
+        eoderTo.setSenderName(to.getSenderName());
+        eoderTo.setSenderMobile(to.getSenderMobile());
+        eoderTo.setSenderTel(to.getSenderTel());
+        eoderTo.setSenderProvince(to.getSenderProvince());
+        eoderTo.setSenderCity(to.getSenderCity());
+        eoderTo.setSenderAddress(to.getSenderAddress());
+        eoderTo.setSenderExpArea(to.getSenderExpArea());
+        eoderTo.setSenderPostCode(to.getSenderPostCode());
+        eoderTo.setOrgId(to.getOrgId());
+        
 		_log.info("调用快递电子面单的参数为：{}", eoderTo);
 		EOrderRo eOrderRo = kdiSvc.eorder(eoderTo);
 		_log.info("调用快递电子面单的返回值为：{}", eOrderRo);

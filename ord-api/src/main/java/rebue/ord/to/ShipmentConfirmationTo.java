@@ -7,6 +7,8 @@ import org.springframework.format.annotation.DateTimeFormat;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 
+import io.swagger.annotations.ApiModelProperty;
+
 public class ShipmentConfirmationTo {
 
 	/**
@@ -113,11 +115,128 @@ public class ShipmentConfirmationTo {
 	 * 快递公司ID
 	 */
 	private Long shipperId;
+	
+	/**
+	 * 快递公司编码
+	 */
+	private String shipperCode;
 
 	/**
 	 * 发货操作人
 	 */
 	private Long sendOpId;
+	
+
+    @ApiModelProperty(value = "发件人名称")
+    private String senderName;
+
+
+    @ApiModelProperty(value = "发件人电话")
+    private String senderTel;
+
+
+    @ApiModelProperty(value = "发件人手机")
+    private String senderMobile;
+
+
+    @ApiModelProperty(value = "发件省")
+    private String senderProvince;
+
+
+    @ApiModelProperty(value = "发件市")
+    private String senderCity;
+
+
+    @ApiModelProperty(value = "发件区")
+    private String senderExpArea;
+
+
+    @ApiModelProperty(value = "发件人详细地址")
+    private String senderAddress;
+
+
+    @ApiModelProperty(value = "发件地邮编")
+    private String senderPostCode;
+	
+	/**
+	 * 组织ID
+	 */
+    @ApiModelProperty(value = "组织id")
+	private Long orgId;
+    
+    
+
+	public Long getOrgId() {
+		return orgId;
+	}
+
+	public void setOrgId(Long orgId) {
+		this.orgId = orgId;
+	}
+
+	public String getSenderName() {
+		return senderName;
+	}
+
+	public void setSenderName(String senderName) {
+		this.senderName = senderName;
+	}
+
+	public String getSenderTel() {
+		return senderTel;
+	}
+
+	public void setSenderTel(String senderTel) {
+		this.senderTel = senderTel;
+	}
+
+	public String getSenderMobile() {
+		return senderMobile;
+	}
+
+	public void setSenderMobile(String senderMobile) {
+		this.senderMobile = senderMobile;
+	}
+
+	public String getSenderProvince() {
+		return senderProvince;
+	}
+
+	public void setSenderProvince(String senderProvince) {
+		this.senderProvince = senderProvince;
+	}
+
+	public String getSenderCity() {
+		return senderCity;
+	}
+
+	public void setSenderCity(String senderCity) {
+		this.senderCity = senderCity;
+	}
+
+	public String getSenderExpArea() {
+		return senderExpArea;
+	}
+
+	public void setSenderExpArea(String senderExpArea) {
+		this.senderExpArea = senderExpArea;
+	}
+
+	public String getSenderAddress() {
+		return senderAddress;
+	}
+
+	public void setSenderAddress(String senderAddress) {
+		this.senderAddress = senderAddress;
+	}
+
+	public String getSenderPostCode() {
+		return senderPostCode;
+	}
+
+	public void setSenderPostCode(String senderPostCode) {
+		this.senderPostCode = senderPostCode;
+	}
 
 	public Long getId() {
 		return id;
@@ -286,6 +405,16 @@ public class ShipmentConfirmationTo {
 	public void setSendOpId(Long sendOpId) {
 		this.sendOpId = sendOpId;
 	}
+	
+	
+
+	public String getShipperCode() {
+		return shipperCode;
+	}
+
+	public void setShipperCode(String shipperCode) {
+		this.shipperCode = shipperCode;
+	}
 
 	@Override
 	public String toString() {
@@ -296,7 +425,16 @@ public class ShipmentConfirmationTo {
 				+ receiverMobile + ", receiverProvince=" + receiverProvince + ", receiverCity=" + receiverCity
 				+ ", receiverExpArea=" + receiverExpArea + ", receiverAddress=" + receiverAddress
 				+ ", receiverPostCode=" + receiverPostCode + ", orderMessages=" + orderMessages + ", shipperId="
-				+ shipperId + ", sendOpId=" + sendOpId + "]";
+				+ shipperId + ", shipperCode=" + shipperCode + ", sendOpId=" + sendOpId + ", senderName=" + senderName
+				+ ", senderTel=" + senderTel + ", senderMobile=" + senderMobile + ", senderProvince=" + senderProvince
+				+ ", senderCity=" + senderCity + ", senderExpArea=" + senderExpArea + ", senderAddress=" + senderAddress
+				+ ", senderPostCode=" + senderPostCode + ", orgId=" + orgId + "]";
 	}
+
+
+
+	
+
+
 
 }
