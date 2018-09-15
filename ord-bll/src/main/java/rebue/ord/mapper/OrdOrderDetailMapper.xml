@@ -448,7 +448,7 @@
   	 SELECT  ood.ID, ood.ORDER_ID, ood.ONLINE_ID, ood.PRODUCE_ID, ood.ONLINE_TITLE, ood.SPEC_NAME, ood.BUY_COUNT, ood.BUY_PRICE, 
     ood.CASHBACK_AMOUNT, ood.RETURN_COUNT, ood.CASHBACK_TOTAL, ood.BUY_UNIT, RETURN_STATE, ood.USER_ID, ood.CASHBACK_COMMISSION_SLOT, 
     ood.CASHBACK_COMMISSION_STATE,oo.ORDER_TIME
-    from ORD_ORDER_DETAIL ood AND ORD_ORDER oo
+    from ORD_ORDER_DETAIL ood , ORD_ORDER oo
      <where>
       <if test="id != null">
         and ood.ID = #{id,jdbcType=BIGINT}
