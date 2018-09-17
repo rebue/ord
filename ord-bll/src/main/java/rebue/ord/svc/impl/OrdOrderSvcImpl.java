@@ -330,6 +330,7 @@ public class OrdOrderSvcImpl extends MybatisBaseSvcImpl<OrdOrderMo, java.lang.Lo
 					detailMo.setBuyPrice(orderList.get(j).getSalePrice());
 					detailMo.setCashbackAmount(new BigDecimal("0"));
 					detailMo.setReturnState((byte) 0);
+					detailMo.setCashbackCommissionSlot((byte) 2);
 					detailMo.setUserId(id);
 					detailMo.setCashbackTotal(new BigDecimal("0"));
 					_log.info("添加订单详情的参数为：{}", detailMo);
