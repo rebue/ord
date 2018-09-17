@@ -1,6 +1,6 @@
 /*==============================================================*/
 /* DBMS name:      MySQL 5.0                                    */
-/* Created on:     2018/9/15 17:54:46                           */
+/* Created on:     2018/9/17 20:24:37                           */
 /*==============================================================*/
 
 
@@ -179,7 +179,10 @@ create table ORD_SUBLEVEL_BUY
 (
    ID                   bigint not null comment '下级购买信息ID',
    ORDER_DETAIL_ID      bigint not null comment '订单详情ID',
-   SUBLEVEL_USER_ID     bigint comment '下级买家ID',
+   USER_ID              bigint not null comment '本级用户ID',
+   SUBLEVEL_USER_ID     bigint not null comment '下级用户ID',
+   SUBLEVEL_ORDER_DETAIL_ID bigint not null comment '下级订单详情ID',
+   IS_SIGN_IN           bool not null default false comment '是否已签收',
    primary key (ID)
 );
 
@@ -215,3 +218,4 @@ alter table ORD_RETURN_PIC add constraint FK_Relationship_4 foreign key (RETURN_
 
 alter table ORD_SUBLEVEL_BUY add constraint FK_Relationship_5 foreign key (ORDER_DETAIL_ID)
       references ORD_ORDER_DETAIL (ID) on delete restrict on update restrict;
+

@@ -52,6 +52,33 @@ public class OrdOrderDetailMo implements Serializable {
     private Long produceId;
 
     /**
+     *    版块类型（0：普通，1：全返）
+     *
+     *    数据库字段: ORD_ORDER_DETAIL.SUBJECT_TYPE
+     *
+     *    @mbg.generated 自动生成，如需修改，请删除本行
+     */
+    private Byte subjectType;
+
+    /**
+     *    返现佣金名额
+     *
+     *    数据库字段: ORD_ORDER_DETAIL.CASHBACK_COMMISSION_SLOT
+     *
+     *    @mbg.generated 自动生成，如需修改，请删除本行
+     */
+    private Byte cashbackCommissionSlot;
+
+    /**
+     *    返现佣金状态（0：匹配中，1：待返，2：已返）
+     *
+     *    数据库字段: ORD_ORDER_DETAIL.CASHBACK_COMMISSION_STATE
+     *
+     *    @mbg.generated 自动生成，如需修改，请删除本行
+     */
+    private Byte cashbackCommissionState;
+
+    /**
      *    上线标题
      *
      *    数据库字段: ORD_ORDER_DETAIL.ONLINE_TITLE
@@ -79,7 +106,7 @@ public class OrdOrderDetailMo implements Serializable {
     private Integer buyCount;
 
     /**
-     *    购买价格
+     *    购买价格（单价）
      *
      *    数据库字段: ORD_ORDER_DETAIL.BUY_PRICE
      *
@@ -140,24 +167,6 @@ public class OrdOrderDetailMo implements Serializable {
      *    @mbg.generated 自动生成，如需修改，请删除本行
      */
     private Long userId;
-
-    /**
-     *    返现佣金名额
-     *
-     *    数据库字段: ORD_ORDER_DETAIL.CASHBACK_COMMISSION_SLOT
-     *
-     *    @mbg.generated 自动生成，如需修改，请删除本行
-     */
-    private Byte cashbackCommissionSlot;
-
-    /**
-     *    返现佣金状态（0：匹配中，1：待返，2：已返）
-     *
-     *    数据库字段: ORD_ORDER_DETAIL.CASHBACK_COMMISSION_STATE
-     *
-     *    @mbg.generated 自动生成，如需修改，请删除本行
-     */
-    private Byte cashbackCommissionState;
 
     /**
      *    @mbg.generated 自动生成，如需修改，请删除本行
@@ -253,6 +262,72 @@ public class OrdOrderDetailMo implements Serializable {
     }
 
     /**
+     *    版块类型（0：普通，1：全返）
+     *
+     *    数据库字段: ORD_ORDER_DETAIL.SUBJECT_TYPE
+     *
+     *    @mbg.generated 自动生成，如需修改，请删除本行
+     */
+    public Byte getSubjectType() {
+        return subjectType;
+    }
+
+    /**
+     *    版块类型（0：普通，1：全返）
+     *
+     *    数据库字段: ORD_ORDER_DETAIL.SUBJECT_TYPE
+     *
+     *    @mbg.generated 自动生成，如需修改，请删除本行
+     */
+    public void setSubjectType(Byte subjectType) {
+        this.subjectType = subjectType;
+    }
+
+    /**
+     *    返现佣金名额
+     *
+     *    数据库字段: ORD_ORDER_DETAIL.CASHBACK_COMMISSION_SLOT
+     *
+     *    @mbg.generated 自动生成，如需修改，请删除本行
+     */
+    public Byte getCashbackCommissionSlot() {
+        return cashbackCommissionSlot;
+    }
+
+    /**
+     *    返现佣金名额
+     *
+     *    数据库字段: ORD_ORDER_DETAIL.CASHBACK_COMMISSION_SLOT
+     *
+     *    @mbg.generated 自动生成，如需修改，请删除本行
+     */
+    public void setCashbackCommissionSlot(Byte cashbackCommissionSlot) {
+        this.cashbackCommissionSlot = cashbackCommissionSlot;
+    }
+
+    /**
+     *    返现佣金状态（0：匹配中，1：待返，2：已返）
+     *
+     *    数据库字段: ORD_ORDER_DETAIL.CASHBACK_COMMISSION_STATE
+     *
+     *    @mbg.generated 自动生成，如需修改，请删除本行
+     */
+    public Byte getCashbackCommissionState() {
+        return cashbackCommissionState;
+    }
+
+    /**
+     *    返现佣金状态（0：匹配中，1：待返，2：已返）
+     *
+     *    数据库字段: ORD_ORDER_DETAIL.CASHBACK_COMMISSION_STATE
+     *
+     *    @mbg.generated 自动生成，如需修改，请删除本行
+     */
+    public void setCashbackCommissionState(Byte cashbackCommissionState) {
+        this.cashbackCommissionState = cashbackCommissionState;
+    }
+
+    /**
      *    上线标题
      *
      *    数据库字段: ORD_ORDER_DETAIL.ONLINE_TITLE
@@ -319,7 +394,7 @@ public class OrdOrderDetailMo implements Serializable {
     }
 
     /**
-     *    购买价格
+     *    购买价格（单价）
      *
      *    数据库字段: ORD_ORDER_DETAIL.BUY_PRICE
      *
@@ -330,7 +405,7 @@ public class OrdOrderDetailMo implements Serializable {
     }
 
     /**
-     *    购买价格
+     *    购买价格（单价）
      *
      *    数据库字段: ORD_ORDER_DETAIL.BUY_PRICE
      *
@@ -473,50 +548,6 @@ public class OrdOrderDetailMo implements Serializable {
     }
 
     /**
-     *    返现佣金名额
-     *
-     *    数据库字段: ORD_ORDER_DETAIL.CASHBACK_COMMISSION_SLOT
-     *
-     *    @mbg.generated 自动生成，如需修改，请删除本行
-     */
-    public Byte getCashbackCommissionSlot() {
-        return cashbackCommissionSlot;
-    }
-
-    /**
-     *    返现佣金名额
-     *
-     *    数据库字段: ORD_ORDER_DETAIL.CASHBACK_COMMISSION_SLOT
-     *
-     *    @mbg.generated 自动生成，如需修改，请删除本行
-     */
-    public void setCashbackCommissionSlot(Byte cashbackCommissionSlot) {
-        this.cashbackCommissionSlot = cashbackCommissionSlot;
-    }
-
-    /**
-     *    返现佣金状态（0：匹配中，1：待返，2：已返）
-     *
-     *    数据库字段: ORD_ORDER_DETAIL.CASHBACK_COMMISSION_STATE
-     *
-     *    @mbg.generated 自动生成，如需修改，请删除本行
-     */
-    public Byte getCashbackCommissionState() {
-        return cashbackCommissionState;
-    }
-
-    /**
-     *    返现佣金状态（0：匹配中，1：待返，2：已返）
-     *
-     *    数据库字段: ORD_ORDER_DETAIL.CASHBACK_COMMISSION_STATE
-     *
-     *    @mbg.generated 自动生成，如需修改，请删除本行
-     */
-    public void setCashbackCommissionState(Byte cashbackCommissionState) {
-        this.cashbackCommissionState = cashbackCommissionState;
-    }
-
-    /**
      *    @mbg.generated 自动生成，如需修改，请删除本行
      */
     @Override
@@ -529,6 +560,9 @@ public class OrdOrderDetailMo implements Serializable {
         sb.append(", orderId=").append(orderId);
         sb.append(", onlineId=").append(onlineId);
         sb.append(", produceId=").append(produceId);
+        sb.append(", subjectType=").append(subjectType);
+        sb.append(", cashbackCommissionSlot=").append(cashbackCommissionSlot);
+        sb.append(", cashbackCommissionState=").append(cashbackCommissionState);
         sb.append(", onlineTitle=").append(onlineTitle);
         sb.append(", specName=").append(specName);
         sb.append(", buyCount=").append(buyCount);
@@ -539,8 +573,6 @@ public class OrdOrderDetailMo implements Serializable {
         sb.append(", buyUnit=").append(buyUnit);
         sb.append(", returnState=").append(returnState);
         sb.append(", userId=").append(userId);
-        sb.append(", cashbackCommissionSlot=").append(cashbackCommissionSlot);
-        sb.append(", cashbackCommissionState=").append(cashbackCommissionState);
         sb.append(", serialVersionUID=").append(serialVersionUID);
         sb.append("]");
         return sb.toString();

@@ -16,6 +16,11 @@ import rebue.ord.ro.RejectReturnRo;
 import rebue.ord.to.OrdOrderReturnTo;
 import rebue.robotech.svc.MybatisBaseSvc;
 
+/**
+ * 用户退货信息
+ *
+ * @mbg.generated 自动生成的注释，如需修改本注释，请删除本行
+ */
 public interface OrdReturnSvc extends MybatisBaseSvc<OrdReturnMo, java.lang.Long> {
 
     /**

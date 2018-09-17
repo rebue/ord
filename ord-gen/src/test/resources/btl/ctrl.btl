@@ -22,7 +22,6 @@ import com.github.pagehelper.PageInfo;
 
 import ${moClassFullName};
 import ${modulePackage}.svc.${entityName}Svc;
-import ${modulePackage}.ro.${entityName}GetRo;
 
 import rebue.robotech.dic.ResultDic;
 import rebue.robotech.ro.Ro;
@@ -59,7 +58,7 @@ public class ${entityName}Ctrl {
      */
     @PostMapping("/${strutil.toLowerCase(entityNamePrefix)}/${strutil.toLowerCase(entitySimpleName)}")
     Ro add(@RequestBody ${moClassShortName} mo) throws Exception {
-        _log.info("add ${moClassShortName}:" + mo);
+        _log.info("add ${moClassShortName}: {}", mo);
         Ro ro = new Ro();
         try {
             int result = svc.add(mo);
@@ -99,7 +98,7 @@ public class ${entityName}Ctrl {
      */
     @PutMapping("/${strutil.toLowerCase(entityNamePrefix)}/${strutil.toLowerCase(entitySimpleName)}")
     Ro modify(@RequestBody ${moClassShortName} mo) throws Exception {
-        _log.info("modify ${moClassShortName}:" + mo);
+        _log.info("modify ${moClassShortName}: {}", mo);
         Ro ro = new Ro();
         try {
             if (svc.modify(mo) == 1) {
@@ -150,7 +149,7 @@ public class ${entityName}Ctrl {
             print(id.key);
         }
     &>) {
-        _log.info("save ${moClassShortName}:" + <&
+        _log.info("del ${moClassShortName} by id: {}", <&
             for(id in ids){
                 if(!idLP.first) {
                     print(', ');
@@ -189,7 +188,11 @@ public class ${entityName}Ctrl {
      * @mbg.generated 自动生成，如需修改，请删除本行
      */
     @GetMapping("/${strutil.toLowerCase(entityNamePrefix)}/${strutil.toLowerCase(entitySimpleName)}")
-    PageInfo<${moClassShortName}> list(${moClassShortName} mo, @RequestParam("pageNum") int pageNum, @RequestParam("pageSize") int pageSize) {
+    PageInfo<${moClassShortName}> list(${moClassShortName} mo, @RequestParam(value = "pageNum", required = false) Integer pageNum, @RequestParam(value = "pageSize", required = false) Integer pageSize) {
+        if (pageNum == null)
+            pageNum = 1;
+        if (pageSize == null)
+            pageSize = 5;
         _log.info("list ${moClassShortName}:" + mo + ", pageNum = " + pageNum + ", pageSize = " + pageSize);
         if (pageSize > 50) {
             String msg = "pageSize不能大于50";

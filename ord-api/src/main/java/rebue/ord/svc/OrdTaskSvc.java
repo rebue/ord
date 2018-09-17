@@ -4,6 +4,11 @@ import java.util.List;
 import rebue.ord.mo.OrdTaskMo;
 import rebue.robotech.svc.MybatisBaseSvc;
 
+/**
+ * 订单任务
+ *
+ * @mbg.generated 自动生成的注释，如需修改本注释，请删除本行
+ */
 public interface OrdTaskSvc extends MybatisBaseSvc<OrdTaskMo, java.lang.Long> {
 
     /**

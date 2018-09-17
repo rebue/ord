@@ -80,24 +80,10 @@ public interface OrdOrderDetailMapper extends MybatisBaseMapper<OrdOrderDetailMo
      */
     @Update("UPDATE ORD_ORDER_DETAIL SET RETURN_STATE = #{returnState,jdbcType=TINYINT} WHERE ID = #{id,jdbcType=BIGINT}")
     int modifyReturnStateById(@Param("returnState") byte returnState, @Param("id") long id);
-    
-    /**
-     * 根据上线ID及价格查找用户全返商品
-     */
-    
+
     OrdOrderDetailMo getFullReturnDetail(OrdOrderDetailMo mo);
-    
-    /**
-     * 根据上线ID及价格查找用户全返商品
-     */
-    
+
     OrdOrderDetailMo getOtherFullReturnDetail(OrdOrderDetailMo mo);
-    
-    /**
-     * 修改订单详情全返佣金名额
-     */
-    
+
     int updateCashbackSlot(OrdOrderDetailMo mo);
-
 }
-

@@ -92,12 +92,12 @@ public class OrdOrderMo implements Serializable {
 
     /**
      *    订单状态（-1：作废  1：已下单（待支付）  2：已支付（待发货）  3：已发货（待签收）  4：已签收（待结算）  5：已结算  ））
-     *            -1：作废
-     *            1：已下单（待支付）
-     *            2：已支付（待发货）
-     *            3：已发货（待签收）
-     *            4：已签收（待结算）
-     *            5：已结算
+     *                -1：作废
+     *                1：已下单（待支付）
+     *                2：已支付（待发货）
+     *                3：已发货（待签收）
+     *                4：已签收（待结算）
+     *                5：已结算
      *
      *    数据库字段: ORD_ORDER.ORDER_STATE
      *
@@ -197,6 +197,15 @@ public class OrdOrderMo implements Serializable {
      *    @mbg.generated 自动生成，如需修改，请删除本行
      */
     private Long logisticId;
+
+    /**
+     *    快递公司编号
+     *
+     *    数据库字段: ORD_ORDER.SHIPPER_CODE
+     *
+     *    @mbg.generated 自动生成，如需修改，请删除本行
+     */
+    private String shipperCode;
 
     /**
      *    快递公司名称
@@ -350,15 +359,6 @@ public class OrdOrderMo implements Serializable {
      *    @mbg.generated 自动生成，如需修改，请删除本行
      */
     private String cancelReason;
-
-    /**
-     *    快递公司ID
-     *
-     *    数据库字段: ORD_ORDER.SHIPPER_ID
-     *
-     *    @mbg.generated 自动生成，如需修改，请删除本行
-     */
-    private Long shipperId;
 
     /**
      *    @mbg.generated 自动生成，如需修改，请删除本行
@@ -543,12 +543,12 @@ public class OrdOrderMo implements Serializable {
 
     /**
      *    订单状态（-1：作废  1：已下单（待支付）  2：已支付（待发货）  3：已发货（待签收）  4：已签收（待结算）  5：已结算  ））
-     *            -1：作废
-     *            1：已下单（待支付）
-     *            2：已支付（待发货）
-     *            3：已发货（待签收）
-     *            4：已签收（待结算）
-     *            5：已结算
+     *                -1：作废
+     *                1：已下单（待支付）
+     *                2：已支付（待发货）
+     *                3：已发货（待签收）
+     *                4：已签收（待结算）
+     *                5：已结算
      *
      *    数据库字段: ORD_ORDER.ORDER_STATE
      *
@@ -560,12 +560,12 @@ public class OrdOrderMo implements Serializable {
 
     /**
      *    订单状态（-1：作废  1：已下单（待支付）  2：已支付（待发货）  3：已发货（待签收）  4：已签收（待结算）  5：已结算  ））
-     *            -1：作废
-     *            1：已下单（待支付）
-     *            2：已支付（待发货）
-     *            3：已发货（待签收）
-     *            4：已签收（待结算）
-     *            5：已结算
+     *                -1：作废
+     *                1：已下单（待支付）
+     *                2：已支付（待发货）
+     *                3：已发货（待签收）
+     *                4：已签收（待结算）
+     *                5：已结算
      *
      *    数据库字段: ORD_ORDER.ORDER_STATE
      *
@@ -771,6 +771,28 @@ public class OrdOrderMo implements Serializable {
      */
     public void setLogisticId(Long logisticId) {
         this.logisticId = logisticId;
+    }
+
+    /**
+     *    快递公司编号
+     *
+     *    数据库字段: ORD_ORDER.SHIPPER_CODE
+     *
+     *    @mbg.generated 自动生成，如需修改，请删除本行
+     */
+    public String getShipperCode() {
+        return shipperCode;
+    }
+
+    /**
+     *    快递公司编号
+     *
+     *    数据库字段: ORD_ORDER.SHIPPER_CODE
+     *
+     *    @mbg.generated 自动生成，如需修改，请删除本行
+     */
+    public void setShipperCode(String shipperCode) {
+        this.shipperCode = shipperCode;
     }
 
     /**
@@ -1148,28 +1170,6 @@ public class OrdOrderMo implements Serializable {
     }
 
     /**
-     *    快递公司ID
-     *
-     *    数据库字段: ORD_ORDER.SHIPPER_ID
-     *
-     *    @mbg.generated 自动生成，如需修改，请删除本行
-     */
-    public Long getShipperId() {
-        return shipperId;
-    }
-
-    /**
-     *    快递公司ID
-     *
-     *    数据库字段: ORD_ORDER.SHIPPER_ID
-     *
-     *    @mbg.generated 自动生成，如需修改，请删除本行
-     */
-    public void setShipperId(Long shipperId) {
-        this.shipperId = shipperId;
-    }
-
-    /**
      *    @mbg.generated 自动生成，如需修改，请删除本行
      */
     @Override
@@ -1196,6 +1196,7 @@ public class OrdOrderMo implements Serializable {
         sb.append(", closeTime=").append(closeTime);
         sb.append(", cancelTime=").append(cancelTime);
         sb.append(", logisticId=").append(logisticId);
+        sb.append(", shipperCode=").append(shipperCode);
         sb.append(", shipperName=").append(shipperName);
         sb.append(", logisticCode=").append(logisticCode);
         sb.append(", receiverName=").append(receiverName);
@@ -1213,7 +1214,6 @@ public class OrdOrderMo implements Serializable {
         sb.append(", sendOpId=").append(sendOpId);
         sb.append(", receivedOpId=").append(receivedOpId);
         sb.append(", cancelReason=").append(cancelReason);
-        sb.append(", shipperId=").append(shipperId);
         sb.append(", serialVersionUID=").append(serialVersionUID);
         sb.append("]");
         return sb.toString();

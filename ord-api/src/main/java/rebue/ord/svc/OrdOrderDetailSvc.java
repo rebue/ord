@@ -1,10 +1,13 @@
 package rebue.ord.svc;
 
-import java.math.BigDecimal;
-
 import rebue.ord.mo.OrdOrderDetailMo;
 import rebue.robotech.svc.MybatisBaseSvc;
 
+/**
+ * 订单详情
+ *
+ * @mbg.generated 自动生成的注释，如需修改本注释，请删除本行
+ */
 public interface OrdOrderDetailSvc extends MybatisBaseSvc<OrdOrderDetailMo, java.lang.Long> {
 
     /**
@@ -29,22 +32,13 @@ public interface OrdOrderDetailSvc extends MybatisBaseSvc<OrdOrderDetailMo, java
      *  @date 2018年5月8日 上午10:59:44
      */
     int modifyReturnStateById(long id, byte returnState);
-    
-    /**
-     * 根据上线ID及价格查找上家用户全返商品,如有多个则找到时间最早的一个商品详情，以确定上家
-     */
-    
+
     OrdOrderDetailMo getFullReturnDetail(OrdOrderDetailMo mo);
-    
-    /**
-     * 根据上线ID及价格查找除购买关系和注册关系外的全返商品详情，如有多个则找到时间最早的且返佣名额为2个的一个商品详情，以确定上家
-     */
-    
+
     OrdOrderDetailMo getOtherFullReturnDetail(OrdOrderDetailMo mo);
-    
+
     /**
      * 更新订单详情的返佣名额字段
      */
     int updateCashbackSlot(OrdOrderDetailMo mo);
-    
 }

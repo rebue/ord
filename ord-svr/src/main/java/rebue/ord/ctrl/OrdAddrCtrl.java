@@ -1,5 +1,6 @@
 package rebue.ord.ctrl;
 
+import com.github.pagehelper.PageInfo;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -8,51 +9,97 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import rebue.ord.mo.OrdAddrMo;
 import rebue.ord.svc.OrdAddrSvc;
+import rebue.robotech.dic.ResultDic;
+import rebue.robotech.ro.Ro;
 
+/**
+ * 用户收货地址
+ *
+ * @mbg.generated 自动生成的注释，如需修改本注释，请删除本行
+ */
 @RestController
 public class OrdAddrCtrl {
 
     /**
-     * @mbg.generated
+     * @mbg.generated 自动生成，如需修改，请删除本行
      */
     private static final Logger _log = LoggerFactory.getLogger(OrdAddrCtrl.class);
 
     /**
-     * @mbg.generated
+     * @mbg.generated 自动生成，如需修改，请删除本行
      */
     @Resource
     private OrdAddrSvc svc;
 
     /**
-     * 删除用户收货地址
-     * @mbg.generated
+     * 有唯一约束的字段名称
+     *
+     * @mbg.generated 自动生成，如需修改，请删除本行
      */
-    @DeleteMapping("/ord/addr/{id}")
-    Map<String, Object> del(@PathVariable("id") java.lang.Long id) {
-        _log.info("save OrdAddrMo:" + id);
-        svc.del(id);
-        Map<String, Object> result = new HashMap<>();
-        result.put("success", true);
-        _log.info("delete OrdAddrMo success!");
+    private String _uniqueFilesName = "某字段内容";
+
+    /**
+     * 删除用户收货地址
+     *
+     * @mbg.generated 自动生成，如需修改，请删除本行
+     */
+    @DeleteMapping("/ord/addr")
+    Ro del(@RequestParam("id") java.lang.Long id) {
+        _log.info("del OrdAddrMo by id: {}", id);
+        int result = svc.del(id);
+        Ro ro = new Ro();
+        if (result == 1) {
+            String msg = "删除成功";
+            _log.info("{}: id-{}", msg, id);
+            ro.setMsg(msg);
+            ro.setResult(ResultDic.SUCCESS);
+            return ro;
+        } else {
+            String msg = "删除失败，找不到该记录";
+            _log.error("{}: id-{}", msg, id);
+            ro.setMsg(msg);
+            ro.setResult(ResultDic.FAIL);
+            return ro;
+        }
+    }
+
+    /**
+     * 查询用户收货地址
+     *
+     * @mbg.generated 自动生成，如需修改，请删除本行
+     */
+    @GetMapping("/ord/addr")
+    PageInfo<OrdAddrMo> list(OrdAddrMo mo, @RequestParam(value = "pageNum", required = false) Integer pageNum, @RequestParam(value = "pageSize", required = false) Integer pageSize) {
+        if (pageNum == null)
+            pageNum = 1;
+        if (pageSize == null)
+            pageSize = 5;
+        _log.info("list OrdAddrMo:" + mo + ", pageNum = " + pageNum + ", pageSize = " + pageSize);
+        if (pageSize > 50) {
+            String msg = "pageSize不能大于50";
+            _log.error(msg);
+            throw new IllegalArgumentException(msg);
+        }
+        PageInfo<OrdAddrMo> result = svc.list(mo, pageNum, pageSize);
+        _log.info("result: " + result);
         return result;
     }
 
     /**
      * 获取单个用户收货地址
-     * @mbg.generated
+     *
+     * @mbg.generated 自动生成，如需修改，请删除本行
      */
-    @GetMapping("/ord/addr/{id}")
-    OrdAddrMo get(@PathVariable("id") java.lang.Long id) {
+    @GetMapping("/ord/addr/getbyid")
+    OrdAddrMo getById(@RequestParam("id") java.lang.Long id) {
         _log.info("get OrdAddrMo by id: " + id);
-        OrdAddrMo result = svc.getById(id);
-        _log.info("get: " + result);
-        return result;
+        return svc.getById(id);
     }
 
     /**
