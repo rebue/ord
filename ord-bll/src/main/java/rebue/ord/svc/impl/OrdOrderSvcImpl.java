@@ -370,8 +370,7 @@ public class OrdOrderSvcImpl extends MybatisBaseSvcImpl<OrdOrderMo, java.lang.Lo
 			throw new RuntimeException("添加取消订单任务失败");
 		}
 		_log.info("删除购物车和修改上线数量的参数为：{}", String.valueOf(cartAndSpecList));
-		Map<String, Object> deleteAndUpdateMap = onlOnlineSpecSvc
-				.deleteCartAndUpdateOnlineCount(objectMapper.writeValueAsString(cartAndSpecList));
+		Map<String, Object> deleteAndUpdateMap = onlOnlineSpecSvc.deleteCartAndUpdateOnlineCount(objectMapper.writeValueAsString(cartAndSpecList));
 		if (deleteAndUpdateMap == null || deleteAndUpdateMap.size() == 0) {
 			_log.error("{}删除购物车和修改上线数量失败", id);
 			throw new RuntimeException(String.valueOf(deleteAndUpdateMap.get("msg")));
@@ -394,17 +393,19 @@ public class OrdOrderSvcImpl extends MybatisBaseSvcImpl<OrdOrderMo, java.lang.Lo
 	@Transactional(readOnly = false, propagation = Propagation.REQUIRED)
     public boolean getAndUpdateBuyRelation(long id , long onlineId,BigDecimal buyPrice) {
     	//获取用户购买关系
-    	_log.info("获取用户购买关系");
-    	String buyRelation = sucUserSvc.getBuyRelation(id, onlineId);
+    	_log.info("获取用户购买关系的id:"+id+"onlineId:"+onlineId+"buyPricce:"+buyPrice);
+    	Long buyRelation = sucUserSvc.getBuyRelation(id, onlineId);
     	_log.info("获取用户购买关系返回值为："+buyRelation);
-    	if(buyRelation ==null||buyRelation =="") {
+    	if(buyRelation ==null) {
     		return false;
     	}
 		//根据产品上线ID查找购买关系用户的购买记录，看是否有符合要求的订单详情记录
 		OrdOrderDetailMo mo = new OrdOrderDetailMo();
     	mo.setOnlineId(onlineId);
     	mo.setBuyPrice(buyPrice);
-    	mo.setUserId(Long.parseLong(buyRelation));
+    	_log.info("111");
+    	mo.setUserId(buyRelation);
+    	_log.info("获取用户购买关系订单详情的参数为：{}"+mo);
     	OrdOrderDetailMo orderDetailMo = ordOrderDetailSvc.getFullReturnDetail(mo);
     	_log.info("获取用户购买关系订单详情的返回值为：{}"+orderDetailMo);
     	if(orderDetailMo==null) {

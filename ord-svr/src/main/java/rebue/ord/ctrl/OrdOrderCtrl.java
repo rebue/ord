@@ -323,4 +323,18 @@ public class OrdOrderCtrl {
         _log.info("查询订单信息的返回值：{}", String.valueOf(list));
         return list;
     }
+    
+    /**
+     * 根据定单编号获取单个订单信息
+     */
+    @GetMapping("/ord/getByOrderCode/{orderCode}")
+    OrdOrderMo getByOrderCode(@PathVariable("orderCode") java.lang.Long orderCode) {
+        _log.info("根据定单编号查找定单: " + orderCode);
+        String orderCodeStr = String.valueOf(orderCode);
+        OrdOrderMo mo = new OrdOrderMo();
+        mo.setOrderCode(orderCodeStr);
+        OrdOrderMo result = svc.getOne(mo);
+        _log.info("get: " + result);
+        return result;
+    }
 }
