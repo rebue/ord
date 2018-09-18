@@ -62,45 +62,45 @@ public class OrdReturnCtrl {
      */
     private String _uniqueFilesName = "某字段内容";
 
-    /**
-     * 添加用户退货信息
-     *
-     * @mbg.generated 自动生成，如需修改，请删除本行
-     */
-    @PostMapping("/ord/return")
-    Ro add(@RequestBody OrdReturnMo mo) throws Exception {
-        _log.info("add OrdReturnMo: {}", mo);
-        Ro ro = new Ro();
-        try {
-            int result = svc.add(mo);
-            if (result == 1) {
-                String msg = "添加成功";
-                _log.info("{}: mo-{}", msg, mo);
-                ro.setMsg(msg);
-                ro.setResult(ResultDic.SUCCESS);
-                return ro;
-            } else {
-                String msg = "添加失败";
-                _log.error("{}: mo-{}", msg, mo);
-                ro.setMsg(msg);
-                ro.setResult(ResultDic.FAIL);
-                return ro;
-            }
-        } catch (DuplicateKeyException e) {
-            String msg = "添加失败，" + _uniqueFilesName + "已存在，不允许出现重复";
-            _log.error("{}: mo-{}", msg, mo);
-            ro.setMsg(msg);
-            ro.setResult(ResultDic.FAIL);
-            return ro;
-        } catch (RuntimeException e) {
-            SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-            String msg = "修改失败，出现运行时异常(" + sdf.format(new Date()) + ")";
-            _log.error("{}: mo-{}", msg, mo);
-            ro.setMsg(msg);
-            ro.setResult(ResultDic.FAIL);
-            return ro;
-        }
-    }
+//    /**
+//     * 添加用户退货信息
+//     *
+//     * @mbg.generated 自动生成，如需修改，请删除本行
+//     */
+//    @PostMapping("/ord/return")
+//    Ro add(@RequestBody OrdReturnMo mo) throws Exception {
+//        _log.info("add OrdReturnMo: {}", mo);
+//        Ro ro = new Ro();
+//        try {
+//            int result = svc.add(mo);
+//            if (result == 1) {
+//                String msg = "添加成功";
+//                _log.info("{}: mo-{}", msg, mo);
+//                ro.setMsg(msg);
+//                ro.setResult(ResultDic.SUCCESS);
+//                return ro;
+//            } else {
+//                String msg = "添加失败";
+//                _log.error("{}: mo-{}", msg, mo);
+//                ro.setMsg(msg);
+//                ro.setResult(ResultDic.FAIL);
+//                return ro;
+//            }
+//        } catch (DuplicateKeyException e) {
+//            String msg = "添加失败，" + _uniqueFilesName + "已存在，不允许出现重复";
+//            _log.error("{}: mo-{}", msg, mo);
+//            ro.setMsg(msg);
+//            ro.setResult(ResultDic.FAIL);
+//            return ro;
+//        } catch (RuntimeException e) {
+//            SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+//            String msg = "修改失败，出现运行时异常(" + sdf.format(new Date()) + ")";
+//            _log.error("{}: mo-{}", msg, mo);
+//            ro.setMsg(msg);
+//            ro.setResult(ResultDic.FAIL);
+//            return ro;
+//        }
+//    }
 
     /**
      * 修改用户退货信息
@@ -166,27 +166,27 @@ public class OrdReturnCtrl {
         }
     }
 
-    /**
-     * 查询用户退货信息
-     *
-     * @mbg.generated 自动生成，如需修改，请删除本行
-     */
-    @GetMapping("/ord/return")
-    PageInfo<OrdReturnMo> list(OrdReturnMo mo, @RequestParam(value = "pageNum", required = false) Integer pageNum, @RequestParam(value = "pageSize", required = false) Integer pageSize) {
-        if (pageNum == null)
-            pageNum = 1;
-        if (pageSize == null)
-            pageSize = 5;
-        _log.info("list OrdReturnMo:" + mo + ", pageNum = " + pageNum + ", pageSize = " + pageSize);
-        if (pageSize > 50) {
-            String msg = "pageSize不能大于50";
-            _log.error(msg);
-            throw new IllegalArgumentException(msg);
-        }
-        PageInfo<OrdReturnMo> result = svc.list(mo, pageNum, pageSize);
-        _log.info("result: " + result);
-        return result;
-    }
+//    /**
+//     * 查询用户退货信息
+//     *
+//     * @mbg.generated 自动生成，如需修改，请删除本行
+//     */
+//    @GetMapping("/ord/return")
+//    PageInfo<OrdReturnMo> list(OrdReturnMo mo, @RequestParam(value = "pageNum", required = false) Integer pageNum, @RequestParam(value = "pageSize", required = false) Integer pageSize) {
+//        if (pageNum == null)
+//            pageNum = 1;
+//        if (pageSize == null)
+//            pageSize = 5;
+//        _log.info("list OrdReturnMo:" + mo + ", pageNum = " + pageNum + ", pageSize = " + pageSize);
+//        if (pageSize > 50) {
+//            String msg = "pageSize不能大于50";
+//            _log.error(msg);
+//            throw new IllegalArgumentException(msg);
+//        }
+//        PageInfo<OrdReturnMo> result = svc.list(mo, pageNum, pageSize);
+//        _log.info("result: " + result);
+//        return result;
+//    }
 
     /**
      * 获取单个用户退货信息

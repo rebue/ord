@@ -173,7 +173,7 @@ public interface OrdOrderSvc extends MybatisBaseSvc<OrdOrderMo, java.lang.Long> 
      *  @return
      *  @date 2018年5月21日 下午5:01:46
      */
-    byte selectOrderStateByOrderCode(String orderCode);
+    Byte selectOrderStateByOrderCode(String orderCode);
 
     /**
      *  查询用户待返现订单信息 Title: selectOrderInfo Description:

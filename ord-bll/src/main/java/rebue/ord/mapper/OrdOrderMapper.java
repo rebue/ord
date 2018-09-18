@@ -194,7 +194,7 @@ public interface OrdOrderMapper extends MybatisBaseMapper<OrdOrderMo, Long> {
      *  @date 2018年5月21日 下午4:57:04
      */
     @Select("select ORDER_STATE from ORD_ORDER where ORDER_CODE = #{orderCode,jdbcType=VARCHAR}")
-    byte selectOrderStateByOrderCode(@Param("orderCode") String orderCode);
+    Byte selectOrderStateByOrderCode(@Param("orderCode") String orderCode);
 
     /**
      * 分页查询订单信息

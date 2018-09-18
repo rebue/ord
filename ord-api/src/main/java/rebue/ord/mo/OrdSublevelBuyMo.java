@@ -33,40 +33,13 @@ public class OrdSublevelBuyMo implements Serializable {
     private Long orderDetailId;
 
     /**
-     *    本级用户ID
-     *
-     *    数据库字段: ORD_SUBLEVEL_BUY.USER_ID
-     *
-     *    @mbg.generated 自动生成，如需修改，请删除本行
-     */
-    private Long userId;
-
-    /**
-     *    下级用户ID
+     *    下级买家ID
      *
      *    数据库字段: ORD_SUBLEVEL_BUY.SUBLEVEL_USER_ID
      *
      *    @mbg.generated 自动生成，如需修改，请删除本行
      */
     private Long sublevelUserId;
-
-    /**
-     *    下级订单详情ID
-     *
-     *    数据库字段: ORD_SUBLEVEL_BUY.SUBLEVEL_ORDER_DETAIL_ID
-     *
-     *    @mbg.generated 自动生成，如需修改，请删除本行
-     */
-    private Long sublevelOrderDetailId;
-
-    /**
-     *    是否已签收
-     *
-     *    数据库字段: ORD_SUBLEVEL_BUY.IS_SIGN_IN
-     *
-     *    @mbg.generated 自动生成，如需修改，请删除本行
-     */
-    private Boolean isSignIn;
 
     /**
      *    @mbg.generated 自动生成，如需修改，请删除本行
@@ -118,29 +91,7 @@ public class OrdSublevelBuyMo implements Serializable {
     }
 
     /**
-     *    本级用户ID
-     *
-     *    数据库字段: ORD_SUBLEVEL_BUY.USER_ID
-     *
-     *    @mbg.generated 自动生成，如需修改，请删除本行
-     */
-    public Long getUserId() {
-        return userId;
-    }
-
-    /**
-     *    本级用户ID
-     *
-     *    数据库字段: ORD_SUBLEVEL_BUY.USER_ID
-     *
-     *    @mbg.generated 自动生成，如需修改，请删除本行
-     */
-    public void setUserId(Long userId) {
-        this.userId = userId;
-    }
-
-    /**
-     *    下级用户ID
+     *    下级买家ID
      *
      *    数据库字段: ORD_SUBLEVEL_BUY.SUBLEVEL_USER_ID
      *
@@ -151,7 +102,7 @@ public class OrdSublevelBuyMo implements Serializable {
     }
 
     /**
-     *    下级用户ID
+     *    下级买家ID
      *
      *    数据库字段: ORD_SUBLEVEL_BUY.SUBLEVEL_USER_ID
      *
@@ -159,50 +110,6 @@ public class OrdSublevelBuyMo implements Serializable {
      */
     public void setSublevelUserId(Long sublevelUserId) {
         this.sublevelUserId = sublevelUserId;
-    }
-
-    /**
-     *    下级订单详情ID
-     *
-     *    数据库字段: ORD_SUBLEVEL_BUY.SUBLEVEL_ORDER_DETAIL_ID
-     *
-     *    @mbg.generated 自动生成，如需修改，请删除本行
-     */
-    public Long getSublevelOrderDetailId() {
-        return sublevelOrderDetailId;
-    }
-
-    /**
-     *    下级订单详情ID
-     *
-     *    数据库字段: ORD_SUBLEVEL_BUY.SUBLEVEL_ORDER_DETAIL_ID
-     *
-     *    @mbg.generated 自动生成，如需修改，请删除本行
-     */
-    public void setSublevelOrderDetailId(Long sublevelOrderDetailId) {
-        this.sublevelOrderDetailId = sublevelOrderDetailId;
-    }
-
-    /**
-     *    是否已签收
-     *
-     *    数据库字段: ORD_SUBLEVEL_BUY.IS_SIGN_IN
-     *
-     *    @mbg.generated 自动生成，如需修改，请删除本行
-     */
-    public Boolean getIsSignIn() {
-        return isSignIn;
-    }
-
-    /**
-     *    是否已签收
-     *
-     *    数据库字段: ORD_SUBLEVEL_BUY.IS_SIGN_IN
-     *
-     *    @mbg.generated 自动生成，如需修改，请删除本行
-     */
-    public void setIsSignIn(Boolean isSignIn) {
-        this.isSignIn = isSignIn;
     }
 
     /**
@@ -216,10 +123,7 @@ public class OrdSublevelBuyMo implements Serializable {
         sb.append("Hash = ").append(hashCode());
         sb.append(", id=").append(id);
         sb.append(", orderDetailId=").append(orderDetailId);
-        sb.append(", userId=").append(userId);
         sb.append(", sublevelUserId=").append(sublevelUserId);
-        sb.append(", sublevelOrderDetailId=").append(sublevelOrderDetailId);
-        sb.append(", isSignIn=").append(isSignIn);
         sb.append(", serialVersionUID=").append(serialVersionUID);
         sb.append("]");
         return sb.toString();

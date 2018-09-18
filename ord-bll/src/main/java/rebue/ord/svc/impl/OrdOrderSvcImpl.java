@@ -1075,7 +1075,7 @@ public class OrdOrderSvcImpl extends MybatisBaseSvcImpl<OrdOrderMo, java.lang.Lo
      *  @date 2018年5月21日 下午5:00:25
      */
     @Override
-    public byte selectOrderStateByOrderCode(String orderCode) {
+    public Byte selectOrderStateByOrderCode(String orderCode) {
         return _mapper.selectOrderStateByOrderCode(orderCode);
     }
 

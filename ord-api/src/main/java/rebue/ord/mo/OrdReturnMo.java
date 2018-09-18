@@ -136,15 +136,6 @@ public class OrdReturnMo implements Serializable {
     private String returnReason;
 
     /**
-     *    用户ID
-     *
-     *    数据库字段: ORD_RETURN.USER_ID
-     *
-     *    @mbg.generated 自动生成，如需修改，请删除本行
-     */
-    private Long userId;
-
-    /**
      *    申请操作人
      *
      *    数据库字段: ORD_RETURN.APPLICATION_OP_ID
@@ -292,6 +283,15 @@ public class OrdReturnMo implements Serializable {
     @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss")
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd HH:mm:ss", timezone = "GMT+8")
     private Date receiveTime;
+
+    /**
+     *    用户ID
+     *
+     *    数据库字段: ORD_RETURN.USER_ID
+     *
+     *    @mbg.generated 自动生成，如需修改，请删除本行
+     */
+    private Long userId;
 
     /**
      *    @mbg.generated 自动生成，如需修改，请删除本行
@@ -582,28 +582,6 @@ public class OrdReturnMo implements Serializable {
      */
     public void setReturnReason(String returnReason) {
         this.returnReason = returnReason;
-    }
-
-    /**
-     *    用户ID
-     *
-     *    数据库字段: ORD_RETURN.USER_ID
-     *
-     *    @mbg.generated 自动生成，如需修改，请删除本行
-     */
-    public Long getUserId() {
-        return userId;
-    }
-
-    /**
-     *    用户ID
-     *
-     *    数据库字段: ORD_RETURN.USER_ID
-     *
-     *    @mbg.generated 自动生成，如需修改，请删除本行
-     */
-    public void setUserId(Long userId) {
-        this.userId = userId;
     }
 
     /**
@@ -937,6 +915,28 @@ public class OrdReturnMo implements Serializable {
     }
 
     /**
+     *    用户ID
+     *
+     *    数据库字段: ORD_RETURN.USER_ID
+     *
+     *    @mbg.generated 自动生成，如需修改，请删除本行
+     */
+    public Long getUserId() {
+        return userId;
+    }
+
+    /**
+     *    用户ID
+     *
+     *    数据库字段: ORD_RETURN.USER_ID
+     *
+     *    @mbg.generated 自动生成，如需修改，请删除本行
+     */
+    public void setUserId(Long userId) {
+        this.userId = userId;
+    }
+
+    /**
      *    @mbg.generated 自动生成，如需修改，请删除本行
      */
     @Override
@@ -958,7 +958,6 @@ public class OrdReturnMo implements Serializable {
         sb.append(", applicationState=").append(applicationState);
         sb.append(", refundState=").append(refundState);
         sb.append(", returnReason=").append(returnReason);
-        sb.append(", userId=").append(userId);
         sb.append(", applicationOpId=").append(applicationOpId);
         sb.append(", applicationTime=").append(applicationTime);
         sb.append(", cancelOpId=").append(cancelOpId);
@@ -974,6 +973,7 @@ public class OrdReturnMo implements Serializable {
         sb.append(", finishTime=").append(finishTime);
         sb.append(", receiveOpId=").append(receiveOpId);
         sb.append(", receiveTime=").append(receiveTime);
+        sb.append(", userId=").append(userId);
         sb.append(", serialVersionUID=").append(serialVersionUID);
         sb.append("]");
         return sb.toString();
