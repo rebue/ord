@@ -208,4 +208,11 @@
       </if>
     </where>
   </select>
+  
+  <update id="updateByOrderDetailId" parameterType="rebue.ord.mo.OrdBuyRelationMo">
+    update ORD_BUY_RELATION
+    set DOWNLINE_USER_ID = #{downlineUserId,jdbcType=BIGINT},DOWNLINE_ORDER_DETAIL_ID = #{downlineOrderDetailId,jdbcType=BIGINT},
+    where UPLINE_ORDER_DETAIL_ID = #{uplineOrderDetailId,jdbcType=BIGINT}
+  </update>
+  
 </mapper>

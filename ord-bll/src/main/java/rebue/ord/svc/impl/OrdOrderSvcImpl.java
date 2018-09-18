@@ -1,11 +1,5 @@
 package rebue.ord.svc.impl;
 
-import com.fasterxml.jackson.core.JsonParseException;
-import com.fasterxml.jackson.databind.JavaType;
-import com.fasterxml.jackson.databind.JsonMappingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.github.pagehelper.PageHelper;
-import com.github.pagehelper.PageInfo;
 import java.beans.BeanInfo;
 import java.beans.IntrospectionException;
 import java.beans.Introspector;
@@ -22,7 +16,9 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+
 import javax.annotation.Resource;
+
 import org.dozer.Mapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -30,6 +26,14 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
+
+import com.fasterxml.jackson.core.JsonParseException;
+import com.fasterxml.jackson.databind.JavaType;
+import com.fasterxml.jackson.databind.JsonMappingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.github.pagehelper.PageHelper;
+import com.github.pagehelper.PageInfo;
+
 import rebue.afc.dic.SettleTaskExecuteStateDic;
 import rebue.afc.dic.TradeTypeDic;
 import rebue.afc.mo.AfcSettleTaskMo;
@@ -58,9 +62,9 @@ import rebue.ord.dic.ShipmentConfirmationDic;
 import rebue.ord.dic.UsersToPlaceTheOrderDic;
 import rebue.ord.mapper.OrdOrderMapper;
 import rebue.ord.mo.OrdAddrMo;
+import rebue.ord.mo.OrdBuyRelationMo;
 import rebue.ord.mo.OrdOrderDetailMo;
 import rebue.ord.mo.OrdOrderMo;
-import rebue.ord.mo.OrdSublevelBuyMo;
 import rebue.ord.mo.OrdTaskMo;
 import rebue.ord.ro.CancelDeliveryRo;
 import rebue.ord.ro.CancellationOfOrderRo;
@@ -72,9 +76,9 @@ import rebue.ord.ro.SetUpExpressCompanyRo;
 import rebue.ord.ro.ShipmentConfirmationRo;
 import rebue.ord.ro.UsersToPlaceTheOrderRo;
 import rebue.ord.svc.OrdAddrSvc;
+import rebue.ord.svc.OrdBuyRelationSvc;
 import rebue.ord.svc.OrdOrderDetailSvc;
 import rebue.ord.svc.OrdOrderSvc;
-import rebue.ord.svc.OrdSublevelBuySvc;
 import rebue.ord.svc.OrdTaskSvc;
 import rebue.ord.to.OrdOrderTo;
 import rebue.ord.to.OrderSignInTo;
@@ -171,7 +175,7 @@ public class OrdOrderSvcImpl extends MybatisBaseSvcImpl<OrdOrderMo, java.lang.Lo
     /**
      */
     @Resource
-    private OrdSublevelBuySvc subLevelBuySvc;
+    private OrdBuyRelationSvc ordBuyRelationSvc;
 
     /**
      *  买家返款时间
@@ -233,6 +237,7 @@ public class OrdOrderSvcImpl extends MybatisBaseSvcImpl<OrdOrderMo, java.lang.Lo
         }
         Date date = new Date();
         long orderId = _idWorker.getId();
+        //下单用户ID
         long id = orderList.get(0).getUserId();
         OrdOrderMo orderMo = new OrdOrderMo();
         orderMo.setOrderCode(String.valueOf(orderId));
@@ -305,20 +310,7 @@ public class OrdOrderSvcImpl extends MybatisBaseSvcImpl<OrdOrderMo, java.lang.Lo
             } else {
                 _log.info("全返商品添加订单详情");
                 for (int j = 0; j < buyCount; j++) {
-                    _log.info("获取用户购买关系上家");
-                    boolean getBuyRelationResult = getAndUpdateBuyRelation(id, onlineId, orderList.get(j).getSalePrice());
-                    _log.info("获取用户购买关系的返回值为：{}" + getBuyRelationResult);
-                    if (getBuyRelationResult == false) {
-                        _log.info("获取用户注册关系上家");
-                        boolean getRegRelationResult = getAndUpdateRegRelation(id, onlineId, orderList.get(j).getSalePrice());
-                        _log.info("获取用户注册关系的返回值为：{}" + getRegRelationResult);
-                        if (getRegRelationResult == false) {
-                            _log.info("获取其它关系上家");
-                            boolean getOtherRelationResult = getAndUpdateOtherRelation(id, onlineId, orderList.get(j).getSalePrice());
-                            _log.info("获取其它关系的返回值为：{}" + getOtherRelationResult);
-                        }
-                    }
-                    OrdOrderDetailMo detailMo = new OrdOrderDetailMo();
+                	OrdOrderDetailMo detailMo = new OrdOrderDetailMo();
                     detailMo.setId(_idWorker.getId());
                     detailMo.setOrderId(orderId);
                     detailMo.setOnlineId(onlineId);
@@ -339,12 +331,27 @@ public class OrdOrderSvcImpl extends MybatisBaseSvcImpl<OrdOrderMo, java.lang.Lo
                         _log.error("{}添加订单详情失败", id);
                         throw new RuntimeException("生成订单详情出错");
                     }
-                    _log.info("在下级购买信息表中添加记录");
-                    OrdSublevelBuyMo subLeverBuyMo = new OrdSublevelBuyMo();
-                    subLeverBuyMo.setId(_idWorker.getId());
-                    subLeverBuyMo.setOrderDetailId(detailMo.getId());
-                    int addSubLeverBuyResult = subLevelBuySvc.add(subLeverBuyMo);
-                    if (addSubLeverBuyResult != 1) {
+                    _log.info("获取用户购买关系上家");
+                    boolean getBuyRelationResult = getAndUpdateBuyRelation(id, onlineId, orderList.get(j).getSalePrice(),detailMo.getId());
+                    _log.info("获取用户购买关系的返回值为：{}" + getBuyRelationResult);
+                    if (getBuyRelationResult == false) {
+                        _log.info("获取用户注册关系上家");
+                        boolean getRegRelationResult = getAndUpdateRegRelation(id, onlineId, orderList.get(j).getSalePrice(),detailMo.getId());
+                        _log.info("获取用户注册关系的返回值为：{}" + getRegRelationResult);
+                        if (getRegRelationResult == false) {
+                            _log.info("获取其它关系上家");
+                            boolean getOtherRelationResult = getAndUpdateOtherRelation(id, onlineId, orderList.get(j).getSalePrice(),detailMo.getId());
+                            _log.info("获取其它关系的返回值为：{}" + getOtherRelationResult);
+                        }
+                    }
+                    
+                    _log.info("在购买关系表中添加记录");
+                    OrdBuyRelationMo buyRelationMo = new OrdBuyRelationMo();
+                    buyRelationMo.setId(_idWorker.getId());
+                    buyRelationMo.setUplineUserId(id);
+                    buyRelationMo.setUplineOrderDetailId(detailMo.getId());
+                    int addBuyRelationResult = ordBuyRelationSvc.add(buyRelationMo);
+                    if (addBuyRelationResult != 1) {
                         _log.error("{}添加下级购买信息失败", id);
                         throw new RuntimeException("生成下级购买信息出错");
                     }
@@ -391,7 +398,7 @@ public class OrdOrderSvcImpl extends MybatisBaseSvcImpl<OrdOrderMo, java.lang.Lo
      * 获取购买关系并更新购买关系表
      */
     @Transactional(readOnly = false, propagation = Propagation.REQUIRED)
-    public boolean getAndUpdateBuyRelation(long id, long onlineId, BigDecimal buyPrice) {
+    public boolean getAndUpdateBuyRelation(long id, long onlineId, BigDecimal buyPrice,long downLineDetailId) {
         // 获取用户购买关系
         _log.info("获取用户购买关系的id:" + id + "onlineId:" + onlineId + "buyPricce:" + buyPrice);
         Long buyRelation = sucUserSvc.getBuyRelation(id, onlineId);
@@ -417,13 +424,14 @@ public class OrdOrderSvcImpl extends MybatisBaseSvcImpl<OrdOrderMo, java.lang.Lo
             _log.error("{}更新订单详情返现名额失败", id);
             throw new RuntimeException("更新订单详情返现名额失败");
         }
-        // 在下级购买信息表中更新购买关系
-        OrdSublevelBuyMo subLeverBuyMo = new OrdSublevelBuyMo();
-        subLeverBuyMo.setOrderDetailId(orderDetailMo.getId());
-        subLeverBuyMo.setSublevelUserId(id);
-        int updateSubLeverResult = subLevelBuySvc.updateByOrderDetailId(subLeverBuyMo);
-        if (updateSubLeverResult != 1) {
-            _log.error("{}更新下级购买关系失败", id);
+        // 在购买关系信息表中更新购买关系
+        OrdBuyRelationMo ordBuyRelationMo = new OrdBuyRelationMo();
+        ordBuyRelationMo.setUplineOrderDetailId(orderDetailMo.getId());
+        ordBuyRelationMo.setDownlineUserId(id);
+        ordBuyRelationMo.setDownlineOrderDetailId(downLineDetailId);
+        int updateBuyRelationResult = ordBuyRelationSvc.updateByUplineOrderDetailId(ordBuyRelationMo);
+        if (updateBuyRelationResult != 1) {
+            _log.error("{}更新购买关系失败", id);
             throw new RuntimeException("更新下级购买关系失败");
         }
         return true;
@@ -437,7 +445,7 @@ public class OrdOrderSvcImpl extends MybatisBaseSvcImpl<OrdOrderMo, java.lang.Lo
      * @return
      */
     @Transactional(readOnly = false, propagation = Propagation.REQUIRED)
-    public boolean getAndUpdateRegRelation(long id, long onlineId, BigDecimal buyPrice) {
+    public boolean getAndUpdateRegRelation(long id, long onlineId, BigDecimal buyPrice ,long downLineDetailId) {
         _log.info("获取用户注册关系参数：{}" + id);
         SucRegRo sucReg = sucUserSvc.getRegInfo(id);
         _log.info("获取用户注册关系返回值为：" + sucReg.toString());
@@ -460,12 +468,13 @@ public class OrdOrderSvcImpl extends MybatisBaseSvcImpl<OrdOrderMo, java.lang.Lo
             _log.error("{}更新订单详情返现名额失败", id);
             throw new RuntimeException("更新订单详情返现名额失败");
         }
-        // 在下级购买信息表中更新购买关系
-        OrdSublevelBuyMo subLeverBuyMo = new OrdSublevelBuyMo();
-        subLeverBuyMo.setOrderDetailId(orderDetailMo.getId());
-        subLeverBuyMo.setSublevelUserId(id);
-        int updateSubLeverResult = subLevelBuySvc.updateByOrderDetailId(subLeverBuyMo);
-        if (updateSubLeverResult != 1) {
+     // 在购买关系信息表中更新购买关系
+        OrdBuyRelationMo ordBuyRelationMo = new OrdBuyRelationMo();
+        ordBuyRelationMo.setUplineOrderDetailId(orderDetailMo.getId());
+        ordBuyRelationMo.setDownlineUserId(id);
+        ordBuyRelationMo.setDownlineOrderDetailId(downLineDetailId);
+        int updateBuyRelationResult = ordBuyRelationSvc.updateByUplineOrderDetailId(ordBuyRelationMo);
+        if (updateBuyRelationResult != 1) {
             _log.error("{}更新下级购买关系失败", id);
             throw new RuntimeException("更新下级购买关系失败");
         }
@@ -476,7 +485,7 @@ public class OrdOrderSvcImpl extends MybatisBaseSvcImpl<OrdOrderMo, java.lang.Lo
      * 获取除购买关系和注册关系外的一个购买上家,并更新购买关系表
      */
     @Transactional(readOnly = false, propagation = Propagation.REQUIRED)
-    public boolean getAndUpdateOtherRelation(long id, long onlineId, BigDecimal buyPrice) {
+    public boolean getAndUpdateOtherRelation(long id, long onlineId, BigDecimal buyPrice ,long downLineDetailId) {
         // 根据产品上线ID和价格查找订单详情记录，看是否有符合要求的订单详情
         OrdOrderDetailMo mo = new OrdOrderDetailMo();
         mo.setOnlineId(onlineId);
@@ -492,14 +501,15 @@ public class OrdOrderSvcImpl extends MybatisBaseSvcImpl<OrdOrderMo, java.lang.Lo
             _log.error("{}更新订单详情返现名额失败", id);
             throw new RuntimeException("更新订单详情返现名额失败");
         }
-        // 在下级购买信息表中更新购买关系
-        OrdSublevelBuyMo subLeverBuyMo = new OrdSublevelBuyMo();
-        subLeverBuyMo.setOrderDetailId(orderDetailMo.getId());
-        subLeverBuyMo.setSublevelUserId(id);
-        int updateSubLeverResult = subLevelBuySvc.updateByOrderDetailId(subLeverBuyMo);
-        if (updateSubLeverResult != 1) {
-            _log.error("{}更新下级购买关系失败", id);
-            throw new RuntimeException("更新下级购买关系失败");
+        // 在购买关系信息表中更新购买关系
+        OrdBuyRelationMo ordBuyRelationMo = new OrdBuyRelationMo();
+        ordBuyRelationMo.setUplineOrderDetailId(orderDetailMo.getId());
+        ordBuyRelationMo.setDownlineUserId(id);
+        ordBuyRelationMo.setDownlineOrderDetailId(downLineDetailId);
+        int updateBuyRelationResult = ordBuyRelationSvc.updateByUplineOrderDetailId(ordBuyRelationMo);
+        if (updateBuyRelationResult != 1) {
+            _log.error("{}更新购买关系失败", id);
+            throw new RuntimeException("更新购买关系失败");
         }
         return true;
     }

@@ -56,4 +56,15 @@ public interface OrdBuyRelationMapper extends MybatisBaseMapper<OrdBuyRelationMo
     @mbg.generated 自动生成，如需修改，请删除本行
      */
     boolean existSelective(OrdBuyRelationMo record);
+    
+    /**
+     * 根据上家ID更新购买关系表
+     * @param mo
+     * @return
+     */
+    int updateByUplineOrderDetailId (OrdBuyRelationMo mo);
 }
+
+
+
+

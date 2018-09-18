@@ -50,4 +50,10 @@ public class OrdBuyRelationSvcImpl extends MybatisBaseSvcImpl<OrdBuyRelationMo, 
         return super.add(mo);
     }
 
+	@Override
+	public int updateByUplineOrderDetailId(OrdBuyRelationMo mo) {
+		_mapper.updateByUplineOrderDetailId(mo);
+		return 0;
+	}
+
 }
