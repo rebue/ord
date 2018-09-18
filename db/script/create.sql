@@ -1,10 +1,12 @@
 /*==============================================================*/
 /* DBMS name:      MySQL 5.0                                    */
-/* Created on:     2018/9/17 20:24:37                           */
+/* Created on:     2018/9/18 9:19:24                            */
 /*==============================================================*/
 
 
 drop table if exists ORD_ADDR;
+
+drop table if exists ORD_BUY_RELATION;
 
 drop table if exists ORD_ORDER;
 
@@ -13,8 +15,6 @@ drop table if exists ORD_ORDER_DETAIL;
 drop table if exists ORD_RETURN;
 
 drop table if exists ORD_RETURN_PIC;
-
-drop table if exists ORD_SUBLEVEL_BUY;
 
 drop table if exists ORD_TASK;
 
@@ -39,6 +39,23 @@ create table ORD_ADDR
 );
 
 alter table ORD_ADDR comment '用户收货地址';
+
+/*==============================================================*/
+/* Table: ORD_BUY_RELATION                                      */
+/*==============================================================*/
+create table ORD_BUY_RELATION
+(
+   ID                   bigint not null comment '订单购买关系ID',
+   UPLINE_USER_ID       bigint not null comment '上家用户ID',
+   UPLINE_ORDER_DETAIL_ID bigint not null comment '上家订单详情ID',
+   DOWNLINE_USER_ID     bigint not null comment '下家用户ID',
+   DOWNLINE_ORDER_DETAIL_ID bigint not null comment '下家订单详情ID',
+   IS_SIGN_IN           bool not null default false comment '是否已签收',
+   primary key (ID),
+   unique key AK_UPLINE_AND_DOWNLINE_ORDER_DETAIL (UPLINE_ORDER_DETAIL_ID, DOWNLINE_ORDER_DETAIL_ID)
+);
+
+alter table ORD_BUY_RELATION comment '订单购买关系';
 
 /*==============================================================*/
 /* Table: ORD_ORDER                                             */
@@ -173,22 +190,6 @@ create table ORD_RETURN_PIC
 alter table ORD_RETURN_PIC comment '退货图片';
 
 /*==============================================================*/
-/* Table: ORD_SUBLEVEL_BUY                                      */
-/*==============================================================*/
-create table ORD_SUBLEVEL_BUY
-(
-   ID                   bigint not null comment '下级购买信息ID',
-   ORDER_DETAIL_ID      bigint not null comment '订单详情ID',
-   USER_ID              bigint not null comment '本级用户ID',
-   SUBLEVEL_USER_ID     bigint not null comment '下级用户ID',
-   SUBLEVEL_ORDER_DETAIL_ID bigint not null comment '下级订单详情ID',
-   IS_SIGN_IN           bool not null default false comment '是否已签收',
-   primary key (ID)
-);
-
-alter table ORD_SUBLEVEL_BUY comment '下级购买信息';
-
-/*==============================================================*/
 /* Table: ORD_TASK                                              */
 /*==============================================================*/
 create table ORD_TASK
@@ -204,6 +205,9 @@ create table ORD_TASK
 
 alter table ORD_TASK comment '订单任务';
 
+alter table ORD_BUY_RELATION add constraint FK_Relationship_5 foreign key (UPLINE_ORDER_DETAIL_ID)
+      references ORD_ORDER_DETAIL (ID) on delete restrict on update restrict;
+
 alter table ORD_ORDER_DETAIL add constraint FK_Relationship_1 foreign key (ORDER_ID)
       references ORD_ORDER (ID) on delete restrict on update restrict;
 
@@ -215,7 +219,4 @@ alter table ORD_RETURN add constraint FK_Relationship_3 foreign key (ORDER_ID)
 
 alter table ORD_RETURN_PIC add constraint FK_Relationship_4 foreign key (RETURN_ID)
       references ORD_RETURN (ID) on delete restrict on update restrict;
-
-alter table ORD_SUBLEVEL_BUY add constraint FK_Relationship_5 foreign key (ORDER_DETAIL_ID)
-      references ORD_ORDER_DETAIL (ID) on delete restrict on update restrict;
 
