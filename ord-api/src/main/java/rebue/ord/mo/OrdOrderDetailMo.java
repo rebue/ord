@@ -160,6 +160,13 @@ public class OrdOrderDetailMo implements Serializable {
     private Byte cashbackCommissionState;
 
     /**
+     *    数据库字段: ORD_ORDER_DETAIL.SUBJECT_TYPE
+     *
+     *    @mbg.generated 自动生成，如需修改，请删除本行
+     */
+    private Byte subjectType;
+
+    /**
      *    @mbg.generated 自动生成，如需修改，请删除本行
      */
     private static final long serialVersionUID = 1L;
@@ -517,6 +524,24 @@ public class OrdOrderDetailMo implements Serializable {
     }
 
     /**
+     *    数据库字段: ORD_ORDER_DETAIL.SUBJECT_TYPE
+     *
+     *    @mbg.generated 自动生成，如需修改，请删除本行
+     */
+    public Byte getSubjectType() {
+        return subjectType;
+    }
+
+    /**
+     *    数据库字段: ORD_ORDER_DETAIL.SUBJECT_TYPE
+     *
+     *    @mbg.generated 自动生成，如需修改，请删除本行
+     */
+    public void setSubjectType(Byte subjectType) {
+        this.subjectType = subjectType;
+    }
+
+    /**
      *    @mbg.generated 自动生成，如需修改，请删除本行
      */
     @Override
@@ -541,6 +566,7 @@ public class OrdOrderDetailMo implements Serializable {
         sb.append(", userId=").append(userId);
         sb.append(", cashbackCommissionSlot=").append(cashbackCommissionSlot);
         sb.append(", cashbackCommissionState=").append(cashbackCommissionState);
+        sb.append(", subjectType=").append(subjectType);
         sb.append(", serialVersionUID=").append(serialVersionUID);
         sb.append("]");
         return sb.toString();

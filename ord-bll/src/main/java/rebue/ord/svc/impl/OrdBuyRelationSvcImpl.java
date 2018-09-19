@@ -1,21 +1,16 @@
 package rebue.ord.svc.impl;
 
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
-
 import rebue.ord.mapper.OrdBuyRelationMapper;
 import rebue.ord.mo.OrdBuyRelationMo;
 import rebue.ord.svc.OrdBuyRelationSvc;
-
 import rebue.robotech.svc.impl.MybatisBaseSvcImpl;
 
 /**
- * 
- *
  * 在单独使用不带任何参数的 @Transactional 注释时，
  * propagation(传播模式)=REQUIRED，readOnly=false，
  * isolation(事务隔离级别)=READ_COMMITTED，
@@ -30,11 +25,11 @@ import rebue.robotech.svc.impl.MybatisBaseSvcImpl;
 @Transactional(readOnly = true, propagation = Propagation.SUPPORTS)
 @Service
 public class OrdBuyRelationSvcImpl extends MybatisBaseSvcImpl<OrdBuyRelationMo, java.lang.Long, OrdBuyRelationMapper> implements OrdBuyRelationSvc {
-	
+
     /**
      * @mbg.generated 自动生成，如需修改，请删除本行
      */
-	private static final Logger _log = LoggerFactory.getLogger(OrdBuyRelationSvcImpl.class);
+    private static final Logger _log = LoggerFactory.getLogger(OrdBuyRelationSvcImpl.class);
 
     /**
      * @mbg.generated 自动生成，如需修改，请删除本行
@@ -42,7 +37,7 @@ public class OrdBuyRelationSvcImpl extends MybatisBaseSvcImpl<OrdBuyRelationMo, 
     @Override
     @Transactional(readOnly = false, propagation = Propagation.REQUIRED)
     public int add(OrdBuyRelationMo mo) {
-    	_log.info("添加");
+        _log.info("添加");
         // 如果id为空那么自动生成分布式id
         if (mo.getId() == null || mo.getId() == 0) {
             mo.setId(_idWorker.getId());
@@ -50,10 +45,9 @@ public class OrdBuyRelationSvcImpl extends MybatisBaseSvcImpl<OrdBuyRelationMo, 
         return super.add(mo);
     }
 
-	@Override
-	public int updateByUplineOrderDetailId(OrdBuyRelationMo mo) {
-		_mapper.updateByUplineOrderDetailId(mo);
-		return 0;
-	}
-
+    @Override
+    public int updateByUplineOrderDetailId(OrdBuyRelationMo mo) {
+        _mapper.updateByUplineOrderDetailId(mo);
+        return 0;
+    }
 }
