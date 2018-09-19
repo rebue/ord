@@ -45,6 +45,7 @@ import rebue.kdi.mo.KdiCompanyMo;
 import rebue.kdi.ro.EOrderRo;
 import rebue.kdi.svr.feign.KdiSvc;
 import rebue.kdi.to.EOrderTo;
+import rebue.onl.mo.OnlOnlineMo;
 import rebue.onl.mo.OnlOnlinePicMo;
 import rebue.onl.ro.DeleteCartAndModifyInventoryRo;
 import rebue.onl.ro.ModifyOnlineSpecInfoRo;
@@ -582,7 +583,12 @@ public class OrdOrderSvcImpl extends MybatisBaseSvcImpl<OrdOrderMo, java.lang.Lo
                     _log.info("查询用户订单信息开始获取商品主图");
                     List<OnlOnlinePicMo> onlinePicList = onlOnlinePicSvc.list(orderDetailMo.getOnlineId(), (byte) 1);
                     _log.info("获取商品主图的返回值为{}", String.valueOf(onlinePicList));
+                    _log.info("根据上线ID查找上线商品信息");
+                    _log.info("参数 "+orderDetailMo.getOnlineId());
+                    OnlOnlineMo onlineMo = onlOnlineSvc.getById(orderDetailMo.getOnlineId());
+                    _log.info("返回值{}",onlineMo);
                     OrderDetailRo orderDetailRo = new OrderDetailRo();
+                    orderDetailRo.setSubjectType(onlineMo.getSubjectType());
                     orderDetailRo.setId(orderDetailMo.getId());
                     orderDetailRo.setOrderId(orderDetailMo.getOrderId());
                     orderDetailRo.setOnlineId(orderDetailMo.getOnlineId());
@@ -597,6 +603,7 @@ public class OrdOrderSvcImpl extends MybatisBaseSvcImpl<OrdOrderMo, java.lang.Lo
                     orderDetailRo.setGoodsQsmm(onlinePicList.get(0).getPicPath());
                     orderDetailRo.setReturnCount(orderDetailMo.getReturnCount());
                     orderDetailRo.setCashbackTotal(orderDetailMo.getCashbackTotal());
+                    orderDetailRo.setCashbackCommissionSlot(orderDetailMo.getCashbackCommissionSlot());
                     orderDetailRoList.add(orderDetailRo);
                 }
                 hm.put("items", orderDetailRoList);

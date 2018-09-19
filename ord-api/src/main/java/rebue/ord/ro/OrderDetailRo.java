@@ -50,8 +50,45 @@ public class OrderDetailRo {
 	/** 退货状态（0：未退货 1：退货中 2：已退货） **/
 	private Byte returnState;
 
+	/**
+	 * 返现佣金名额
+	 */
+	private Byte cashbackCommissionSlot;
+
+	 /**
+     *    返现佣金状态（0：匹配中，1：待返，2：已返)
+     */
+	private Byte cashbackCommissionState;
+
+	public Byte getCashbackCommissionSlot() {
+		return cashbackCommissionSlot;
+	}
+
+	public void setCashbackCommissionSlot(Byte cashbackCommissionSlot) {
+		this.cashbackCommissionSlot = cashbackCommissionSlot;
+	}
+
+	public Byte getCashbackCommissionState() {
+		return cashbackCommissionState;
+	}
+
+	public void setCashbackCommissionState(Byte cashbackCommissionState) {
+		this.cashbackCommissionState = cashbackCommissionState;
+	}
+
 	/** 商品主图 **/
 	private String goodsQsmm;
+
+	/** 商品类型 **/
+	private Byte subjectType;
+
+	public Byte getSubjectType() {
+		return subjectType;
+	}
+
+	public void setSubjectType(Byte subjectType) {
+		this.subjectType = subjectType;
+	}
 
 	public OrderDetailRo() {
 		super();
@@ -175,7 +212,9 @@ public class OrderDetailRo {
 				+ produceId + ", onlineTitle=" + onlineTitle + ", specName=" + specName + ", buyCount=" + buyCount
 				+ ", buyPrice=" + buyPrice + ", cashbackAmount=" + cashbackAmount + ", cashbackTotal=" + cashbackTotal
 				+ ", buyUnit=" + buyUnit + ", returnCount=" + returnCount + ", returnState=" + returnState
-				+ ", goodsQsmm=" + goodsQsmm + "]";
+				+ ", cashbackCommissionSlot=" + cashbackCommissionSlot + ", cashbackCommissionState="
+				+ cashbackCommissionState + ", goodsQsmm=" + goodsQsmm + ", subjectType=" + subjectType + "]";
 	}
+
 
 }
