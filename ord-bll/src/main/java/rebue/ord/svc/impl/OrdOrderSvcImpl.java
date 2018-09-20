@@ -324,6 +324,7 @@ public class OrdOrderSvcImpl extends MybatisBaseSvcImpl<OrdOrderMo, java.lang.Lo
                     detailMo.setCashbackAmount(new BigDecimal("0"));
                     detailMo.setReturnState((byte) 0);
                     detailMo.setCashbackCommissionSlot((byte) 2);
+                    detailMo.setCashbackCommissionState((byte)0);
                     detailMo.setUserId(id);
                     detailMo.setCashbackTotal(new BigDecimal("0"));
                     _log.info("添加订单详情的参数为：{}", detailMo);
@@ -422,14 +423,19 @@ public class OrdOrderSvcImpl extends MybatisBaseSvcImpl<OrdOrderMo, java.lang.Lo
         }
         OrdOrderDetailMo updateOrderDetailMo = new OrdOrderDetailMo();
         updateOrderDetailMo.setCashbackCommissionSlot((byte)(orderDetailMo.getCashbackCommissionSlot()-1));
+        updateOrderDetailMo.setId(orderDetailMo.getId());
+        if((orderDetailMo.getCashbackCommissionSlot()-1)==0) {
+        	updateOrderDetailMo.setCashbackCommissionState((byte)1);
+        }
         // 更新购买关系订单详情的返现名额
-        int updateOrderDetailResult = ordOrderDetailSvc.updateCashbackSlot(updateOrderDetailMo);
+        int updateOrderDetailResult = ordOrderDetailSvc.modify(updateOrderDetailMo);
         if (updateOrderDetailResult != 1) {
             _log.error("{}更新订单详情返现名额失败", id);
             throw new RuntimeException("更新订单详情返现名额失败");
         }
         // 在购买关系信息表中更新购买关系
         OrdBuyRelationMo ordBuyRelationMo = new OrdBuyRelationMo();
+        
         ordBuyRelationMo.setUplineOrderDetailId(orderDetailMo.getId());
         ordBuyRelationMo.setDownlineUserId(id);
         ordBuyRelationMo.setDownlineOrderDetailId(downLineDetailId);
@@ -468,7 +474,14 @@ public class OrdOrderSvcImpl extends MybatisBaseSvcImpl<OrdOrderMo, java.lang.Lo
             return false;
         }
         // 更新购买关系订单详情的返现名额
-        int updateOrderDetailResult = ordOrderDetailSvc.updateCashbackSlot(orderDetailMo);
+        OrdOrderDetailMo updateOrderDetailMo = new OrdOrderDetailMo();
+        updateOrderDetailMo.setCashbackCommissionSlot((byte)(orderDetailMo.getCashbackCommissionSlot()-1));
+        updateOrderDetailMo.setId(orderDetailMo.getId());
+        if((orderDetailMo.getCashbackCommissionSlot()-1)==0) {
+        	updateOrderDetailMo.setCashbackCommissionState((byte)1);
+        }
+        // 更新购买关系订单详情的返现名额
+        int updateOrderDetailResult = ordOrderDetailSvc.modify(updateOrderDetailMo);
         if (updateOrderDetailResult != 1) {
             _log.error("{}更新订单详情返现名额失败", id);
             throw new RuntimeException("更新订单详情返现名额失败");
@@ -502,7 +515,14 @@ public class OrdOrderSvcImpl extends MybatisBaseSvcImpl<OrdOrderMo, java.lang.Lo
             return false;
         }
         // 更新购买关系订单详情的返现名额
-        int updateOrderDetailResult = ordOrderDetailSvc.updateCashbackSlot(orderDetailMo);
+        OrdOrderDetailMo updateOrderDetailMo = new OrdOrderDetailMo();
+        updateOrderDetailMo.setCashbackCommissionSlot((byte)(orderDetailMo.getCashbackCommissionSlot()-1));
+        updateOrderDetailMo.setId(orderDetailMo.getId());
+        if((orderDetailMo.getCashbackCommissionSlot()-1)==0) {
+        	updateOrderDetailMo.setCashbackCommissionState((byte)1);
+        }
+        // 更新购买关系订单详情的返现名额
+        int updateOrderDetailResult = ordOrderDetailSvc.modify(updateOrderDetailMo);
         if (updateOrderDetailResult != 1) {
             _log.error("{}更新订单详情返现名额失败", id);
             throw new RuntimeException("更新订单详情返现名额失败");
