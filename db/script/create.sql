@@ -1,6 +1,6 @@
 /*==============================================================*/
 /* DBMS name:      MySQL 5.0                                    */
-/* Created on:     2018/9/18 9:19:24                            */
+/* Created on:     2018/9/20 10:18:21                           */
 /*==============================================================*/
 
 
@@ -47,8 +47,10 @@ create table ORD_BUY_RELATION
 (
    ID                   bigint not null comment '订单购买关系ID',
    UPLINE_USER_ID       bigint not null comment '上家用户ID',
+   UPLINE_ORDER_ID      bigint not null comment '上家订单ID',
    UPLINE_ORDER_DETAIL_ID bigint not null comment '上家订单详情ID',
    DOWNLINE_USER_ID     bigint not null comment '下家用户ID',
+   DOWNLINE_ORDER_ID    bigint not null comment '下家订单ID',
    DOWNLINE_ORDER_DETAIL_ID bigint not null comment '下家订单详情ID',
    IS_SIGN_IN           bool not null default false comment '是否已签收',
    primary key (ID),
