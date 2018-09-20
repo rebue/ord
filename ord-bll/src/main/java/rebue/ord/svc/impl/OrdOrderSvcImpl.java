@@ -237,10 +237,12 @@ public class OrdOrderSvcImpl extends MybatisBaseSvcImpl<OrdOrderMo, java.lang.Lo
         }
         Date date = new Date();
         long orderId = _idWorker.getId();
+        long orderCode = _idWorker.getId();
         // 下单用户ID
         long id = orderList.get(0).getUserId();
         OrdOrderMo orderMo = new OrdOrderMo();
-        orderMo.setOrderCode(String.valueOf(orderId));
+        orderMo.setId(orderId);
+        orderMo.setOrderCode(String.valueOf(orderCode));
         orderMo.setOrderTitle(orderTitle);
         orderMo.setOrderMoney(orderList.get(0).getTotalPrice());
         orderMo.setRealMoney(orderList.get(0).getTotalPrice());
@@ -332,21 +334,22 @@ public class OrdOrderSvcImpl extends MybatisBaseSvcImpl<OrdOrderMo, java.lang.Lo
                         throw new RuntimeException("生成订单详情出错");
                     }
                     _log.info("获取用户购买关系上家");
-                    boolean getBuyRelationResult = getAndUpdateBuyRelation(id, onlineId, orderList.get(j).getSalePrice(), detailMo.getId());
+                    boolean getBuyRelationResult = getAndUpdateBuyRelation(id, onlineId, orderList.get(j).getSalePrice(), detailMo.getId(),detailMo.getOrderId());
                     _log.info("获取用户购买关系的返回值为：{}" + getBuyRelationResult);
                     if (getBuyRelationResult == false) {
                         _log.info("获取用户注册关系上家");
-                        boolean getRegRelationResult = getAndUpdateRegRelation(id, onlineId, orderList.get(j).getSalePrice(), detailMo.getId());
+                        boolean getRegRelationResult = getAndUpdateRegRelation(id, onlineId, orderList.get(j).getSalePrice(), detailMo.getId(),detailMo.getOrderId());
                         _log.info("获取用户注册关系的返回值为：{}" + getRegRelationResult);
                         if (getRegRelationResult == false) {
                             _log.info("获取其它关系上家");
-                            boolean getOtherRelationResult = getAndUpdateOtherRelation(id, onlineId, orderList.get(j).getSalePrice(), detailMo.getId());
+                            boolean getOtherRelationResult = getAndUpdateOtherRelation(id, onlineId, orderList.get(j).getSalePrice(), detailMo.getId(),detailMo.getOrderId());
                             _log.info("获取其它关系的返回值为：{}" + getOtherRelationResult);
                         }
                     }
                     _log.info("在购买关系表中添加记录");
                     OrdBuyRelationMo buyRelationMo = new OrdBuyRelationMo();
                     buyRelationMo.setId(_idWorker.getId());
+                    buyRelationMo.setUplineOrderId(orderId);
                     buyRelationMo.setUplineUserId(id);
                     buyRelationMo.setUplineOrderDetailId(detailMo.getId());
                     int addBuyRelationResult = ordBuyRelationSvc.add(buyRelationMo);
@@ -397,7 +400,7 @@ public class OrdOrderSvcImpl extends MybatisBaseSvcImpl<OrdOrderMo, java.lang.Lo
      * 获取购买关系并更新购买关系表
      */
     @Transactional(readOnly = false, propagation = Propagation.REQUIRED)
-    public boolean getAndUpdateBuyRelation(long id, long onlineId, BigDecimal buyPrice, long downLineDetailId) {
+    public boolean getAndUpdateBuyRelation(long id, long onlineId, BigDecimal buyPrice, long downLineDetailId,long downLineOrderId) {
         // 获取用户购买关系
         _log.info("获取用户购买关系的id:" + id + "onlineId:" + onlineId + "buyPricce:" + buyPrice);
         Long buyRelation = sucUserSvc.getBuyRelation(id, onlineId);
@@ -417,8 +420,10 @@ public class OrdOrderSvcImpl extends MybatisBaseSvcImpl<OrdOrderMo, java.lang.Lo
         if (orderDetailMo == null) {
             return false;
         }
+        OrdOrderDetailMo updateOrderDetailMo = new OrdOrderDetailMo();
+        updateOrderDetailMo.setCashbackCommissionSlot((byte)(orderDetailMo.getCashbackCommissionSlot()-1));
         // 更新购买关系订单详情的返现名额
-        int updateOrderDetailResult = ordOrderDetailSvc.updateCashbackSlot(orderDetailMo);
+        int updateOrderDetailResult = ordOrderDetailSvc.updateCashbackSlot(updateOrderDetailMo);
         if (updateOrderDetailResult != 1) {
             _log.error("{}更新订单详情返现名额失败", id);
             throw new RuntimeException("更新订单详情返现名额失败");
@@ -428,6 +433,7 @@ public class OrdOrderSvcImpl extends MybatisBaseSvcImpl<OrdOrderMo, java.lang.Lo
         ordBuyRelationMo.setUplineOrderDetailId(orderDetailMo.getId());
         ordBuyRelationMo.setDownlineUserId(id);
         ordBuyRelationMo.setDownlineOrderDetailId(downLineDetailId);
+        ordBuyRelationMo.setDownlineOrderId(downLineOrderId);
         int updateBuyRelationResult = ordBuyRelationSvc.updateByUplineOrderDetailId(ordBuyRelationMo);
         if (updateBuyRelationResult != 1) {
             _log.error("{}更新购买关系失败", id);
@@ -444,7 +450,7 @@ public class OrdOrderSvcImpl extends MybatisBaseSvcImpl<OrdOrderMo, java.lang.Lo
      * @return
      */
     @Transactional(readOnly = false, propagation = Propagation.REQUIRED)
-    public boolean getAndUpdateRegRelation(long id, long onlineId, BigDecimal buyPrice, long downLineDetailId) {
+    public boolean getAndUpdateRegRelation(long id, long onlineId, BigDecimal buyPrice, long downLineDetailId,long downLineOrderId) {
         _log.info("获取用户注册关系参数：{}" + id);
         SucRegRo sucReg = sucUserSvc.getRegInfo(id);
         _log.info("获取用户注册关系返回值为：" + sucReg.toString());
@@ -472,6 +478,7 @@ public class OrdOrderSvcImpl extends MybatisBaseSvcImpl<OrdOrderMo, java.lang.Lo
         ordBuyRelationMo.setUplineOrderDetailId(orderDetailMo.getId());
         ordBuyRelationMo.setDownlineUserId(id);
         ordBuyRelationMo.setDownlineOrderDetailId(downLineDetailId);
+        ordBuyRelationMo.setDownlineOrderId(downLineOrderId);
         int updateBuyRelationResult = ordBuyRelationSvc.updateByUplineOrderDetailId(ordBuyRelationMo);
         if (updateBuyRelationResult != 1) {
             _log.error("{}更新下级购买关系失败", id);
@@ -484,7 +491,7 @@ public class OrdOrderSvcImpl extends MybatisBaseSvcImpl<OrdOrderMo, java.lang.Lo
      * 获取除购买关系和注册关系外的一个购买上家,并更新购买关系表
      */
     @Transactional(readOnly = false, propagation = Propagation.REQUIRED)
-    public boolean getAndUpdateOtherRelation(long id, long onlineId, BigDecimal buyPrice, long downLineDetailId) {
+    public boolean getAndUpdateOtherRelation(long id, long onlineId, BigDecimal buyPrice, long downLineDetailId,long downLineOrderId) {
         // 根据产品上线ID和价格查找订单详情记录，看是否有符合要求的订单详情
         OrdOrderDetailMo mo = new OrdOrderDetailMo();
         mo.setOnlineId(onlineId);
@@ -505,6 +512,7 @@ public class OrdOrderSvcImpl extends MybatisBaseSvcImpl<OrdOrderMo, java.lang.Lo
         ordBuyRelationMo.setUplineOrderDetailId(orderDetailMo.getId());
         ordBuyRelationMo.setDownlineUserId(id);
         ordBuyRelationMo.setDownlineOrderDetailId(downLineDetailId);
+        ordBuyRelationMo.setDownlineOrderId(downLineOrderId);
         int updateBuyRelationResult = ordBuyRelationSvc.updateByUplineOrderDetailId(ordBuyRelationMo);
         if (updateBuyRelationResult != 1) {
             _log.error("{}更新购买关系失败", id);
@@ -929,6 +937,7 @@ public class OrdOrderSvcImpl extends MybatisBaseSvcImpl<OrdOrderMo, java.lang.Lo
             return orderSignInRo;
         }
         long userId = orderList.get(0).getUserId();
+        long orderId = orderList.get(0).getId();
         if (orderList.get(0).getOrderState() != OrderStateDic.ALREADY_DELIVER_GOODS.getCode()) {
             _log.error("由于订单：{}处于非待签收状态，{}签收订单失败", orderCode, userId);
             orderSignInRo.setResult(OrderSignInDic.CURRENT_STATE_NOT_EXIST_CANCEL);
@@ -958,7 +967,7 @@ public class OrdOrderSvcImpl extends MybatisBaseSvcImpl<OrdOrderMo, java.lang.Lo
         calendar.add(Calendar.HOUR, settleUplineCommissionTime);
         Date uplineCommissionTime = calendar.getTime();
         AddSettleTasksTo settleTasksTo = new AddSettleTasksTo();
-        settleTasksTo.setOrderId(orderCode);
+        settleTasksTo.setOrderId(String.valueOf(orderId));
         settleTasksTo.setBuyerAccountId(userId);
         settleTasksTo.setSettleBuyerCashbackTime(buyerCashbackDate);
         settleTasksTo.setSettleUplineCommissionTime(uplineCommissionTime);
@@ -967,6 +976,19 @@ public class OrdOrderSvcImpl extends MybatisBaseSvcImpl<OrdOrderMo, java.lang.Lo
         List<AddSettleTasksDetailTo> addSettleTasksDetailList = new ArrayList<AddSettleTasksDetailTo>();
         for (OrdOrderDetailMo ordOrderDetailMo : detailList) {
             AddSettleTasksDetailTo settleTasksDetailTo = new AddSettleTasksDetailTo();
+            if (ordOrderDetailMo.getSubjectType() == 1) {
+                OrdBuyRelationMo mo = new OrdBuyRelationMo();
+                mo.setDownlineOrderDetailId(ordOrderDetailMo.getId());
+                OrdBuyRelationMo buyRelationResult = ordBuyRelationSvc.getOne(mo);
+                _log.info("根据订单详情获取订单购买关系为{}", buyRelationResult);
+                if (buyRelationResult != null) {
+                    settleTasksDetailTo.setUplineAccountId(buyRelationResult.getUplineUserId());
+                    settleTasksDetailTo.setUplineOrderId(buyRelationResult.getUplineOrderId());
+                    settleTasksDetailTo.setUplineOrderDetailId(buyRelationResult.getUplineOrderDetailId());
+                    settleTasksDetailTo.setSettleUplineCommissionAmount(ordOrderDetailMo.getBuyPrice());
+                    settleTasksDetailTo.setSettleUplineCommissionTitle("大卖网络-结算订单上家佣金");
+                }
+            }
             settleTasksDetailTo.setOrderDetailId(ordOrderDetailMo.getId().toString());
             settleTasksDetailTo.setSettleBuyerCashbackAmount(ordOrderDetailMo.getCashbackTotal());
             settleTasksDetailTo.setSettleBuyerCashbackTitle("大卖网络-用户返款");

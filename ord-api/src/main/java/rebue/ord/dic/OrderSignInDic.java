@@ -30,7 +30,7 @@ public enum OrderSignInDic implements EnumBase {
 	
 	/** 添加结算失败 **/
 	ADD_SETTLEMENT_ERROR(-4),
-
+	
 	/** 签收失败 **/
 	ERROR(-5);
 

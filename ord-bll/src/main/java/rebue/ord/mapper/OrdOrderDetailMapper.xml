@@ -274,7 +274,7 @@
     CASHBACK_COMMISSION_STATE, SUBJECT_TYPE
     from ORD_ORDER_DETAIL
   </select>
-  
+ 
   <select id="existByPrimaryKey" parameterType="java.lang.Long" resultType="boolean">
     <!--
       WARNING - @mbg.generated
@@ -513,7 +513,7 @@
   </select>
   
   <update id="updateCashbackSlot" parameterType="rebue.ord.mo.OrdOrderDetailMo">
-  		UPDATE ORD_ORDER_DETAIL SET CASHBACK_COMMISSION_SLOT = #{cashbackCommissionSlot+1,jdbcType=TINYINT} WHERE ID = #{id,jdbcType=BIGINT}
+  		UPDATE ORD_ORDER_DETAIL SET CASHBACK_COMMISSION_SLOT = #{cashbackCommissionSlot,jdbcType=TINYINT} WHERE ID = #{id,jdbcType=BIGINT}
   		AND CASHBACK_COMMISSION_SLOT = #{cashbackCommissionSlot,jdbcType=TINYINT}
   </update>
   

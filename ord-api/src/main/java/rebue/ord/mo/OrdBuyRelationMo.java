@@ -5,6 +5,8 @@ import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import java.io.Serializable;
 
 /**
+ * 订单购买关系
+ *
  * 数据库表: ORD_BUY_RELATION
  *
  * @mbg.generated 自动生成的注释，如需修改本注释，请删除本行
@@ -47,6 +49,15 @@ public class OrdBuyRelationMo implements Serializable {
      *    @mbg.generated 自动生成，如需修改，请删除本行
      */
     private Long downlineUserId;
+
+    /**
+     *    下家订单ID
+     *
+     *    数据库字段: ORD_BUY_RELATION.DOWNLINE_ORDER_ID
+     *
+     *    @mbg.generated 自动生成，如需修改，请删除本行
+     */
+    private Long downlineOrderId;
 
     /**
      *    下家订单详情ID
@@ -160,6 +171,28 @@ public class OrdBuyRelationMo implements Serializable {
     }
 
     /**
+     *    下家订单ID
+     *
+     *    数据库字段: ORD_BUY_RELATION.DOWNLINE_ORDER_ID
+     *
+     *    @mbg.generated 自动生成，如需修改，请删除本行
+     */
+    public Long getDownlineOrderId() {
+        return downlineOrderId;
+    }
+
+    /**
+     *    下家订单ID
+     *
+     *    数据库字段: ORD_BUY_RELATION.DOWNLINE_ORDER_ID
+     *
+     *    @mbg.generated 自动生成，如需修改，请删除本行
+     */
+    public void setDownlineOrderId(Long downlineOrderId) {
+        this.downlineOrderId = downlineOrderId;
+    }
+
+    /**
      *    下家订单详情ID
      *
      *    数据库字段: ORD_BUY_RELATION.DOWNLINE_ORDER_DETAIL_ID
@@ -207,26 +240,6 @@ public class OrdBuyRelationMo implements Serializable {
      *    @mbg.generated 自动生成，如需修改，请删除本行
      */
     @Override
-    public String toString() {
-        StringBuilder sb = new StringBuilder();
-        sb.append(getClass().getSimpleName());
-        sb.append(" [");
-        sb.append("Hash = ").append(hashCode());
-        sb.append(", id=").append(id);
-        sb.append(", uplineUserId=").append(uplineUserId);
-        sb.append(", uplineOrderDetailId=").append(uplineOrderDetailId);
-        sb.append(", downlineUserId=").append(downlineUserId);
-        sb.append(", downlineOrderDetailId=").append(downlineOrderDetailId);
-        sb.append(", isSignIn=").append(isSignIn);
-        sb.append(", serialVersionUID=").append(serialVersionUID);
-        sb.append("]");
-        return sb.toString();
-    }
-
-    /**
-     *    @mbg.generated 自动生成，如需修改，请删除本行
-     */
-    @Override
     public boolean equals(Object that) {
         if (this == that) {
             return true;
@@ -250,5 +263,20 @@ public class OrdBuyRelationMo implements Serializable {
         int result = 1;
         result = prime * result + ((getId() == null) ? 0 : getId().hashCode());
         return result;
+    }
+
+    private Long uplineOrderId;
+
+    public Long getUplineOrderId() {
+        return uplineOrderId;
+    }
+
+    public void setUplineOrderId(Long uplineOrderId) {
+        this.uplineOrderId = uplineOrderId;
+    }
+
+    @Override
+    public String toString() {
+        return "OrdBuyRelationMo [id=" + id + ", uplineUserId=" + uplineUserId + ", uplineOrderDetailId=" + uplineOrderDetailId + ", downlineUserId=" + downlineUserId + ", downlineOrderDetailId=" + downlineOrderDetailId + ", isSignIn=" + isSignIn + ", uplineOrderId=" + uplineOrderId + "]";
     }
 }
