@@ -987,6 +987,17 @@ public class OrdOrderSvcImpl extends MybatisBaseSvcImpl<OrdOrderMo, java.lang.Lo
                     settleTasksDetailTo.setUplineOrderDetailId(buyRelationResult.getUplineOrderDetailId());
                     settleTasksDetailTo.setSettleUplineCommissionAmount(ordOrderDetailMo.getBuyPrice());
                     settleTasksDetailTo.setSettleUplineCommissionTitle("大卖网络-结算订单上家佣金");
+                    _log.info("订单签收更新购买关系表");
+                    OrdBuyRelationMo updateBuyRelationMo = new OrdBuyRelationMo();
+                    updateBuyRelationMo.setId(buyRelationResult.getId());
+                    updateBuyRelationMo.setIsSignIn(true);
+                    int updateBuyRelationResult = ordBuyRelationSvc.modify(updateBuyRelationMo);
+                    if (updateBuyRelationResult < 1) {
+                        _log.error("{}更新购买关系出错，返回值为：{}", userId, updateBuyRelationResult);
+                        orderSignInRo.setResult(OrderSignInDic.ERROR);
+                        orderSignInRo.setMsg("更新购买关系失败");
+                        return orderSignInRo;
+                    }
                 }
             }
             settleTasksDetailTo.setOrderDetailId(ordOrderDetailMo.getId().toString());
@@ -1006,6 +1017,7 @@ public class OrdOrderSvcImpl extends MybatisBaseSvcImpl<OrdOrderMo, java.lang.Lo
             orderSignInRo.setMsg("添加结算出错");
             return orderSignInRo;
         }
+        
         OrdOrderMo orderMo = new OrdOrderMo();
         orderMo.setOrderCode(orderCode);
         orderMo.setUserId(userId);
