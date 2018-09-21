@@ -13,37 +13,31 @@ import rebue.ord.dic.TaskExecuteStateDic;
 import rebue.ord.svr.feign.OrdTaskSvc;
 
 /**
- * 创建时间：2018年5月21日 下午12:11:51 项目名称：ord-scheduler-svr
- * 
- * @author daniel
- * @version 1.0
- * @since JDK 1.8 文件名称：SignInTasks.java 类说明： 订单签收任务
+ * 订单签收任务
  */
 @Component
 public class SignInOrderTasks {
+    private final static Logger _log = LoggerFactory.getLogger(SignInOrderTasks.class);
 
-	private final static Logger _log = LoggerFactory.getLogger(SignInOrderTasks.class);
+    @Resource
+    private OrdTaskSvc          taskSvc;
 
-	@Resource
-	OrdTaskSvc taskSvc;
-
-	@Scheduled(fixedDelayString = "${ord.scheduler.tradeFixedDelay}")
-	public void executeTasks() {
-		_log.info("定时执行需要自动签收订单的任务");
-		try {
-
-			// 获取所有需要执行订单签收的任务
-			List<Long> list = taskSvc.getByExecutePlanTimeBeforeNow((byte) TaskExecuteStateDic.NOT_EXECUTE.getCode(), (byte) 2);
-			_log.info("获取到的订单签收任务为：{}", String.valueOf(list));
-			for (Long id : list) {
-				try {
-					taskSvc.executeSignInOrderTask(id);
+    @Scheduled(fixedDelayString = "${ord.scheduler.tradeFixedDelay}")
+    public void executeTasks() {
+        _log.info("定时执行需要自动签收订单的任务");
+        try {
+            _log.info("获取所有需要执行订单签收的任务列表");
+            List<Long> tasks = taskSvc.getByExecutePlanTimeBeforeNow((byte) TaskExecuteStateDic.NOT_EXECUTE.getCode(), (byte) 2);
+            _log.info("获取到的订单签收任务为：{}", String.valueOf(tasks));
+            for (Long id : tasks) {
+                try {
+                    taskSvc.executeSignInOrderTask(id);
                 } catch (RuntimeException e) {
-                	_log.info("执行订单签收失败，返回值为：{}", e);
+                    _log.info("执行订单签收失败", e);
                 }
-			}
-		} catch (RuntimeException e) {
-			_log.info("获取需要执行自动签收的订单任务时出现异常", e);
-		}
-	}
+            }
+        } catch (RuntimeException e) {
+            _log.info("获取需要执行自动签收的订单任务时出现异常", e);
+        }
+    }
 }
