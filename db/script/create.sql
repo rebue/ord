@@ -1,6 +1,6 @@
 /*==============================================================*/
 /* DBMS name:      MySQL 5.0                                    */
-/* Created on:     2018/9/20 10:18:21                           */
+/* Created on:     2018/9/21 14:22:03                           */
 /*==============================================================*/
 
 
@@ -8,15 +8,15 @@ drop table if exists ORD_ADDR;
 
 drop table if exists ORD_BUY_RELATION;
 
-drop table if exists ORD_ORDER;
-
-drop table if exists ORD_ORDER_DETAIL;
-
-drop table if exists ORD_RETURN;
-
 drop table if exists ORD_RETURN_PIC;
 
 drop table if exists ORD_TASK;
+
+drop table if exists ORD_RETURN;
+
+drop table if exists ORD_ORDER_DETAIL;
+
+drop table if exists ORD_ORDER;
 
 /*==============================================================*/
 /* Table: ORD_ADDR                                              */
@@ -122,8 +122,8 @@ create table ORD_ORDER_DETAIL
    ONLINE_ID            bigint not null comment '上线ID',
    PRODUCE_ID           bigint not null comment '产品ID',
    SUBJECT_TYPE         tinyint not null default 0 comment '版块类型（0：普通，1：全返）',
-   CASHBACK_COMMISSION_SLOT tinyint comment '返现佣金名额',
-   CASHBACK_COMMISSION_STATE tinyint comment '返现佣金状态（0：匹配中，1：待返，2：已返）',
+   COMMISSION_SLOT      tinyint comment '返佣金名额',
+   COMMISSION_STATE     tinyint comment '返佣金状态（0：匹配中，1：待返，2：已返）',
    ONLINE_TITLE         varchar(200) not null comment '上线标题',
    SPEC_NAME            varchar(50) not null comment '规格名称',
    BUY_COUNT            int not null comment '购买数量',

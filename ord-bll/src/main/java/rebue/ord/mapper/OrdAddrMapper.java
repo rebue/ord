@@ -57,4 +57,9 @@ public interface OrdAddrMapper extends MybatisBaseMapper<OrdAddrMo, Long> {
      *    @mbg.generated 自动生成，如需修改，请删除本行
      */
     boolean existSelective(OrdAddrMo record);
+
+    /**
+     *    @mbg.generated 自动生成，如需修改，请删除本行
+     */
+    int countSelective(OrdAddrMo record);
 }

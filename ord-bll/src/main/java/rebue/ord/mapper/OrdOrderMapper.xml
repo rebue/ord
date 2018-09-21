@@ -24,6 +24,7 @@
     <result column="CLOSE_TIME" jdbcType="TIMESTAMP" property="closeTime" />
     <result column="CANCEL_TIME" jdbcType="TIMESTAMP" property="cancelTime" />
     <result column="LOGISTIC_ID" jdbcType="BIGINT" property="logisticId" />
+    <result column="SHIPPER_CODE" jdbcType="VARCHAR" property="shipperCode" />
     <result column="SHIPPER_NAME" jdbcType="VARCHAR" property="shipperName" />
     <result column="LOGISTIC_CODE" jdbcType="VARCHAR" property="logisticCode" />
     <result column="RECEIVER_NAME" jdbcType="VARCHAR" property="receiverName" />
@@ -41,7 +42,6 @@
     <result column="SEND_OP_ID" jdbcType="BIGINT" property="sendOpId" />
     <result column="RECEIVED_OP_ID" jdbcType="BIGINT" property="receivedOpId" />
     <result column="CANCEL_REASON" jdbcType="VARCHAR" property="cancelReason" />
-    <result column="SHIPPER_ID" jdbcType="BIGINT" property="shipperId" />
   </resultMap>
   <sql id="Base_Column_List">
     <!--
@@ -50,11 +50,10 @@
     -->
     ID, ORDER_CODE, ORDER_TITLE, ORDER_MONEY, REAL_MONEY, RETURN_TOTAL, RETURN_AMOUNT1, 
     RETURN_AMOUNT2, ORDER_STATE, USER_ID, USER_NAME, ORDER_TIME, PAY_TIME, SEND_TIME, 
-    RECEIVED_TIME, CLOSE_TIME, CANCEL_TIME, LOGISTIC_ID, SHIPPER_NAME, LOGISTIC_CODE, 
-    RECEIVER_NAME, RECEIVER_TEL, RECEIVER_MOBILE, RECEIVER_PROVINCE, RECEIVER_CITY, RECEIVER_EXP_AREA, 
-    RECEIVER_ADDRESS, RECEIVER_POST_CODE, ORDER_MESSAGES, MODIFY_REALVERY_MONEY_OP_ID, 
-    CANCELING_ORDER_OP_ID, CANCELDELI_REASON, SEND_OP_ID, RECEIVED_OP_ID, CANCEL_REASON, 
-    SHIPPER_ID
+    RECEIVED_TIME, CLOSE_TIME, CANCEL_TIME, LOGISTIC_ID, SHIPPER_CODE, SHIPPER_NAME, 
+    LOGISTIC_CODE, RECEIVER_NAME, RECEIVER_TEL, RECEIVER_MOBILE, RECEIVER_PROVINCE, RECEIVER_CITY, 
+    RECEIVER_EXP_AREA, RECEIVER_ADDRESS, RECEIVER_POST_CODE, ORDER_MESSAGES, MODIFY_REALVERY_MONEY_OP_ID, 
+    CANCELING_ORDER_OP_ID, CANCELDELI_REASON, SEND_OP_ID, RECEIVED_OP_ID, CANCEL_REASON
   </sql>
   <select id="selectByPrimaryKey" parameterType="java.lang.Long" resultMap="BaseResultMap">
     <!--
@@ -85,26 +84,26 @@
       USER_ID, USER_NAME, ORDER_TIME, 
       PAY_TIME, SEND_TIME, RECEIVED_TIME, 
       CLOSE_TIME, CANCEL_TIME, LOGISTIC_ID, 
-      SHIPPER_NAME, LOGISTIC_CODE, RECEIVER_NAME, 
-      RECEIVER_TEL, RECEIVER_MOBILE, RECEIVER_PROVINCE, 
-      RECEIVER_CITY, RECEIVER_EXP_AREA, RECEIVER_ADDRESS, 
-      RECEIVER_POST_CODE, ORDER_MESSAGES, MODIFY_REALVERY_MONEY_OP_ID, 
-      CANCELING_ORDER_OP_ID, CANCELDELI_REASON, SEND_OP_ID, 
-      RECEIVED_OP_ID, CANCEL_REASON, SHIPPER_ID
-      )
+      SHIPPER_CODE, SHIPPER_NAME, LOGISTIC_CODE, 
+      RECEIVER_NAME, RECEIVER_TEL, RECEIVER_MOBILE, 
+      RECEIVER_PROVINCE, RECEIVER_CITY, RECEIVER_EXP_AREA, 
+      RECEIVER_ADDRESS, RECEIVER_POST_CODE, ORDER_MESSAGES, 
+      MODIFY_REALVERY_MONEY_OP_ID, CANCELING_ORDER_OP_ID, 
+      CANCELDELI_REASON, SEND_OP_ID, RECEIVED_OP_ID, 
+      CANCEL_REASON)
     values (#{id,jdbcType=BIGINT}, #{orderCode,jdbcType=VARCHAR}, #{orderTitle,jdbcType=VARCHAR}, 
       #{orderMoney,jdbcType=DECIMAL}, #{realMoney,jdbcType=DECIMAL}, #{returnTotal,jdbcType=DECIMAL}, 
       #{returnAmount1,jdbcType=DECIMAL}, #{returnAmount2,jdbcType=DECIMAL}, #{orderState,jdbcType=TINYINT}, 
       #{userId,jdbcType=BIGINT}, #{userName,jdbcType=VARCHAR}, #{orderTime,jdbcType=TIMESTAMP}, 
       #{payTime,jdbcType=TIMESTAMP}, #{sendTime,jdbcType=TIMESTAMP}, #{receivedTime,jdbcType=TIMESTAMP}, 
       #{closeTime,jdbcType=TIMESTAMP}, #{cancelTime,jdbcType=TIMESTAMP}, #{logisticId,jdbcType=BIGINT}, 
-      #{shipperName,jdbcType=VARCHAR}, #{logisticCode,jdbcType=VARCHAR}, #{receiverName,jdbcType=VARCHAR}, 
-      #{receiverTel,jdbcType=VARCHAR}, #{receiverMobile,jdbcType=VARCHAR}, #{receiverProvince,jdbcType=VARCHAR}, 
-      #{receiverCity,jdbcType=VARCHAR}, #{receiverExpArea,jdbcType=VARCHAR}, #{receiverAddress,jdbcType=VARCHAR}, 
-      #{receiverPostCode,jdbcType=CHAR}, #{orderMessages,jdbcType=VARCHAR}, #{modifyRealveryMoneyOpId,jdbcType=BIGINT}, 
-      #{cancelingOrderOpId,jdbcType=BIGINT}, #{canceldeliReason,jdbcType=VARCHAR}, #{sendOpId,jdbcType=BIGINT}, 
-      #{receivedOpId,jdbcType=BIGINT}, #{cancelReason,jdbcType=VARCHAR}, #{shipperId,jdbcType=BIGINT}
-      )
+      #{shipperCode,jdbcType=VARCHAR}, #{shipperName,jdbcType=VARCHAR}, #{logisticCode,jdbcType=VARCHAR}, 
+      #{receiverName,jdbcType=VARCHAR}, #{receiverTel,jdbcType=VARCHAR}, #{receiverMobile,jdbcType=VARCHAR}, 
+      #{receiverProvince,jdbcType=VARCHAR}, #{receiverCity,jdbcType=VARCHAR}, #{receiverExpArea,jdbcType=VARCHAR}, 
+      #{receiverAddress,jdbcType=VARCHAR}, #{receiverPostCode,jdbcType=CHAR}, #{orderMessages,jdbcType=VARCHAR}, 
+      #{modifyRealveryMoneyOpId,jdbcType=BIGINT}, #{cancelingOrderOpId,jdbcType=BIGINT}, 
+      #{canceldeliReason,jdbcType=VARCHAR}, #{sendOpId,jdbcType=BIGINT}, #{receivedOpId,jdbcType=BIGINT}, 
+      #{cancelReason,jdbcType=VARCHAR})
   </insert>
   <insert id="insertSelective" parameterType="rebue.ord.mo.OrdOrderMo">
     <!--
@@ -167,6 +166,9 @@
       <if test="logisticId != null">
         LOGISTIC_ID,
       </if>
+      <if test="shipperCode != null">
+        SHIPPER_CODE,
+      </if>
       <if test="shipperName != null">
         SHIPPER_NAME,
       </if>
@@ -217,9 +219,6 @@
       </if>
       <if test="cancelReason != null">
         CANCEL_REASON,
-      </if>
-      <if test="shipperId != null">
-        SHIPPER_ID,
       </if>
     </trim>
     <trim prefix="values (" suffix=")" suffixOverrides=",">
@@ -277,6 +276,9 @@
       <if test="logisticId != null">
         #{logisticId,jdbcType=BIGINT},
       </if>
+      <if test="shipperCode != null">
+        #{shipperCode,jdbcType=VARCHAR},
+      </if>
       <if test="shipperName != null">
         #{shipperName,jdbcType=VARCHAR},
       </if>
@@ -327,9 +329,6 @@
       </if>
       <if test="cancelReason != null">
         #{cancelReason,jdbcType=VARCHAR},
-      </if>
-      <if test="shipperId != null">
-        #{shipperId,jdbcType=BIGINT},
       </if>
     </trim>
   </insert>
@@ -391,6 +390,9 @@
       <if test="logisticId != null">
         LOGISTIC_ID = #{logisticId,jdbcType=BIGINT},
       </if>
+      <if test="shipperCode != null">
+        SHIPPER_CODE = #{shipperCode,jdbcType=VARCHAR},
+      </if>
       <if test="shipperName != null">
         SHIPPER_NAME = #{shipperName,jdbcType=VARCHAR},
       </if>
@@ -442,9 +444,6 @@
       <if test="cancelReason != null">
         CANCEL_REASON = #{cancelReason,jdbcType=VARCHAR},
       </if>
-      <if test="shipperId != null">
-        SHIPPER_ID = #{shipperId,jdbcType=BIGINT},
-      </if>
     </set>
     where ID = #{id,jdbcType=BIGINT}
   </update>
@@ -471,6 +470,7 @@
       CLOSE_TIME = #{closeTime,jdbcType=TIMESTAMP},
       CANCEL_TIME = #{cancelTime,jdbcType=TIMESTAMP},
       LOGISTIC_ID = #{logisticId,jdbcType=BIGINT},
+      SHIPPER_CODE = #{shipperCode,jdbcType=VARCHAR},
       SHIPPER_NAME = #{shipperName,jdbcType=VARCHAR},
       LOGISTIC_CODE = #{logisticCode,jdbcType=VARCHAR},
       RECEIVER_NAME = #{receiverName,jdbcType=VARCHAR},
@@ -487,8 +487,7 @@
       CANCELDELI_REASON = #{canceldeliReason,jdbcType=VARCHAR},
       SEND_OP_ID = #{sendOpId,jdbcType=BIGINT},
       RECEIVED_OP_ID = #{receivedOpId,jdbcType=BIGINT},
-      CANCEL_REASON = #{cancelReason,jdbcType=VARCHAR},
-      SHIPPER_ID = #{shipperId,jdbcType=BIGINT}
+      CANCEL_REASON = #{cancelReason,jdbcType=VARCHAR}
     where ID = #{id,jdbcType=BIGINT}
   </update>
   <select id="selectAll" resultMap="BaseResultMap">
@@ -498,11 +497,10 @@
     -->
     select ID, ORDER_CODE, ORDER_TITLE, ORDER_MONEY, REAL_MONEY, RETURN_TOTAL, RETURN_AMOUNT1, 
     RETURN_AMOUNT2, ORDER_STATE, USER_ID, USER_NAME, ORDER_TIME, PAY_TIME, SEND_TIME, 
-    RECEIVED_TIME, CLOSE_TIME, CANCEL_TIME, LOGISTIC_ID, SHIPPER_NAME, LOGISTIC_CODE, 
-    RECEIVER_NAME, RECEIVER_TEL, RECEIVER_MOBILE, RECEIVER_PROVINCE, RECEIVER_CITY, RECEIVER_EXP_AREA, 
-    RECEIVER_ADDRESS, RECEIVER_POST_CODE, ORDER_MESSAGES, MODIFY_REALVERY_MONEY_OP_ID, 
-    CANCELING_ORDER_OP_ID, CANCELDELI_REASON, SEND_OP_ID, RECEIVED_OP_ID, CANCEL_REASON, 
-    SHIPPER_ID
+    RECEIVED_TIME, CLOSE_TIME, CANCEL_TIME, LOGISTIC_ID, SHIPPER_CODE, SHIPPER_NAME, 
+    LOGISTIC_CODE, RECEIVER_NAME, RECEIVER_TEL, RECEIVER_MOBILE, RECEIVER_PROVINCE, RECEIVER_CITY, 
+    RECEIVER_EXP_AREA, RECEIVER_ADDRESS, RECEIVER_POST_CODE, ORDER_MESSAGES, MODIFY_REALVERY_MONEY_OP_ID, 
+    CANCELING_ORDER_OP_ID, CANCELDELI_REASON, SEND_OP_ID, RECEIVED_OP_ID, CANCEL_REASON
     from ORD_ORDER
   </select>
   <select id="selectSelective" parameterType="rebue.ord.mo.OrdOrderMo" resultMap="BaseResultMap">
@@ -565,6 +563,9 @@
       <if test="logisticId != null">
         and LOGISTIC_ID = #{logisticId,jdbcType=BIGINT}
       </if>
+      <if test="shipperCode != null and shipperCode != ''">
+        and SHIPPER_CODE = #{shipperCode,jdbcType=VARCHAR}
+      </if>
       <if test="shipperName != null and shipperName != ''">
         and SHIPPER_NAME = #{shipperName,jdbcType=VARCHAR}
       </if>
@@ -615,9 +616,6 @@
       </if>
       <if test="cancelReason != null and cancelReason != ''">
         and CANCEL_REASON = #{cancelReason,jdbcType=VARCHAR}
-      </if>
-      <if test="shipperId != null">
-        and SHIPPER_ID = #{shipperId,jdbcType=BIGINT}
       </if>
     </where>
   </select>
@@ -692,6 +690,9 @@
       <if test="logisticId != null and logisticId != ''">
         and LOGISTIC_ID = #{logisticId,jdbcType=BIGINT}
       </if>
+      <if test="shipperCode != null and shipperCode != ''">
+        and SHIPPER_CODE = #{shipperCode,jdbcType=VARCHAR}
+      </if>
       <if test="shipperName != null and shipperName != ''">
         and SHIPPER_NAME = #{shipperName,jdbcType=VARCHAR}
       </if>
@@ -743,8 +744,120 @@
       <if test="cancelReason != null and cancelReason != ''">
         and CANCEL_REASON = #{cancelReason,jdbcType=VARCHAR}
       </if>
-      <if test="shipperId != null and shipperId != ''">
-        and SHIPPER_ID = #{shipperId,jdbcType=BIGINT}
+    </where>
+  </select>
+  <select id="countSelective" parameterType="rebue.ord.mo.OrdOrderMo" resultType="int">
+    <!--
+      WARNING - @mbg.generated
+      This element is automatically generated by MyBatis Generator, do not modify.
+    -->
+    select count(1) 
+    from ORD_ORDER
+    <where>
+      <if test="orderCode != null and orderCode != ''">
+        and ORDER_CODE = #{orderCode,jdbcType=VARCHAR}
+      </if>
+      <if test="orderTitle != null and orderTitle != ''">
+        and ORDER_TITLE = #{orderTitle,jdbcType=VARCHAR}
+      </if>
+      <if test="orderMoney != null">
+        and ORDER_MONEY = #{orderMoney,jdbcType=DECIMAL}
+      </if>
+      <if test="realMoney != null">
+        and REAL_MONEY = #{realMoney,jdbcType=DECIMAL}
+      </if>
+      <if test="returnTotal != null">
+        and RETURN_TOTAL = #{returnTotal,jdbcType=DECIMAL}
+      </if>
+      <if test="returnAmount1 != null">
+        and RETURN_AMOUNT1 = #{returnAmount1,jdbcType=DECIMAL}
+      </if>
+      <if test="returnAmount2 != null">
+        and RETURN_AMOUNT2 = #{returnAmount2,jdbcType=DECIMAL}
+      </if>
+      <if test="orderState != null">
+        and ORDER_STATE = #{orderState,jdbcType=TINYINT}
+      </if>
+      <if test="userId != null">
+        and USER_ID = #{userId,jdbcType=BIGINT}
+      </if>
+      <if test="userName != null and userName != ''">
+        and USER_NAME = #{userName,jdbcType=VARCHAR}
+      </if>
+      <if test="orderTime != null">
+        and ORDER_TIME = #{orderTime,jdbcType=TIMESTAMP}
+      </if>
+      <if test="payTime != null">
+        and PAY_TIME = #{payTime,jdbcType=TIMESTAMP}
+      </if>
+      <if test="sendTime != null">
+        and SEND_TIME = #{sendTime,jdbcType=TIMESTAMP}
+      </if>
+      <if test="receivedTime != null">
+        and RECEIVED_TIME = #{receivedTime,jdbcType=TIMESTAMP}
+      </if>
+      <if test="closeTime != null">
+        and CLOSE_TIME = #{closeTime,jdbcType=TIMESTAMP}
+      </if>
+      <if test="cancelTime != null">
+        and CANCEL_TIME = #{cancelTime,jdbcType=TIMESTAMP}
+      </if>
+      <if test="logisticId != null">
+        and LOGISTIC_ID = #{logisticId,jdbcType=BIGINT}
+      </if>
+      <if test="shipperCode != null and shipperCode != ''">
+        and SHIPPER_CODE = #{shipperCode,jdbcType=VARCHAR}
+      </if>
+      <if test="shipperName != null and shipperName != ''">
+        and SHIPPER_NAME = #{shipperName,jdbcType=VARCHAR}
+      </if>
+      <if test="logisticCode != null and logisticCode != ''">
+        and LOGISTIC_CODE = #{logisticCode,jdbcType=VARCHAR}
+      </if>
+      <if test="receiverName != null and receiverName != ''">
+        and RECEIVER_NAME = #{receiverName,jdbcType=VARCHAR}
+      </if>
+      <if test="receiverTel != null and receiverTel != ''">
+        and RECEIVER_TEL = #{receiverTel,jdbcType=VARCHAR}
+      </if>
+      <if test="receiverMobile != null and receiverMobile != ''">
+        and RECEIVER_MOBILE = #{receiverMobile,jdbcType=VARCHAR}
+      </if>
+      <if test="receiverProvince != null and receiverProvince != ''">
+        and RECEIVER_PROVINCE = #{receiverProvince,jdbcType=VARCHAR}
+      </if>
+      <if test="receiverCity != null and receiverCity != ''">
+        and RECEIVER_CITY = #{receiverCity,jdbcType=VARCHAR}
+      </if>
+      <if test="receiverExpArea != null and receiverExpArea != ''">
+        and RECEIVER_EXP_AREA = #{receiverExpArea,jdbcType=VARCHAR}
+      </if>
+      <if test="receiverAddress != null and receiverAddress != ''">
+        and RECEIVER_ADDRESS = #{receiverAddress,jdbcType=VARCHAR}
+      </if>
+      <if test="receiverPostCode != null and receiverPostCode != ''">
+        and RECEIVER_POST_CODE = #{receiverPostCode,jdbcType=CHAR}
+      </if>
+      <if test="orderMessages != null and orderMessages != ''">
+        and ORDER_MESSAGES = #{orderMessages,jdbcType=VARCHAR}
+      </if>
+      <if test="modifyRealveryMoneyOpId != null">
+        and MODIFY_REALVERY_MONEY_OP_ID = #{modifyRealveryMoneyOpId,jdbcType=BIGINT}
+      </if>
+      <if test="cancelingOrderOpId != null">
+        and CANCELING_ORDER_OP_ID = #{cancelingOrderOpId,jdbcType=BIGINT}
+      </if>
+      <if test="canceldeliReason != null and canceldeliReason != ''">
+        and CANCELDELI_REASON = #{canceldeliReason,jdbcType=VARCHAR}
+      </if>
+      <if test="sendOpId != null">
+        and SEND_OP_ID = #{sendOpId,jdbcType=BIGINT}
+      </if>
+      <if test="receivedOpId != null">
+        and RECEIVED_OP_ID = #{receivedOpId,jdbcType=BIGINT}
+      </if>
+      <if test="cancelReason != null and cancelReason != ''">
+        and CANCEL_REASON = #{cancelReason,jdbcType=VARCHAR}
       </if>
     </where>
   </select>

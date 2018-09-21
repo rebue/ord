@@ -19,6 +19,7 @@
     <result column="APPLICATION_STATE" jdbcType="TINYINT" property="applicationState" />
     <result column="REFUND_STATE" jdbcType="TINYINT" property="refundState" />
     <result column="RETURN_REASON" jdbcType="VARCHAR" property="returnReason" />
+    <result column="USER_ID" jdbcType="BIGINT" property="userId" />
     <result column="APPLICATION_OP_ID" jdbcType="BIGINT" property="applicationOpId" />
     <result column="APPLICATION_TIME" jdbcType="TIMESTAMP" property="applicationTime" />
     <result column="CANCEL_OP_ID" jdbcType="BIGINT" property="cancelOpId" />
@@ -34,7 +35,6 @@
     <result column="FINISH_TIME" jdbcType="TIMESTAMP" property="finishTime" />
     <result column="RECEIVE_OP_ID" jdbcType="BIGINT" property="receiveOpId" />
     <result column="RECEIVE_TIME" jdbcType="TIMESTAMP" property="receiveTime" />
-    <result column="USER_ID" jdbcType="BIGINT" property="userId" />
   </resultMap>
   <sql id="Base_Column_List">
     <!--
@@ -43,9 +43,9 @@
     -->
     ID, RETURN_CODE, ORDER_ID, ORDER_DETAIL_ID, RETURN_COUNT, RETURN_RENTAL, RETURN_AMOUNT1, 
     RETURN_AMOUNT2, SUBTRACT_CASHBACK, RETURN_TYPE, APPLICATION_STATE, REFUND_STATE, 
-    RETURN_REASON, APPLICATION_OP_ID, APPLICATION_TIME, CANCEL_OP_ID, CANCEL_TIME, REVIEW_OP_ID, 
-    REVIEW_TIME, REFUND_OP_ID, REFUND_TIME, REJECT_OP_ID, REJECT_REASON, REJECT_TIME, 
-    FINISH_OP_ID, FINISH_TIME, RECEIVE_OP_ID, RECEIVE_TIME, USER_ID
+    RETURN_REASON, USER_ID, APPLICATION_OP_ID, APPLICATION_TIME, CANCEL_OP_ID, CANCEL_TIME, 
+    REVIEW_OP_ID, REVIEW_TIME, REFUND_OP_ID, REFUND_TIME, REJECT_OP_ID, REJECT_REASON, 
+    REJECT_TIME, FINISH_OP_ID, FINISH_TIME, RECEIVE_OP_ID, RECEIVE_TIME
   </sql>
   <select id="selectByPrimaryKey" parameterType="java.lang.Long" resultMap="BaseResultMap">
     <!--
@@ -74,22 +74,22 @@
       ORDER_DETAIL_ID, RETURN_COUNT, RETURN_RENTAL, 
       RETURN_AMOUNT1, RETURN_AMOUNT2, SUBTRACT_CASHBACK, 
       RETURN_TYPE, APPLICATION_STATE, REFUND_STATE, 
-      RETURN_REASON, APPLICATION_OP_ID, APPLICATION_TIME, 
-      CANCEL_OP_ID, CANCEL_TIME, REVIEW_OP_ID, 
-      REVIEW_TIME, REFUND_OP_ID, REFUND_TIME, 
-      REJECT_OP_ID, REJECT_REASON, REJECT_TIME, 
-      FINISH_OP_ID, FINISH_TIME, RECEIVE_OP_ID, 
-      RECEIVE_TIME, USER_ID)
+      RETURN_REASON, USER_ID, APPLICATION_OP_ID, 
+      APPLICATION_TIME, CANCEL_OP_ID, CANCEL_TIME, 
+      REVIEW_OP_ID, REVIEW_TIME, REFUND_OP_ID, 
+      REFUND_TIME, REJECT_OP_ID, REJECT_REASON, 
+      REJECT_TIME, FINISH_OP_ID, FINISH_TIME, 
+      RECEIVE_OP_ID, RECEIVE_TIME)
     values (#{id,jdbcType=BIGINT}, #{returnCode,jdbcType=BIGINT}, #{orderId,jdbcType=BIGINT}, 
       #{orderDetailId,jdbcType=BIGINT}, #{returnCount,jdbcType=INTEGER}, #{returnRental,jdbcType=DECIMAL}, 
       #{returnAmount1,jdbcType=DECIMAL}, #{returnAmount2,jdbcType=DECIMAL}, #{subtractCashback,jdbcType=DECIMAL}, 
       #{returnType,jdbcType=TINYINT}, #{applicationState,jdbcType=TINYINT}, #{refundState,jdbcType=TINYINT}, 
-      #{returnReason,jdbcType=VARCHAR}, #{applicationOpId,jdbcType=BIGINT}, #{applicationTime,jdbcType=TIMESTAMP}, 
-      #{cancelOpId,jdbcType=BIGINT}, #{cancelTime,jdbcType=TIMESTAMP}, #{reviewOpId,jdbcType=BIGINT}, 
-      #{reviewTime,jdbcType=TIMESTAMP}, #{refundOpId,jdbcType=BIGINT}, #{refundTime,jdbcType=TIMESTAMP}, 
-      #{rejectOpId,jdbcType=BIGINT}, #{rejectReason,jdbcType=VARCHAR}, #{rejectTime,jdbcType=TIMESTAMP}, 
-      #{finishOpId,jdbcType=BIGINT}, #{finishTime,jdbcType=TIMESTAMP}, #{receiveOpId,jdbcType=BIGINT}, 
-      #{receiveTime,jdbcType=TIMESTAMP}, #{userId,jdbcType=BIGINT})
+      #{returnReason,jdbcType=VARCHAR}, #{userId,jdbcType=BIGINT}, #{applicationOpId,jdbcType=BIGINT}, 
+      #{applicationTime,jdbcType=TIMESTAMP}, #{cancelOpId,jdbcType=BIGINT}, #{cancelTime,jdbcType=TIMESTAMP}, 
+      #{reviewOpId,jdbcType=BIGINT}, #{reviewTime,jdbcType=TIMESTAMP}, #{refundOpId,jdbcType=BIGINT}, 
+      #{refundTime,jdbcType=TIMESTAMP}, #{rejectOpId,jdbcType=BIGINT}, #{rejectReason,jdbcType=VARCHAR}, 
+      #{rejectTime,jdbcType=TIMESTAMP}, #{finishOpId,jdbcType=BIGINT}, #{finishTime,jdbcType=TIMESTAMP}, 
+      #{receiveOpId,jdbcType=BIGINT}, #{receiveTime,jdbcType=TIMESTAMP})
   </insert>
   <insert id="insertSelective" parameterType="rebue.ord.mo.OrdReturnMo">
     <!--
@@ -137,6 +137,9 @@
       <if test="returnReason != null">
         RETURN_REASON,
       </if>
+      <if test="userId != null">
+        USER_ID,
+      </if>
       <if test="applicationOpId != null">
         APPLICATION_OP_ID,
       </if>
@@ -182,9 +185,6 @@
       <if test="receiveTime != null">
         RECEIVE_TIME,
       </if>
-      <if test="userId != null">
-        USER_ID,
-      </if>
     </trim>
     <trim prefix="values (" suffix=")" suffixOverrides=",">
       <if test="id != null">
@@ -225,6 +225,9 @@
       </if>
       <if test="returnReason != null">
         #{returnReason,jdbcType=VARCHAR},
+      </if>
+      <if test="userId != null">
+        #{userId,jdbcType=BIGINT},
       </if>
       <if test="applicationOpId != null">
         #{applicationOpId,jdbcType=BIGINT},
@@ -271,9 +274,6 @@
       <if test="receiveTime != null">
         #{receiveTime,jdbcType=TIMESTAMP},
       </if>
-      <if test="userId != null">
-        #{userId,jdbcType=BIGINT},
-      </if>
     </trim>
   </insert>
   <update id="updateByPrimaryKeySelective" parameterType="rebue.ord.mo.OrdReturnMo">
@@ -318,6 +318,9 @@
       </if>
       <if test="returnReason != null">
         RETURN_REASON = #{returnReason,jdbcType=VARCHAR},
+      </if>
+      <if test="userId != null">
+        USER_ID = #{userId,jdbcType=BIGINT},
       </if>
       <if test="applicationOpId != null">
         APPLICATION_OP_ID = #{applicationOpId,jdbcType=BIGINT},
@@ -364,9 +367,6 @@
       <if test="receiveTime != null">
         RECEIVE_TIME = #{receiveTime,jdbcType=TIMESTAMP},
       </if>
-      <if test="userId != null">
-        USER_ID = #{userId,jdbcType=BIGINT},
-      </if>
     </set>
     where ID = #{id,jdbcType=BIGINT}
   </update>
@@ -388,6 +388,7 @@
       APPLICATION_STATE = #{applicationState,jdbcType=TINYINT},
       REFUND_STATE = #{refundState,jdbcType=TINYINT},
       RETURN_REASON = #{returnReason,jdbcType=VARCHAR},
+      USER_ID = #{userId,jdbcType=BIGINT},
       APPLICATION_OP_ID = #{applicationOpId,jdbcType=BIGINT},
       APPLICATION_TIME = #{applicationTime,jdbcType=TIMESTAMP},
       CANCEL_OP_ID = #{cancelOpId,jdbcType=BIGINT},
@@ -402,8 +403,7 @@
       FINISH_OP_ID = #{finishOpId,jdbcType=BIGINT},
       FINISH_TIME = #{finishTime,jdbcType=TIMESTAMP},
       RECEIVE_OP_ID = #{receiveOpId,jdbcType=BIGINT},
-      RECEIVE_TIME = #{receiveTime,jdbcType=TIMESTAMP},
-      USER_ID = #{userId,jdbcType=BIGINT}
+      RECEIVE_TIME = #{receiveTime,jdbcType=TIMESTAMP}
     where ID = #{id,jdbcType=BIGINT}
   </update>
   <select id="selectAll" resultMap="BaseResultMap">
@@ -413,9 +413,9 @@
     -->
     select ID, RETURN_CODE, ORDER_ID, ORDER_DETAIL_ID, RETURN_COUNT, RETURN_RENTAL, RETURN_AMOUNT1, 
     RETURN_AMOUNT2, SUBTRACT_CASHBACK, RETURN_TYPE, APPLICATION_STATE, REFUND_STATE, 
-    RETURN_REASON, APPLICATION_OP_ID, APPLICATION_TIME, CANCEL_OP_ID, CANCEL_TIME, REVIEW_OP_ID, 
-    REVIEW_TIME, REFUND_OP_ID, REFUND_TIME, REJECT_OP_ID, REJECT_REASON, REJECT_TIME, 
-    FINISH_OP_ID, FINISH_TIME, RECEIVE_OP_ID, RECEIVE_TIME, USER_ID
+    RETURN_REASON, USER_ID, APPLICATION_OP_ID, APPLICATION_TIME, CANCEL_OP_ID, CANCEL_TIME, 
+    REVIEW_OP_ID, REVIEW_TIME, REFUND_OP_ID, REFUND_TIME, REJECT_OP_ID, REJECT_REASON, 
+    REJECT_TIME, FINISH_OP_ID, FINISH_TIME, RECEIVE_OP_ID, RECEIVE_TIME
     from ORD_RETURN
   </select>
   <select id="selectSelective" parameterType="rebue.ord.mo.OrdReturnMo" resultMap="BaseResultMap">
@@ -463,6 +463,9 @@
       <if test="returnReason != null and returnReason != ''">
         and RETURN_REASON = #{returnReason,jdbcType=VARCHAR}
       </if>
+      <if test="userId != null">
+        and USER_ID = #{userId,jdbcType=BIGINT}
+      </if>
       <if test="applicationOpId != null">
         and APPLICATION_OP_ID = #{applicationOpId,jdbcType=BIGINT}
       </if>
@@ -507,9 +510,6 @@
       </if>
       <if test="receiveTime != null">
         and RECEIVE_TIME = #{receiveTime,jdbcType=TIMESTAMP}
-      </if>
-      <if test="userId != null">
-        and USER_ID = #{userId,jdbcType=BIGINT}
       </if>
     </where>
   </select>
@@ -569,6 +569,9 @@
       <if test="returnReason != null and returnReason != ''">
         and RETURN_REASON = #{returnReason,jdbcType=VARCHAR}
       </if>
+      <if test="userId != null and userId != ''">
+        and USER_ID = #{userId,jdbcType=BIGINT}
+      </if>
       <if test="applicationOpId != null and applicationOpId != ''">
         and APPLICATION_OP_ID = #{applicationOpId,jdbcType=BIGINT}
       </if>
@@ -614,8 +617,99 @@
       <if test="receiveTime != null and receiveTime != ''">
         and RECEIVE_TIME = #{receiveTime,jdbcType=TIMESTAMP}
       </if>
-      <if test="userId != null and userId != ''">
+    </where>
+  </select>
+  <select id="countSelective" parameterType="rebue.ord.mo.OrdReturnMo" resultType="int">
+    <!--
+      WARNING - @mbg.generated
+      This element is automatically generated by MyBatis Generator, do not modify.
+    -->
+    select count(1) 
+    from ORD_RETURN
+    <where>
+      <if test="returnCode != null">
+        and RETURN_CODE = #{returnCode,jdbcType=BIGINT}
+      </if>
+      <if test="orderId != null">
+        and ORDER_ID = #{orderId,jdbcType=BIGINT}
+      </if>
+      <if test="orderDetailId != null">
+        and ORDER_DETAIL_ID = #{orderDetailId,jdbcType=BIGINT}
+      </if>
+      <if test="returnCount != null">
+        and RETURN_COUNT = #{returnCount,jdbcType=INTEGER}
+      </if>
+      <if test="returnRental != null">
+        and RETURN_RENTAL = #{returnRental,jdbcType=DECIMAL}
+      </if>
+      <if test="returnAmount1 != null">
+        and RETURN_AMOUNT1 = #{returnAmount1,jdbcType=DECIMAL}
+      </if>
+      <if test="returnAmount2 != null">
+        and RETURN_AMOUNT2 = #{returnAmount2,jdbcType=DECIMAL}
+      </if>
+      <if test="subtractCashback != null">
+        and SUBTRACT_CASHBACK = #{subtractCashback,jdbcType=DECIMAL}
+      </if>
+      <if test="returnType != null">
+        and RETURN_TYPE = #{returnType,jdbcType=TINYINT}
+      </if>
+      <if test="applicationState != null">
+        and APPLICATION_STATE = #{applicationState,jdbcType=TINYINT}
+      </if>
+      <if test="refundState != null">
+        and REFUND_STATE = #{refundState,jdbcType=TINYINT}
+      </if>
+      <if test="returnReason != null and returnReason != ''">
+        and RETURN_REASON = #{returnReason,jdbcType=VARCHAR}
+      </if>
+      <if test="userId != null">
         and USER_ID = #{userId,jdbcType=BIGINT}
+      </if>
+      <if test="applicationOpId != null">
+        and APPLICATION_OP_ID = #{applicationOpId,jdbcType=BIGINT}
+      </if>
+      <if test="applicationTime != null">
+        and APPLICATION_TIME = #{applicationTime,jdbcType=TIMESTAMP}
+      </if>
+      <if test="cancelOpId != null">
+        and CANCEL_OP_ID = #{cancelOpId,jdbcType=BIGINT}
+      </if>
+      <if test="cancelTime != null">
+        and CANCEL_TIME = #{cancelTime,jdbcType=TIMESTAMP}
+      </if>
+      <if test="reviewOpId != null">
+        and REVIEW_OP_ID = #{reviewOpId,jdbcType=BIGINT}
+      </if>
+      <if test="reviewTime != null">
+        and REVIEW_TIME = #{reviewTime,jdbcType=TIMESTAMP}
+      </if>
+      <if test="refundOpId != null">
+        and REFUND_OP_ID = #{refundOpId,jdbcType=BIGINT}
+      </if>
+      <if test="refundTime != null">
+        and REFUND_TIME = #{refundTime,jdbcType=TIMESTAMP}
+      </if>
+      <if test="rejectOpId != null">
+        and REJECT_OP_ID = #{rejectOpId,jdbcType=BIGINT}
+      </if>
+      <if test="rejectReason != null and rejectReason != ''">
+        and REJECT_REASON = #{rejectReason,jdbcType=VARCHAR}
+      </if>
+      <if test="rejectTime != null">
+        and REJECT_TIME = #{rejectTime,jdbcType=TIMESTAMP}
+      </if>
+      <if test="finishOpId != null">
+        and FINISH_OP_ID = #{finishOpId,jdbcType=BIGINT}
+      </if>
+      <if test="finishTime != null">
+        and FINISH_TIME = #{finishTime,jdbcType=TIMESTAMP}
+      </if>
+      <if test="receiveOpId != null">
+        and RECEIVE_OP_ID = #{receiveOpId,jdbcType=BIGINT}
+      </if>
+      <if test="receiveTime != null">
+        and RECEIVE_TIME = #{receiveTime,jdbcType=TIMESTAMP}
       </if>
     </where>
   </select>

@@ -61,6 +61,11 @@ public interface OrdOrderDetailMapper extends MybatisBaseMapper<OrdOrderDetailMo
     boolean existSelective(OrdOrderDetailMo record);
 
     /**
+     *    @mbg.generated 自动生成，如需修改，请删除本行
+     */
+    int countSelective(OrdOrderDetailMo record);
+
+    /**
      *  根据订单编号订单详情ID修改退货数量和返现总额 Title: modifyReturnCountAndCashBackTotal
      *  Description:
      *
