@@ -323,8 +323,8 @@ public class OrdOrderSvcImpl extends MybatisBaseSvcImpl<OrdOrderMo, java.lang.Lo
                     detailMo.setBuyPrice(orderList.get(j).getSalePrice());
                     detailMo.setCashbackAmount(new BigDecimal("0"));
                     detailMo.setReturnState((byte) 0);
-                    detailMo.setCashbackCommissionSlot((byte) 2);
-                    detailMo.setCashbackCommissionState((byte)0);
+                    detailMo.setCommissionSlot((byte) 2);
+                    detailMo.setCommissionState((byte)0);
                     detailMo.setUserId(id);
                     detailMo.setCashbackTotal(new BigDecimal("0"));
                     _log.info("添加订单详情的参数为：{}", detailMo);
@@ -422,10 +422,10 @@ public class OrdOrderSvcImpl extends MybatisBaseSvcImpl<OrdOrderMo, java.lang.Lo
             return false;
         }
         OrdOrderDetailMo updateOrderDetailMo = new OrdOrderDetailMo();
-        updateOrderDetailMo.setCashbackCommissionSlot((byte)(orderDetailMo.getCashbackCommissionSlot()-1));
+        updateOrderDetailMo.setCommissionSlot((byte)(orderDetailMo.getCommissionSlot()-1));
         updateOrderDetailMo.setId(orderDetailMo.getId());
-        if((orderDetailMo.getCashbackCommissionSlot()-1)==0) {
-        	updateOrderDetailMo.setCashbackCommissionState((byte)1);
+        if((orderDetailMo.getCommissionSlot()-1)==0) {
+        	updateOrderDetailMo.setCommissionState((byte)1);
         }
         // 更新购买关系订单详情的返现名额
         int updateOrderDetailResult = ordOrderDetailSvc.modify(updateOrderDetailMo);
@@ -475,10 +475,10 @@ public class OrdOrderSvcImpl extends MybatisBaseSvcImpl<OrdOrderMo, java.lang.Lo
         }
         // 更新购买关系订单详情的返现名额
         OrdOrderDetailMo updateOrderDetailMo = new OrdOrderDetailMo();
-        updateOrderDetailMo.setCashbackCommissionSlot((byte)(orderDetailMo.getCashbackCommissionSlot()-1));
+        updateOrderDetailMo.setCommissionSlot((byte)(orderDetailMo.getCommissionSlot()-1));
         updateOrderDetailMo.setId(orderDetailMo.getId());
-        if((orderDetailMo.getCashbackCommissionSlot()-1)==0) {
-        	updateOrderDetailMo.setCashbackCommissionState((byte)1);
+        if((orderDetailMo.getCommissionSlot()-1)==0) {
+        	updateOrderDetailMo.setCommissionState((byte)1);
         }
         // 更新购买关系订单详情的返现名额
         int updateOrderDetailResult = ordOrderDetailSvc.modify(updateOrderDetailMo);
@@ -516,10 +516,10 @@ public class OrdOrderSvcImpl extends MybatisBaseSvcImpl<OrdOrderMo, java.lang.Lo
         }
         // 更新购买关系订单详情的返现名额
         OrdOrderDetailMo updateOrderDetailMo = new OrdOrderDetailMo();
-        updateOrderDetailMo.setCashbackCommissionSlot((byte)(orderDetailMo.getCashbackCommissionSlot()-1));
+        updateOrderDetailMo.setCommissionSlot((byte)(orderDetailMo.getCommissionSlot()-1));
         updateOrderDetailMo.setId(orderDetailMo.getId());
-        if((orderDetailMo.getCashbackCommissionSlot()-1)==0) {
-        	updateOrderDetailMo.setCashbackCommissionState((byte)1);
+        if((orderDetailMo.getCommissionSlot()-1)==0) {
+        	updateOrderDetailMo.setCommissionState((byte)1);
         }
         // 更新购买关系订单详情的返现名额
         int updateOrderDetailResult = ordOrderDetailSvc.modify(updateOrderDetailMo);
@@ -629,7 +629,7 @@ public class OrdOrderSvcImpl extends MybatisBaseSvcImpl<OrdOrderMo, java.lang.Lo
                     orderDetailRo.setGoodsQsmm(onlinePicList.get(0).getPicPath());
                     orderDetailRo.setReturnCount(orderDetailMo.getReturnCount());
                     orderDetailRo.setCashbackTotal(orderDetailMo.getCashbackTotal());
-                    orderDetailRo.setCashbackCommissionSlot(orderDetailMo.getCashbackCommissionSlot());
+                    orderDetailRo.setCashbackCommissionSlot(orderDetailMo.getCommissionSlot());
                     orderDetailRoList.add(orderDetailRo);
                 }
                 hm.put("items", orderDetailRoList);

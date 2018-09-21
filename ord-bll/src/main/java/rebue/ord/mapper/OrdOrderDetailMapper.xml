@@ -462,58 +462,6 @@
     </where>
   </select>
 
-  <select id="selectSelective" parameterType="rebue.ord.mo.OrdOrderDetailMo" resultMap="BaseResultMap">
-    <!--
-      	查询订单详情
-    -->
-    select 
-    <include refid="Base_Column_List" />
-    from ORD_ORDER_DETAIL
-    <where>
-      <if test="id != null">
-        and ID = #{id,jdbcType=BIGINT}
-      </if>
-      <if test="orderId != null">
-        and ORDER_ID = #{orderId,jdbcType=BIGINT}
-      </if>
-      <if test="onlineId != null">
-        and ONLINE_ID = #{onlineId,jdbcType=BIGINT}
-      </if>
-      <if test="produceId != null">
-        and PRODUCE_ID = #{produceId,jdbcType=BIGINT}
-      </if>
-      <if test="onlineTitle != null and onlineTitle != ''">
-        and ONLINE_TITLE = #{onlineTitle,jdbcType=VARCHAR}
-      </if>
-      <if test="specName != null and specName != ''">
-        and SPEC_NAME = #{specName,jdbcType=VARCHAR}
-      </if>
-      <if test="buyCount != null">
-        and BUY_COUNT = #{buyCount,jdbcType=INTEGER}
-      </if>
-      <if test="buyPrice != null">
-        and BUY_PRICE = #{buyPrice,jdbcType=DECIMAL}
-      </if>
-      <if test="cashbackAmount != null">
-        and CASHBACK_AMOUNT = #{cashbackAmount,jdbcType=DECIMAL}
-      </if>
-      <if test="returnCount != null">
-        and RETURN_COUNT = #{returnCount,jdbcType=INTEGER}
-      </if>
-      <if test="cashbackTotal != null">
-        and CASHBACK_TOTAL = #{cashbackTotal,jdbcType=DECIMAL}
-      </if>
-      <if test="buyUnit != null and buyUnit != ''">
-        and BUY_UNIT = #{buyUnit,jdbcType=VARCHAR}
-      </if>
-      <if test="returnState != null">
-        and RETURN_STATE = #{returnState,jdbcType=TINYINT}
-      </if>
-      <if test="userId != null">
-        and USER_ID = #{userId,jdbcType=BIGINT}
-      </if>
-    </where>
-  </select>
   
   <!-- 修改订单详情退货数量和返现总额  -->
   <update id="modifyReturnCountAndCashBackTotal" parameterType="rebue.ord.mo.OrdOrderDetailMo">
@@ -526,8 +474,8 @@
   
   <select id="getFullReturnDetail" parameterType="rebue.ord.mo.OrdOrderDetailMo" resultMap="BaseResultMap">
   	 SELECT  ood.ID, ood.ORDER_ID, ood.ONLINE_ID, ood.PRODUCE_ID, ood.ONLINE_TITLE, ood.SPEC_NAME, ood.BUY_COUNT, ood.BUY_PRICE, 
-    ood.CASHBACK_AMOUNT, ood.RETURN_COUNT, ood.CASHBACK_TOTAL, ood.BUY_UNIT, RETURN_STATE, ood.USER_ID, ood.CASHBACK_COMMISSION_SLOT, 
-    ood.CASHBACK_COMMISSION_STATE,oo.ORDER_TIME
+    ood.CASHBACK_AMOUNT, ood.RETURN_COUNT, ood.CASHBACK_TOTAL, ood.BUY_UNIT, RETURN_STATE, ood.USER_ID, ood.COMMISSION_SLOT, 
+    ood.COMMISSION_STATE,oo.ORDER_TIME
     from ORD_ORDER_DETAIL ood , ORD_ORDER oo
      <where>
       <if test="id != null">
@@ -578,8 +526,8 @@
   
 <select id="getOtherFullReturnDetail" parameterType="rebue.ord.mo.OrdOrderDetailMo" resultMap="BaseResultMap">
   	 SELECT  ood.ID, ood.ORDER_ID, ood.ONLINE_ID, ood.PRODUCE_ID, ood.ONLINE_TITLE, ood.SPEC_NAME, ood.BUY_COUNT, ood.BUY_PRICE, 
-    ood.CASHBACK_AMOUNT, ood.RETURN_COUNT, ood.CASHBACK_TOTAL, ood.BUY_UNIT, RETURN_STATE, ood.USER_ID, ood.CASHBACK_COMMISSION_SLOT, 
-    ood.CASHBACK_COMMISSION_STATE,oo.ORDER_TIME
+    ood.CASHBACK_AMOUNT, ood.RETURN_COUNT, ood.CASHBACK_TOTAL, ood.BUY_UNIT, RETURN_STATE, ood.USER_ID, ood.COMMISSION_SLOT, 
+    ood.COMMISSION_STATE,oo.ORDER_TIME
     from ORD_ORDER_DETAIL ood , ORD_ORDER oo
      <where>
       <if test="id != null">
@@ -625,12 +573,12 @@
         and ood.USER_ID = #{userId,jdbcType=BIGINT}
       </if>
     </where>
-    AND ood.ORDER_ID = oo.ID and ood.CASHBACK_COMMISSION_SLOT = 2  ORDER BY oo.ORDER_TIME ASC limit 1
+    AND ood.ORDER_ID = oo.ID and ood.COMMISSION_SLOT = 2  ORDER BY oo.ORDER_TIME ASC limit 1
   </select>
   
   <update id="updateCashbackSlot" parameterType="rebue.ord.mo.OrdOrderDetailMo">
   		UPDATE ORD_ORDER_DETAIL SET CASHBACK_COMMISSION_SLOT = #{cashbackCommissionSlot,jdbcType=TINYINT} WHERE ID = #{id,jdbcType=BIGINT}
-  		AND CASHBACK_COMMISSION_SLOT = #{cashbackCommissionSlot,jdbcType=TINYINT}
+  		AND COMMISSION_SLOT = #{cashbackCommissionSlot,jdbcType=TINYINT}
   </update>
   
 </mapper>
