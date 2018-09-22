@@ -865,6 +865,9 @@
 	<!-- 查询用户订单信息 -->
 	<select id="selectOrderInfo" parameterType="java.util.Map" resultMap="BaseResultMap">
 		select * from ORD_ORDER where 1=1
+		<if test="id != null and id != ''">
+			and ID = #{id,jdbcType=VARCHAR}
+		</if>
 		<if test="orderCode != null and orderCode != ''">
 			and ORDER_CODE = #{orderCode,jdbcType=VARCHAR}
 		</if>

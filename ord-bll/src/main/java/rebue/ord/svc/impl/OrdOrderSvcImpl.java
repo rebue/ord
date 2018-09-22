@@ -457,10 +457,10 @@ public class OrdOrderSvcImpl extends MybatisBaseSvcImpl<OrdOrderMo, java.lang.Lo
      */
     @Transactional(readOnly = false, propagation = Propagation.REQUIRED)
     public boolean getAndUpdateRegRelation(long id, long onlineId, BigDecimal buyPrice, long downLineDetailId,long downLineOrderId) {
-        _log.info("获取用户注册关系参数：{}" + id);
+        _log.info("获取用户信息参数：{}" + id);
         SucRegRo sucReg = sucUserSvc.getRegInfo(id);
-        _log.info("获取用户注册关系返回值为：" + sucReg.toString());
-        if (sucReg.getRecord() == null) {
+        _log.info("获取用户信息返回值为：" + sucReg.toString());
+        if (sucReg.getRecord().getPromoterId()==null) {
             return false;
         }
         // 根据产品上线ID查找注册关系用户的购买记录，看是否有符合要求的订单详情记录
@@ -507,6 +507,7 @@ public class OrdOrderSvcImpl extends MybatisBaseSvcImpl<OrdOrderMo, java.lang.Lo
     public boolean getAndUpdateOtherRelation(long id, long onlineId, BigDecimal buyPrice, long downLineDetailId,long downLineOrderId) {
         // 根据产品上线ID和价格查找订单详情记录，看是否有符合要求的订单详情
         OrdOrderDetailMo mo = new OrdOrderDetailMo();
+        mo.setId(downLineDetailId);
         mo.setOnlineId(onlineId);
         mo.setBuyPrice(buyPrice);
         OrdOrderDetailMo orderDetailMo = ordOrderDetailSvc.getOtherFullReturnDetail(mo);
@@ -600,7 +601,7 @@ public class OrdOrderSvcImpl extends MybatisBaseSvcImpl<OrdOrderMo, java.lang.Lo
                 }
                 _log.info("查询用户订单信息hm里面的值为：{}", String.valueOf(hm));
                 OrdOrderDetailMo detailMo = new OrdOrderDetailMo();
-                detailMo.setOrderId(Long.parseLong(orderList.get(i).getOrderCode()));
+                detailMo.setOrderId(orderList.get(i).getId());
                 _log.info("查询用户订单信息获取订单详情的参数为：{}", detailMo.toString());
                 List<OrdOrderDetailMo> orderDetailList = ordOrderDetailSvc.list(detailMo);
                 _log.info("查询用户订单信息获取订单详情的返回值为：{}", String.valueOf(orderDetailList));

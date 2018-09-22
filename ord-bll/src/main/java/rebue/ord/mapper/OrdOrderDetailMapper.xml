@@ -521,7 +521,7 @@
         and ood.USER_ID = #{userId,jdbcType=BIGINT}
       </if>
     </where>
-    AND ood.ORDER_ID = oo.ORDER_CODE and ood.COMMISSION_SLOT &lt; 3 AND ood.COMMISSION_SLOT &gt; 0 ORDER BY oo.ORDER_TIME ASC limit 1
+    AND ood.ORDER_ID = oo.ORDER_CODE and oo.ORDER_STATE IN (2,3,4,5) and ood.COMMISSION_SLOT &lt; 3 AND ood.COMMISSION_SLOT &gt; 0 ORDER BY oo.ORDER_TIME ASC limit 1
   </select>
   
 <select id="getOtherFullReturnDetail" parameterType="rebue.ord.mo.OrdOrderDetailMo" resultMap="BaseResultMap">
@@ -530,9 +530,7 @@
     ood.COMMISSION_STATE,oo.ORDER_TIME
     from ORD_ORDER_DETAIL ood , ORD_ORDER oo
      <where>
-      <if test="id != null">
-        and ood.ID = #{id,jdbcType=BIGINT}
-      </if>
+      
       <if test="orderId != null">
         and ood.ORDER_ID = #{orderId,jdbcType=BIGINT}
       </if>
@@ -573,7 +571,7 @@
         and ood.USER_ID = #{userId,jdbcType=BIGINT}
       </if>
     </where>
-    AND ood.ORDER_ID = oo.ID and ood.COMMISSION_SLOT = 2  ORDER BY oo.ORDER_TIME ASC limit 1
+    AND ood.ORDER_ID = oo.ID and oo.ORDER_STATE IN (2,3,4,5) and ood.COMMISSION_SLOT = 2  and ood.ID !=  #{id,jdbcType=BIGINT}  ORDER BY oo.ORDER_TIME ASC limit 1
   </select>
   
   <update id="updateCashbackSlot" parameterType="rebue.ord.mo.OrdOrderDetailMo">
