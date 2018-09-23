@@ -768,30 +768,30 @@ public class OrdOrderSvcImpl extends MybatisBaseSvcImpl<OrdOrderMo, java.lang.Lo
         CancelDeliveryRo cancelDeliveryRo = new CancelDeliveryRo();
         Map<String, Object> map = new HashMap<String, Object>();
         long userId = mo.getUserId();
-        String orderCode = mo.getOrderCode();
+        long id = mo.getId();
         map.put("userId", userId);
-        map.put("orderCode", orderCode);
+        map.put("orderCode", id);
         _log.info("用户查询订单的参数为：{}", String.valueOf(map));
         List<OrdOrderMo> orderList = _mapper.selectOrderInfo(map);
         _log.info("用户查询订单信息的返回值为：{}", String.valueOf(orderList));
         if (orderList.size() == 0) {
-            _log.error("由于订单：{}不存在，{}取消发货失败", orderCode, userId);
+            _log.error("由于订单：{}不存在，{}取消发货失败", id, userId);
             cancelDeliveryRo.setResult(CancelDeliveryDic.ORDER_NOT_EXIST);
             cancelDeliveryRo.setMsg("订单不存在");
             return cancelDeliveryRo;
         }
         if (orderList.get(0).getOrderState() != OrderStateDic.ALREADY_PAY.getCode()) {
-            _log.error("由于订单：{}处于非待发货状态，{}取消发货失败", orderCode, userId);
+            _log.error("由于订单：{}处于非待发货状态，{}取消发货失败", id, userId);
             cancelDeliveryRo.setResult(CancelDeliveryDic.CURRENT_STATE_NOT_EXIST_CANCEL);
             cancelDeliveryRo.setMsg("当前状态不允许取消");
             return cancelDeliveryRo;
         }
         OrdOrderDetailMo detailMo = new OrdOrderDetailMo();
-        detailMo.setOrderId(Long.parseLong(orderCode));
+        detailMo.setOrderId(id);
         List<OrdOrderDetailMo> orderDetailList = ordOrderDetailSvc.list(detailMo);
         _log.info("查询订单详情的返回值为：{}", String.valueOf(orderDetailList));
         if (orderDetailList.size() == 0) {
-            _log.error("由于订单：{}不存在，{}取消发货失败", orderCode, userId);
+            _log.error("由于订单：{}不存在，{}取消发货失败", id, userId);
             cancelDeliveryRo.setResult(CancelDeliveryDic.ORDER_NOT_EXIST);
             cancelDeliveryRo.setMsg("订单不存在");
             return cancelDeliveryRo;
@@ -818,10 +818,10 @@ public class OrdOrderSvcImpl extends MybatisBaseSvcImpl<OrdOrderMo, java.lang.Lo
         mo.setCancelTime(date);
         int updateResult = _mapper.cancelDeliveryUpdateOrderState(mo);
         if (updateResult != 1) {
-            _log.error("{}取消发货：{}失败", userId, orderCode);
+            _log.error("{}取消发货：{}失败", userId, id);
             throw new RuntimeException("修改订单状态失败");
         }
-        _log.info("{}发货订单：{}成功", userId, orderCode);
+        _log.info("{}发货订单：{}成功", userId, id);
         cancelDeliveryRo.setResult(CancelDeliveryDic.SUCCESS);
         cancelDeliveryRo.setMsg("取消发货成功");
         return cancelDeliveryRo;
@@ -850,7 +850,7 @@ public class OrdOrderSvcImpl extends MybatisBaseSvcImpl<OrdOrderMo, java.lang.Lo
         ordTaskMo.setExecutePlanTime(executePlanTime);
         ordTaskMo.setExecuteState((byte) 0);
         ordTaskMo.setTaskType((byte) 2);
-        ordTaskMo.setOrderId(mo.getOrderCode());
+        ordTaskMo.setOrderId(String.valueOf(mo.getId()));
         _log.info("确认发货添加签收任务的参数为：{}", ordTaskMo);
         // 添加签收任务
         int taskAddResult = ordTaskSvc.add(ordTaskMo);
@@ -862,7 +862,7 @@ public class OrdOrderSvcImpl extends MybatisBaseSvcImpl<OrdOrderMo, java.lang.Lo
         EOrderTo eoderTo = new EOrderTo();
         eoderTo.setShipperId(to.getShipperId());
         eoderTo.setShipperCode(to.getShipperCode());
-        eoderTo.setOrderId(Long.parseLong(mo.getOrderCode()));
+        eoderTo.setOrderId(mo.getId());
         eoderTo.setOrderTitle(mo.getOrderTitle());
         eoderTo.setReceiverName(mo.getReceiverName());
         eoderTo.setReceiverProvince(mo.getReceiverProvince());
