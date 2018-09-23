@@ -55,10 +55,10 @@ public class VpayPayDoneSub implements ApplicationListener<ContextRefreshedEvent
 	private boolean handlePayNotify(VpayPayDoneMsg msg) {
 		try {
 			OrdOrderMo mo = new OrdOrderMo();
-			mo.setOrderCode(msg.getOrderId());
+			mo.setId(Long.parseLong(msg.getOrderId()));
 			mo.setReturnAmount1(msg.getPayChangeAmount1());
 			mo.setReturnAmount2(msg.getPayChangeAmount2());
-			int result = ordOrderSvc.updateByOrderCode(mo);
+			int result = ordOrderSvc.modify(mo);
 			if (result > 0) {
 				_log.info("更新订单可返金额成功！");
 				return true;

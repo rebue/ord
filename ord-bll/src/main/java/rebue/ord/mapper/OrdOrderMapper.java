@@ -177,8 +177,8 @@ public interface OrdOrderMapper extends MybatisBaseMapper<OrdOrderMo, Long> {
      *  @return
      *  @date 2018年5月17日 下午3:07:55
      */
-    @Update("UPDATE ORD_ORDER SET ORDER_STATE=5, CLOSE_TIME=#{closeTime,jdbcType=TIMESTAMP} WHERE ORDER_CODE=#{orderCode,jdbcType=VARCHAR} AND ORDER_STATE=4")
-    int finishSettlement(@Param("closeTime") Date closeTime, @Param("orderCode") String orderCode);
+    @Update("UPDATE ORD_ORDER SET ORDER_STATE=5, CLOSE_TIME=#{closeTime,jdbcType=TIMESTAMP} WHERE ORDER_ID=#{orderId,jdbcType=VARCHAR} AND ORDER_STATE=4")
+    int finishSettlement(@Param("closeTime") Date closeTime, @Param("orderId") String orderId);
 
     /**
      *  订单支付 Title: orderPay Description:
@@ -188,8 +188,8 @@ public interface OrdOrderMapper extends MybatisBaseMapper<OrdOrderMo, Long> {
      *  @return
      *  @date 2018年5月18日 上午11:20:12
      */
-    @Update("UPDATE ORD_ORDER SET ORDER_STATE=2, PAY_TIME=#{payTime,jdbcType=TIMESTAMP}  WHERE ORDER_CODE=#{orderCode,jdbcType=VARCHAR} AND ORDER_STATE=1")
-    int orderPay(@Param("orderCode") String orderCode, @Param("payTime") Date payTime);
+    @Update("UPDATE ORD_ORDER SET ORDER_STATE=2, PAY_TIME=#{payTime,jdbcType=TIMESTAMP}  WHERE ID=#{orderId,jdbcType=VARCHAR} AND ORDER_STATE=1")
+    int orderPay(@Param("orderId") String orderId, @Param("payTime") Date payTime);
 
     /**
      *  根据订单编号查询订单状态 Title: selectOrderStateByOrderCode Description:

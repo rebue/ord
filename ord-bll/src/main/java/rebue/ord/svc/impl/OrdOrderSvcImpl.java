@@ -649,29 +649,29 @@ public class OrdOrderSvcImpl extends MybatisBaseSvcImpl<OrdOrderMo, java.lang.Lo
     public CancellationOfOrderRo cancellationOfOrder(OrdOrderMo mo) {
         CancellationOfOrderRo cancellationOfOrderRo = new CancellationOfOrderRo();
         Map<String, Object> map = new HashMap<String, Object>();
-        String orderCode = mo.getOrderCode();
-        map.put("orderCode", orderCode);
+        Long id = mo.getId();
+        map.put("id", id);
         List<OrdOrderMo> orderList = _mapper.selectOrderInfo(map);
         _log.info("用户查询订单信息的返回值为：{}", String.valueOf(orderList));
         if (orderList.size() == 0) {
-            _log.error("由于订单：{}不存在，取消订单失败", orderCode);
+            _log.error("由于订单：{}不存在，取消订单失败", id);
             cancellationOfOrderRo.setResult(CancellationOfOrderDic.ORDER_NOT_EXIST);
             cancellationOfOrderRo.setMsg("订单不存在");
             return cancellationOfOrderRo;
         }
         long userId = orderList.get(0).getUserId();
         if (orderList.get(0).getOrderState() != OrderStateDic.ALREADY_PLACE_AN_ORDER.getCode()) {
-            _log.error("由于订单：{}处于非待支付状态，{}取消订单失败", orderCode, userId);
+            _log.error("由于订单：{}处于非待支付状态，{}取消订单失败", id, userId);
             cancellationOfOrderRo.setResult(CancellationOfOrderDic.CURRENT_STATE_NOT_EXIST_CANCEL);
             cancellationOfOrderRo.setMsg("当前状态不允许取消");
             return cancellationOfOrderRo;
         }
         OrdOrderDetailMo detailMo = new OrdOrderDetailMo();
-        detailMo.setOrderId(Long.parseLong(orderCode));
+        detailMo.setOrderId(id);
         List<OrdOrderDetailMo> orderDetailList = ordOrderDetailSvc.list(detailMo);
         _log.info("查询订单详情的返回值为：{}", String.valueOf(orderDetailList));
         if (orderDetailList.size() == 0) {
-            _log.error("由于订单：{}不存在，{}取消订单失败", orderCode, userId);
+            _log.error("由于订单：{}不存在，{}取消订单失败", id, userId);
             cancellationOfOrderRo.setResult(CancellationOfOrderDic.ORDER_NOT_EXIST);
             cancellationOfOrderRo.setMsg("订单不存在");
             return cancellationOfOrderRo;
@@ -701,10 +701,10 @@ public class OrdOrderSvcImpl extends MybatisBaseSvcImpl<OrdOrderMo, java.lang.Lo
         int updateResult = _mapper.cancellationOrderUpdateOrderState(mo);
         _log.info("取消订单并修改状态的返回值为：{}", updateResult);
         if (updateResult != 1) {
-            _log.error("{}取消订单：{}失败", userId, orderCode);
+            _log.error("{}取消订单：{}失败", userId, id);
             throw new RuntimeException("修改订单状态失败");
         }
-        _log.info("{}取消订单：{}成功", userId, orderCode);
+        _log.info("{}取消订单：{}成功", userId, id);
         cancellationOfOrderRo.setResult(CancellationOfOrderDic.SUCCESS);
         cancellationOfOrderRo.setMsg("取消订单成功");
         return cancellationOfOrderRo;
@@ -1137,9 +1137,9 @@ public class OrdOrderSvcImpl extends MybatisBaseSvcImpl<OrdOrderMo, java.lang.Lo
      */
     @Override
     @Transactional(readOnly = false, propagation = Propagation.REQUIRED)
-    public int orderPay(String orderCode, Date payTime) {
-        _log.info("订单支付的参数为：{}，{}", orderCode, payTime);
-        return _mapper.orderPay(orderCode, payTime);
+    public int orderPay(String orderId, Date payTime) {
+        _log.info("订单支付的参数为：{}，{}", orderId, payTime);
+        return _mapper.orderPay(orderId, payTime);
     }
 
     /**
@@ -1250,4 +1250,5 @@ public class OrdOrderSvcImpl extends MybatisBaseSvcImpl<OrdOrderMo, java.lang.Lo
         _log.info("orderList: ro-{}; pageNum-{}; pageSize-{}", to, pageNum, pageSize);
         return PageHelper.startPage(pageNum, pageSize).doSelectPageInfo(() -> _mapper.orderList(to));
     }
+    
 }

@@ -153,7 +153,7 @@ public interface OrdOrderSvc extends MybatisBaseSvc<OrdOrderMo, java.lang.Long> 
      *  @return
      *  @date 2018年5月17日 下午3:19:25
      */
-    int finishSettlement(Date closeTime, String orderCode);
+    int finishSettlement(Date closeTime, String orderId);
 
     /**
      *  订单支付 Title: orderPay Description:
@@ -163,7 +163,7 @@ public interface OrdOrderSvc extends MybatisBaseSvc<OrdOrderMo, java.lang.Long> 
      *  @return
      *  @date 2018年5月18日 上午11:21:01
      */
-    int orderPay(String orderCode, Date payTime);
+    int orderPay(String orderId, Date payTime);
 
     /**
      *  根据订单编号查询订单状态
@@ -197,4 +197,5 @@ public interface OrdOrderSvc extends MybatisBaseSvc<OrdOrderMo, java.lang.Long> 
      * @return
      */
     PageInfo<OrdOrderMo> orderList(OrdOrderTo to, int pageNum, int pageSize);
+    
 }
