@@ -697,7 +697,7 @@ public class OrdOrderSvcImpl extends MybatisBaseSvcImpl<OrdOrderMo, java.lang.Lo
         Date date = new Date();
         mo.setCancelTime(date);
         mo.setOrderState((byte) OrderStateDic.ALREADY_PLACE_AN_ORDER.getCode());
-        _log.info("取消订单并修改状态的参数为：", mo);
+        _log.info("取消订单并修改状态的参数为：{}", mo);
         int updateResult = _mapper.cancellationOrderUpdateOrderState(mo);
         _log.info("取消订单并修改状态的返回值为：{}", updateResult);
         if (updateResult != 1) {

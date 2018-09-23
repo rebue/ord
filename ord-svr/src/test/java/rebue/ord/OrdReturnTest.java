@@ -37,13 +37,13 @@ public class OrdReturnTest {
 	@Test
 	public void cancellationOfOrder() throws IOException {
 		Map<String, Object> map = new HashMap<String, Object>();
-		map.put("orderCode", 463607009762213888L);
-		map.put("userId", 451273803712954379L);
+		map.put("id", 519010270442422272L);
+		map.put("userId", 479952536770445317L);
 		map.put("cancelReason", "买家取消订单");
 		map.put("cancelingOrderOpId", 451273803712954379L);
 		System.out.println("取消订单的参数为：{}" + String.valueOf(map));
 		// 取消订单
-		String results = OkhttpUtils.putByFormParams(hostUrl + "/ord/order/cancel", map);
+		String results = OkhttpUtils.putByJsonParams(hostUrl + "/ord/order/cancel", map);
 		System.out.println("取消订单的返回值为：" + results);
 	}
 }
