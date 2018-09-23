@@ -957,7 +957,7 @@
 		CANCEL_REASON =
 		#{cancelReason,jdbcType=VARCHAR}
 		WHERE
-		ID=${id,jdbcType=BIGINT} AND
+		ID=#{id,jdbcType=BIGINT} AND
 		ORDER_STATE=#{orderState,jdbcType=TINYINT}
 	</update>
 

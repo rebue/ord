@@ -1,11 +1,5 @@
 package rebue.ord.svc.impl;
 
-import com.fasterxml.jackson.core.JsonParseException;
-import com.fasterxml.jackson.databind.JavaType;
-import com.fasterxml.jackson.databind.JsonMappingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.github.pagehelper.PageHelper;
-import com.github.pagehelper.PageInfo;
 import java.beans.BeanInfo;
 import java.beans.IntrospectionException;
 import java.beans.Introspector;
@@ -22,7 +16,9 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+
 import javax.annotation.Resource;
+
 import org.dozer.Mapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -30,6 +26,14 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
+
+import com.fasterxml.jackson.core.JsonParseException;
+import com.fasterxml.jackson.databind.JavaType;
+import com.fasterxml.jackson.databind.JsonMappingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.github.pagehelper.PageHelper;
+import com.github.pagehelper.PageInfo;
+
 import rebue.afc.dic.SettleTaskExecuteStateDic;
 import rebue.afc.dic.TradeTypeDic;
 import rebue.afc.mo.AfcSettleTaskMo;
@@ -124,7 +128,7 @@ public class OrdOrderSvcImpl extends MybatisBaseSvcImpl<OrdOrderMo, java.lang.Lo
     /**
      */
     @Resource
-    private OrdAddrSvc ordAddrSvc;
+    private OrdAddrSvc        ordAddrSvc;
 
     /**
      */
@@ -132,42 +136,42 @@ public class OrdOrderSvcImpl extends MybatisBaseSvcImpl<OrdOrderMo, java.lang.Lo
     private OrdOrderDetailSvc ordOrderDetailSvc;
 
     @Resource
-    private OrdTaskSvc ordTaskSvc;
+    private OrdTaskSvc        ordTaskSvc;
 
     /**
      */
     @Resource
-    private OnlOnlineSpecSvc onlOnlineSpecSvc;
+    private OnlOnlineSpecSvc  onlOnlineSpecSvc;
 
     /**
      */
     @Resource
-    private OnlOnlineSvc onlOnlineSvc;
+    private OnlOnlineSvc      onlOnlineSvc;
 
     /**
      */
     @Resource
-    private OnlCartSvc onlCartSvc;
+    private OnlCartSvc        onlCartSvc;
 
     /**
      */
     @Resource
-    private KdiSvc kdiSvc;
+    private KdiSvc            kdiSvc;
 
     /**
      */
     @Resource
-    private OnlOnlinePicSvc onlOnlinePicSvc;
+    private OnlOnlinePicSvc   onlOnlinePicSvc;
 
     /**
      */
     @Resource
-    private AfcSettleTaskSvc afcSettleTaskSvc;
+    private AfcSettleTaskSvc  afcSettleTaskSvc;
 
     /**
      */
     @Resource
-    private SucUserSvc sucUserSvc;
+    private SucUserSvc        sucUserSvc;
 
     /**
      */
@@ -175,40 +179,40 @@ public class OrdOrderSvcImpl extends MybatisBaseSvcImpl<OrdOrderMo, java.lang.Lo
     private OrdBuyRelationSvc ordBuyRelationSvc;
 
     /**
-     *  买家返款时间
+     * 买家返款时间
      */
     @Value("${ord.settle-buyer-cashback-time}")
-    private int settleBuyerCashbackTime;
+    private int               settleBuyerCashbackTime;
 
     @Value("${ord.settle-upline-commission-time}")
-    private int settleUplineCommissionTime;
+    private int               settleUplineCommissionTime;
 
     /**
-     *  执行取消用户订单时间
+     * 执行取消用户订单时间
      */
     @Value("${ord.cancel-order-time}")
-    private int cancelOrderTime;
+    private int               cancelOrderTime;
 
     /**
-     *  执行用户订单签收时间
+     * 执行用户订单签收时间
      */
     @Value("${ord.signin-order-time}")
-    private int signinOrderTime;
+    private int               signinOrderTime;
 
     @Resource
-    private Mapper dozerMapper;
+    private Mapper            dozerMapper;
 
     @Resource
-    private ObjectMapper objectMapper;
+    private ObjectMapper      objectMapper;
 
     /**
-     *  用户下订单 Title: placeOrder Description:
+     * 用户下订单 Title: placeOrder Description:
      *
-     *  @return
-     *  @throws IOException
-     *  @throws JsonMappingException
-     *  @throws JsonParseException
-     *  @date 2018年4月9日 上午10:53:44
+     * @return
+     * @throws IOException
+     * @throws JsonMappingException
+     * @throws JsonParseException
+     * @date 2018年4月9日 上午10:53:44
      */
     @Override
     @Transactional(readOnly = false, propagation = Propagation.REQUIRED)
@@ -324,7 +328,7 @@ public class OrdOrderSvcImpl extends MybatisBaseSvcImpl<OrdOrderMo, java.lang.Lo
                     detailMo.setCashbackAmount(new BigDecimal("0"));
                     detailMo.setReturnState((byte) 0);
                     detailMo.setCommissionSlot((byte) 2);
-                    detailMo.setCommissionState((byte)0);
+                    detailMo.setCommissionState((byte) 0);
                     detailMo.setUserId(id);
                     detailMo.setCashbackTotal(new BigDecimal("0"));
                     _log.info("添加订单详情的参数为：{}", detailMo);
@@ -335,15 +339,15 @@ public class OrdOrderSvcImpl extends MybatisBaseSvcImpl<OrdOrderMo, java.lang.Lo
                         throw new RuntimeException("生成订单详情出错");
                     }
                     _log.info("获取用户购买关系上家");
-                    boolean getBuyRelationResult = getAndUpdateBuyRelation(id, onlineId, orderList.get(j).getSalePrice(), detailMo.getId(),detailMo.getOrderId());
+                    boolean getBuyRelationResult = getAndUpdateBuyRelation(id, onlineId, orderList.get(j).getSalePrice(), detailMo.getId(), detailMo.getOrderId());
                     _log.info("获取用户购买关系的返回值为：{}" + getBuyRelationResult);
                     if (getBuyRelationResult == false) {
                         _log.info("获取用户注册关系上家");
-                        boolean getRegRelationResult = getAndUpdateRegRelation(id, onlineId, orderList.get(j).getSalePrice(), detailMo.getId(),detailMo.getOrderId());
+                        boolean getRegRelationResult = getAndUpdateRegRelation(id, onlineId, orderList.get(j).getSalePrice(), detailMo.getId(), detailMo.getOrderId());
                         _log.info("获取用户注册关系的返回值为：{}" + getRegRelationResult);
                         if (getRegRelationResult == false) {
                             _log.info("获取其它关系上家");
-                            boolean getOtherRelationResult = getAndUpdateOtherRelation(id, onlineId, orderList.get(j).getSalePrice(), detailMo.getId(),detailMo.getOrderId());
+                            boolean getOtherRelationResult = getAndUpdateOtherRelation(id, onlineId, orderList.get(j).getSalePrice(), detailMo.getId(), detailMo.getOrderId());
                             _log.info("获取其它关系的返回值为：{}" + getOtherRelationResult);
                         }
                     }
@@ -401,7 +405,7 @@ public class OrdOrderSvcImpl extends MybatisBaseSvcImpl<OrdOrderMo, java.lang.Lo
      * 获取购买关系并更新购买关系表
      */
     @Transactional(readOnly = false, propagation = Propagation.REQUIRED)
-    public boolean getAndUpdateBuyRelation(long id, long onlineId, BigDecimal buyPrice, long downLineDetailId,long downLineOrderId) {
+    public boolean getAndUpdateBuyRelation(long id, long onlineId, BigDecimal buyPrice, long downLineDetailId, long downLineOrderId) {
         // 获取用户购买关系
         _log.info("获取用户购买关系的id:" + id + "onlineId:" + onlineId + "buyPricce:" + buyPrice);
         Long buyRelation = sucUserSvc.getBuyRelation(id, onlineId);
@@ -422,10 +426,10 @@ public class OrdOrderSvcImpl extends MybatisBaseSvcImpl<OrdOrderMo, java.lang.Lo
             return false;
         }
         OrdOrderDetailMo updateOrderDetailMo = new OrdOrderDetailMo();
-        updateOrderDetailMo.setCommissionSlot((byte)(orderDetailMo.getCommissionSlot()-1));
+        updateOrderDetailMo.setCommissionSlot((byte) (orderDetailMo.getCommissionSlot() - 1));
         updateOrderDetailMo.setId(orderDetailMo.getId());
-        if((orderDetailMo.getCommissionSlot()-1)==0) {
-        	updateOrderDetailMo.setCommissionState((byte)1);
+        if ((orderDetailMo.getCommissionSlot() - 1) == 0) {
+            updateOrderDetailMo.setCommissionState((byte) 1);
         }
         // 更新购买关系订单详情的返现名额
         int updateOrderDetailResult = ordOrderDetailSvc.modify(updateOrderDetailMo);
@@ -435,7 +439,7 @@ public class OrdOrderSvcImpl extends MybatisBaseSvcImpl<OrdOrderMo, java.lang.Lo
         }
         // 在购买关系信息表中更新购买关系
         OrdBuyRelationMo ordBuyRelationMo = new OrdBuyRelationMo();
-        
+
         ordBuyRelationMo.setUplineOrderDetailId(orderDetailMo.getId());
         ordBuyRelationMo.setDownlineUserId(id);
         ordBuyRelationMo.setDownlineOrderDetailId(downLineDetailId);
@@ -450,17 +454,18 @@ public class OrdOrderSvcImpl extends MybatisBaseSvcImpl<OrdOrderMo, java.lang.Lo
 
     /**
      * 获取注册关系并更新购买关系表
+     * 
      * @param id
      * @param onlineId
      * @param buyPrice
      * @return
      */
     @Transactional(readOnly = false, propagation = Propagation.REQUIRED)
-    public boolean getAndUpdateRegRelation(long id, long onlineId, BigDecimal buyPrice, long downLineDetailId,long downLineOrderId) {
+    public boolean getAndUpdateRegRelation(long id, long onlineId, BigDecimal buyPrice, long downLineDetailId, long downLineOrderId) {
         _log.info("获取用户信息参数：{}" + id);
         SucRegRo sucReg = sucUserSvc.getRegInfo(id);
         _log.info("获取用户信息返回值为：" + sucReg.toString());
-        if (sucReg.getRecord().getPromoterId()==null) {
+        if (sucReg.getRecord().getPromoterId() == null) {
             return false;
         }
         // 根据产品上线ID查找注册关系用户的购买记录，看是否有符合要求的订单详情记录
@@ -475,10 +480,10 @@ public class OrdOrderSvcImpl extends MybatisBaseSvcImpl<OrdOrderMo, java.lang.Lo
         }
         // 更新购买关系订单详情的返现名额
         OrdOrderDetailMo updateOrderDetailMo = new OrdOrderDetailMo();
-        updateOrderDetailMo.setCommissionSlot((byte)(orderDetailMo.getCommissionSlot()-1));
+        updateOrderDetailMo.setCommissionSlot((byte) (orderDetailMo.getCommissionSlot() - 1));
         updateOrderDetailMo.setId(orderDetailMo.getId());
-        if((orderDetailMo.getCommissionSlot()-1)==0) {
-        	updateOrderDetailMo.setCommissionState((byte)1);
+        if ((orderDetailMo.getCommissionSlot() - 1) == 0) {
+            updateOrderDetailMo.setCommissionState((byte) 1);
         }
         // 更新购买关系订单详情的返现名额
         int updateOrderDetailResult = ordOrderDetailSvc.modify(updateOrderDetailMo);
@@ -504,7 +509,7 @@ public class OrdOrderSvcImpl extends MybatisBaseSvcImpl<OrdOrderMo, java.lang.Lo
      * 获取除购买关系和注册关系外的一个购买上家,并更新购买关系表
      */
     @Transactional(readOnly = false, propagation = Propagation.REQUIRED)
-    public boolean getAndUpdateOtherRelation(long id, long onlineId, BigDecimal buyPrice, long downLineDetailId,long downLineOrderId) {
+    public boolean getAndUpdateOtherRelation(long id, long onlineId, BigDecimal buyPrice, long downLineDetailId, long downLineOrderId) {
         // 根据产品上线ID和价格查找订单详情记录，看是否有符合要求的订单详情
         OrdOrderDetailMo mo = new OrdOrderDetailMo();
         mo.setId(downLineDetailId);
@@ -517,10 +522,10 @@ public class OrdOrderSvcImpl extends MybatisBaseSvcImpl<OrdOrderMo, java.lang.Lo
         }
         // 更新购买关系订单详情的返现名额
         OrdOrderDetailMo updateOrderDetailMo = new OrdOrderDetailMo();
-        updateOrderDetailMo.setCommissionSlot((byte)(orderDetailMo.getCommissionSlot()-1));
+        updateOrderDetailMo.setCommissionSlot((byte) (orderDetailMo.getCommissionSlot() - 1));
         updateOrderDetailMo.setId(orderDetailMo.getId());
-        if((orderDetailMo.getCommissionSlot()-1)==0) {
-        	updateOrderDetailMo.setCommissionState((byte)1);
+        if ((orderDetailMo.getCommissionSlot() - 1) == 0) {
+            updateOrderDetailMo.setCommissionState((byte) 1);
         }
         // 更新购买关系订单详情的返现名额
         int updateOrderDetailResult = ordOrderDetailSvc.modify(updateOrderDetailMo);
@@ -543,16 +548,17 @@ public class OrdOrderSvcImpl extends MybatisBaseSvcImpl<OrdOrderMo, java.lang.Lo
     }
 
     /**
-     *  查询用户订单信息 2018年4月9日16:49:17
+     * 查询用户订单信息 2018年4月9日16:49:17
      *
-     *  @throws ParseException
-     *  @throws IntrospectionException
-     *  @throws InvocationTargetException
-     *  @throws IllegalArgumentException
-     *  @throws IllegalAccessException
+     * @throws ParseException
+     * @throws IntrospectionException
+     * @throws InvocationTargetException
+     * @throws IllegalArgumentException
+     * @throws IllegalAccessException
      */
     @Override
-    public List<Map<String, Object>> selectOrderInfo(Map<String, Object> map) throws ParseException, IntrospectionException, IllegalAccessException, IllegalArgumentException, InvocationTargetException {
+    public List<Map<String, Object>> selectOrderInfo(Map<String, Object> map)
+            throws ParseException, IntrospectionException, IllegalAccessException, IllegalArgumentException, InvocationTargetException {
         List<Map<String, Object>> list = new ArrayList<Map<String, Object>>();
         _log.info("查询用户订单信息的参数为：{}", map.toString());
         List<OrdOrderMo> orderList = _mapper.selectOrderInfo(map);
@@ -642,7 +648,7 @@ public class OrdOrderSvcImpl extends MybatisBaseSvcImpl<OrdOrderMo, java.lang.Lo
     }
 
     /**
-     *  用户取消订单 2018年4月9日18:57:36
+     * 用户取消订单 2018年4月9日18:57:36
      */
     @Override
     @Transactional(readOnly = false, propagation = Propagation.REQUIRED)
@@ -711,11 +717,11 @@ public class OrdOrderSvcImpl extends MybatisBaseSvcImpl<OrdOrderMo, java.lang.Lo
     }
 
     /**
-     *  修改订单实际金额 Title: updateOrderRealMoney Description:
+     * 修改订单实际金额 Title: updateOrderRealMoney Description:
      *
-     *  @param mo
-     *  @return
-     *  @date 2018年4月12日 下午2:59:38
+     * @param mo
+     * @return
+     * @date 2018年4月12日 下午2:59:38
      */
     @Override
     @Transactional(readOnly = false, propagation = Propagation.REQUIRED)
@@ -735,11 +741,11 @@ public class OrdOrderSvcImpl extends MybatisBaseSvcImpl<OrdOrderMo, java.lang.Lo
     }
 
     /**
-     *  设置快递公司 Title: setTheCourier Description:
+     * 设置快递公司 Title: setTheCourier Description:
      *
-     *  @param mo
-     *  @return
-     *  @date 2018年4月13日 上午11:12:39
+     * @param mo
+     * @return
+     * @date 2018年4月13日 上午11:12:39
      */
     @Override
     @Transactional(readOnly = false, propagation = Propagation.REQUIRED)
@@ -760,7 +766,7 @@ public class OrdOrderSvcImpl extends MybatisBaseSvcImpl<OrdOrderMo, java.lang.Lo
     }
 
     /**
-     *  取消发货 2018年5月16日10:22:40
+     * 取消发货 2018年5月16日10:22:40
      */
     @Override
     @Transactional(readOnly = false, propagation = Propagation.REQUIRED)
@@ -828,11 +834,11 @@ public class OrdOrderSvcImpl extends MybatisBaseSvcImpl<OrdOrderMo, java.lang.Lo
     }
 
     /**
-     *  确认发货并修改订单状态 Title: sendAndPrint Description:
+     * 确认发货并修改订单状态 Title: sendAndPrint Description:
      *
-     *  @param mo
-     *  @return
-     *  @date 2018年4月13日 下午6:18:44
+     * @param mo
+     * @return
+     * @date 2018年4月13日 下午6:18:44
      */
     @Override
     @Transactional(readOnly = false, propagation = Propagation.REQUIRED)
@@ -934,12 +940,12 @@ public class OrdOrderSvcImpl extends MybatisBaseSvcImpl<OrdOrderMo, java.lang.Lo
     }
 
     /**
-     *  订单签收 Title: orderSignIn Description:
+     * 订单签收 Title: orderSignIn Description:
      *
-     *  @param mo
-     *  @param to
-     *  @return
-     *  @date 2018年4月14日 下午2:20:19
+     * @param mo
+     * @param to
+     * @return
+     * @date 2018年4月14日 下午2:20:19
      */
     @Override
     @Transactional(readOnly = false, propagation = Propagation.REQUIRED)
@@ -1038,7 +1044,7 @@ public class OrdOrderSvcImpl extends MybatisBaseSvcImpl<OrdOrderMo, java.lang.Lo
             orderSignInRo.setMsg("添加结算出错");
             return orderSignInRo;
         }
-        
+
         OrdOrderMo orderMo = new OrdOrderMo();
         orderMo.setOrderCode(orderCode);
         orderMo.setUserId(userId);
@@ -1060,11 +1066,11 @@ public class OrdOrderSvcImpl extends MybatisBaseSvcImpl<OrdOrderMo, java.lang.Lo
     }
 
     /**
-     *  根据订单编号修改退货金额 Title: modifyReturnAmountByorderCode Description:
+     * 根据订单编号修改退货金额 Title: modifyReturnAmountByorderCode Description:
      *
-     *  @param mo
-     *  @return
-     *  @date 2018年5月7日 上午9:18:19
+     * @param mo
+     * @return
+     * @date 2018年5月7日 上午9:18:19
      */
     @Override
     @Transactional(readOnly = false, propagation = Propagation.REQUIRED)
@@ -1073,12 +1079,12 @@ public class OrdOrderSvcImpl extends MybatisBaseSvcImpl<OrdOrderMo, java.lang.Lo
     }
 
     /**
-     *  根据订单编号修改订单状态 Title: modifyOrderStateByOderCode Description:
+     * 根据订单编号修改订单状态 Title: modifyOrderStateByOderCode Description:
      *
-     *  @param orderCode
-     *  @param orderState
-     *  @return
-     *  @date 2018年5月8日 上午10:45:12
+     * @param orderCode
+     * @param orderState
+     * @return
+     * @date 2018年5月8日 上午10:45:12
      */
     @Override
     @Transactional(readOnly = false, propagation = Propagation.REQUIRED)
@@ -1088,11 +1094,11 @@ public class OrdOrderSvcImpl extends MybatisBaseSvcImpl<OrdOrderMo, java.lang.Lo
     }
 
     /**
-     *  根据订单编号查询退货金额 Title: selectReturnAmountByOrderCode Description:
+     * 根据订单编号查询退货金额 Title: selectReturnAmountByOrderCode Description:
      *
-     *  @param orderCode
-     *  @return
-     *  @date 2018年5月11日 上午11:14:42
+     * @param orderCode
+     * @return
+     * @date 2018年5月11日 上午11:14:42
      */
     @Override
     @Transactional(readOnly = false, propagation = Propagation.REQUIRED)
@@ -1113,12 +1119,12 @@ public class OrdOrderSvcImpl extends MybatisBaseSvcImpl<OrdOrderMo, java.lang.Lo
     }
 
     /**
-     *  结算完成 Title: finishSettlement Description:
+     * 结算完成 Title: finishSettlement Description:
      *
-     *  @param closeTime
-     *  @param orderCode
-     *  @return
-     *  @date 2018年5月17日 下午3:18:49
+     * @param closeTime
+     * @param orderCode
+     * @return
+     * @date 2018年5月17日 下午3:18:49
      */
     @Override
     @Transactional(readOnly = false, propagation = Propagation.REQUIRED)
@@ -1128,12 +1134,12 @@ public class OrdOrderSvcImpl extends MybatisBaseSvcImpl<OrdOrderMo, java.lang.Lo
     }
 
     /**
-     *  订单支付 Title: orderPay Description:
+     * 订单支付 Title: orderPay Description:
      *
-     *  @param orderCode
-     *  @param payTime
-     *  @return
-     *  @date 2018年5月18日 上午11:20:37
+     * @param orderCode
+     * @param payTime
+     * @return
+     * @date 2018年5月18日 上午11:20:37
      */
     @Override
     @Transactional(readOnly = false, propagation = Propagation.REQUIRED)
@@ -1143,11 +1149,11 @@ public class OrdOrderSvcImpl extends MybatisBaseSvcImpl<OrdOrderMo, java.lang.Lo
     }
 
     /**
-     *  根据订单编号查询订单状态 Title: selectOrderStateByOrderCode Description:
+     * 根据订单编号查询订单状态 Title: selectOrderStateByOrderCode Description:
      *
-     *  @param orderCode
-     *  @return
-     *  @date 2018年5月21日 下午5:00:25
+     * @param orderCode
+     * @return
+     * @date 2018年5月21日 下午5:00:25
      */
     @Override
     public Byte selectOrderStateByOrderCode(String orderCode) {
@@ -1155,16 +1161,17 @@ public class OrdOrderSvcImpl extends MybatisBaseSvcImpl<OrdOrderMo, java.lang.Lo
     }
 
     /**
-     *  查询用户待返现订单信息 2018年5月29日
+     * 查询用户待返现订单信息 2018年5月29日
      *
-     *  @throws ParseException
-     *  @throws IntrospectionException
-     *  @throws InvocationTargetException
-     *  @throws IllegalArgumentException
-     *  @throws IllegalAccessException
+     * @throws ParseException
+     * @throws IntrospectionException
+     * @throws InvocationTargetException
+     * @throws IllegalArgumentException
+     * @throws IllegalAccessException
      */
     @Override
-    public List<Map<String, Object>> getCashBackOrder(Map<String, Object> map) throws ParseException, IntrospectionException, IllegalAccessException, IllegalArgumentException, InvocationTargetException {
+    public List<Map<String, Object>> getCashBackOrder(Map<String, Object> map)
+            throws ParseException, IntrospectionException, IllegalAccessException, IllegalArgumentException, InvocationTargetException {
         List<Map<String, Object>> list = new ArrayList<Map<String, Object>>();
         _log.info("查询用户待返现任务的参数为：{}", map.toString());
         long accountId = Long.parseLong(String.valueOf(map.get("userId")));
@@ -1242,7 +1249,7 @@ public class OrdOrderSvcImpl extends MybatisBaseSvcImpl<OrdOrderMo, java.lang.Lo
     }
 
     /**
-     *  分页查询订单
+     * 分页查询订单
      */
     @Override
     public PageInfo<OrdOrderMo> orderList(OrdOrderTo to, int pageNum, int pageSize) {
@@ -1250,5 +1257,5 @@ public class OrdOrderSvcImpl extends MybatisBaseSvcImpl<OrdOrderMo, java.lang.Lo
         _log.info("orderList: ro-{}; pageNum-{}; pageSize-{}", to, pageNum, pageSize);
         return PageHelper.startPage(pageNum, pageSize).doSelectPageInfo(() -> _mapper.orderList(to));
     }
-    
+
 }
