@@ -107,7 +107,7 @@ public class OrdReturnRo {
 	private Long onlineId;
 
 	/** 产品ID **/
-	private Long produceId;
+	private Long productId;
 
 	/** 上线标题 **/
 	private String onlineTitle;
@@ -168,7 +168,7 @@ public class OrdReturnRo {
 		this.finishOpId = finishOpId;
 		this.finishTime = finishTime;
 		this.onlineId = onlineId;
-		this.produceId = produceId;
+		this.productId = produceId;
 		this.onlineTitle = onlineTitle;
 		this.specName = specName;
 		this.buyCount = buyCount;
@@ -387,11 +387,11 @@ public class OrdReturnRo {
 	}
 
 	public Long getProduceId() {
-		return produceId;
+		return productId;
 	}
 
 	public void setProduceId(Long produceId) {
-		this.produceId = produceId;
+		this.productId = produceId;
 	}
 
 	public String getOnlineTitle() {
@@ -461,7 +461,7 @@ public class OrdReturnRo {
 				+ ", reviewTime=" + reviewTime + ", refundOpId=" + refundOpId + ", refundTime=" + refundTime
 				+ ", rejectOpId=" + rejectOpId + ", rejectReason=" + rejectReason + ", rejectTime=" + rejectTime
 				+ ", finishOpId=" + finishOpId + ", finishTime=" + finishTime + ", onlineId=" + onlineId
-				+ ", produceId=" + produceId + ", onlineTitle=" + onlineTitle + ", specName=" + specName + ", buyCount="
+				+ ", produceId=" + productId + ", onlineTitle=" + onlineTitle + ", specName=" + specName + ", buyCount="
 				+ buyCount + ", buyPrice=" + buyPrice + ", cashbackAmount=" + cashbackAmount + ", buyUnit=" + buyUnit
 				+ ", returnState=" + returnState + "]";
 	}

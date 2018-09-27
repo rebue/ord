@@ -208,7 +208,7 @@ public class OrderDetailRo {
 
 	@Override
 	public String toString() {
-		return "OrderDetailRo [id=" + id + ", orderId=" + orderId + ", onlineId=" + onlineId + ", produceId="
+		return "OrderDetailRo [id=" + id + ", orderId=" + orderId + ", onlineId=" + onlineId + ", productId="
 				+ productId + ", onlineTitle=" + onlineTitle + ", specName=" + specName + ", buyCount=" + buyCount
 				+ ", buyPrice=" + buyPrice + ", cashbackAmount=" + cashbackAmount + ", cashbackTotal=" + cashbackTotal
 				+ ", buyUnit=" + buyUnit + ", returnCount=" + returnCount + ", returnState=" + returnState
