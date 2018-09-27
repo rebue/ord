@@ -324,6 +324,7 @@ public class OrdOrderSvcImpl extends MybatisBaseSvcImpl<OrdOrderMo, java.lang.Lo
                     detailMo.setOnlineTitle(orderList.get(j).getOnlineTitle());
                     detailMo.setSpecName(OnlineSpec);
                     detailMo.setBuyCount(1);
+                    detailMo.setSubjectType((byte)1);
                     detailMo.setBuyPrice(orderList.get(j).getSalePrice());
                     detailMo.setCashbackAmount(new BigDecimal("0"));
                     detailMo.setReturnState((byte) 0);
@@ -972,8 +973,8 @@ public class OrdOrderSvcImpl extends MybatisBaseSvcImpl<OrdOrderMo, java.lang.Lo
             return orderSignInRo;
         }
         OrdOrderDetailMo detailMo = new OrdOrderDetailMo();
-        detailMo.setOrderId(Long.parseLong(orderCode));
-        _log.info("订单签收查询订单详情的参数为：{}", orderCode);
+        detailMo.setOrderId(orderId);
+        _log.info("订单签收查询订单详情的参数为：{}", orderId);
         List<OrdOrderDetailMo> detailList = ordOrderDetailSvc.list(detailMo);
         _log.info("订单签收查询订单详情的返回值为：{}", String.valueOf(detailList));
         if (detailList.size() == 0) {
@@ -1128,9 +1129,9 @@ public class OrdOrderSvcImpl extends MybatisBaseSvcImpl<OrdOrderMo, java.lang.Lo
      */
     @Override
     @Transactional(readOnly = false, propagation = Propagation.REQUIRED)
-    public int finishSettlement(Date closeTime, String orderCode) {
-        _log.info("结算完成的参数为：{}，{}", closeTime, orderCode);
-        return _mapper.finishSettlement(closeTime, orderCode);
+    public int finishSettlement(Date closeTime, String orderId) {
+        _log.info("结算完成的参数为：{}，{}", closeTime, orderId);
+        return _mapper.finishSettlement(closeTime, orderId);
     }
 
     /**
