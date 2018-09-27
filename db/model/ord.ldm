@@ -1652,7 +1652,7 @@ DESTINATION 0 新宋体,8,N</a:FontList>
 <o:RelationshipSymbol Id="o31">
 <a:CreationDate>1536310761</a:CreationDate>
 <a:ModificationDate>1536310761</a:ModificationDate>
-<a:Rect>((-38785,18368), (-25500,20117))</a:Rect>
+<a:Rect>((-38785,18368), (-25500,20118))</a:Rect>
 <a:ListOfPoints>((-25500,19168),(-38785,19168))</a:ListOfPoints>
 <a:CornerStyle>1</a:CornerStyle>
 <a:ArrowStyle>4627</a:ArrowStyle>
@@ -1899,11 +1899,11 @@ LABL 0 新宋体,8,N</a:FontList>
 <o:EntityAttribute Id="o47">
 <a:ObjectID>D7EE6E7B-5D1D-4096-8A24-C816446A9756</a:ObjectID>
 <a:Name>产品ID</a:Name>
-<a:Code>PRODUCE_ID</a:Code>
+<a:Code>PRODUCT_ID</a:Code>
 <a:CreationDate>1523180727</a:CreationDate>
 <a:Creator>admin</a:Creator>
-<a:ModificationDate>1523180809</a:ModificationDate>
-<a:Modifier>admin</a:Modifier>
+<a:ModificationDate>1538038280</a:ModificationDate>
+<a:Modifier>zbz</a:Modifier>
 <a:Comment>产品ID</a:Comment>
 <a:DataType>LI</a:DataType>
 <a:LogicalAttribute.Mandatory>1</a:LogicalAttribute.Mandatory>
@@ -3819,12 +3819,12 @@ LABL 0 新宋体,8,N</a:FontList>
 <a:Code>order-mysql</a:Code>
 <a:CreationDate>1537005118</a:CreationDate>
 <a:Creator>xiaoming</a:Creator>
-<a:ModificationDate>1537510910</a:ModificationDate>
+<a:ModificationDate>1538038315</a:ModificationDate>
 <a:Modifier>zbz</a:Modifier>
 <a:TargetModelURL>file://Vboxsvr/02/ord/db/model/ord-mysql.pdm</a:TargetModelURL>
 <a:TargetModelID>04A97B82-954C-4FA9-8924-7C05CCB4C08F</a:TargetModelID>
 <a:TargetModelClassID>CDE44E21-9669-11D1-9914-006097355D9B</a:TargetModelClassID>
-<a:TargetModelLastModificationDate>1537510910</a:TargetModelLastModificationDate>
+<a:TargetModelLastModificationDate>1538038315</a:TargetModelLastModificationDate>
 <c:SessionShortcuts>
 <o:Shortcut Ref="o17"/>
 </c:SessionShortcuts>
