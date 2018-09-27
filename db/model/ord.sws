@@ -5,7 +5,7 @@
 <Workspace>
 	<Local Expanded="Yes">
 		<Model Expanded="Yes" ID="{04A97B82-954C-4FA9-8924-7C05CCB4C08F}" Name="order-mysql" Type="{CDE44E21-9669-11D1-9914-006097355D9B}" URL="ord-mysql.pdm"/>
-		<Model Expanded="Yes" ID="{51687919-12C7-42E8-B4FF-B67D7F72A68E}" Name="order" Type="{5F45F978-C4F3-4E35-A3FC-AF3318663A0F}" URL="ord.ldm"/>
+		<Model Expanded="Yes" ID="{51687919-12C7-42E8-B4FF-B67D7F72A68E}" Name="order" Selected="Yes" Type="{5F45F978-C4F3-4E35-A3FC-AF3318663A0F}" URL="ord.ldm"/>
 	</Local>
 	<BrowserModule Name="Repository"/>
 </Workspace>
