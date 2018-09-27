@@ -177,7 +177,7 @@ public interface OrdOrderMapper extends MybatisBaseMapper<OrdOrderMo, Long> {
      *  @return
      *  @date 2018年5月17日 下午3:07:55
      */
-    @Update("UPDATE ORD_ORDER SET ORDER_STATE=5, CLOSE_TIME=#{closeTime,jdbcType=TIMESTAMP} WHERE ORDER_ID=#{orderId,jdbcType=VARCHAR} AND ORDER_STATE=4")
+    @Update("UPDATE ORD_ORDER SET ORDER_STATE=5, CLOSE_TIME=#{closeTime,jdbcType=TIMESTAMP} WHERE ID=#{orderId,jdbcType=VARCHAR} AND ORDER_STATE=4")
     int finishSettlement(@Param("closeTime") Date closeTime, @Param("orderId") String orderId);
 
     /**
