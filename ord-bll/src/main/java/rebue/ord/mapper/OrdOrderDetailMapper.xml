@@ -473,7 +473,7 @@
   </update>
   
   <select id="getFullReturnDetail" parameterType="rebue.ord.mo.OrdOrderDetailMo" resultMap="BaseResultMap">
-  	 SELECT  ood.ID, ood.ORDER_ID, ood.ONLINE_ID, ood.PRODUCE_ID, ood.ONLINE_TITLE, ood.SPEC_NAME, ood.BUY_COUNT, ood.BUY_PRICE, 
+  	 SELECT  ood.ID, ood.ORDER_ID, ood.ONLINE_ID, ood.PRODUCT_ID, ood.ONLINE_TITLE, ood.SPEC_NAME, ood.BUY_COUNT, ood.BUY_PRICE, 
     ood.CASHBACK_AMOUNT, ood.RETURN_COUNT, ood.CASHBACK_TOTAL, ood.BUY_UNIT, RETURN_STATE, ood.USER_ID, ood.COMMISSION_SLOT, 
     ood.COMMISSION_STATE,oo.ORDER_TIME
     from ORD_ORDER_DETAIL ood , ORD_ORDER oo
@@ -487,8 +487,8 @@
       <if test="onlineId != null">
         and ood.ONLINE_ID = #{onlineId,jdbcType=BIGINT}
       </if>
-      <if test="produceId != null">
-        and ood.PRODUCE_ID = #{produceId,jdbcType=BIGINT}
+      <if test="productId != null">
+        and ood.PRODUCT_ID = #{productId,jdbcType=BIGINT}
       </if>
       <if test="onlineTitle != null and onlineTitle != ''">
         and ood.ONLINE_TITLE = #{onlineTitle,jdbcType=VARCHAR}
@@ -525,7 +525,7 @@
   </select>
   
 <select id="getOtherFullReturnDetail" parameterType="rebue.ord.mo.OrdOrderDetailMo" resultMap="BaseResultMap">
-  	 SELECT  ood.ID, ood.ORDER_ID, ood.ONLINE_ID, ood.PRODUCE_ID, ood.ONLINE_TITLE, ood.SPEC_NAME, ood.BUY_COUNT, ood.BUY_PRICE, 
+  	 SELECT  ood.ID, ood.ORDER_ID, ood.ONLINE_ID, ood.PRODUCT_ID, ood.ONLINE_TITLE, ood.SPEC_NAME, ood.BUY_COUNT, ood.BUY_PRICE, 
     ood.CASHBACK_AMOUNT, ood.RETURN_COUNT, ood.CASHBACK_TOTAL, ood.BUY_UNIT, RETURN_STATE, ood.USER_ID, ood.COMMISSION_SLOT, 
     ood.COMMISSION_STATE,oo.ORDER_TIME
     from ORD_ORDER_DETAIL ood , ORD_ORDER oo
@@ -537,8 +537,8 @@
       <if test="onlineId != null">
         and ood.ONLINE_ID = #{onlineId,jdbcType=BIGINT}
       </if>
-      <if test="produceId != null">
-        and ood.PRODUCE_ID = #{produceId,jdbcType=BIGINT}
+      <if test="productId != null">
+        and ood.PRODUCT_ID = #{productId,jdbcType=BIGINT}
       </if>
       <if test="onlineTitle != null and onlineTitle != ''">
         and ood.ONLINE_TITLE = #{onlineTitle,jdbcType=VARCHAR}

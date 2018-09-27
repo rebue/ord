@@ -741,7 +741,7 @@
     <result column="FINISH_OP_ID" jdbcType="BIGINT" property="finishOpId" />
     <result column="FINISH_TIME" jdbcType="TIMESTAMP" property="finishTime" />
     <result column="ONLINE_ID" jdbcType="BIGINT" property="onlineId" />
-    <result column="PRODUCE_ID" jdbcType="BIGINT" property="produceId" />
+    <result column="PRODUCT_ID" jdbcType="BIGINT" property="productId" />
     <result column="ONLINE_TITLE" jdbcType="VARCHAR" property="onlineTitle" />
     <result column="SPEC_NAME" jdbcType="VARCHAR" property="specName" />
     <result column="BUY_COUNT" jdbcType="INTEGER" property="buyCount" />
@@ -753,7 +753,7 @@
   
   <!-- 查询退货分页列表信息 -->
   <select id="selectReturnPageList" parameterType="rebue.ord.mo.OrdReturnMo" resultMap="ReturnInfoMap">
-  	SELECT a.*, b.ONLINE_ID, b.PRODUCE_ID, b.ONLINE_TITLE, b.SPEC_NAME, b.BUY_COUNT, b.BUY_PRICE, b.CASHBACK_AMOUNT, b.RETURN_STATE, b.BUY_UNIT
+  	SELECT a.*, b.ONLINE_ID, b.PRODUCT_ID, b.ONLINE_TITLE, b.SPEC_NAME, b.BUY_COUNT, b.BUY_PRICE, b.CASHBACK_AMOUNT, b.RETURN_STATE, b.BUY_UNIT
 	FROM ORD_RETURN a
 	LEFT JOIN ORD_ORDER_DETAIL b ON a.ORDER_DETAIL_ID=b.ID AND a.ORDER_ID=b.ORDER_ID
 	WHERE 1=1
