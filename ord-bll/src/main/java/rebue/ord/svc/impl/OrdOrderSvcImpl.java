@@ -1,5 +1,11 @@
 package rebue.ord.svc.impl;
 
+import com.fasterxml.jackson.core.JsonParseException;
+import com.fasterxml.jackson.databind.JavaType;
+import com.fasterxml.jackson.databind.JsonMappingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.github.pagehelper.PageHelper;
+import com.github.pagehelper.PageInfo;
 import java.beans.BeanInfo;
 import java.beans.IntrospectionException;
 import java.beans.Introspector;
@@ -16,9 +22,7 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-
 import javax.annotation.Resource;
-
 import org.dozer.Mapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -26,14 +30,6 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
-
-import com.fasterxml.jackson.core.JsonParseException;
-import com.fasterxml.jackson.databind.JavaType;
-import com.fasterxml.jackson.databind.JsonMappingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.github.pagehelper.PageHelper;
-import com.github.pagehelper.PageInfo;
-
 import rebue.afc.dic.SettleTaskExecuteStateDic;
 import rebue.afc.dic.TradeTypeDic;
 import rebue.afc.mo.AfcSettleTaskMo;
@@ -128,7 +124,7 @@ public class OrdOrderSvcImpl extends MybatisBaseSvcImpl<OrdOrderMo, java.lang.Lo
     /**
      */
     @Resource
-    private OrdAddrSvc        ordAddrSvc;
+    private OrdAddrSvc ordAddrSvc;
 
     /**
      */
@@ -136,42 +132,42 @@ public class OrdOrderSvcImpl extends MybatisBaseSvcImpl<OrdOrderMo, java.lang.Lo
     private OrdOrderDetailSvc ordOrderDetailSvc;
 
     @Resource
-    private OrdTaskSvc        ordTaskSvc;
+    private OrdTaskSvc ordTaskSvc;
 
     /**
      */
     @Resource
-    private OnlOnlineSpecSvc  onlOnlineSpecSvc;
+    private OnlOnlineSpecSvc onlOnlineSpecSvc;
 
     /**
      */
     @Resource
-    private OnlOnlineSvc      onlOnlineSvc;
+    private OnlOnlineSvc onlOnlineSvc;
 
     /**
      */
     @Resource
-    private OnlCartSvc        onlCartSvc;
+    private OnlCartSvc onlCartSvc;
 
     /**
      */
     @Resource
-    private KdiSvc            kdiSvc;
+    private KdiSvc kdiSvc;
 
     /**
      */
     @Resource
-    private OnlOnlinePicSvc   onlOnlinePicSvc;
+    private OnlOnlinePicSvc onlOnlinePicSvc;
 
     /**
      */
     @Resource
-    private AfcSettleTaskSvc  afcSettleTaskSvc;
+    private AfcSettleTaskSvc afcSettleTaskSvc;
 
     /**
      */
     @Resource
-    private SucUserSvc        sucUserSvc;
+    private SucUserSvc sucUserSvc;
 
     /**
      */
@@ -182,28 +178,28 @@ public class OrdOrderSvcImpl extends MybatisBaseSvcImpl<OrdOrderMo, java.lang.Lo
      * 买家返款时间
      */
     @Value("${ord.settle-buyer-cashback-time}")
-    private int               settleBuyerCashbackTime;
+    private int settleBuyerCashbackTime;
 
     @Value("${ord.settle-upline-commission-time}")
-    private int               settleUplineCommissionTime;
+    private int settleUplineCommissionTime;
 
     /**
      * 执行取消用户订单时间
      */
     @Value("${ord.cancel-order-time}")
-    private int               cancelOrderTime;
+    private int cancelOrderTime;
 
     /**
      * 执行用户订单签收时间
      */
     @Value("${ord.signin-order-time}")
-    private int               signinOrderTime;
+    private int signinOrderTime;
 
     @Resource
-    private Mapper            dozerMapper;
+    private Mapper dozerMapper;
 
     @Resource
-    private ObjectMapper      objectMapper;
+    private ObjectMapper objectMapper;
 
     /**
      * 用户下订单 Title: placeOrder Description:
@@ -297,7 +293,7 @@ public class OrdOrderSvcImpl extends MybatisBaseSvcImpl<OrdOrderMo, java.lang.Lo
                 detailMo.setId(_idWorker.getId());
                 detailMo.setOrderId(orderId);
                 detailMo.setOnlineId(onlineId);
-                detailMo.setProduceId(orderList.get(i).getProductId());
+                detailMo.setProductId(orderList.get(i).getProductId());
                 detailMo.setOnlineTitle(orderList.get(i).getOnlineTitle());
                 detailMo.setSpecName(OnlineSpec);
                 detailMo.setBuyCount(buyCount);
@@ -320,11 +316,11 @@ public class OrdOrderSvcImpl extends MybatisBaseSvcImpl<OrdOrderMo, java.lang.Lo
                     detailMo.setId(_idWorker.getId());
                     detailMo.setOrderId(orderId);
                     detailMo.setOnlineId(onlineId);
-                    detailMo.setProduceId(orderList.get(j).getProductId());
+                    detailMo.setProductId(orderList.get(j).getProductId());
                     detailMo.setOnlineTitle(orderList.get(j).getOnlineTitle());
                     detailMo.setSpecName(OnlineSpec);
                     detailMo.setBuyCount(1);
-                    detailMo.setSubjectType((byte)1);
+                    detailMo.setSubjectType((byte) 1);
                     detailMo.setBuyPrice(orderList.get(j).getSalePrice());
                     detailMo.setCashbackAmount(new BigDecimal("0"));
                     detailMo.setReturnState((byte) 0);
@@ -440,7 +436,6 @@ public class OrdOrderSvcImpl extends MybatisBaseSvcImpl<OrdOrderMo, java.lang.Lo
         }
         // 在购买关系信息表中更新购买关系
         OrdBuyRelationMo ordBuyRelationMo = new OrdBuyRelationMo();
-
         ordBuyRelationMo.setUplineOrderDetailId(orderDetailMo.getId());
         ordBuyRelationMo.setDownlineUserId(id);
         ordBuyRelationMo.setDownlineOrderDetailId(downLineDetailId);
@@ -455,7 +450,7 @@ public class OrdOrderSvcImpl extends MybatisBaseSvcImpl<OrdOrderMo, java.lang.Lo
 
     /**
      * 获取注册关系并更新购买关系表
-     * 
+     *
      * @param id
      * @param onlineId
      * @param buyPrice
@@ -558,8 +553,7 @@ public class OrdOrderSvcImpl extends MybatisBaseSvcImpl<OrdOrderMo, java.lang.Lo
      * @throws IllegalAccessException
      */
     @Override
-    public List<Map<String, Object>> selectOrderInfo(Map<String, Object> map)
-            throws ParseException, IntrospectionException, IllegalAccessException, IllegalArgumentException, InvocationTargetException {
+    public List<Map<String, Object>> selectOrderInfo(Map<String, Object> map) throws ParseException, IntrospectionException, IllegalAccessException, IllegalArgumentException, InvocationTargetException {
         List<Map<String, Object>> list = new ArrayList<Map<String, Object>>();
         _log.info("查询用户订单信息的参数为：{}", map.toString());
         List<OrdOrderMo> orderList = _mapper.selectOrderInfo(map);
@@ -626,7 +620,7 @@ public class OrdOrderSvcImpl extends MybatisBaseSvcImpl<OrdOrderMo, java.lang.Lo
                     orderDetailRo.setId(orderDetailMo.getId());
                     orderDetailRo.setOrderId(orderDetailMo.getOrderId());
                     orderDetailRo.setOnlineId(orderDetailMo.getOnlineId());
-                    orderDetailRo.setProduceId(orderDetailMo.getProduceId());
+                    orderDetailRo.setProductId(orderDetailMo.getProductId());
                     orderDetailRo.setOnlineTitle(orderDetailMo.getOnlineTitle());
                     orderDetailRo.setSpecName(orderDetailMo.getSpecName());
                     orderDetailRo.setBuyCount(orderDetailMo.getBuyCount());
@@ -1045,7 +1039,6 @@ public class OrdOrderSvcImpl extends MybatisBaseSvcImpl<OrdOrderMo, java.lang.Lo
             orderSignInRo.setMsg("添加结算出错");
             return orderSignInRo;
         }
-
         OrdOrderMo orderMo = new OrdOrderMo();
         orderMo.setOrderCode(orderCode);
         orderMo.setUserId(userId);
@@ -1171,8 +1164,7 @@ public class OrdOrderSvcImpl extends MybatisBaseSvcImpl<OrdOrderMo, java.lang.Lo
      * @throws IllegalAccessException
      */
     @Override
-    public List<Map<String, Object>> getCashBackOrder(Map<String, Object> map)
-            throws ParseException, IntrospectionException, IllegalAccessException, IllegalArgumentException, InvocationTargetException {
+    public List<Map<String, Object>> getCashBackOrder(Map<String, Object> map) throws ParseException, IntrospectionException, IllegalAccessException, IllegalArgumentException, InvocationTargetException {
         List<Map<String, Object>> list = new ArrayList<Map<String, Object>>();
         _log.info("查询用户待返现任务的参数为：{}", map.toString());
         long accountId = Long.parseLong(String.valueOf(map.get("userId")));
@@ -1228,7 +1220,7 @@ public class OrdOrderSvcImpl extends MybatisBaseSvcImpl<OrdOrderMo, java.lang.Lo
                     orderDetailRo.setId(orderDetailMo.getId());
                     orderDetailRo.setOrderId(orderDetailMo.getOrderId());
                     orderDetailRo.setOnlineId(orderDetailMo.getOnlineId());
-                    orderDetailRo.setProduceId(orderDetailMo.getProduceId());
+                    orderDetailRo.setProductId(orderDetailMo.getProductId());
                     orderDetailRo.setOnlineTitle(orderDetailMo.getOnlineTitle());
                     orderDetailRo.setSpecName(orderDetailMo.getSpecName());
                     orderDetailRo.setBuyCount(orderDetailMo.getBuyCount());
@@ -1258,5 +1250,4 @@ public class OrdOrderSvcImpl extends MybatisBaseSvcImpl<OrdOrderMo, java.lang.Lo
         _log.info("orderList: ro-{}; pageNum-{}; pageSize-{}", to, pageNum, pageSize);
         return PageHelper.startPage(pageNum, pageSize).doSelectPageInfo(() -> _mapper.orderList(to));
     }
-
 }

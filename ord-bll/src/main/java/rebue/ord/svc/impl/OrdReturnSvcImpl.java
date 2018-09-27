@@ -871,7 +871,7 @@ public class OrdReturnSvcImpl extends MybatisBaseSvcImpl<OrdReturnMo, java.lang.
                     orderDetailRo.setId(orderDetailMo.getId());
                     orderDetailRo.setOrderId(orderDetailMo.getOrderId());
                     orderDetailRo.setOnlineId(orderDetailMo.getOnlineId());
-                    orderDetailRo.setProduceId(orderDetailMo.getProduceId());
+                    orderDetailRo.setProductId(orderDetailMo.getProductId());
                     orderDetailRo.setOnlineTitle(orderDetailMo.getOnlineTitle());
                     orderDetailRo.setSpecName(orderDetailMo.getSpecName());
                     orderDetailRo.setBuyCount(orderDetailMo.getBuyCount());
@@ -935,7 +935,7 @@ public class OrdReturnSvcImpl extends MybatisBaseSvcImpl<OrdReturnMo, java.lang.
                     orderDetailRo.setId(orderDetailMo.getId());
                     orderDetailRo.setOrderId(orderDetailMo.getOrderId());
                     orderDetailRo.setOnlineId(orderDetailMo.getOnlineId());
-                    orderDetailRo.setProduceId(orderDetailMo.getProduceId());
+                    orderDetailRo.setProductId(orderDetailMo.getProductId());
                     orderDetailRo.setOnlineTitle(orderDetailMo.getOnlineTitle());
                     orderDetailRo.setSpecName(orderDetailMo.getSpecName());
                     orderDetailRo.setBuyCount(orderDetailMo.getBuyCount());

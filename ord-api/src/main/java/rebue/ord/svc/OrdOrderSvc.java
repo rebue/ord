@@ -197,5 +197,4 @@ public interface OrdOrderSvc extends MybatisBaseSvc<OrdOrderMo, java.lang.Long> 
      * @return
      */
     PageInfo<OrdOrderMo> orderList(OrdOrderTo to, int pageNum, int pageSize);
-    
 }

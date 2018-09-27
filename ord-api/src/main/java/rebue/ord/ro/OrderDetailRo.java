@@ -21,7 +21,7 @@ public class OrderDetailRo {
 	private Long onlineId;
 
 	/** 产品ID **/
-	private Long produceId;
+	private Long productId;
 
 	/** 上线标题 **/
 	private String onlineTitle;
@@ -126,12 +126,12 @@ public class OrderDetailRo {
 		this.onlineId = onlineId;
 	}
 
-	public Long getProduceId() {
-		return produceId;
+	public Long getProductId() {
+		return productId;
 	}
 
-	public void setProduceId(Long produceId) {
-		this.produceId = produceId;
+	public void setProductId(Long productId) {
+		this.productId = productId;
 	}
 
 	public String getOnlineTitle() {
@@ -209,7 +209,7 @@ public class OrderDetailRo {
 	@Override
 	public String toString() {
 		return "OrderDetailRo [id=" + id + ", orderId=" + orderId + ", onlineId=" + onlineId + ", produceId="
-				+ produceId + ", onlineTitle=" + onlineTitle + ", specName=" + specName + ", buyCount=" + buyCount
+				+ productId + ", onlineTitle=" + onlineTitle + ", specName=" + specName + ", buyCount=" + buyCount
 				+ ", buyPrice=" + buyPrice + ", cashbackAmount=" + cashbackAmount + ", cashbackTotal=" + cashbackTotal
 				+ ", buyUnit=" + buyUnit + ", returnCount=" + returnCount + ", returnState=" + returnState
 				+ ", cashbackCommissionSlot=" + cashbackCommissionSlot + ", cashbackCommissionState="

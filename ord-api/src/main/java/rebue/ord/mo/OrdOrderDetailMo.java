@@ -45,11 +45,11 @@ public class OrdOrderDetailMo implements Serializable {
     /**
      *    产品ID
      *
-     *    数据库字段: ORD_ORDER_DETAIL.PRODUCE_ID
+     *    数据库字段: ORD_ORDER_DETAIL.PRODUCT_ID
      *
      *    @mbg.generated 自动生成，如需修改，请删除本行
      */
-    private Long produceId;
+    private Long productId;
 
     /**
      *    版块类型（0：普通，1：全返）
@@ -242,23 +242,23 @@ public class OrdOrderDetailMo implements Serializable {
     /**
      *    产品ID
      *
-     *    数据库字段: ORD_ORDER_DETAIL.PRODUCE_ID
+     *    数据库字段: ORD_ORDER_DETAIL.PRODUCT_ID
      *
      *    @mbg.generated 自动生成，如需修改，请删除本行
      */
-    public Long getProduceId() {
-        return produceId;
+    public Long getProductId() {
+        return productId;
     }
 
     /**
      *    产品ID
      *
-     *    数据库字段: ORD_ORDER_DETAIL.PRODUCE_ID
+     *    数据库字段: ORD_ORDER_DETAIL.PRODUCT_ID
      *
      *    @mbg.generated 自动生成，如需修改，请删除本行
      */
-    public void setProduceId(Long produceId) {
-        this.produceId = produceId;
+    public void setProductId(Long productId) {
+        this.productId = productId;
     }
 
     /**
@@ -559,7 +559,7 @@ public class OrdOrderDetailMo implements Serializable {
         sb.append(", id=").append(id);
         sb.append(", orderId=").append(orderId);
         sb.append(", onlineId=").append(onlineId);
-        sb.append(", produceId=").append(produceId);
+        sb.append(", productId=").append(productId);
         sb.append(", subjectType=").append(subjectType);
         sb.append(", commissionSlot=").append(commissionSlot);
         sb.append(", commissionState=").append(commissionState);

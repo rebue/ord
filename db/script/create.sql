@@ -6,17 +6,17 @@
 
 drop table if exists ORD_ADDR;
 
-drop table if exists ORD_BUY_RELATION;
-
-drop table if exists ORD_ORDER;
-
-drop table if exists ORD_ORDER_DETAIL;
-
-drop table if exists ORD_RETURN;
+drop table if exists ORD_TASK;
 
 drop table if exists ORD_RETURN_PIC;
 
-drop table if exists ORD_TASK;
+drop table if exists ORD_RETURN;
+
+drop table if exists ORD_BUY_RELATION;
+
+drop table if exists ORD_ORDER_DETAIL;
+
+drop table if exists ORD_ORDER;
 
 /*==============================================================*/
 /* Table: ORD_ADDR                                              */
