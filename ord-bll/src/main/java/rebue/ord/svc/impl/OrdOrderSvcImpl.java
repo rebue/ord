@@ -973,8 +973,8 @@ public class OrdOrderSvcImpl extends MybatisBaseSvcImpl<OrdOrderMo, java.lang.Lo
             return orderSignInRo;
         }
         OrdOrderDetailMo detailMo = new OrdOrderDetailMo();
-        detailMo.setOrderId(Long.parseLong(orderCode));
-        _log.info("订单签收查询订单详情的参数为：{}", orderCode);
+        detailMo.setOrderId(orderId);
+        _log.info("订单签收查询订单详情的参数为：{}", orderId);
         List<OrdOrderDetailMo> detailList = ordOrderDetailSvc.list(detailMo);
         _log.info("订单签收查询订单详情的返回值为：{}", String.valueOf(detailList));
         if (detailList.size() == 0) {
