@@ -992,7 +992,7 @@
 		#{logisticId,jdbcType=BIGINT},
 		SEND_OP_ID =
 		#{sendOpId,jdbcType=BIGINT}, SEND_TIME =
-		#{sendTime,jdbcType=TIMESTAMP} WHERE ORDER_ID=${id} AND
+		#{sendTime,jdbcType=TIMESTAMP} WHERE ID=${id} AND
 		ORDER_STATE=#{orderState,jdbcType=TINYINT}
 	</update>
 
@@ -1000,7 +1000,7 @@
 	<update id="setUpExpressCompany" parameterType="rebue.ord.mo.OrdOrderMo">
 		UPDATE ORD_ORDER SET SHIPPER_NAME =
 		#{shipperName,jdbcType=VARCHAR}
-		WHERE ORDER_ID=#{id,
+		WHERE ID=#{id,
 		jdbcType=VARCHAR}
 	</update>
 
