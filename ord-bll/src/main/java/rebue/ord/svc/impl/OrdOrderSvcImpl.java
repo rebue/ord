@@ -351,17 +351,6 @@ public class OrdOrderSvcImpl extends MybatisBaseSvcImpl<OrdOrderMo, java.lang.Lo
 							_log.info("获取其它关系的返回值为：{}" + getOtherRelationResult);
 						}
 					}
-					_log.info("在购买关系表中添加记录");
-					OrdBuyRelationMo buyRelationMo = new OrdBuyRelationMo();
-					buyRelationMo.setId(_idWorker.getId());
-					buyRelationMo.setUplineOrderId(orderId);
-					buyRelationMo.setUplineUserId(id);
-					buyRelationMo.setUplineOrderDetailId(detailMo.getId());
-					int addBuyRelationResult = ordBuyRelationSvc.add(buyRelationMo);
-					if (addBuyRelationResult != 1) {
-						_log.error("{}添加下级购买信息失败", id);
-						throw new RuntimeException("生成下级购买信息出错");
-					}
 				}
 			}
 		}
@@ -419,7 +408,6 @@ public class OrdOrderSvcImpl extends MybatisBaseSvcImpl<OrdOrderMo, java.lang.Lo
 		OrdOrderDetailMo mo = new OrdOrderDetailMo();
 		mo.setOnlineId(onlineId);
 		mo.setBuyPrice(buyPrice);
-		_log.info("111");
 		mo.setUserId(buyRelation);
 		_log.info("获取用户购买关系订单详情的参数为：{}" + mo);
 		OrdOrderDetailMo orderDetailMo = ordOrderDetailSvc.getFullReturnDetail(mo);
@@ -433,22 +421,27 @@ public class OrdOrderSvcImpl extends MybatisBaseSvcImpl<OrdOrderMo, java.lang.Lo
 		if ((orderDetailMo.getCommissionSlot() - 1) == 0) {
 			updateOrderDetailMo.setCommissionState((byte) 1);
 		}
-		// 更新购买关系订单详情的返现名额
+		// 更新购买关系订单详情的返佣名额
 		int updateOrderDetailResult = ordOrderDetailSvc.modify(updateOrderDetailMo);
 		if (updateOrderDetailResult != 1) {
-			_log.error("{}更新订单详情返现名额失败", id);
+			_log.error("{}更新订单详情返佣名额失败", id);
 			throw new RuntimeException("更新订单详情返现名额失败");
 		}
-		// 在购买关系信息表中更新购买关系
+		// 添加购买关系记录
+		_log.info("在购买关系表中添加记录");
 		OrdBuyRelationMo ordBuyRelationMo = new OrdBuyRelationMo();
+		ordBuyRelationMo.setId(_idWorker.getId());
+		ordBuyRelationMo.setUplineOrderId(orderDetailMo.getOrderId());
+		ordBuyRelationMo.setUplineUserId(orderDetailMo.getUserId());
 		ordBuyRelationMo.setUplineOrderDetailId(orderDetailMo.getId());
 		ordBuyRelationMo.setDownlineUserId(id);
 		ordBuyRelationMo.setDownlineOrderDetailId(downLineDetailId);
 		ordBuyRelationMo.setDownlineOrderId(downLineOrderId);
-		int updateBuyRelationResult = ordBuyRelationSvc.updateByUplineOrderDetailId(ordBuyRelationMo);
-		if (updateBuyRelationResult != 1) {
-			_log.error("{}更新购买关系失败", id);
-			throw new RuntimeException("更新下级购买关系失败");
+		_log.error("添加购买关系参数:{}", ordBuyRelationMo);
+		int addBuyRelationResult = ordBuyRelationSvc.add(ordBuyRelationMo);
+		if (addBuyRelationResult != 1) {
+			_log.error("{}添加下级购买信息失败", id);
+			throw new RuntimeException("生成购买关系出错");
 		}
 		return true;
 	}
@@ -493,16 +486,21 @@ public class OrdOrderSvcImpl extends MybatisBaseSvcImpl<OrdOrderMo, java.lang.Lo
 			_log.error("{}更新订单详情返现名额失败", id);
 			throw new RuntimeException("更新订单详情返现名额失败");
 		}
-		// 在购买关系信息表中更新购买关系
+		// 添加购买关系记录
+		_log.info("在购买关系表中添加记录");
 		OrdBuyRelationMo ordBuyRelationMo = new OrdBuyRelationMo();
+		ordBuyRelationMo.setId(_idWorker.getId());
+		ordBuyRelationMo.setUplineOrderId(orderDetailMo.getOrderId());
+		ordBuyRelationMo.setUplineUserId(orderDetailMo.getUserId());
 		ordBuyRelationMo.setUplineOrderDetailId(orderDetailMo.getId());
 		ordBuyRelationMo.setDownlineUserId(id);
 		ordBuyRelationMo.setDownlineOrderDetailId(downLineDetailId);
 		ordBuyRelationMo.setDownlineOrderId(downLineOrderId);
-		int updateBuyRelationResult = ordBuyRelationSvc.updateByUplineOrderDetailId(ordBuyRelationMo);
-		if (updateBuyRelationResult != 1) {
-			_log.error("{}更新下级购买关系失败", id);
-			throw new RuntimeException("更新下级购买关系失败");
+		_log.error("添加购买关系参数:{}", ordBuyRelationMo);
+		int addBuyRelationResult = ordBuyRelationSvc.add(ordBuyRelationMo);
+		if (addBuyRelationResult != 1) {
+			_log.error("{}添加下级购买信息失败", id);
+			throw new RuntimeException("生成购买关系出错");
 		}
 		return true;
 	}
@@ -536,16 +534,21 @@ public class OrdOrderSvcImpl extends MybatisBaseSvcImpl<OrdOrderMo, java.lang.Lo
 			_log.error("{}更新订单详情返现名额失败", id);
 			throw new RuntimeException("更新订单详情返现名额失败");
 		}
-		// 在购买关系信息表中更新购买关系
+		// 添加购买关系记录
+		_log.info("在购买关系表中添加记录");
 		OrdBuyRelationMo ordBuyRelationMo = new OrdBuyRelationMo();
+		ordBuyRelationMo.setId(_idWorker.getId());
+		ordBuyRelationMo.setUplineOrderId(orderDetailMo.getOrderId());
+		ordBuyRelationMo.setUplineUserId(orderDetailMo.getUserId());
 		ordBuyRelationMo.setUplineOrderDetailId(orderDetailMo.getId());
 		ordBuyRelationMo.setDownlineUserId(id);
 		ordBuyRelationMo.setDownlineOrderDetailId(downLineDetailId);
 		ordBuyRelationMo.setDownlineOrderId(downLineOrderId);
-		int updateBuyRelationResult = ordBuyRelationSvc.updateByUplineOrderDetailId(ordBuyRelationMo);
-		if (updateBuyRelationResult != 1) {
-			_log.error("{}更新购买关系失败", id);
-			throw new RuntimeException("更新购买关系失败");
+		_log.error("添加购买关系参数:{}", ordBuyRelationMo);
+		int addBuyRelationResult = ordBuyRelationSvc.add(ordBuyRelationMo);
+		if (addBuyRelationResult != 1) {
+			_log.error("{}添加下级购买信息失败", id);
+			throw new RuntimeException("生成购买关系出错");
 		}
 		return true;
 	}
