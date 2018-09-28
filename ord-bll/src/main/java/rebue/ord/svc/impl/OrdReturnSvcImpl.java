@@ -134,6 +134,7 @@ public class OrdReturnSvcImpl extends MybatisBaseSvcImpl<OrdReturnMo, java.lang.
     public AddReturnRo addReturn(OrdOrderReturnTo to) {
         _log.info("添加用户退货信息的参数为：{}", to.toString());
         AddReturnRo addReturnRo = new AddReturnRo();
+        long orderId = to.getOrderId();
         long orderCode = to.getOrderCode();
         long orderDetailId = to.getOrderDetailId();
         long userId = to.getUserId();
@@ -169,7 +170,7 @@ public class OrdReturnSvcImpl extends MybatisBaseSvcImpl<OrdReturnMo, java.lang.
             return addReturnRo;
         }
         OrdOrderDetailMo orderDetailMo = new OrdOrderDetailMo();
-        orderDetailMo.setOrderId(orderCode);
+        orderDetailMo.setOrderId(orderId);
         orderDetailMo.setSpecName(to.getSpecName());
         _log.info("查询订单详情的参数为：{}", orderDetailMo);
         List<OrdOrderDetailMo> orderDetailList = new ArrayList<OrdOrderDetailMo>();
@@ -213,7 +214,7 @@ public class OrdReturnSvcImpl extends MybatisBaseSvcImpl<OrdReturnMo, java.lang.
         OrdReturnMo ordReturnMo = new OrdReturnMo();
         ordReturnMo.setId(_idWorker.getId());
         ordReturnMo.setReturnCode(returnCode);
-        ordReturnMo.setOrderId(orderCode);
+        ordReturnMo.setOrderId(orderId);
         ordReturnMo.setOrderDetailId(orderDetailId);
         ordReturnMo.setReturnCount(returnNum);
         ordReturnMo.setReturnRental(to.getReturnPrice());
@@ -237,9 +238,10 @@ public class OrdReturnSvcImpl extends MybatisBaseSvcImpl<OrdReturnMo, java.lang.
         for (String returnPic : returnPics) {
             OrdReturnPicMo ordReturnPicMo = new OrdReturnPicMo();
             ordReturnPicMo.setId(_idWorker.getId());
-            ordReturnPicMo.setReturnId(returnCode);
+            ordReturnPicMo.setReturnId(ordReturnMo.getId());
             ordReturnPicMo.setPicPath(returnPic);
             int insertReturnPicResult = ordReturnPicSvc.add(ordReturnPicMo);
+            _log.error("添加退货图片返回值：{}"+insertReturnPicResult);
             if (insertReturnPicResult < 1) {
                 _log.error("添加退货图片出错，返回值为：{}", insertReturnresult);
                 throw new RuntimeException("添加退货图片失败");
