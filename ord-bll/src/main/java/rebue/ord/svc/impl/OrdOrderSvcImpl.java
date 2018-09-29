@@ -459,8 +459,8 @@ public class OrdOrderSvcImpl extends MybatisBaseSvcImpl<OrdOrderMo, java.lang.Lo
 			long downLineOrderId) {
 		_log.info("获取用户信息参数：{}" + id);
 		SucRegRo sucReg = sucUserSvc.getRegInfo(id);
-		_log.info("获取用户信息返回值为：" + sucReg.toString());
-		if (sucReg.getRecord().getPromoterId() == null) {
+		_log.info("获取用户信息返回值为：" + sucReg);
+		if (sucReg.getResult() != 1) {
 			return false;
 		}
 		// 根据产品上线ID查找注册关系用户的购买记录，看是否有符合要求的订单详情记录
@@ -468,6 +468,7 @@ public class OrdOrderSvcImpl extends MybatisBaseSvcImpl<OrdOrderMo, java.lang.Lo
 		mo.setOnlineId(onlineId);
 		mo.setBuyPrice(buyPrice);
 		mo.setUserId(sucReg.getRecord().getId());
+		_log.info("获取用户注册关系订单详情的参数：{}" + mo);
 		OrdOrderDetailMo orderDetailMo = ordOrderDetailSvc.getFullReturnDetail(mo);
 		_log.info("获取用户注册关系订单详情的返回值为：{}" + orderDetailMo);
 		if (orderDetailMo == null) {

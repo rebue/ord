@@ -29,7 +29,7 @@ public class SettleDoneSub implements ApplicationListener<ContextRefreshedEvent>
 	/**
 	 * 处理添加用户完成通知的队列
 	 */
-	private final static String SETTLE_DONE_EXCHANGE_NAME = "rebue.ord.afc.settle.done.queue";
+	private final static String SETTLE_DONE_QUEUE_NAME = "rebue.ord.afc.settle.done.queue";
 
 	@Resource
 	private RabbitConsumer consumer;
@@ -49,9 +49,9 @@ public class SettleDoneSub implements ApplicationListener<ContextRefreshedEvent>
 			return;
 		bStartedFlag = true;
 
-		_log.info("结算完成通知的队列为: {} - {}", AfcExchangeCo.SETTLE_DONE_EXCHANGE_NAME, SETTLE_DONE_EXCHANGE_NAME);
+		_log.info("结算完成通知的队列为: {} - {}", AfcExchangeCo.SETTLE_DONE_EXCHANGE_NAME, SETTLE_DONE_QUEUE_NAME);
 
-		consumer.bind(AfcExchangeCo.SETTLE_DONE_EXCHANGE_NAME, SETTLE_DONE_EXCHANGE_NAME,
+		consumer.bind(AfcExchangeCo.SETTLE_DONE_EXCHANGE_NAME, SETTLE_DONE_QUEUE_NAME,
 				SettleDoneMsg.class, (msg) -> {
 					try {
 						_log.info("接收到结算完成通知参数为: {}", msg);
