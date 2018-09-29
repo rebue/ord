@@ -47,7 +47,22 @@ public class OrdAddrSvcImpl extends MybatisBaseSvcImpl<OrdAddrMo, java.lang.Long
         }
         Date date = new Date();
         mo.setOpTime(date);
-        return super.add(mo);
+        int j =super.add(mo);
+        if(j==1) {
+        	OrdAddrMo pm=new OrdAddrMo();
+        	pm.setUserId(mo.getUserId());
+        	List<OrdAddrMo> result=super.list(pm);
+            _log.info("添加发件人后查询是否只有一个收货地址的结果为：{}", result.size());
+        	if(result.size()==1) {
+        		pm.setId(result.get(0).getId());
+        		pm.setUserId(result.get(0).getUserId());
+        		pm.setIsDef(true);
+                _log.info("将唯一的一个收货地址改为默认的参数为：{}", pm);
+        		int i=_mapper.updateByPrimaryKeySelective(pm);
+                _log.info("将唯一的一个收货地址改为默认的结果为：{}", i);
+        	}
+        }
+        return j ;
     }
 
     /**

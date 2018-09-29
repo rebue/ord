@@ -1,6 +1,4 @@
 package rebue.ord.ctrl;
-
-import com.github.pagehelper.PageInfo;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -37,12 +35,6 @@ public class OrdAddrCtrl {
     @Resource
     private OrdAddrSvc svc;
 
-    /**
-     * 有唯一约束的字段名称
-     *
-     * @mbg.generated 自动生成，如需修改，请删除本行
-     */
-    private String _uniqueFilesName = "某字段内容";
 
     /**
      * 删除用户收货地址
@@ -69,27 +61,6 @@ public class OrdAddrCtrl {
         }
     }
 
-    /**
-     * 查询用户收货地址
-     *
-     * @mbg.generated 自动生成，如需修改，请删除本行
-     */
-//    @GetMapping("/ord/addr")
-//    PageInfo<OrdAddrMo> list(OrdAddrMo mo, @RequestParam(value = "pageNum", required = false) Integer pageNum, @RequestParam(value = "pageSize", required = false) Integer pageSize) {
-//        if (pageNum == null)
-//            pageNum = 1;
-//        if (pageSize == null)
-//            pageSize = 5;
-//        _log.info("list OrdAddrMo:" + mo + ", pageNum = " + pageNum + ", pageSize = " + pageSize);
-//        if (pageSize > 50) {
-//            String msg = "pageSize不能大于50";
-//            _log.error(msg);
-//            throw new IllegalArgumentException(msg);
-//        }
-//        PageInfo<OrdAddrMo> result = svc.list(mo, pageNum, pageSize);
-//        _log.info("result: " + result);
-//        return result;
-//    }
 
     /**
      * 获取单个用户收货地址
