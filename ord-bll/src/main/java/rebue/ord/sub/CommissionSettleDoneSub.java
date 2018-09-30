@@ -11,7 +11,6 @@ import org.springframework.stereotype.Service;
 
 import rebue.afc.co.AfcExchangeCo;
 import rebue.afc.msg.CommissionSettleDoneMsg;
-import rebue.afc.msg.SettleDoneMsg;
 import rebue.ord.mo.OrdBuyRelationMo;
 import rebue.ord.mo.OrdOrderDetailMo;
 import rebue.ord.svc.OrdBuyRelationSvc;

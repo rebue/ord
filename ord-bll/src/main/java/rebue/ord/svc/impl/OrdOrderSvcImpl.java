@@ -409,9 +409,9 @@ public class OrdOrderSvcImpl extends MybatisBaseSvcImpl<OrdOrderMo, java.lang.Lo
 		mo.setOnlineId(onlineId);
 		mo.setBuyPrice(buyPrice);
 		mo.setUserId(buyRelation);
-		_log.info("获取用户购买关系订单详情的参数为：{}" + mo);
+		_log.info("获取用户上线购买关系订单详情的参数为：{}" + mo);
 		OrdOrderDetailMo orderDetailMo = ordOrderDetailSvc.getFullReturnDetail(mo);
-		_log.info("获取用户购买关系订单详情的返回值为：{}" + orderDetailMo);
+		_log.info("获取用户上线购买关系订单详情的返回值为：{}" + orderDetailMo);
 		if (orderDetailMo == null) {
 			return false;
 		}
@@ -474,14 +474,14 @@ public class OrdOrderSvcImpl extends MybatisBaseSvcImpl<OrdOrderMo, java.lang.Lo
 		if (orderDetailMo == null) {
 			return false;
 		}
-		// 更新购买关系订单详情的返现名额
+		// 更新注册关系上线订单详情的返现名额
 		OrdOrderDetailMo updateOrderDetailMo = new OrdOrderDetailMo();
 		updateOrderDetailMo.setCommissionSlot((byte) (orderDetailMo.getCommissionSlot() - 1));
 		updateOrderDetailMo.setId(orderDetailMo.getId());
 		if ((orderDetailMo.getCommissionSlot() - 1) == 0) {
 			updateOrderDetailMo.setCommissionState((byte) 1);
 		}
-		// 更新购买关系订单详情的返现名额
+		// 更新注册关系上线订单详情的返现名额
 		int updateOrderDetailResult = ordOrderDetailSvc.modify(updateOrderDetailMo);
 		if (updateOrderDetailResult != 1) {
 			_log.error("{}更新订单详情返现名额失败", id);
