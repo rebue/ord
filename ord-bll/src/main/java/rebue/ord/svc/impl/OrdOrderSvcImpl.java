@@ -401,7 +401,7 @@ public class OrdOrderSvcImpl extends MybatisBaseSvcImpl<OrdOrderMo, java.lang.Lo
 		_log.info("获取用户购买关系的id:" + id + "onlineId:" + onlineId + "buyPricce:" + buyPrice);
 		Long buyRelation = sucUserSvc.getBuyRelation(id, onlineId);
 		_log.info("获取用户购买关系返回值为：" + buyRelation);
-		if (buyRelation == null) {
+		if (buyRelation == null || buyRelation == id) {
 			return false;
 		}
 		// 根据产品上线ID查找购买关系用户的购买记录，看是否有符合要求的订单详情记录
@@ -993,12 +993,12 @@ public class OrdOrderSvcImpl extends MybatisBaseSvcImpl<OrdOrderMo, java.lang.Lo
 		_log.info("订单签收的时间为：{}", date);
 		Calendar calendar = Calendar.getInstance();
 		calendar.setTime(date);
-		calendar.add(Calendar.HOUR, settleBuyerCashbackTime);
+		calendar.add(Calendar.MINUTE, settleBuyerCashbackTime);
 		Date buyerCashbackDate = calendar.getTime();
 		_log.info("订单签收的执行买家返款的时间为：{}", buyerCashbackDate);
 		calendar = Calendar.getInstance();
 		calendar.setTime(date);
-		calendar.add(Calendar.HOUR, settleUplineCommissionTime);
+		calendar.add(Calendar.MINUTE, settleUplineCommissionTime);
 		Date uplineCommissionTime = calendar.getTime();
 		AddSettleTasksTo settleTasksTo = new AddSettleTasksTo();
 		settleTasksTo.setOrderId(String.valueOf(orderId));

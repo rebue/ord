@@ -11,9 +11,8 @@ import org.springframework.stereotype.Service;
 
 import rebue.afc.co.AfcExchangeCo;
 import rebue.afc.msg.CommissionSettleDoneMsg;
-import rebue.ord.mo.OrdBuyRelationMo;
 import rebue.ord.mo.OrdOrderDetailMo;
-import rebue.ord.svc.OrdBuyRelationSvc;
+import rebue.ord.svc.OrdOrderDetailSvc;
 import rebue.ord.svc.OrdOrderSvc;
 import rebue.sbs.rabbit.RabbitConsumer;
 
@@ -39,9 +38,9 @@ public class CommissionSettleDoneSub implements ApplicationListener<ContextRefre
 
 	@Resource
 	private OrdOrderSvc ordOrderSvc;
-	
+
 	@Resource
-	private OrdBuyRelationSvc ordBuyRelationSvc;
+	private OrdOrderDetailSvc ordOrderDetailSvc;
 
 	/**
 	 * 启动标志，防止多次启动
@@ -55,37 +54,30 @@ public class CommissionSettleDoneSub implements ApplicationListener<ContextRefre
 			return;
 		bStartedFlag = true;
 
-		_log.info("结算完成通知的队列为: {} - {}", AfcExchangeCo.COMMISSION_SETTLE_DONE_EXCHANGE_NAME, COMMISSION_SETTLE_DONE_QUEUE_NAME);
+		_log.info("结算完成通知的队列为: {} - {}", AfcExchangeCo.COMMISSION_SETTLE_DONE_EXCHANGE_NAME,
+				COMMISSION_SETTLE_DONE_QUEUE_NAME);
 
 		consumer.bind(AfcExchangeCo.COMMISSION_SETTLE_DONE_EXCHANGE_NAME, COMMISSION_SETTLE_DONE_QUEUE_NAME,
 				CommissionSettleDoneMsg.class, (msg) -> {
 					try {
 						_log.info("接收到返佣结算完成通知参数为: {}", msg);
-						// 根据结算订单详情ID获取购买关系
-						OrdBuyRelationMo buyRelationMo = new OrdBuyRelationMo();
-						buyRelationMo.setDownlineOrderDetailId(Long.parseLong(msg.getOrderDetailId()));
-						OrdBuyRelationMo buyRelationResult = ordBuyRelationSvc.getOne(buyRelationMo);
-						if(buyRelationResult ==null) {
-							_log.warn("查找到的购买关系为空 ");
-							return true;
-						}else {
-							_log.info("根据购买关系更新上线订单详情返佣状态 ");
-							OrdOrderDetailMo orderDetailMo = new OrdOrderDetailMo();
-							orderDetailMo.setId(buyRelationResult.getUplineOrderDetailId());
-							orderDetailMo.setCommissionState((byte) 2);
-							int updateDetailResult = ordBuyRelationSvc.modify(buyRelationMo);
-							if(updateDetailResult != 1) {
-								_log.error("结算完成通知修改上线订单返佣状态时出现错误，参数为：{}", msg);
-								return true;
-							}
-							_log.info("结算完成通知修改上线订单详情状态成功返回，订单详情ID为：{}", msg.getOrderDetailId());
+						_log.info("根据返回ID更新上线订单详情返佣状态 ");
+						OrdOrderDetailMo orderDetailMo = new OrdOrderDetailMo();
+						orderDetailMo.setId(Long.parseLong(msg.getOrderDetailId()));
+						orderDetailMo.setCommissionState((byte) 2);
+						int updateDetailResult = ordOrderDetailSvc.modify(orderDetailMo);
+						if (updateDetailResult != 1) {
+							_log.error("结算完成通知修改上线订单返佣状态时出现错误，参数为：{}", msg);
 							return true;
 						}
+						_log.info("结算完成通知修改上线订单详情状态成功返回，订单详情ID为：{}", msg.getOrderDetailId());
+						return true;
+
 					} catch (DuplicateKeyException e) {
 						_log.warn("收到重复的消息: " + msg, e);
 						return true;
 					} catch (Exception e) {
-						_log.error("添加账户出现异常", e);
+						_log.error("接收返佣结算完成出现异常", e);
 						return false;
 					}
 				});
