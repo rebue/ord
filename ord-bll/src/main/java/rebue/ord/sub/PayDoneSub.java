@@ -42,9 +42,9 @@ public class PayDoneSub implements ApplicationListener<ContextRefreshedEvent> {
 	 */
 	private final static String PAY_DONE_QUEUE_NAME = "rebue.ord.pay.done.queue";
 
-    @Value("${appid:0}")
-    private int                 _appid;
-	
+	@Value("${appid:0}")
+	private int _appid;
+
 	protected IdWorker3 _idWorker;
 
 	@PostConstruct
@@ -83,6 +83,8 @@ public class PayDoneSub implements ApplicationListener<ContextRefreshedEvent> {
 		_log.info("订阅支付完成的通知");
 		consumer.bind(AfcExchangeCo.PAY_DONE_EXCHANGE_NAME, PAY_DONE_QUEUE_NAME, PayDoneMsg.class, (msg) -> {
 			_log.info("收到支付完成的通知: {}", msg);
+			if (!handlePayNotify(msg))
+				return false;
 			_log.info("添加订单购买关系");
 			OrdOrderMo orderMo = ordOrderSvc.getById(Long.parseLong(msg.getOrderId()));
 			_log.info("获取用户订单详情信息");
@@ -108,7 +110,7 @@ public class PayDoneSub implements ApplicationListener<ContextRefreshedEvent> {
 					_log.info(msg.getOrderId() + "获取其它关系的返回值为：{}" + getOtherRelationResult);
 				}
 			}
-			return handlePayNotify(msg);
+			return true;
 		});
 	}
 
