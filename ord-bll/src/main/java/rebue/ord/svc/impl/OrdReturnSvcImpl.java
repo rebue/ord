@@ -541,7 +541,8 @@ public class OrdReturnSvcImpl extends MybatisBaseSvcImpl<OrdReturnMo, java.lang.
 		BigDecimal bd = new BigDecimal("0");
 		BigDecimal returnAmount1 = new BigDecimal(to.getReturnAmount1());
 		BigDecimal returnAmount2 = new BigDecimal(to.getReturnAmount2());
-		BigDecimal subtractCashback = new BigDecimal(to.getSubtractCashback());
+//		BigDecimal subtractCashback = new BigDecimal(to.getSubtractCashback());
+		BigDecimal subtractCashback = bd;
 		Long refundOpId = to.getOpId();
 		if (returnCode == null || orderId == null || orderDetailId == null || refundOpId == null
 				|| subtractCashback == null) {
