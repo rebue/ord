@@ -559,17 +559,17 @@ public class OrdReturnSvcImpl extends MybatisBaseSvcImpl<OrdReturnMo, java.lang.
 			return agreeToARefundRo;
 		}
 		OrdOrderMo orderMo = new OrdOrderMo();
-		orderMo.setOrderCode(String.valueOf(orderId));
+		orderMo.setId(orderId);
 		_log.info("同意退款查询订单信息的参数为：{}", orderId);
-		List<OrdOrderMo> orderList = ordOrderSvc.list(orderMo);
+		OrdOrderMo orderList = ordOrderSvc.getById(orderId);
 		_log.info("同意退款查询订单信息的返回值为：{}", String.valueOf(orderList));
-		if (orderList.size() == 0) {
+		if (orderList == null) {
 			_log.error("同意退款查询订单时发现没有该订单，退货编号为：{}", returnCode);
 			agreeToARefundRo.setResult(AgreeToARefundDic.ORDER_NOT_EXIST);
 			agreeToARefundRo.setMsg("订单不存在");
 			return agreeToARefundRo;
 		}
-		byte orderState = orderList.get(0).getOrderState();
+		byte orderState = orderList.getOrderState();
 		if (orderState == OrderStateDic.CANCEL.getCode()
 				|| orderState == OrderStateDic.ALREADY_PLACE_AN_ORDER.getCode()) {
 			_log.error("同意退款时发现订单未支付或已取消，退货编号为：{}", returnCode);
@@ -623,12 +623,12 @@ public class OrdReturnSvcImpl extends MybatisBaseSvcImpl<OrdReturnMo, java.lang.
 			agreeToARefundRo.setMsg("该退款单已退款");
 			return agreeToARefundRo;
 		}
-		BigDecimal returnTotal = orderList.get(0).getReturnTotal();
+		BigDecimal returnTotal = orderList.getReturnTotal();
 		if (returnTotal == null) {
 			returnTotal = new BigDecimal("0");
 		}
 		BigDecimal newOrderReturnTotal = new BigDecimal(returnTotal.add(returnRental).doubleValue());
-		if (orderList.get(0).getRealMoney().compareTo(newOrderReturnTotal) == 0) {
+		if (orderList.getRealMoney().compareTo(newOrderReturnTotal) == 0) {
 			orderMo.setOrderState((byte) -1);
 		}
 		orderMo.setReturnAmount1(returnAmount1);

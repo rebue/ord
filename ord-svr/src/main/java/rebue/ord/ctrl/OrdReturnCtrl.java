@@ -29,6 +29,7 @@ import rebue.ord.ro.AddReturnRo;
 import rebue.ord.ro.AgreeToARefundRo;
 import rebue.ord.ro.AgreeToReturnRo;
 import rebue.ord.ro.OrdReturnRo;
+import rebue.ord.ro.OrdReturnRo2;
 import rebue.ord.ro.ReceivedAndRefundedRo;
 import rebue.ord.ro.RejectReturnRo;
 import rebue.ord.svc.OrdReturnSvc;
@@ -197,9 +198,25 @@ public class OrdReturnCtrl {
 	 * @mbg.generated 自动生成，如需修改，请删除本行
 	 */
 	@GetMapping("/ord/return/getbyid")
-	OrdReturnMo getById(@RequestParam("id") java.lang.Long id) {
+	OrdReturnRo2 getById(@RequestParam("id") java.lang.Long id) {
 		_log.info("get OrdReturnMo by id: " + id);
-		return svc.getById(id);
+		OrdReturnMo result = svc.getById(id);
+        _log.info("get: " + result);
+        OrdReturnRo2 ro = new OrdReturnRo2();
+        if (result == null) {
+            String msg = "获取失败，没有找到该条记录";
+            _log.error("{}: id-{}", msg, id);
+            ro.setMsg(msg);
+            ro.setResult((byte) -1);
+            return ro;
+        } else {
+            String msg = "获取成功";
+            _log.info("{}: id-{}", msg, id);
+            ro.setMsg(msg);
+            ro.setResult((byte) 1);
+            ro.setRecord(result);
+            return ro;
+        }
 	}
 
 	/**
@@ -288,7 +305,7 @@ public class OrdReturnCtrl {
 	 * @date 2018年5月11日 下午2:59:49
 	 */
 	@PostMapping("/ord/return/agreetoarefund")
-	AgreeToARefundRo agreeToARefund(OrdOrderReturnTo to) {
+	AgreeToARefundRo agreeToARefund(@RequestBody OrdOrderReturnTo to) {
 		AgreeToARefundRo agreeToARefundRo = new AgreeToARefundRo();
 		try {
 			_log.info("同意退款的请求参数为：{}", to.toString());

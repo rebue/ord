@@ -1023,7 +1023,7 @@
 		<if test="orderState != null">
 			,ORDER_STATE = #{orderState,jdbcType=TINYINT}
 		</if>
-		WHERE ORDER_CODE=#{orderCode, jdbcType=VARCHAR}
+		WHERE ID=#{id, jdbcType=VARCHAR}
 	</update>
 
 	<update id="updateByOrderCode" parameterType="rebue.ord.mo.OrdOrderMo">
