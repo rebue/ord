@@ -536,7 +536,7 @@ public class OrdReturnSvcImpl extends MybatisBaseSvcImpl<OrdReturnMo, java.lang.
 	public AgreeToARefundRo agreeToARefund(OrdOrderReturnTo to) {
 		AgreeToARefundRo agreeToARefundRo = new AgreeToARefundRo();
 		Long returnCode = to.getReturnCode();
-		Long orderId = to.getOrderCode();
+		Long orderId = to.getOrderId();
 		Long orderDetailId = to.getOrderDetailId();
 		BigDecimal bd = new BigDecimal("0");
 		BigDecimal returnAmount1 = new BigDecimal(to.getReturnAmount1());
