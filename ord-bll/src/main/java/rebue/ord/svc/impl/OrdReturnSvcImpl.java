@@ -696,6 +696,9 @@ public class OrdReturnSvcImpl extends MybatisBaseSvcImpl<OrdReturnMo, java.lang.
 			_log.error("已收到货并退款执行退款出错，退货编号为：{}", returnCode);
 			throw new RuntimeException("v支付出错，退款失败");
 		}
+		_log.info("删除该定单详情的购买关系记录");
+		int delResult = ordBuyRelationSvc.del(detailList.get(0).getId());
+		_log.info("删除该定单详情的购买关系记录的返回值为：{}",delResult);
 		agreeToARefundRo.setResult(AgreeToARefundDic.SUCCESS);
 		agreeToARefundRo.setMsg("退款成功");
 		return agreeToARefundRo;
