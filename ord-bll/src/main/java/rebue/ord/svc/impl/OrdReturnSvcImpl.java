@@ -35,6 +35,7 @@ import rebue.ord.dic.OrderStateDic;
 import rebue.ord.dic.ReceivedAndRefundedDic;
 import rebue.ord.dic.RejectReturnDic;
 import rebue.ord.mapper.OrdReturnMapper;
+import rebue.ord.mo.OrdBuyRelationMo;
 import rebue.ord.mo.OrdOrderDetailMo;
 import rebue.ord.mo.OrdOrderMo;
 import rebue.ord.mo.OrdReturnMo;
@@ -46,6 +47,7 @@ import rebue.ord.ro.OrdReturnRo;
 import rebue.ord.ro.OrderDetailRo;
 import rebue.ord.ro.ReceivedAndRefundedRo;
 import rebue.ord.ro.RejectReturnRo;
+import rebue.ord.svc.OrdBuyRelationSvc;
 import rebue.ord.svc.OrdOrderDetailSvc;
 import rebue.ord.svc.OrdOrderSvc;
 import rebue.ord.svc.OrdReturnPicSvc;
@@ -106,6 +108,9 @@ public class OrdReturnSvcImpl extends MybatisBaseSvcImpl<OrdReturnMo, java.lang.
 	 */
 	@Resource
 	private OrdOrderDetailSvc ordOrderDetailSvc;
+	
+	@Resource
+	private OrdBuyRelationSvc ordBuyRelationSvc;
 
 	/**
 	 */
@@ -512,6 +517,9 @@ public class OrdReturnSvcImpl extends MybatisBaseSvcImpl<OrdReturnMo, java.lang.
 			_log.error("同意退货修改退货信息时出现错误，退货编号为：{}", returnCode);
 			throw new RuntimeException("修改退货信息错误");
 		}
+		_log.info("删除该定单详情的购买关系记录");
+		int delResult = ordBuyRelationSvc.del(orderDetailList.get(0).getId());
+		_log.info("删除该定单详情的购买关系记录的返回值为：{}",delResult);
 		agreeToReturnRo.setResult(AgreeToReturnDic.SUCCESS);
 		agreeToReturnRo.setMsg("审核成功");
 		return agreeToReturnRo;

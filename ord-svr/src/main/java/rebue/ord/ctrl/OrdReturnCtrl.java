@@ -378,6 +378,16 @@ public class OrdReturnCtrl {
 		}
 	}
 
+	/**
+	 * 查询用户退货中订单信息
+	 * @param map
+	 * @return
+	 * @throws ParseException
+	 * @throws IllegalAccessException
+	 * @throws IllegalArgumentException
+	 * @throws InvocationTargetException
+	 * @throws IntrospectionException
+	 */
 	@GetMapping("/ord/order/returningInfo")
 	List<Map<String, Object>> getReturningInfo(@RequestParam Map<String, Object> map) throws ParseException,
 			IllegalAccessException, IllegalArgumentException, InvocationTargetException, IntrospectionException {
@@ -387,6 +397,16 @@ public class OrdReturnCtrl {
 		return list;
 	}
 
+	/**
+	 * 查询用户退货完成订单
+	 * @param map
+	 * @return
+	 * @throws ParseException
+	 * @throws IllegalAccessException
+	 * @throws IllegalArgumentException
+	 * @throws InvocationTargetException
+	 * @throws IntrospectionException
+	 */
 	@GetMapping("/ord/order/returnInfo")
 	List<Map<String, Object>> getReturnInfo(@RequestParam Map<String, Object> map) throws ParseException,
 			IllegalAccessException, IllegalArgumentException, InvocationTargetException, IntrospectionException {
