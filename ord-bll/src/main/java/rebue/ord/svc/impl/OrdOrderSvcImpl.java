@@ -409,6 +409,7 @@ public class OrdOrderSvcImpl extends MybatisBaseSvcImpl<OrdOrderMo, java.lang.Lo
 		mo.setOnlineId(onlineId);
 		mo.setBuyPrice(buyPrice);
 		mo.setUserId(buyRelation);
+		mo.setReturnState((byte)0);
 		_log.info("获取用户上线购买关系订单详情的参数为：{}" + mo);
 		OrdOrderDetailMo orderDetailMo = ordOrderDetailSvc.getFullReturnDetail(mo);
 		_log.info("获取用户上线购买关系订单详情的返回值为：{}" + orderDetailMo);
@@ -468,6 +469,7 @@ public class OrdOrderSvcImpl extends MybatisBaseSvcImpl<OrdOrderMo, java.lang.Lo
 		mo.setOnlineId(onlineId);
 		mo.setBuyPrice(buyPrice);
 		mo.setUserId(sucReg.getRecord().getId());
+		mo.setReturnState((byte)0);
 		_log.info("获取用户注册关系订单详情的参数：{}" + mo);
 		OrdOrderDetailMo orderDetailMo = ordOrderDetailSvc.getFullReturnDetail(mo);
 		_log.info("获取用户注册关系订单详情的返回值为：{}" + orderDetailMo);
@@ -517,6 +519,7 @@ public class OrdOrderSvcImpl extends MybatisBaseSvcImpl<OrdOrderMo, java.lang.Lo
 		mo.setId(downLineDetailId);
 		mo.setOnlineId(onlineId);
 		mo.setBuyPrice(buyPrice);
+		mo.setReturnState((byte)0);
 		OrdOrderDetailMo orderDetailMo = ordOrderDetailSvc.getOtherFullReturnDetail(mo);
 		_log.info("获取上家订单详情的返回值为：{}" + orderDetailMo);
 		if (orderDetailMo == null) {
