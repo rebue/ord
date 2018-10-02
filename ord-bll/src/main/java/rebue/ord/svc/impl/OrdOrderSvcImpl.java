@@ -409,7 +409,7 @@ public class OrdOrderSvcImpl extends MybatisBaseSvcImpl<OrdOrderMo, java.lang.Lo
 		mo.setOnlineId(onlineId);
 		mo.setBuyPrice(buyPrice);
 		mo.setUserId(buyRelation);
-		mo.setReturnState((byte)0);
+		mo.setReturnState((byte) 0);
 		_log.info("获取用户上线购买关系订单详情的参数为：{}" + mo);
 		OrdOrderDetailMo orderDetailMo = ordOrderDetailSvc.getFullReturnDetail(mo);
 		_log.info("获取用户上线购买关系订单详情的返回值为：{}" + orderDetailMo);
@@ -469,7 +469,7 @@ public class OrdOrderSvcImpl extends MybatisBaseSvcImpl<OrdOrderMo, java.lang.Lo
 		mo.setOnlineId(onlineId);
 		mo.setBuyPrice(buyPrice);
 		mo.setUserId(sucReg.getRecord().getId());
-		mo.setReturnState((byte)0);
+		mo.setReturnState((byte) 0);
 		_log.info("获取用户注册关系订单详情的参数：{}" + mo);
 		OrdOrderDetailMo orderDetailMo = ordOrderDetailSvc.getFullReturnDetail(mo);
 		_log.info("获取用户注册关系订单详情的返回值为：{}" + orderDetailMo);
@@ -519,7 +519,7 @@ public class OrdOrderSvcImpl extends MybatisBaseSvcImpl<OrdOrderMo, java.lang.Lo
 		mo.setId(downLineDetailId);
 		mo.setOnlineId(onlineId);
 		mo.setBuyPrice(buyPrice);
-		mo.setReturnState((byte)0);
+		mo.setReturnState((byte) 0);
 		OrdOrderDetailMo orderDetailMo = ordOrderDetailSvc.getOtherFullReturnDetail(mo);
 		_log.info("获取上家订单详情的返回值为：{}" + orderDetailMo);
 		if (orderDetailMo == null) {
@@ -1030,17 +1030,21 @@ public class OrdOrderSvcImpl extends MybatisBaseSvcImpl<OrdOrderMo, java.lang.Lo
 						orderSignInRo.setMsg("更新购买关系失败");
 						return orderSignInRo;
 					}
-					// 获取上线买家商品详情的的购买关系记录，如果有2个且都已签收则执行返佣任务
-					OrdBuyRelationMo uplineBuyRelationMo = new OrdBuyRelationMo();
-					uplineBuyRelationMo.setUplineOrderDetailId(buyRelationResult.getUplineOrderDetailId());
-					uplineBuyRelationMo.setIsSignIn(true);
-					List<OrdBuyRelationMo> uplineBuyRelationList = ordBuyRelationSvc.list(uplineBuyRelationMo);
-					if (uplineBuyRelationList.size() == 2) {
-						settleTasksDetailTo.setUplineAccountId(buyRelationResult.getUplineUserId());
-						settleTasksDetailTo.setUplineOrderId(buyRelationResult.getUplineOrderId());
-						settleTasksDetailTo.setUplineOrderDetailId(buyRelationResult.getUplineOrderDetailId());
-						settleTasksDetailTo.setSettleUplineCommissionAmount(ordOrderDetailMo.getBuyPrice());
-						settleTasksDetailTo.setSettleUplineCommissionTitle("大卖网络-结算订单上家佣金");
+					// 根据购买关系查找上家定单详情,定单详情存在且不是退货状态才发起返佣任务
+					OrdOrderDetailMo uplineDetailResult = ordOrderDetailSvc.getById(buyRelationResult.getUplineOrderDetailId());
+					if (uplineDetailResult != null && uplineDetailResult.getReturnState() == 0) {
+						// 获取上线买家商品详情的的购买关系记录，如果有2个且都已签收则执行返佣任务
+						OrdBuyRelationMo uplineBuyRelationMo = new OrdBuyRelationMo();
+						uplineBuyRelationMo.setUplineOrderDetailId(buyRelationResult.getUplineOrderDetailId());
+						uplineBuyRelationMo.setIsSignIn(true);
+						List<OrdBuyRelationMo> uplineBuyRelationList = ordBuyRelationSvc.list(uplineBuyRelationMo);
+						if (uplineBuyRelationList.size() == 2) {
+							settleTasksDetailTo.setUplineAccountId(buyRelationResult.getUplineUserId());
+							settleTasksDetailTo.setUplineOrderId(buyRelationResult.getUplineOrderId());
+							settleTasksDetailTo.setUplineOrderDetailId(buyRelationResult.getUplineOrderDetailId());
+							settleTasksDetailTo.setSettleUplineCommissionAmount(ordOrderDetailMo.getBuyPrice());
+							settleTasksDetailTo.setSettleUplineCommissionTitle("大卖网络-结算订单上家佣金");
+						}
 					}
 				}
 			}
