@@ -1,6 +1,7 @@
 package rebue.ord.sub;
 
 import java.math.BigDecimal;
+import java.util.List;
 
 import javax.annotation.PostConstruct;
 import javax.annotation.Resource;
@@ -90,24 +91,33 @@ public class PayDoneSub implements ApplicationListener<ContextRefreshedEvent> {
 			_log.info("获取用户订单详情信息");
 			OrdOrderDetailMo detailMo = new OrdOrderDetailMo();
 			detailMo.setOrderId(Long.parseLong(msg.getOrderId()));
-			OrdOrderDetailMo detailMoResult = ordOrderDetailSvc.getOne(detailMo);
+			List<OrdOrderDetailMo> detailMoResult = ordOrderDetailSvc.list(detailMo);
 			_log.info("获取到的定单详情为：{}" + detailMoResult);
-			long id = detailMoResult.getUserId();
-			long onlineId = detailMoResult.getOnlineId();
-			_log.info("获取用户购买关系上家");
-			boolean getBuyRelationResult = getAndUpdateBuyRelation(id, onlineId, detailMoResult.getBuyPrice(),
-					detailMoResult.getId(), detailMoResult.getOrderId());
-			_log.info(msg.getOrderId() + "获取用户购买关系的返回值为：{}" + getBuyRelationResult);
-			if (getBuyRelationResult == false) {
-				_log.info("获取用户注册关系上家");
-				boolean getRegRelationResult = getAndUpdateRegRelation(id, onlineId, detailMoResult.getBuyPrice(),
-						detailMoResult.getId(), detailMoResult.getOrderId());
-				_log.info(msg.getOrderId() + "获取用户注册关系的返回值为：{}" + getRegRelationResult);
-				if (getRegRelationResult == false) {
-					_log.info("获取其它关系上家");
-					boolean getOtherRelationResult = getAndUpdateOtherRelation(id, onlineId,
-							detailMoResult.getBuyPrice(), detailMoResult.getId(), detailMoResult.getOrderId());
-					_log.info(msg.getOrderId() + "获取其它关系的返回值为：{}" + getOtherRelationResult);
+			for (int i = 0; i < detailMoResult.size(); i++) {
+				_log.info("订单详情商品类型为：{}" + detailMoResult.get(i).getSubjectType());
+				if (detailMoResult.get(i).getSubjectType() == 1) {
+					_log.info("全返商品添加购买关系");
+					long id = detailMoResult.get(i).getUserId();
+					long onlineId = detailMoResult.get(i).getOnlineId();
+					_log.info("获取用户购买关系上家");
+					boolean getBuyRelationResult = getAndUpdateBuyRelationByPromot(id, onlineId,
+							detailMoResult.get(i).getBuyPrice(), detailMoResult.get(i).getId(),
+							detailMoResult.get(i).getOrderId());
+					_log.info(msg.getOrderId() + "获取用户购买关系的返回值为：{}" + getBuyRelationResult);
+					if (getBuyRelationResult == false) {
+						_log.info("获取用户注册关系上家");
+						boolean getRegRelationResult = getAndUpdateBuyRelationByReg(id, onlineId,
+								detailMoResult.get(i).getBuyPrice(), detailMoResult.get(i).getId(),
+								detailMoResult.get(i).getOrderId());
+						_log.info(msg.getOrderId() + "获取用户注册关系的返回值为：{}" + getRegRelationResult);
+						if (getRegRelationResult == false) {
+							_log.info("获取其它关系上家");
+							boolean getOtherRelationResult = getAndUpdateBuyRelationByOther(id, onlineId,
+									detailMoResult.get(i).getBuyPrice(), detailMoResult.get(i).getId(),
+									detailMoResult.get(i).getOrderId());
+							_log.info(msg.getOrderId() + "获取其它关系的返回值为：{}" + getOtherRelationResult);
+						}
+					}
 				}
 			}
 			return true;
@@ -144,10 +154,62 @@ public class PayDoneSub implements ApplicationListener<ContextRefreshedEvent> {
 	}
 
 	/**
-	 * 获取购买关系并更新购买关系表
+	 * 根据自己的购买记录更新购买关系
+	 */
+
+	@Transactional(readOnly = false, propagation = Propagation.REQUIRED)
+	public boolean getAndUpdateBuyRelationByOwn(long id, long onlineId, BigDecimal buyPrice, long downLineDetailId,
+			long downLineOrderId) {
+		// 获取用户购买关系
+		_log.info("获取用户购买关系的id:" + id + "onlineId:" + onlineId + "buyPricce:" + buyPrice);
+		// 获取用户购买该产品详情记录
+		OrdOrderDetailMo mo = new OrdOrderDetailMo();
+		mo.setOnlineId(onlineId);
+		mo.setBuyPrice(buyPrice);
+		mo.setUserId(id);
+		mo.setReturnState((byte) 0);
+		_log.info("获取用户自己购买订单详情的参数为：{}" + mo);
+		OrdOrderDetailMo orderDetailMo = ordOrderDetailSvc.getFullReturnDetail(mo);
+		_log.info("获取用户上线购买关系订单详情的返回值为：{}" + orderDetailMo);
+		if (orderDetailMo == null) {
+			return false;
+		}
+		OrdOrderDetailMo updateOrderDetailMo = new OrdOrderDetailMo();
+		updateOrderDetailMo.setCommissionSlot((byte) (orderDetailMo.getCommissionSlot() - 1));
+		updateOrderDetailMo.setId(orderDetailMo.getId());
+		if ((orderDetailMo.getCommissionSlot() - 1) == 0) {
+			updateOrderDetailMo.setCommissionState((byte) 1);
+		}
+		// 更新购买关系订单详情的返佣名额
+		int updateOrderDetailResult = ordOrderDetailSvc.modify(updateOrderDetailMo);
+		if (updateOrderDetailResult != 1) {
+			_log.error("{}更新订单详情返佣名额失败", id);
+			throw new RuntimeException("更新订单详情返现名额失败");
+		}
+		// 添加购买关系记录
+		_log.info("在购买关系表中添加记录");
+		OrdBuyRelationMo ordBuyRelationMo = new OrdBuyRelationMo();
+		ordBuyRelationMo.setId(_idWorker.getId());
+		ordBuyRelationMo.setUplineOrderId(orderDetailMo.getOrderId());
+		ordBuyRelationMo.setUplineUserId(orderDetailMo.getUserId());
+		ordBuyRelationMo.setUplineOrderDetailId(orderDetailMo.getId());
+		ordBuyRelationMo.setDownlineUserId(id);
+		ordBuyRelationMo.setDownlineOrderDetailId(downLineDetailId);
+		ordBuyRelationMo.setDownlineOrderId(downLineOrderId);
+		_log.error("添加购买关系参数:{}", ordBuyRelationMo);
+		int addBuyRelationResult = ordBuyRelationSvc.add(ordBuyRelationMo);
+		if (addBuyRelationResult != 1) {
+			_log.error("{}添加下级购买信息失败", id);
+			throw new RuntimeException("生成购买关系出错");
+		}
+		return true;
+	}
+
+	/**
+	 * 获取邀请关系并更新购买关系表
 	 */
 	@Transactional(readOnly = false, propagation = Propagation.REQUIRED)
-	public boolean getAndUpdateBuyRelation(long id, long onlineId, BigDecimal buyPrice, long downLineDetailId,
+	public boolean getAndUpdateBuyRelationByPromot(long id, long onlineId, BigDecimal buyPrice, long downLineDetailId,
 			long downLineOrderId) {
 		// 获取用户购买关系
 		_log.info("获取用户购买关系的id:" + id + "onlineId:" + onlineId + "buyPricce:" + buyPrice);
@@ -208,7 +270,7 @@ public class PayDoneSub implements ApplicationListener<ContextRefreshedEvent> {
 	 * @return
 	 */
 	@Transactional(readOnly = false, propagation = Propagation.REQUIRED)
-	public boolean getAndUpdateRegRelation(long id, long onlineId, BigDecimal buyPrice, long downLineDetailId,
+	public boolean getAndUpdateBuyRelationByReg(long id, long onlineId, BigDecimal buyPrice, long downLineDetailId,
 			long downLineOrderId) {
 		_log.info("获取用户信息参数：{}" + id);
 		SucRegRo sucReg = sucUserSvc.getRegInfo(id);
@@ -264,7 +326,7 @@ public class PayDoneSub implements ApplicationListener<ContextRefreshedEvent> {
 	 * 获取除购买关系和注册关系外的一个购买上家,并更新购买关系表
 	 */
 	@Transactional(readOnly = false, propagation = Propagation.REQUIRED)
-	public boolean getAndUpdateOtherRelation(long id, long onlineId, BigDecimal buyPrice, long downLineDetailId,
+	public boolean getAndUpdateBuyRelationByOther(long id, long onlineId, BigDecimal buyPrice, long downLineDetailId,
 			long downLineOrderId) {
 		// 根据产品上线ID和价格查找订单详情记录，看是否有符合要求的订单详情
 		OrdOrderDetailMo mo = new OrdOrderDetailMo();
