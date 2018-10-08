@@ -1,5 +1,8 @@
--- 2018年10月8日11:13:07添加：
-	-- 商品购买关系表（ORD_GOODS_BUY_RELATION）
+-- 2018年10月8日15:17:14
+	-- 添加订单购买关系（ORD_BUY_RELATION）表字段：关系来源（RELATION_SOURCE）
+	alter table ORD_BUY_RELATION add RELATION_SOURCE      tinyint not null comment '关系来源（1：自己匹配自己  2：购买关系  3：注册关系  4：差一人且已有购买关系  5：差两人  6：差一人但没有购买关系）';
+-- 2018年10月8日11:13:07
+	-- 添加：商品购买关系表（ORD_GOODS_BUY_RELATION）
 	/*==============================================================*/
 	/* Table: ORD_GOODS_BUY_RELATION                                */
 	/*==============================================================*/

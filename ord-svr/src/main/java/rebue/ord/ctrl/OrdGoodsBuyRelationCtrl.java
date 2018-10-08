@@ -1,12 +1,9 @@
 package rebue.ord.ctrl;
 
+import com.github.pagehelper.PageInfo;
 import java.text.SimpleDateFormat;
 import java.util.Date;
-import java.util.List;
-
 import javax.annotation.Resource;
-
-import org.dozer.Mapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.dao.DuplicateKeyException;
@@ -17,12 +14,8 @@ import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
-
-import com.github.pagehelper.PageInfo;
-
 import rebue.ord.mo.OrdGoodsBuyRelationMo;
 import rebue.ord.svc.OrdGoodsBuyRelationSvc;
-
 import rebue.robotech.dic.ResultDic;
 import rebue.robotech.ro.Ro;
 
@@ -33,10 +26,11 @@ import rebue.robotech.ro.Ro;
  */
 @RestController
 public class OrdGoodsBuyRelationCtrl {
+
     /**
      * @mbg.generated 自动生成，如需修改，请删除本行
      */
-    private final static Logger _log = LoggerFactory.getLogger(OrdGoodsBuyRelationCtrl.class);
+    private static final Logger _log = LoggerFactory.getLogger(OrdGoodsBuyRelationCtrl.class);
 
     /**
      * @mbg.generated 自动生成，如需修改，请删除本行
@@ -132,11 +126,12 @@ public class OrdGoodsBuyRelationCtrl {
 
     /**
      * 删除用户商品购买关系
-     * 
+     *
      * @mbg.generated 自动生成，如需修改，请删除本行
      */
     @DeleteMapping("/ord/goodsbuyrelation")
-    Ro del(@RequestParam("id") java.lang.Long id) {        _log.info("del OrdGoodsBuyRelationMo by id: {}", id);
+    Ro del(@RequestParam("id") java.lang.Long id) {
+        _log.info("del OrdGoodsBuyRelationMo by id: {}", id);
         int result = svc.del(id);
         Ro ro = new Ro();
         if (result == 1) {
@@ -156,7 +151,7 @@ public class OrdGoodsBuyRelationCtrl {
 
     /**
      * 查询用户商品购买关系
-     * 
+     *
      * @mbg.generated 自动生成，如需修改，请删除本行
      */
     @GetMapping("/ord/goodsbuyrelation")
@@ -178,7 +173,7 @@ public class OrdGoodsBuyRelationCtrl {
 
     /**
      * 获取单个用户商品购买关系
-     * 
+     *
      * @mbg.generated 自动生成，如需修改，请删除本行
      */
     @GetMapping("/ord/goodsbuyrelation/getbyid")
@@ -186,5 +181,4 @@ public class OrdGoodsBuyRelationCtrl {
         _log.info("get OrdGoodsBuyRelationMo by id: " + id);
         return svc.getById(id);
     }
-
 }
