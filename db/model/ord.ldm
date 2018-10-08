@@ -1841,7 +1841,7 @@ LABL 0 新宋体,8,N</a:FontList>
 <a:CreationDate>1538967416</a:CreationDate>
 <a:ModificationDate>1538967801</a:ModificationDate>
 <a:IconMode>-1</a:IconMode>
-<a:Rect>((-25776,-34517), (-7752,-25369))</a:Rect>
+<a:Rect>((-24656,-34105), (-8872,-25781))</a:Rect>
 <a:LineColor>11881048</a:LineColor>
 <a:FillColor>16759472</a:FillColor>
 <a:ShadowColor>12632256</a:ShadowColor>
@@ -3469,11 +3469,11 @@ LABL 0 新宋体,8,N</a:FontList>
 </o:Identifier>
 <o:Identifier Id="o168">
 <a:ObjectID>B2BE1A42-30E1-47F5-84F0-D3A861D10BBB</a:ObjectID>
-<a:Name>UPLINE_USER_ID_AND_DOWNLINE_USER_ID_AND_ONLINE_ID_AND_SALE_PRICE</a:Name>
+<a:Name>用户商品购买关系</a:Name>
 <a:Code>UPLINE_USER_ID_AND_DOWNLINE_USER_ID_AND_ONLINE_ID_AND_SALE_PRICE</a:Code>
 <a:CreationDate>1538968097</a:CreationDate>
 <a:Creator>admin</a:Creator>
-<a:ModificationDate>1538968234</a:ModificationDate>
+<a:ModificationDate>1538969270</a:ModificationDate>
 <a:Modifier>admin</a:Modifier>
 <c:Identifier.Attributes>
 <o:EntityAttribute Ref="o169"/>
@@ -3987,12 +3987,12 @@ LABL 0 新宋体,8,N</a:FontList>
 <a:Code>ord-mysql</a:Code>
 <a:CreationDate>1538967752</a:CreationDate>
 <a:Creator>admin</a:Creator>
-<a:ModificationDate>1538968261</a:ModificationDate>
+<a:ModificationDate>1538969298</a:ModificationDate>
 <a:Modifier>admin</a:Modifier>
 <a:TargetModelURL>file:///D|/eclipse/ord/db/model/ord-mysql.pdm</a:TargetModelURL>
 <a:TargetModelID>39368D4F-E183-4613-ACFF-22B4C338BC9F</a:TargetModelID>
 <a:TargetModelClassID>CDE44E21-9669-11D1-9914-006097355D9B</a:TargetModelClassID>
-<a:TargetModelLastModificationDate>1538968262</a:TargetModelLastModificationDate>
+<a:TargetModelLastModificationDate>1538969299</a:TargetModelLastModificationDate>
 <c:SessionShortcuts>
 <o:Shortcut Ref="o18"/>
 </c:SessionShortcuts>

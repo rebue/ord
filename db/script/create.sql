@@ -1,6 +1,6 @@
 /*==============================================================*/
 /* DBMS name:      MySQL 5.0                                    */
-/* Created on:     2018/10/8 11:12:00                           */
+/* Created on:     2018/10/8 11:35:49                           */
 /*==============================================================*/
 
 
@@ -73,7 +73,7 @@ create table ORD_GOODS_BUY_RELATION
    SALE_PRICE           decimal(18,4) not null comment '销售价格',
    CREATE_TIME          datetime not null comment '创建时间',
    primary key (ID),
-   unique key AK_UPLINE_USER_ID_AND_DOWNLINE_USER_ID_AND_ONLINE_ID_AND_SALE_PRICE (UPLINE_USER_ID, DOWNLINE_USER_ID, ONLINE_ID, SALE_PRICE)
+   unique key AK_UPLINE_USER_AND_DOWNLINE_USER_AND_ONLINE_AND_SALE_PRICE (UPLINE_USER_ID, DOWNLINE_USER_ID, ONLINE_ID, SALE_PRICE)
 );
 
 alter table ORD_GOODS_BUY_RELATION comment '用户商品购买关系';
