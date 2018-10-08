@@ -1,12 +1,9 @@
 package rebue.ord.ctrl;
 
+import com.github.pagehelper.PageInfo;
 import java.text.SimpleDateFormat;
 import java.util.Date;
-import java.util.List;
-
 import javax.annotation.Resource;
-
-import org.dozer.Mapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.dao.DuplicateKeyException;
@@ -17,12 +14,8 @@ import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
-
-import com.github.pagehelper.PageInfo;
-
 import rebue.ord.mo.OrdBuyRelationMo;
 import rebue.ord.svc.OrdBuyRelationSvc;
-
 import rebue.robotech.dic.ResultDic;
 import rebue.robotech.ro.Ro;
 
@@ -33,10 +26,11 @@ import rebue.robotech.ro.Ro;
  */
 @RestController
 public class OrdBuyRelationCtrl {
+
     /**
      * @mbg.generated 自动生成，如需修改，请删除本行
      */
-    private final static Logger _log = LoggerFactory.getLogger(OrdBuyRelationCtrl.class);
+    private static final Logger _log = LoggerFactory.getLogger(OrdBuyRelationCtrl.class);
 
     /**
      * @mbg.generated 自动生成，如需修改，请删除本行
@@ -132,11 +126,12 @@ public class OrdBuyRelationCtrl {
 
     /**
      * 删除订单购买关系
-     * 
+     *
      * @mbg.generated 自动生成，如需修改，请删除本行
      */
     @DeleteMapping("/ord/buyrelation")
-    Ro del(@RequestParam("id") java.lang.Long id) {        _log.info("del OrdBuyRelationMo by id: {}", id);
+    Ro del(@RequestParam("id") java.lang.Long id) {
+        _log.info("del OrdBuyRelationMo by id: {}", id);
         int result = svc.del(id);
         Ro ro = new Ro();
         if (result == 1) {
@@ -156,7 +151,7 @@ public class OrdBuyRelationCtrl {
 
     /**
      * 查询订单购买关系
-     * 
+     *
      * @mbg.generated 自动生成，如需修改，请删除本行
      */
     @GetMapping("/ord/buyrelation")
@@ -178,7 +173,7 @@ public class OrdBuyRelationCtrl {
 
     /**
      * 获取单个订单购买关系
-     * 
+     *
      * @mbg.generated 自动生成，如需修改，请删除本行
      */
     @GetMapping("/ord/buyrelation/getbyid")
@@ -186,5 +181,4 @@ public class OrdBuyRelationCtrl {
         _log.info("get OrdBuyRelationMo by id: " + id);
         return svc.getById(id);
     }
-
 }
