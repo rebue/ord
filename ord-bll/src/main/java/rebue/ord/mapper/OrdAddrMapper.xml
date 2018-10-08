@@ -144,7 +144,6 @@
       </if>
     </trim>
   </insert>
- 
   <update id="updateByPrimaryKey" parameterType="rebue.ord.mo.OrdAddrMo">
     <!--
       WARNING - @mbg.generated

@@ -65,7 +65,7 @@ public interface OrdTaskMapper extends MybatisBaseMapper<OrdTaskMo, Long> {
     /**
      *    @mbg.generated 自动生成，如需修改，请删除本行
      */
-    List<OrdTaskMo> countSelective(OrdTaskMo record);
+    int countSelective(OrdTaskMo record);
 
     /**
      *  查询订单任务数量 Title: selectByExecutePlanTimeBeforeNow Description:

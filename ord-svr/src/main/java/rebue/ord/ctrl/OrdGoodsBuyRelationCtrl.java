@@ -1,10 +1,12 @@
 package rebue.ord.ctrl;
 
-import com.github.pagehelper.PageInfo;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.List;
+
 import javax.annotation.Resource;
+
+import org.dozer.Mapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.dao.DuplicateKeyException;
@@ -15,29 +17,32 @@ import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
-import rebue.ord.mo.OrdReturnPicMo;
-import rebue.ord.svc.OrdReturnPicSvc;
+
+import com.github.pagehelper.PageInfo;
+
+import rebue.ord.mo.OrdGoodsBuyRelationMo;
+import rebue.ord.svc.OrdGoodsBuyRelationSvc;
+
 import rebue.robotech.dic.ResultDic;
 import rebue.robotech.ro.Ro;
 
 /**
- * 退货图片
+ * 用户商品购买关系
  *
  * @mbg.generated 自动生成的注释，如需修改本注释，请删除本行
  */
 @RestController
-public class OrdReturnPicCtrl {
-
+public class OrdGoodsBuyRelationCtrl {
     /**
      * @mbg.generated 自动生成，如需修改，请删除本行
      */
-    private static final Logger _log = LoggerFactory.getLogger(OrdReturnPicCtrl.class);
+    private final static Logger _log = LoggerFactory.getLogger(OrdGoodsBuyRelationCtrl.class);
 
     /**
      * @mbg.generated 自动生成，如需修改，请删除本行
      */
     @Resource
-    private OrdReturnPicSvc svc;
+    private OrdGoodsBuyRelationSvc svc;
 
     /**
      * 有唯一约束的字段名称
@@ -47,13 +52,13 @@ public class OrdReturnPicCtrl {
     private String _uniqueFilesName = "某字段内容";
 
     /**
-     * 添加退货图片
+     * 添加用户商品购买关系
      *
      * @mbg.generated 自动生成，如需修改，请删除本行
      */
-    @PostMapping("/ord/returnpic")
-    Ro add(@RequestBody OrdReturnPicMo mo) throws Exception {
-        _log.info("add OrdReturnPicMo: {}", mo);
+    @PostMapping("/ord/goodsbuyrelation")
+    Ro add(@RequestBody OrdGoodsBuyRelationMo mo) throws Exception {
+        _log.info("add OrdGoodsBuyRelationMo: {}", mo);
         Ro ro = new Ro();
         try {
             int result = svc.add(mo);
@@ -87,13 +92,13 @@ public class OrdReturnPicCtrl {
     }
 
     /**
-     * 修改退货图片
+     * 修改用户商品购买关系
      *
      * @mbg.generated 自动生成，如需修改，请删除本行
      */
-    @PutMapping("/ord/returnpic")
-    Ro modify(@RequestBody OrdReturnPicMo mo) throws Exception {
-        _log.info("modify OrdReturnPicMo: {}", mo);
+    @PutMapping("/ord/goodsbuyrelation")
+    Ro modify(@RequestBody OrdGoodsBuyRelationMo mo) throws Exception {
+        _log.info("modify OrdGoodsBuyRelationMo: {}", mo);
         Ro ro = new Ro();
         try {
             if (svc.modify(mo) == 1) {
@@ -126,13 +131,12 @@ public class OrdReturnPicCtrl {
     }
 
     /**
-     * 删除退货图片
-     *
+     * 删除用户商品购买关系
+     * 
      * @mbg.generated 自动生成，如需修改，请删除本行
      */
-    @DeleteMapping("/ord/returnpic")
-    Ro del(@RequestParam("id") java.lang.Long id) {
-        _log.info("del OrdReturnPicMo by id: {}", id);
+    @DeleteMapping("/ord/goodsbuyrelation")
+    Ro del(@RequestParam("id") java.lang.Long id) {        _log.info("del OrdGoodsBuyRelationMo by id: {}", id);
         int result = svc.del(id);
         Ro ro = new Ro();
         if (result == 1) {
@@ -151,24 +155,36 @@ public class OrdReturnPicCtrl {
     }
 
     /**
-     * 获取单个退货图片
-     *
+     * 查询用户商品购买关系
+     * 
      * @mbg.generated 自动生成，如需修改，请删除本行
      */
-    @GetMapping("/ord/returnpic/getbyid")
-    OrdReturnPicMo getById(@RequestParam("id") java.lang.Long id) {
-        _log.info("get OrdReturnPicMo by id: " + id);
-        return svc.getById(id);
+    @GetMapping("/ord/goodsbuyrelation")
+    PageInfo<OrdGoodsBuyRelationMo> list(OrdGoodsBuyRelationMo mo, @RequestParam(value = "pageNum", required = false) Integer pageNum, @RequestParam(value = "pageSize", required = false) Integer pageSize) {
+        if (pageNum == null)
+            pageNum = 1;
+        if (pageSize == null)
+            pageSize = 5;
+        _log.info("list OrdGoodsBuyRelationMo:" + mo + ", pageNum = " + pageNum + ", pageSize = " + pageSize);
+        if (pageSize > 50) {
+            String msg = "pageSize不能大于50";
+            _log.error(msg);
+            throw new IllegalArgumentException(msg);
+        }
+        PageInfo<OrdGoodsBuyRelationMo> result = svc.list(mo, pageNum, pageSize);
+        _log.info("result: " + result);
+        return result;
     }
 
     /**
-     * 查询退货图片
+     * 获取单个用户商品购买关系
+     * 
+     * @mbg.generated 自动生成，如需修改，请删除本行
      */
-    @GetMapping("/ord/returnpic")
-    List<OrdReturnPicMo> list(OrdReturnPicMo qo) {
-        _log.info("查询退货图片的参数为：{}", qo.toString());
-        List<OrdReturnPicMo> result = svc.list(qo);
-        _log.info("查询退货图片的返回值为：{}", String.valueOf(result));
-        return result;
+    @GetMapping("/ord/goodsbuyrelation/getbyid")
+    OrdGoodsBuyRelationMo getById(@RequestParam("id") java.lang.Long id) {
+        _log.info("get OrdGoodsBuyRelationMo by id: " + id);
+        return svc.getById(id);
     }
+
 }

@@ -63,7 +63,7 @@ public interface OrdReturnMapper extends MybatisBaseMapper<OrdReturnMo, Long> {
     /**
      *    @mbg.generated 自动生成，如需修改，请删除本行
      */
-    List<OrdReturnMo> countSelective(OrdReturnMo record);
+    int countSelective(OrdReturnMo record);
 
     /**
      *  查询分页列表信息 Title: selectReturnPageList Description:
