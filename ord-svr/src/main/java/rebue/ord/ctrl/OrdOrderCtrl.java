@@ -1,16 +1,20 @@
 package rebue.ord.ctrl;
 
+import com.fasterxml.jackson.core.JsonParseException;
+import com.fasterxml.jackson.databind.JsonMappingException;
+import com.github.pagehelper.PageInfo;
 import java.beans.IntrospectionException;
 import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
 import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.List;
 import java.util.Map;
-
 import javax.annotation.Resource;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.dao.DuplicateKeyException;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -19,11 +23,6 @@ import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
-
-import com.fasterxml.jackson.core.JsonParseException;
-import com.fasterxml.jackson.databind.JsonMappingException;
-import com.github.pagehelper.PageInfo;
-
 import rebue.ord.dic.CancelDeliveryDic;
 import rebue.ord.dic.CancellationOfOrderDic;
 import rebue.ord.dic.OrderSignInDic;
@@ -61,6 +60,92 @@ public class OrdOrderCtrl {
      */
     @Resource
     private OrdOrderSvc svc;
+
+    /**
+     * 有唯一约束的字段名称
+     *
+     * @mbg.generated 自动生成，如需修改，请删除本行
+     */
+    private String _uniqueFilesName = "某字段内容";
+
+    /**
+     * 添加订单信息
+     *
+     * @mbg.generated 自动生成，如需修改，请删除本行
+     */
+    @PostMapping("/ord/order")
+    Ro add(@RequestBody OrdOrderMo mo) throws Exception {
+        _log.info("add OrdOrderMo: {}", mo);
+        Ro ro = new Ro();
+        try {
+            int result = svc.add(mo);
+            if (result == 1) {
+                String msg = "添加成功";
+                _log.info("{}: mo-{}", msg, mo);
+                ro.setMsg(msg);
+                ro.setResult(ResultDic.SUCCESS);
+                return ro;
+            } else {
+                String msg = "添加失败";
+                _log.error("{}: mo-{}", msg, mo);
+                ro.setMsg(msg);
+                ro.setResult(ResultDic.FAIL);
+                return ro;
+            }
+        } catch (DuplicateKeyException e) {
+            String msg = "添加失败，" + _uniqueFilesName + "已存在，不允许出现重复";
+            _log.error("{}: mo-{}", msg, mo);
+            ro.setMsg(msg);
+            ro.setResult(ResultDic.FAIL);
+            return ro;
+        } catch (RuntimeException e) {
+            SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+            String msg = "修改失败，出现运行时异常(" + sdf.format(new Date()) + ")";
+            _log.error("{}: mo-{}", msg, mo);
+            ro.setMsg(msg);
+            ro.setResult(ResultDic.FAIL);
+            return ro;
+        }
+    }
+
+    /**
+     * 修改订单信息
+     *
+     * @mbg.generated 自动生成，如需修改，请删除本行
+     */
+    @PutMapping("/ord/order")
+    Ro modify(@RequestBody OrdOrderMo mo) throws Exception {
+        _log.info("modify OrdOrderMo: {}", mo);
+        Ro ro = new Ro();
+        try {
+            if (svc.modify(mo) == 1) {
+                String msg = "修改成功";
+                _log.info("{}: mo-{}", msg, mo);
+                ro.setMsg(msg);
+                ro.setResult(ResultDic.SUCCESS);
+                return ro;
+            } else {
+                String msg = "修改失败";
+                _log.error("{}: mo-{}", msg, mo);
+                ro.setMsg(msg);
+                ro.setResult(ResultDic.FAIL);
+                return ro;
+            }
+        } catch (DuplicateKeyException e) {
+            String msg = "修改失败，" + _uniqueFilesName + "已存在，不允许出现重复";
+            _log.error("{}: mo-{}", msg, mo);
+            ro.setMsg(msg);
+            ro.setResult(ResultDic.FAIL);
+            return ro;
+        } catch (RuntimeException e) {
+            SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+            String msg = "修改失败，出现运行时异常(" + sdf.format(new Date()) + ")";
+            _log.error("{}: mo-{}", msg, mo);
+            ro.setMsg(msg);
+            ro.setResult(ResultDic.FAIL);
+            return ro;
+        }
+    }
 
     /**
      * 删除订单信息

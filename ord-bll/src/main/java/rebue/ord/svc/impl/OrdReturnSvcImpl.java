@@ -320,7 +320,7 @@ public class OrdReturnSvcImpl extends MybatisBaseSvcImpl<OrdReturnMo, java.lang.
             return rejectReturnRo;
         }
         OrdOrderMo orderMo = new OrdOrderMo();
-     //   orderMo.setOrderCode(String.valueOf(orderId));
+        // orderMo.setOrderCode(String.valueOf(orderId));
         _log.info("拒绝退货查询订单信息的参数为：{}", orderMo);
         OrdOrderMo orderList = ordOrderSvc.getById(orderId);
         _log.info("拒绝退货查询订单信息的返回值为：{}", String.valueOf(orderList));
@@ -448,8 +448,8 @@ public class OrdReturnSvcImpl extends MybatisBaseSvcImpl<OrdReturnMo, java.lang.
             return agreeToReturnRo;
         }
         OrdOrderDetailMo orderDetailMo = new OrdOrderDetailMo();
-//        orderDetailMo.setOrderId(orderId);
-//        orderDetailMo.setId(orderDetailId);
+        // orderDetailMo.setOrderId(orderId);
+        // orderDetailMo.setId(orderDetailId);
         _log.info("同意退货查询订单详情信息的参数为：{}", orderDetailMo.toString());
         OrdOrderDetailMo orderDetailList = ordOrderDetailSvc.getById(orderDetailId);
         _log.info("同意退货查询订单详情信息的返回值为：{}", String.valueOf(orderDetailList));

@@ -4,7 +4,6 @@ import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import java.io.Serializable;
-import java.math.BigDecimal;
 import java.util.Date;
 import org.springframework.format.annotation.DateTimeFormat;
 
@@ -53,15 +52,6 @@ public class OrdGoodsBuyRelationMo implements Serializable {
      *    @mbg.generated 自动生成，如需修改，请删除本行
      */
     private Long onlineId;
-
-    /**
-     *    销售价格
-     *
-     *    数据库字段: ORD_GOODS_BUY_RELATION.SALE_PRICE
-     *
-     *    @mbg.generated 自动生成，如需修改，请删除本行
-     */
-    private BigDecimal salePrice;
 
     /**
      *    创建时间
@@ -168,28 +158,6 @@ public class OrdGoodsBuyRelationMo implements Serializable {
     }
 
     /**
-     *    销售价格
-     *
-     *    数据库字段: ORD_GOODS_BUY_RELATION.SALE_PRICE
-     *
-     *    @mbg.generated 自动生成，如需修改，请删除本行
-     */
-    public BigDecimal getSalePrice() {
-        return salePrice;
-    }
-
-    /**
-     *    销售价格
-     *
-     *    数据库字段: ORD_GOODS_BUY_RELATION.SALE_PRICE
-     *
-     *    @mbg.generated 自动生成，如需修改，请删除本行
-     */
-    public void setSalePrice(BigDecimal salePrice) {
-        this.salePrice = salePrice;
-    }
-
-    /**
      *    创建时间
      *
      *    数据库字段: ORD_GOODS_BUY_RELATION.CREATE_TIME
@@ -224,7 +192,6 @@ public class OrdGoodsBuyRelationMo implements Serializable {
         sb.append(", uplineUserId=").append(uplineUserId);
         sb.append(", downlineUserId=").append(downlineUserId);
         sb.append(", onlineId=").append(onlineId);
-        sb.append(", salePrice=").append(salePrice);
         sb.append(", createTime=").append(createTime);
         sb.append(", serialVersionUID=").append(serialVersionUID);
         sb.append("]");
