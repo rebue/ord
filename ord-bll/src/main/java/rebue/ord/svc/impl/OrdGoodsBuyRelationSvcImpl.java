@@ -1,5 +1,8 @@
 package rebue.ord.svc.impl;
 
+import java.util.Map;
+import java.util.Map.Entry;
+import javax.annotation.Resource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
@@ -9,6 +12,7 @@ import rebue.ord.mapper.OrdGoodsBuyRelationMapper;
 import rebue.ord.mo.OrdGoodsBuyRelationMo;
 import rebue.ord.svc.OrdGoodsBuyRelationSvc;
 import rebue.robotech.svc.impl.MybatisBaseSvcImpl;
+import rebue.sbs.redis.RedisClient;
 
 /**
  * 用户商品购买关系
@@ -45,5 +49,31 @@ public class OrdGoodsBuyRelationSvcImpl extends MybatisBaseSvcImpl<OrdGoodsBuyRe
             mo.setId(_idWorker.getId());
         }
         return super.add(mo);
+    }
+
+    @Resource
+    private RedisClient redisClient;
+
+    /**
+     * 导出redis中的购买关系到数据库中
+     */
+    @Override
+    public void exportGoodsBuyRelation() {
+        // String
+        Map<String, String> listByWildcard = redisClient.listByWildcard("rebue.suc.svc.user.buy_relation.*");
+        System.out.println("模糊查询");
+        for (Entry<String, String> item : listByWildcard.entrySet()) {
+            System.out.println(item.getKey() + ":" + item.getValue());
+            String key = item.getKey();
+            // 替换key中的前缀rebue.suc.svc.user.buy_relation.
+            String keys = key.replace("rebue.suc.svc.user.buy_relation.", "");
+            _log.info("替换前缀之后的值为：{}", keys);
+            // 获取用户Id（下家Id）
+            String userId = keys.substring(0, 18);
+            _log.info("获取到的用户Id（下家Id）为：{}", userId);
+            // 获取上线Id
+            String onlineId = keys.substring(18, 36);
+            _log.info("获取到的上家Id为：{}", onlineId);
+        }
     }
 }

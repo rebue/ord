@@ -181,4 +181,13 @@ public class OrdGoodsBuyRelationCtrl {
         _log.info("get OrdGoodsBuyRelationMo by id: " + id);
         return svc.getById(id);
     }
+
+    /**
+     * 导出redis中的购买关系到数据库中
+     */
+    @GetMapping("/ord/goodsbuyrelation/export")
+    void exportGoodsBuyRelation() {
+        _log.info("开始获取商品购买关系，时间：{}", new Date());
+        svc.exportGoodsBuyRelation();
+    }
 }
