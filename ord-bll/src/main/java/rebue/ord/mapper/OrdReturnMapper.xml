@@ -753,10 +753,10 @@
   
   <!-- 查询退货分页列表信息 -->
   <select id="selectReturnPageList" parameterType="rebue.ord.mo.OrdReturnMo" resultMap="ReturnInfoMap">
-  	SELECT a.*, b.ONLINE_ID, b.PRODUCT_ID, b.ONLINE_TITLE, b.SPEC_NAME, b.BUY_COUNT, b.BUY_PRICE, b.CASHBACK_AMOUNT, b.RETURN_STATE, b.BUY_UNIT
+  	SELECT a.*, c.USER_NAME, b.ONLINE_ID, b.PRODUCT_ID, b.ONLINE_TITLE, b.SPEC_NAME, b.BUY_COUNT, b.BUY_PRICE, b.CASHBACK_AMOUNT, b.RETURN_STATE, b.BUY_UNIT
 	FROM ORD_RETURN a
-	LEFT JOIN ORD_ORDER_DETAIL b ON a.ORDER_DETAIL_ID=b.ID AND a.ORDER_ID=b.ORDER_ID
-	WHERE 1=1
+	LEFT JOIN ORD_ORDER_DETAIL b ON a.ORDER_DETAIL_ID=b.ID AND a.ORDER_ID=b.ORDER_ID,ORD_ORDER c
+	WHERE 1=1 and c.ID=a.ORDER_ID
 	<if test="returnCode != null and returnCode != ''">
       and a.RETURN_CODE = #{returnCode,jdbcType=BIGINT}
     </if>
