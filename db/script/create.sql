@@ -1,22 +1,24 @@
 /*==============================================================*/
 /* DBMS name:      MySQL 5.0                                    */
-/* Created on:     2018/9/27 16:52:05                           */
+/* Created on:     2018/10/8 11:12:00                           */
 /*==============================================================*/
 
 
 drop table if exists ORD_ADDR;
 
-drop table if exists ORD_TASK;
-
-drop table if exists ORD_RETURN_PIC;
-
-drop table if exists ORD_RETURN;
-
 drop table if exists ORD_BUY_RELATION;
+
+drop table if exists ORD_GOODS_BUY_RELATION;
+
+drop table if exists ORD_ORDER;
 
 drop table if exists ORD_ORDER_DETAIL;
 
-drop table if exists ORD_ORDER;
+drop table if exists ORD_RETURN;
+
+drop table if exists ORD_RETURN_PIC;
+
+drop table if exists ORD_TASK;
 
 /*==============================================================*/
 /* Table: ORD_ADDR                                              */
@@ -58,6 +60,23 @@ create table ORD_BUY_RELATION
 );
 
 alter table ORD_BUY_RELATION comment '订单购买关系';
+
+/*==============================================================*/
+/* Table: ORD_GOODS_BUY_RELATION                                */
+/*==============================================================*/
+create table ORD_GOODS_BUY_RELATION
+(
+   ID                   bigint not null comment '商品购买关系ID',
+   UPLINE_USER_ID       bigint not null comment '上家用户ID',
+   DOWNLINE_USER_ID     bigint not null comment '下家用户ID',
+   ONLINE_ID            bigint not null comment '上线ID',
+   SALE_PRICE           decimal(18,4) not null comment '销售价格',
+   CREATE_TIME          datetime not null comment '创建时间',
+   primary key (ID),
+   unique key AK_UPLINE_USER_ID_AND_DOWNLINE_USER_ID_AND_ONLINE_ID_AND_SALE_PRICE (UPLINE_USER_ID, DOWNLINE_USER_ID, ONLINE_ID, SALE_PRICE)
+);
+
+alter table ORD_GOODS_BUY_RELATION comment '用户商品购买关系';
 
 /*==============================================================*/
 /* Table: ORD_ORDER                                             */
@@ -127,10 +146,10 @@ create table ORD_ORDER_DETAIL
    ONLINE_TITLE         varchar(200) not null comment '上线标题',
    SPEC_NAME            varchar(50) not null comment '规格名称',
    BUY_COUNT            int not null comment '购买数量',
-   BUY_PRICE            numeric(50,4) not null comment '购买价格（单价）',
-   CASHBACK_AMOUNT      numeric(50,4) not null comment '返现金额',
+   BUY_PRICE            decimal(18,4) not null comment '购买价格（单价）',
+   CASHBACK_AMOUNT      decimal(18,4) not null comment '返现金额',
    RETURN_COUNT         int comment '退货数量',
-   CASHBACK_TOTAL       decimal(50,4) comment '返现总额',
+   CASHBACK_TOTAL       decimal(18,4) comment '返现总额',
    BUY_UNIT             varchar(10) comment '购买单位',
    RETURN_STATE         tinyint not null comment '退货状态（0：未退货  1：退货中  2：已退货  3：部分已退）',
    USER_ID              bigint not null comment '用户ID',
