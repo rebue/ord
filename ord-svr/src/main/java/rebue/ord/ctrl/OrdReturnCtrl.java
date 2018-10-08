@@ -1,6 +1,5 @@
 package rebue.ord.ctrl;
 
-import com.github.pagehelper.PageInfo;
 import java.beans.IntrospectionException;
 import java.lang.reflect.InvocationTargetException;
 import java.text.ParseException;
@@ -8,7 +7,10 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
+
 import javax.annotation.Resource;
+import javax.servlet.http.HttpServletRequest;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.dao.DuplicateKeyException;
@@ -19,6 +21,9 @@ import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+
+import com.github.pagehelper.PageInfo;
+
 import rebue.ord.dic.AddReturnDic;
 import rebue.ord.dic.AgreeToARefundDic;
 import rebue.ord.dic.AgreeToReturnDic;
@@ -36,6 +41,7 @@ import rebue.ord.svc.OrdReturnSvc;
 import rebue.ord.to.OrdOrderReturnTo;
 import rebue.robotech.dic.ResultDic;
 import rebue.robotech.ro.Ro;
+import rebue.wheel.turing.JwtUtils;
 
 /**
  * 用户退货信息
@@ -302,11 +308,15 @@ public class OrdReturnCtrl {
 	 *
 	 * @param to
 	 * @return
+	 * @throws ParseException 
+	 * @throws NumberFormatException 
 	 * @date 2018年5月11日 下午2:59:49
 	 */
 	@PostMapping("/ord/return/agreetoarefund")
-	AgreeToARefundRo agreeToARefund(@RequestBody OrdOrderReturnTo to) {
+	AgreeToARefundRo agreeToARefund(@RequestBody OrdOrderReturnTo to, HttpServletRequest req) throws NumberFormatException, ParseException {
 		AgreeToARefundRo agreeToARefundRo = new AgreeToARefundRo();
+		Long currentUserId = JwtUtils.getJwtUserIdInCookie(req);
+		to.setOpId(currentUserId);
 		try {
 			_log.info("同意退款的请求参数为：{}", to.toString());
 			agreeToARefundRo = svc.agreeToARefund(to);

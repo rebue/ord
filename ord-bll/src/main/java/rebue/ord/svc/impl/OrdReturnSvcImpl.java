@@ -688,8 +688,10 @@ public class OrdReturnSvcImpl extends MybatisBaseSvcImpl<OrdReturnMo, java.lang.
 		refundTo.setReturnBalanceToBuyer(returnAmount1);
 		refundTo.setReturnCashbackToBuyer(returnCashbackToBuyer);
 		refundTo.setOpId(refundOpId);
-		refundTo.setMac(to.getMac());
-		refundTo.setIp(to.getIp());
+//		refundTo.setMac(to.getMac());
+//		refundTo.setIp(to.getIp());
+		refundTo.setMac("没有获取到MAC地址");
+		refundTo.setIp("没有获取到IP地址");
 		_log.info("已收到货并退款执行退款的参数为：{}", refundTo);
 		RefundRo refundResult = afcRefundSvc.refund(refundTo);
 		_log.info("已收到货并退款执行退款的返回值为：{}", refundResult);
