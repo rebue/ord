@@ -1,6 +1,5 @@
 package rebue.ord.ctrl;
 
-import com.github.pagehelper.PageInfo;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.List;
@@ -148,28 +147,6 @@ public class OrdReturnPicCtrl {
             ro.setResult(ResultDic.FAIL);
             return ro;
         }
-    }
-
-    /**
-     * 查询退货图片
-     *
-     * @mbg.generated 自动生成，如需修改，请删除本行
-     */
-    @GetMapping("/ord/returnpic")
-    PageInfo<OrdReturnPicMo> list(OrdReturnPicMo mo, @RequestParam(value = "pageNum", required = false) Integer pageNum, @RequestParam(value = "pageSize", required = false) Integer pageSize) {
-        if (pageNum == null)
-            pageNum = 1;
-        if (pageSize == null)
-            pageSize = 5;
-        _log.info("list OrdReturnPicMo:" + mo + ", pageNum = " + pageNum + ", pageSize = " + pageSize);
-        if (pageSize > 50) {
-            String msg = "pageSize不能大于50";
-            _log.error(msg);
-            throw new IllegalArgumentException(msg);
-        }
-        PageInfo<OrdReturnPicMo> result = svc.list(mo, pageNum, pageSize);
-        _log.info("result: " + result);
-        return result;
     }
 
     /**
