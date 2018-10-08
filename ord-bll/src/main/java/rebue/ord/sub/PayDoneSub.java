@@ -92,7 +92,7 @@ public class PayDoneSub implements ApplicationListener<ContextRefreshedEvent> {
 			detailMo.setOrderId(Long.parseLong(msg.getOrderId()));
 			OrdOrderDetailMo detailMoResult = ordOrderDetailSvc.getOne(detailMo);
 			_log.info("获取到的定单详情为：{}" + detailMoResult);
-			long id = Long.parseLong(msg.getOrderId());
+			long id = detailMoResult.getUserId();
 			long onlineId = detailMoResult.getOnlineId();
 			_log.info("获取用户购买关系上家");
 			boolean getBuyRelationResult = getAndUpdateBuyRelation(id, onlineId, detailMoResult.getBuyPrice(),
