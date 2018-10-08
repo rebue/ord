@@ -30,6 +30,7 @@ import rebue.ord.ro.AddReturnRo;
 import rebue.ord.ro.AgreeToARefundRo;
 import rebue.ord.ro.AgreeToReturnRo;
 import rebue.ord.ro.OrdReturnRo;
+import rebue.ord.ro.OrdReturnRo2;
 import rebue.ord.ro.ReceivedAndRefundedRo;
 import rebue.ord.ro.RejectReturnRo;
 import rebue.ord.svc.OrdReturnSvc;
@@ -128,15 +129,28 @@ public class OrdReturnCtrl {
         }
     }
 
+
     /**
      * 获取单个用户退货信息
      *
-     * @mbg.generated 自动生成，如需修改，请删除本行
+     * 
      */
     @GetMapping("/ord/return/getbyid")
-    OrdReturnMo getById(@RequestParam("id") java.lang.Long id) {
+    OrdReturnRo2 getById(@RequestParam("id") java.lang.Long id) {
         _log.info("get OrdReturnMo by id: " + id);
-        return svc.getById(id);
+        OrdReturnRo2 result= new OrdReturnRo2();
+        OrdReturnMo record=svc.getById(id);
+       if(record == null){
+    	   result.setMsg("获取失败，找不到该记录");
+    	   result.setRecord(record);
+    	   result.setResult((byte)-1);
+           return result;
+       }else {
+    	   result.setMsg("获取成功");
+    	   result.setRecord(record);
+    	   result.setResult((byte)1);
+           return result;
+       }
     }
 
     /**
@@ -204,7 +218,7 @@ public class OrdReturnCtrl {
      *  @date 2018年4月27日 下午3:31:38
      */
     @PutMapping("/ord/return/reject")
-    RejectReturnRo rejectReturn(OrdReturnMo mo) {
+    RejectReturnRo rejectReturn(@RequestBody OrdReturnMo mo) {
         _log.info("拒绝退货的参数为：{}", mo.toString());
         RejectReturnRo rejectReturnRo = new RejectReturnRo();
         try {

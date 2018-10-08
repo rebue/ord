@@ -320,17 +320,17 @@ public class OrdReturnSvcImpl extends MybatisBaseSvcImpl<OrdReturnMo, java.lang.
             return rejectReturnRo;
         }
         OrdOrderMo orderMo = new OrdOrderMo();
-        orderMo.setOrderCode(String.valueOf(orderId));
+     //   orderMo.setOrderCode(String.valueOf(orderId));
         _log.info("拒绝退货查询订单信息的参数为：{}", orderMo);
-        List<OrdOrderMo> orderList = ordOrderSvc.list(orderMo);
+        OrdOrderMo orderList = ordOrderSvc.getById(orderId);
         _log.info("拒绝退货查询订单信息的返回值为：{}", String.valueOf(orderList));
-        if (orderList.size() == 0) {
+        if (orderList == null) {
             _log.error("拒绝退货查询订单信息时出现订单信息不存在，退货编号为：{}", returnCode);
             rejectReturnRo.setResult(RejectReturnDic.ORDER_NOT_EXIST);
             rejectReturnRo.setMsg("订单不存在");
             return rejectReturnRo;
         }
-        if (orderList.get(0).getOrderState() == OrderStateDic.CANCEL.getCode()) {
+        if (orderList.getOrderState() == OrderStateDic.CANCEL.getCode()) {
             _log.error("拒绝退货时出现订单状态为取消状态，退货编号为：{}", returnCode);
             rejectReturnRo.setResult(RejectReturnDic.ORDER_ALREADY_CANCEL);
             rejectReturnRo.setMsg("该订单已取消，拒绝退货失败");
@@ -448,18 +448,18 @@ public class OrdReturnSvcImpl extends MybatisBaseSvcImpl<OrdReturnMo, java.lang.
             return agreeToReturnRo;
         }
         OrdOrderDetailMo orderDetailMo = new OrdOrderDetailMo();
-        orderDetailMo.setOrderId(orderId);
-        orderDetailMo.setId(orderDetailId);
+//        orderDetailMo.setOrderId(orderId);
+//        orderDetailMo.setId(orderDetailId);
         _log.info("同意退货查询订单详情信息的参数为：{}", orderDetailMo.toString());
-        List<OrdOrderDetailMo> orderDetailList = ordOrderDetailSvc.list(orderDetailMo);
+        OrdOrderDetailMo orderDetailList = ordOrderDetailSvc.getById(orderDetailId);
         _log.info("同意退货查询订单详情信息的返回值为：{}", String.valueOf(orderDetailList));
-        if (orderDetailList.size() == 0) {
+        if (orderDetailList == null) {
             _log.error("同意退货查询订单详情信息时发现没有找到该订单详情信息，退货编号为：{}", returnCode);
             agreeToReturnRo.setResult(AgreeToReturnDic.ORDER_DETAIL_NOT_NULL);
             agreeToReturnRo.setMsg("没有找到该退货商品信息");
             return agreeToReturnRo;
         }
-        if (orderDetailList.get(0).getReturnState() != 1) {
+        if (orderDetailList.getReturnState() != 1) {
             _log.error("同意退货时发现该商品并未申请退货或已完成退货，退货编号为：{}", returnCode);
             agreeToReturnRo.setResult(AgreeToReturnDic.GOODS_NOT_APPLYFOR_RETURN_OR_ALREADY_FINISH);
             agreeToReturnRo.setMsg("该商品未申请退货或已完成退货");
@@ -483,9 +483,9 @@ public class OrdReturnSvcImpl extends MybatisBaseSvcImpl<OrdReturnMo, java.lang.
             agreeToReturnRo.setMsg("修改订单退货金额错误");
             return agreeToReturnRo;
         }
-        Integer orderDetailReturnCount = orderDetailList.get(0).getReturnCount();
+        Integer orderDetailReturnCount = orderDetailList.getReturnCount();
         orderDetailReturnCount = orderDetailReturnCount == null ? 0 : orderDetailReturnCount;
-        BigDecimal cashBackTotal = orderDetailList.get(0).getCashbackTotal();
+        BigDecimal cashBackTotal = orderDetailList.getCashbackTotal();
         cashBackTotal = cashBackTotal == null ? bd : cashBackTotal;
         Integer returnCount = returnList.get(0).getReturnCount();
         returnCount = returnCount == null ? 0 : returnCount;
@@ -515,7 +515,7 @@ public class OrdReturnSvcImpl extends MybatisBaseSvcImpl<OrdReturnMo, java.lang.
             throw new RuntimeException("修改退货信息错误");
         }
         _log.info("删除该定单详情的购买关系记录");
-        int delResult = ordBuyRelationSvc.del(orderDetailList.get(0).getId());
+        int delResult = ordBuyRelationSvc.del(orderDetailList.getId());
         _log.info("删除该定单详情的购买关系记录的返回值为：{}", delResult);
         agreeToReturnRo.setResult(AgreeToReturnDic.SUCCESS);
         agreeToReturnRo.setMsg("审核成功");
