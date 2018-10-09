@@ -229,4 +229,12 @@
       ORDER BY CREATE_TIME DESC LIMIT 1 
     </where>
   </select>
+  <!-- 查询商品购买关系 -->
+  <select id="countGoodsBuyRelation" parameterType="rebue.ord.mo.OrdGoodsBuyRelationMo" resultType="int">
+  	select count(1) 
+    from ORD_GOODS_BUY_RELATION
+        where UPLINE_USER_ID = #{uplineUserId,jdbcType=BIGINT}
+        and DOWNLINE_USER_ID = #{downlineUserId,jdbcType=BIGINT}
+        and ONLINE_ID = #{onlineId,jdbcType=BIGINT}
+  </select>
 </mapper>

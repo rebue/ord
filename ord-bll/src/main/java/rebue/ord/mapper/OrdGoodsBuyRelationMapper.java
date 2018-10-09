@@ -64,4 +64,11 @@ public interface OrdGoodsBuyRelationMapper extends MybatisBaseMapper<OrdGoodsBuy
     List<OrdGoodsBuyRelationMo> countSelective(OrdGoodsBuyRelationMo record);
 
     OrdGoodsBuyRelationMo getBuyRelation(OrdGoodsBuyRelationMo mo);
+    
+    /**
+     * 查询是否存在商品购买关系
+     * @param record
+     * @return
+     */
+    int countGoodsBuyRelation(OrdGoodsBuyRelationMo record);
 }
