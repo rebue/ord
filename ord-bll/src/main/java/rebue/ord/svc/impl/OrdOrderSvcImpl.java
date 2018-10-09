@@ -315,12 +315,12 @@ public class OrdOrderSvcImpl extends MybatisBaseSvcImpl<OrdOrderMo, java.lang.Lo
                     detailMo.setId(_idWorker.getId());
                     detailMo.setOrderId(orderId);
                     detailMo.setOnlineId(onlineId);
-                    detailMo.setProductId(orderList.get(j).getProductId());
-                    detailMo.setOnlineTitle(orderList.get(j).getOnlineTitle());
+                    detailMo.setProductId(orderList.get(i).getProductId());
+                    detailMo.setOnlineTitle(orderList.get(i).getOnlineTitle());
                     detailMo.setSpecName(OnlineSpec);
                     detailMo.setBuyCount(1);
                     detailMo.setSubjectType((byte) 1);
-                    detailMo.setBuyPrice(orderList.get(j).getSalePrice());
+                    detailMo.setBuyPrice(orderList.get(i).getSalePrice());
                     detailMo.setCashbackAmount(new BigDecimal("0"));
                     detailMo.setReturnState((byte) 0);
                     detailMo.setCommissionSlot((byte) 2);
