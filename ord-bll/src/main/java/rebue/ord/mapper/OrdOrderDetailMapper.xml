@@ -538,7 +538,7 @@
       </if>
      
     </where>
-    AND ood.ORDER_ID = oo.ID and oo.ORDER_STATE IN (2,3,4,5) and ood.COMMISSION_SLOT&gt;0 ORDER BY oo.ORDER_TIME ASC limit 1
+    AND ood.ORDER_ID = oo.ID and oo.ORDER_STATE IN (2,3,4,5) and ood.COMMISSION_SLOT&gt;0 ORDER BY oo.ORDER_TIME DESC limit 1
   </select>
   
    <select id="getOrderDetailForBuyRelationThree" parameterType="rebue.ord.mo.OrdOrderDetailMo" resultMap="BaseResultMap">
@@ -597,7 +597,7 @@
       </if>
      
     </where>
-    AND ood.ORDER_ID = oo.ID and ood.id = oor.UPLINE_ORDER_DETAIL_ID and oor.RELATION_SOURCE = 2 and oo.ORDER_STATE IN (2,3,4,5) and ood.COMMISSION_SLOT&gt;0 and ORDER BY oo.ORDER_TIME ASC limit 1
+    AND ood.ORDER_ID = oo.ID and ood.id = oor.UPLINE_ORDER_DETAIL_ID and oor.RELATION_SOURCE = 2 oo.ORDER_STATE IN (2,3,4,5) and ood.COMMISSION_SLOT&gt;0 and ORDER BY oo.ORDER_TIME DESC limit 1
   </select>
   
 </mapper>
