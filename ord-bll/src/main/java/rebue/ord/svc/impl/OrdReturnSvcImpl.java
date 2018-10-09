@@ -691,11 +691,11 @@ public class OrdReturnSvcImpl extends MybatisBaseSvcImpl<OrdReturnMo, java.lang.
         _log.info("已收到货并退款执行退款的返回值为：{}", refundResult);
         if (refundResult.getResult().getCode() != 1) {
             _log.error("已收到货并退款执行退款出错，退货编号为：{}", returnCode);
-            if("重复退款".equals(refundResult.getMsg())) {
+            if ("重复退款".equals(refundResult.getMsg())) {
                 agreeToARefundRo.setResult(AgreeToARefundDic.SUCCESS);
                 agreeToARefundRo.setMsg("退款成功");
                 return agreeToARefundRo;
-            }else {
+            } else {
                 throw new RuntimeException("v支付出错，退款失败");
             }
         }

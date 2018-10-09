@@ -76,4 +76,10 @@ public class OrdGoodsBuyRelationSvcImpl extends MybatisBaseSvcImpl<OrdGoodsBuyRe
             _log.info("获取到的上家Id为：{}", onlineId);
         }
     }
+
+    @Override
+    public OrdGoodsBuyRelationMo getBuyRelation(OrdGoodsBuyRelationMo mo) {
+        // TODO Auto-generated method stub
+        return _mapper.getBuyRelation(mo);
+    }
 }

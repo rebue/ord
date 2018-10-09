@@ -67,7 +67,7 @@ public interface OrdOrderMapper extends MybatisBaseMapper<OrdOrderMo, Long> {
     /**
      *    @mbg.generated 自动生成，如需修改，请删除本行
      */
-    int countSelective(OrdOrderMo record);
+    List<OrdOrderMo> countSelective(OrdOrderMo record);
 
     /**
      *  查询用户订单信息 Title: selectOrderInfo Description:

@@ -209,4 +209,24 @@
       </if>
     </where>
   </select>
+   <select id="getBuyRelation" parameterType="rebue.ord.mo.OrdGoodsBuyRelationMo" resultMap="BaseResultMap">
+    select 
+    <include refid="Base_Column_List" />
+    from ORD_GOODS_BUY_RELATION
+    <where>
+      <if test="uplineUserId != null">
+        and UPLINE_USER_ID = #{uplineUserId,jdbcType=BIGINT}
+      </if>
+      <if test="downlineUserId != null">
+        and DOWNLINE_USER_ID = #{downlineUserId,jdbcType=BIGINT}
+      </if>
+      <if test="onlineId != null">
+        and ONLINE_ID = #{onlineId,jdbcType=BIGINT}
+      </if>
+      <if test="createTime != null">
+        and CREATE_TIME = #{createTime,jdbcType=TIMESTAMP}
+      </if>
+      ORDER BY CREATE_TIME DESC LIMIT 1 
+    </where>
+  </select>
 </mapper>

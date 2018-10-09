@@ -169,15 +169,6 @@ public class OrdOrderDetailMo implements Serializable {
     private Long userId;
 
     /**
-     *    关系来源（1：自己匹配自己  2：购买关系  3：注册关系  4：差一人且已有购买关系  5：差两人  6：差一人但没有购买关系）
-     *
-     *    数据库字段: ORD_ORDER_DETAIL.RELATION_SOURCE
-     *
-     *    @mbg.generated 自动生成，如需修改，请删除本行
-     */
-    private Byte relationSource;
-
-    /**
      *    @mbg.generated 自动生成，如需修改，请删除本行
      */
     private static final long serialVersionUID = 1L;
@@ -557,28 +548,6 @@ public class OrdOrderDetailMo implements Serializable {
     }
 
     /**
-     *    关系来源（1：自己匹配自己  2：购买关系  3：注册关系  4：差一人且已有购买关系  5：差两人  6：差一人但没有购买关系）
-     *
-     *    数据库字段: ORD_ORDER_DETAIL.RELATION_SOURCE
-     *
-     *    @mbg.generated 自动生成，如需修改，请删除本行
-     */
-    public Byte getRelationSource() {
-        return relationSource;
-    }
-
-    /**
-     *    关系来源（1：自己匹配自己  2：购买关系  3：注册关系  4：差一人且已有购买关系  5：差两人  6：差一人但没有购买关系）
-     *
-     *    数据库字段: ORD_ORDER_DETAIL.RELATION_SOURCE
-     *
-     *    @mbg.generated 自动生成，如需修改，请删除本行
-     */
-    public void setRelationSource(Byte relationSource) {
-        this.relationSource = relationSource;
-    }
-
-    /**
      *    @mbg.generated 自动生成，如需修改，请删除本行
      */
     @Override
@@ -604,7 +573,6 @@ public class OrdOrderDetailMo implements Serializable {
         sb.append(", buyUnit=").append(buyUnit);
         sb.append(", returnState=").append(returnState);
         sb.append(", userId=").append(userId);
-        sb.append(", relationSource=").append(relationSource);
         sb.append(", serialVersionUID=").append(serialVersionUID);
         sb.append("]");
         return sb.toString();

@@ -23,7 +23,6 @@
     <result column="BUY_UNIT" jdbcType="VARCHAR" property="buyUnit" />
     <result column="RETURN_STATE" jdbcType="TINYINT" property="returnState" />
     <result column="USER_ID" jdbcType="BIGINT" property="userId" />
-    <result column="RELATION_SOURCE" jdbcType="TINYINT" property="relationSource" />
   </resultMap>
   <sql id="Base_Column_List">
     <!--
@@ -32,7 +31,7 @@
     -->
     ID, ORDER_ID, ONLINE_ID, PRODUCT_ID, SUBJECT_TYPE, COMMISSION_SLOT, COMMISSION_STATE, 
     ONLINE_TITLE, SPEC_NAME, BUY_COUNT, BUY_PRICE, CASHBACK_AMOUNT, RETURN_COUNT, CASHBACK_TOTAL, 
-    BUY_UNIT, RETURN_STATE, USER_ID, RELATION_SOURCE
+    BUY_UNIT, RETURN_STATE, USER_ID
   </sql>
   <select id="selectByPrimaryKey" parameterType="java.lang.Long" resultMap="BaseResultMap">
     <!--
@@ -62,15 +61,13 @@
       COMMISSION_STATE, ONLINE_TITLE, SPEC_NAME, 
       BUY_COUNT, BUY_PRICE, CASHBACK_AMOUNT, 
       RETURN_COUNT, CASHBACK_TOTAL, BUY_UNIT, 
-      RETURN_STATE, USER_ID, RELATION_SOURCE
-      )
+      RETURN_STATE, USER_ID)
     values (#{id,jdbcType=BIGINT}, #{orderId,jdbcType=BIGINT}, #{onlineId,jdbcType=BIGINT}, 
       #{productId,jdbcType=BIGINT}, #{subjectType,jdbcType=TINYINT}, #{commissionSlot,jdbcType=TINYINT}, 
       #{commissionState,jdbcType=TINYINT}, #{onlineTitle,jdbcType=VARCHAR}, #{specName,jdbcType=VARCHAR}, 
       #{buyCount,jdbcType=INTEGER}, #{buyPrice,jdbcType=DECIMAL}, #{cashbackAmount,jdbcType=DECIMAL}, 
       #{returnCount,jdbcType=INTEGER}, #{cashbackTotal,jdbcType=DECIMAL}, #{buyUnit,jdbcType=VARCHAR}, 
-      #{returnState,jdbcType=TINYINT}, #{userId,jdbcType=BIGINT}, #{relationSource,jdbcType=TINYINT}
-      )
+      #{returnState,jdbcType=TINYINT}, #{userId,jdbcType=BIGINT})
   </insert>
   <insert id="insertSelective" parameterType="rebue.ord.mo.OrdOrderDetailMo">
     <!--
@@ -130,9 +127,6 @@
       <if test="userId != null">
         USER_ID,
       </if>
-      <if test="relationSource != null">
-        RELATION_SOURCE,
-      </if>
     </trim>
     <trim prefix="values (" suffix=")" suffixOverrides=",">
       <if test="id != null">
@@ -185,9 +179,6 @@
       </if>
       <if test="userId != null">
         #{userId,jdbcType=BIGINT},
-      </if>
-      <if test="relationSource != null">
-        #{relationSource,jdbcType=TINYINT},
       </if>
     </trim>
   </insert>
@@ -246,9 +237,6 @@
       <if test="userId != null">
         USER_ID = #{userId,jdbcType=BIGINT},
       </if>
-      <if test="relationSource != null">
-        RELATION_SOURCE = #{relationSource,jdbcType=TINYINT},
-      </if>
     </set>
     where ID = #{id,jdbcType=BIGINT}
   </update>
@@ -273,8 +261,7 @@
       CASHBACK_TOTAL = #{cashbackTotal,jdbcType=DECIMAL},
       BUY_UNIT = #{buyUnit,jdbcType=VARCHAR},
       RETURN_STATE = #{returnState,jdbcType=TINYINT},
-      USER_ID = #{userId,jdbcType=BIGINT},
-      RELATION_SOURCE = #{relationSource,jdbcType=TINYINT}
+      USER_ID = #{userId,jdbcType=BIGINT}
     where ID = #{id,jdbcType=BIGINT}
   </update>
   <select id="selectAll" resultMap="BaseResultMap">
@@ -284,7 +271,7 @@
     -->
     select ID, ORDER_ID, ONLINE_ID, PRODUCT_ID, SUBJECT_TYPE, COMMISSION_SLOT, COMMISSION_STATE, 
     ONLINE_TITLE, SPEC_NAME, BUY_COUNT, BUY_PRICE, CASHBACK_AMOUNT, RETURN_COUNT, CASHBACK_TOTAL, 
-    BUY_UNIT, RETURN_STATE, USER_ID, RELATION_SOURCE
+    BUY_UNIT, RETURN_STATE, USER_ID
     from ORD_ORDER_DETAIL
   </select>
   <select id="selectSelective" parameterType="rebue.ord.mo.OrdOrderDetailMo" resultMap="BaseResultMap">
@@ -343,9 +330,6 @@
       </if>
       <if test="userId != null">
         and USER_ID = #{userId,jdbcType=BIGINT}
-      </if>
-      <if test="relationSource != null">
-        and RELATION_SOURCE = #{relationSource,jdbcType=TINYINT}
       </if>
     </where>
   </select>
@@ -417,9 +401,6 @@
       <if test="userId != null and userId != ''">
         and USER_ID = #{userId,jdbcType=BIGINT}
       </if>
-      <if test="relationSource != null and relationSource != ''">
-        and RELATION_SOURCE = #{relationSource,jdbcType=TINYINT}
-      </if>
     </where>
   </select>
   <select id="countSelective" parameterType="rebue.ord.mo.OrdOrderDetailMo" resultType="int">
@@ -478,9 +459,6 @@
       <if test="userId != null">
         and USER_ID = #{userId,jdbcType=BIGINT}
       </if>
-      <if test="relationSource != null">
-        and RELATION_SOURCE = #{relationSource,jdbcType=TINYINT}
-      </if>
     </where>
   </select>
 
@@ -494,111 +472,136 @@
   	WHERE ID=#{id,jdbcType=BIGINT} AND ORDER_ID=#{orderId,jdbcType=BIGINT}
   </update>
   
-  <select id="getFullReturnDetail" parameterType="rebue.ord.mo.OrdOrderDetailMo" resultMap="BaseResultMap">
-  	 SELECT  ood.ID, ood.ORDER_ID, ood.ONLINE_ID, ood.PRODUCT_ID, ood.ONLINE_TITLE, ood.SPEC_NAME, ood.BUY_COUNT, ood.BUY_PRICE, 
-    ood.CASHBACK_AMOUNT, ood.RETURN_COUNT, ood.CASHBACK_TOTAL, ood.BUY_UNIT, RETURN_STATE, ood.USER_ID, ood.COMMISSION_SLOT, 
-    ood.COMMISSION_STATE,oo.ORDER_TIME
-    from ORD_ORDER_DETAIL ood , ORD_ORDER oo
-     <where>
-      <if test="id != null">
-        and ood.ID = #{id,jdbcType=BIGINT}
-      </if>
-      <if test="orderId != null">
-        and ood.ORDER_ID = #{orderId,jdbcType=BIGINT}
-      </if>
-      <if test="onlineId != null">
-        and ood.ONLINE_ID = #{onlineId,jdbcType=BIGINT}
-      </if>
-      <if test="productId != null">
-        and ood.PRODUCT_ID = #{productId,jdbcType=BIGINT}
-      </if>
-      <if test="onlineTitle != null and onlineTitle != ''">
-        and ood.ONLINE_TITLE = #{onlineTitle,jdbcType=VARCHAR}
-      </if>
-      <if test="specName != null and specName != ''">
-        and ood.SPEC_NAME = #{specName,jdbcType=VARCHAR}
-      </if>
-      <if test="buyCount != null">
-        and ood.BUY_COUNT = #{buyCount,jdbcType=INTEGER}
-      </if>
-      <if test="buyPrice != null">
-        and ood.BUY_PRICE = #{buyPrice,jdbcType=DECIMAL}
-      </if>
-      <if test="cashbackAmount != null">
-        and ood.CASHBACK_AMOUNT = #{cashbackAmount,jdbcType=DECIMAL}
-      </if>
-      <if test="returnCount != null">
-        and ood.RETURN_COUNT = #{returnCount,jdbcType=INTEGER}
-      </if>
-      <if test="cashbackTotal != null">
-        and ood.CASHBACK_TOTAL = #{cashbackTotal,jdbcType=DECIMAL}
-      </if>
-      <if test="buyUnit != null and buyUnit != ''">
-        and ood.BUY_UNIT = #{buyUnit,jdbcType=VARCHAR}
-      </if>
-      <if test="returnState != null">
-        and ood.RETURN_STATE = #{returnState,jdbcType=TINYINT}
-      </if>
-      <if test="userId != null">
-        and ood.USER_ID = #{userId,jdbcType=BIGINT}
-      </if>
-    </where>
-    AND ood.ORDER_ID = oo.ORDER_CODE and oo.ORDER_STATE IN (2,3,4,5) and ood.COMMISSION_SLOT &lt; 3 AND ood.COMMISSION_SLOT &gt; 0 ORDER BY oo.ORDER_TIME ASC limit 1
-  </select>
-  
-<select id="getOtherFullReturnDetail" parameterType="rebue.ord.mo.OrdOrderDetailMo" resultMap="BaseResultMap">
-  	 SELECT  ood.ID, ood.ORDER_ID, ood.ONLINE_ID, ood.PRODUCT_ID, ood.ONLINE_TITLE, ood.SPEC_NAME, ood.BUY_COUNT, ood.BUY_PRICE, 
-    ood.CASHBACK_AMOUNT, ood.RETURN_COUNT, ood.CASHBACK_TOTAL, ood.BUY_UNIT, RETURN_STATE, ood.USER_ID, ood.COMMISSION_SLOT, 
-    ood.COMMISSION_STATE,oo.ORDER_TIME
-    from ORD_ORDER_DETAIL ood , ORD_ORDER oo
-     <where>
-      
-      <if test="orderId != null">
-        and ood.ORDER_ID = #{orderId,jdbcType=BIGINT}
-      </if>
-      <if test="onlineId != null">
-        and ood.ONLINE_ID = #{onlineId,jdbcType=BIGINT}
-      </if>
-      <if test="productId != null">
-        and ood.PRODUCT_ID = #{productId,jdbcType=BIGINT}
-      </if>
-      <if test="onlineTitle != null and onlineTitle != ''">
-        and ood.ONLINE_TITLE = #{onlineTitle,jdbcType=VARCHAR}
-      </if>
-      <if test="specName != null and specName != ''">
-        and ood.SPEC_NAME = #{specName,jdbcType=VARCHAR}
-      </if>
-      <if test="buyCount != null">
-        and ood.BUY_COUNT = #{buyCount,jdbcType=INTEGER}
-      </if>
-      <if test="buyPrice != null">
-        and ood.BUY_PRICE = #{buyPrice,jdbcType=DECIMAL}
-      </if>
-      <if test="cashbackAmount != null">
-        and ood.CASHBACK_AMOUNT = #{cashbackAmount,jdbcType=DECIMAL}
-      </if>
-      <if test="returnCount != null">
-        and ood.RETURN_COUNT = #{returnCount,jdbcType=INTEGER}
-      </if>
-      <if test="cashbackTotal != null">
-        and ood.CASHBACK_TOTAL = #{cashbackTotal,jdbcType=DECIMAL}
-      </if>
-      <if test="buyUnit != null and buyUnit != ''">
-        and ood.BUY_UNIT = #{buyUnit,jdbcType=VARCHAR}
-      </if>
-      <if test="returnState != null">
-        and ood.RETURN_STATE = #{returnState,jdbcType=TINYINT}
-      </if>
-      <if test="userId != null">
-        and ood.USER_ID = #{userId,jdbcType=BIGINT}
-      </if>
-    </where>
-    AND ood.ORDER_ID = oo.ID and oo.ORDER_STATE IN (2,3,4,5) and ood.COMMISSION_SLOT = 2  and ood.ID !=  #{id,jdbcType=BIGINT}  ORDER BY oo.ORDER_TIME ASC limit 1
-  </select>
-  
   <update id="updateCashbackSlot" parameterType="rebue.ord.mo.OrdOrderDetailMo">
   		UPDATE ORD_ORDER_DETAIL SET COMMISSION_SLOT = #{cashbackCommissionSlot,jdbcType=TINYINT} WHERE ID = #{id,jdbcType=BIGINT}
   		AND COMMISSION_SLOT = #{cashbackCommissionSlot,jdbcType=TINYINT}
   </update>
+  
+  <update id="updateCommissionSlotForBuyRelation" parameterType="rebue.ord.mo.OrdOrderDetailMo">
+  		UPDATE ORD_ORDER_DETAIL SET COMMISSION_SLOT = #{cashbackCommissionSlot,jdbcType=TINYINT} WHERE ID = #{id,jdbcType=BIGINT}
+  		AND COMMISSION_SLOT = #{cashbackCommissionSlot,jdbcType=TINYINT}+1
+  </update>
+  
+  <select id="getOrderDetailForBuyRelation" parameterType="rebue.ord.mo.OrdOrderDetailMo" resultMap="BaseResultMap">
+  	SELECT  ood.ID, ood.ORDER_ID, ood.ONLINE_ID, ood.PRODUCT_ID, ood.ONLINE_TITLE, ood.SPEC_NAME, ood.BUY_COUNT, ood.BUY_PRICE, 
+    ood.CASHBACK_AMOUNT, ood.RETURN_COUNT, ood.CASHBACK_TOTAL, ood.BUY_UNIT, RETURN_STATE, ood.USER_ID, ood.COMMISSION_SLOT, 
+    ood.COMMISSION_STATE
+    from ORD_ORDER_DETAIL ood , ORD_ORDER oo
+     <where>
+      <if test="orderId != null">
+        and ood.ORDER_ID = #{orderId,jdbcType=BIGINT}
+      </if>
+      <if test="onlineId != null">
+        and ood.ONLINE_ID = #{onlineId,jdbcType=BIGINT}
+      </if>
+      <if test="productId != null">
+        and ood.PRODUCT_ID = #{productId,jdbcType=BIGINT}
+      </if>
+      <if test="subjectType != null">
+        and ood.SUBJECT_TYPE = #{subjectType,jdbcType=TINYINT}
+      </if>
+      <if test="commissionSlot != null">
+        and ood.COMMISSION_SLOT = #{commissionSlot,jdbcType=TINYINT}
+      </if>
+      <if test="commissionState != null">
+        and ood.COMMISSION_STATE = #{commissionState,jdbcType=TINYINT}
+      </if>
+      <if test="onlineTitle != null and onlineTitle != ''">
+        and ood.ONLINE_TITLE = #{onlineTitle,jdbcType=VARCHAR}
+      </if>
+      <if test="specName != null and specName != ''">
+        and ood.SPEC_NAME = #{specName,jdbcType=VARCHAR}
+      </if>
+      <if test="buyCount != null">
+        and ood.BUY_COUNT = #{buyCount,jdbcType=INTEGER}
+      </if>
+      <if test="buyPrice != null">
+        and ood.BUY_PRICE = #{buyPrice,jdbcType=DECIMAL}
+      </if>
+      <if test="cashbackAmount != null">
+        and ood.CASHBACK_AMOUNT = #{cashbackAmount,jdbcType=DECIMAL}
+      </if>
+      <if test="returnCount != null">
+        and ood.RETURN_COUNT = #{returnCount,jdbcType=INTEGER}
+      </if>
+      <if test="cashbackTotal != null">
+        and ood.CASHBACK_TOTAL = #{cashbackTotal,jdbcType=DECIMAL}
+      </if>
+      <if test="buyUnit != null and buyUnit != ''">
+        and ood.BUY_UNIT = #{buyUnit,jdbcType=VARCHAR}
+      </if>
+      <if test="returnState != null">
+        and ood.RETURN_STATE = #{returnState,jdbcType=TINYINT}
+      </if>
+      <if test="userId != null">
+        and ood.USER_ID = #{userId,jdbcType=BIGINT}
+      </if>
+      <if test="relationSource != null">
+        and ood.RELATION_SOURCE = #{relationSource,jdbcType=TINYINT}
+      </if>
+    </where>
+    AND ood.ORDER_ID = oo.ID and oo.ORDER_STATE IN (2,3,4,5) and ood.COMMISSION_SLOT&gt;0 ORDER BY oo.ORDER_TIME ASC limit 1
+  </select>
+  
+   <select id="getOrderDetailForBuyRelationThree" parameterType="rebue.ord.mo.OrdOrderDetailMo" resultMap="BaseResultMap">
+  	SELECT  ood.ID, ood.ORDER_ID, ood.ONLINE_ID, ood.PRODUCT_ID, ood.ONLINE_TITLE, ood.SPEC_NAME, ood.BUY_COUNT, ood.BUY_PRICE, 
+    ood.CASHBACK_AMOUNT, ood.RETURN_COUNT, ood.CASHBACK_TOTAL, ood.BUY_UNIT, RETURN_STATE, ood.USER_ID, ood.COMMISSION_SLOT, 
+    ood.COMMISSION_STATE
+    from ORD_ORDER_DETAIL ood , ORD_ORDER oo,ORD_BUY_RELATION oor
+     <where>
+      <if test="orderId != null">
+        and ood.ORDER_ID = #{orderId,jdbcType=BIGINT}
+      </if>
+      <if test="onlineId != null">
+        and ood.ONLINE_ID = #{onlineId,jdbcType=BIGINT}
+      </if>
+      <if test="productId != null">
+        and ood.PRODUCT_ID = #{productId,jdbcType=BIGINT}
+      </if>
+      <if test="subjectType != null">
+        and ood.SUBJECT_TYPE = #{subjectType,jdbcType=TINYINT}
+      </if>
+      <if test="commissionSlot != null">
+        and ood.COMMISSION_SLOT = #{commissionSlot,jdbcType=TINYINT}
+      </if>
+      <if test="commissionState != null">
+        and ood.COMMISSION_STATE = #{commissionState,jdbcType=TINYINT}
+      </if>
+      <if test="onlineTitle != null and onlineTitle != ''">
+        and ood.ONLINE_TITLE = #{onlineTitle,jdbcType=VARCHAR}
+      </if>
+      <if test="specName != null and specName != ''">
+        and ood.SPEC_NAME = #{specName,jdbcType=VARCHAR}
+      </if>
+      <if test="buyCount != null">
+        and ood.BUY_COUNT = #{buyCount,jdbcType=INTEGER}
+      </if>
+      <if test="buyPrice != null">
+        and ood.BUY_PRICE = #{buyPrice,jdbcType=DECIMAL}
+      </if>
+      <if test="cashbackAmount != null">
+        and ood.CASHBACK_AMOUNT = #{cashbackAmount,jdbcType=DECIMAL}
+      </if>
+      <if test="returnCount != null">
+        and ood.RETURN_COUNT = #{returnCount,jdbcType=INTEGER}
+      </if>
+      <if test="cashbackTotal != null">
+        and ood.CASHBACK_TOTAL = #{cashbackTotal,jdbcType=DECIMAL}
+      </if>
+      <if test="buyUnit != null and buyUnit != ''">
+        and ood.BUY_UNIT = #{buyUnit,jdbcType=VARCHAR}
+      </if>
+      <if test="returnState != null">
+        and ood.RETURN_STATE = #{returnState,jdbcType=TINYINT}
+      </if>
+      <if test="userId != null">
+        and ood.USER_ID = #{userId,jdbcType=BIGINT}
+      </if>
+      <if test="relationSource != null">
+        and ood.RELATION_SOURCE = #{relationSource,jdbcType=TINYINT}
+      </if>
+    </where>
+    AND ood.ORDER_ID = oo.ID and ood.id = oor.UPLINE_ORDER_DETAIL_ID and oor.RELATION_SOURCE = 2 and oo.ORDER_STATE IN (2,3,4,5) and ood.COMMISSION_SLOT&gt;0 and ORDER BY oo.ORDER_TIME ASC limit 1
+  </select>
   
 </mapper>

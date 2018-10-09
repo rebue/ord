@@ -21,9 +21,11 @@ import org.springframework.transaction.annotation.Transactional;
 import rebue.afc.co.AfcExchangeCo;
 import rebue.afc.msg.PayDoneMsg;
 import rebue.ord.mo.OrdBuyRelationMo;
+import rebue.ord.mo.OrdGoodsBuyRelationMo;
 import rebue.ord.mo.OrdOrderDetailMo;
 import rebue.ord.mo.OrdOrderMo;
 import rebue.ord.svc.OrdBuyRelationSvc;
+import rebue.ord.svc.OrdGoodsBuyRelationSvc;
 import rebue.ord.svc.OrdOrderDetailSvc;
 import rebue.ord.svc.OrdOrderSvc;
 import rebue.sbs.rabbit.RabbitConsumer;
@@ -75,6 +77,9 @@ public class PayDoneSub implements ApplicationListener<ContextRefreshedEvent> {
 	@Resource
 	private SucUserSvc sucUserSvc;
 
+	@Resource
+	private OrdGoodsBuyRelationSvc ordGoodsBuyRelationSvc;
+
 	@Override
 	@Transactional(readOnly = false, propagation = Propagation.REQUIRED)
 	public void onApplicationEvent(ContextRefreshedEvent event) {
@@ -99,23 +104,40 @@ public class PayDoneSub implements ApplicationListener<ContextRefreshedEvent> {
 					_log.info("全返商品添加购买关系");
 					long id = detailMoResult.get(i).getUserId();
 					long onlineId = detailMoResult.get(i).getOnlineId();
-					_log.info("获取用户购买关系上家");
-					boolean getBuyRelationResult = getAndUpdateBuyRelationByPromot(id, onlineId,
+					_log.info("按匹配自己匹配购买关系");
+					boolean getBuyRelationResultByOwn = getAndUpdateBuyRelationByOwn(id, onlineId,
 							detailMoResult.get(i).getBuyPrice(), detailMoResult.get(i).getId(),
 							detailMoResult.get(i).getOrderId());
-					_log.info(msg.getOrderId() + "获取用户购买关系的返回值为：{}" + getBuyRelationResult);
-					if (getBuyRelationResult == false) {
-						_log.info("获取用户注册关系上家");
-						boolean getRegRelationResult = getAndUpdateBuyRelationByReg(id, onlineId,
+					_log.info(detailMoResult.get(i).getId() + "按匹配自己匹配购买关系的返回值为：{}" + getBuyRelationResultByOwn);
+					if (getBuyRelationResultByOwn == false) {
+						_log.info("根据邀请规则匹配购买关系");
+						boolean getRegRelationResultByPromote = getAndUpdateBuyRelationByPromote(id, onlineId,
 								detailMoResult.get(i).getBuyPrice(), detailMoResult.get(i).getId(),
 								detailMoResult.get(i).getOrderId());
-						_log.info(msg.getOrderId() + "获取用户注册关系的返回值为：{}" + getRegRelationResult);
-						if (getRegRelationResult == false) {
-							_log.info("获取其它关系上家");
-							boolean getOtherRelationResult = getAndUpdateBuyRelationByOther(id, onlineId,
+						_log.info(detailMoResult.get(i).getId() + "根据邀请规则匹配购买关系的返回值为：{}" + getRegRelationResultByPromote);
+						if (getRegRelationResultByPromote == false) {
+							_log.info("根据匹配差一人，且邀请一人（关系来源是购买关系的）规则匹配购买关系");
+							boolean getOtherRelationResultByThree = getAndUpdateBuyRelationByThree(id, onlineId,
 									detailMoResult.get(i).getBuyPrice(), detailMoResult.get(i).getId(),
 									detailMoResult.get(i).getOrderId());
-							_log.info(msg.getOrderId() + "获取其它关系的返回值为：{}" + getOtherRelationResult);
+							_log.info(detailMoResult.get(i).getId() + "根据匹配差一人，且邀请一人（关系来源是购买关系的）规则匹配购买关系的返回值为：{}" + getOtherRelationResultByThree);
+							if (getOtherRelationResultByThree == false) {
+								_log.info("根据匹配差两人的规则匹配购买关系");
+								boolean getOtherRelationResultByFour = getAndUpdateBuyRelationByFour(id, onlineId,
+										detailMoResult.get(i).getBuyPrice(), detailMoResult.get(i).getId(),
+										detailMoResult.get(i).getOrderId());
+								_log.info(detailMoResult.get(i).getId() + "根据匹配差两人的规则匹配购买关系的返回值为：{}" + getOtherRelationResultByFour);
+								if (getOtherRelationResultByFour == false) {
+									_log.info("根据匹配差一人的规则匹配购买关系");
+									boolean getOtherRelationResultByFive = getAndUpdateBuyRelationByFive(id, onlineId,
+											detailMoResult.get(i).getBuyPrice(), detailMoResult.get(i).getId(),
+											detailMoResult.get(i).getOrderId());
+									_log.info(detailMoResult.get(i).getId() + "根据匹配差一人的规则匹配购买关系的返回值为：{}" + getOtherRelationResultByFive);
+									if (getOtherRelationResultByFive == false) {
+										_log.info(detailMoResult.get(i).getId() + "匹配购买关系失败");
+									}
+								}
+							}
 						}
 					}
 				}
@@ -154,221 +176,327 @@ public class PayDoneSub implements ApplicationListener<ContextRefreshedEvent> {
 	}
 
 	/**
-	 * 根据自己的购买记录更新购买关系
+	 * 根据匹配自己规则匹配购买关系 1.查找用户购买同款产品中剩余1个购买名额的记录，如果已有购买关系下家不是自己，则添加购买关系记录;
+	 * 2.如1结果为空，查用户购买同款产品中剩余两个购买名额的记录，并添加购买关系记录；
 	 */
-
 	@Transactional(readOnly = false, propagation = Propagation.REQUIRED)
 	public boolean getAndUpdateBuyRelationByOwn(long id, long onlineId, BigDecimal buyPrice, long downLineDetailId,
 			long downLineOrderId) {
 		// 获取用户购买关系
 		_log.info("获取用户购买关系的id:" + id + "onlineId:" + onlineId + "buyPricce:" + buyPrice);
-		// 获取用户购买该产品详情记录
+		// 获取用户购买该产品还有两个名额的详情记录
 		OrdOrderDetailMo mo = new OrdOrderDetailMo();
 		mo.setOnlineId(onlineId);
 		mo.setBuyPrice(buyPrice);
 		mo.setUserId(id);
 		mo.setReturnState((byte) 0);
-		_log.info("获取用户自己购买订单详情的参数为：{}" + mo);
-		OrdOrderDetailMo orderDetailMo = ordOrderDetailSvc.getFullReturnDetail(mo);
-		_log.info("获取用户上线购买关系订单详情的返回值为：{}" + orderDetailMo);
-		if (orderDetailMo == null) {
-			return false;
+		mo.setCommissionSlot((byte) 1);
+		_log.info("获取用户自己购买剩余1个购买名额的订单详情的参数为：{}" + mo);
+		OrdOrderDetailMo orderDetailOfOneCommissionSlot = ordOrderDetailSvc.getOrderDetailForBuyRelation(mo);
+		_log.info("查找订单详情的购买关系记录");
+		if (orderDetailOfOneCommissionSlot == null) {
+			_log.info("获取用户购买过该产品且还有1个匹配名额的记录为空");
+		} else {
+			OrdBuyRelationMo relationMo = new OrdBuyRelationMo();
+			relationMo.setUplineOrderDetailId(orderDetailOfOneCommissionSlot.getId());
+			List<OrdBuyRelationMo> relationResult = ordBuyRelationSvc.list(relationMo);
+			_log.info("获取到的购买关系结果为:{}", relationResult);
+			if (relationResult.size() != 0 && relationResult.get(0).getRelationSource() != null
+					&& relationResult.get(0).getRelationSource() != 1) {
+				// 添加购买关系记录
+				_log.info("在购买关系表中添加记录");
+				OrdBuyRelationMo ordBuyRelationMo = new OrdBuyRelationMo();
+				ordBuyRelationMo.setId(_idWorker.getId());
+				ordBuyRelationMo.setUplineOrderId(orderDetailOfOneCommissionSlot.getOrderId());
+				ordBuyRelationMo.setUplineUserId(orderDetailOfOneCommissionSlot.getUserId());
+				ordBuyRelationMo.setUplineOrderDetailId(orderDetailOfOneCommissionSlot.getId());
+				ordBuyRelationMo.setDownlineUserId(id);
+				ordBuyRelationMo.setDownlineOrderDetailId(downLineDetailId);
+				ordBuyRelationMo.setDownlineOrderId(downLineOrderId);
+				ordBuyRelationMo.setRelationSource((byte) 1);
+				_log.error("添加购买关系参数:{}", ordBuyRelationMo);
+				int addBuyRelationResult = ordBuyRelationSvc.add(ordBuyRelationMo);
+				if (addBuyRelationResult != 1) {
+					_log.error("{}添加下级购买信息失败", id);
+					throw new RuntimeException("生成购买关系出错");
+				}
+				// 更新购买关系订单详情的返佣名额
+				OrdOrderDetailMo updateOrderDetailMo = new OrdOrderDetailMo();
+				updateOrderDetailMo.setCommissionSlot((byte) 0);
+				updateOrderDetailMo.setId(orderDetailOfOneCommissionSlot.getId());
+				updateOrderDetailMo.setCommissionState((byte) 1);
+				int updateOrderDetailResult = ordOrderDetailSvc.updateCommissionSlotForBuyRelation(updateOrderDetailMo);
+				if (updateOrderDetailResult != 1) {
+					_log.error("{}更新订单详情返佣名额失败", id);
+					throw new RuntimeException("更新订单详情返现名额失败");
+				}
+				_log.info("根据匹配自己规则匹配差一人匹配购买关系成功，匹配的购买关系ID为:{}" + ordBuyRelationMo.getId());
+				return true;
+			}
 		}
-		OrdOrderDetailMo updateOrderDetailMo = new OrdOrderDetailMo();
-		updateOrderDetailMo.setCommissionSlot((byte) (orderDetailMo.getCommissionSlot() - 1));
-		updateOrderDetailMo.setId(orderDetailMo.getId());
-		if ((orderDetailMo.getCommissionSlot() - 1) == 0) {
-			updateOrderDetailMo.setCommissionState((byte) 1);
+		mo.setCommissionSlot((byte) 2);
+		_log.info("获取用户自己购买剩余2个购买名额的订单详情的参数为：{}" + mo);
+		OrdOrderDetailMo orderDetailOfTwoCommissionSlot = ordOrderDetailSvc.getOrderDetailForBuyRelation(mo);
+		if (orderDetailOfTwoCommissionSlot == null) {
+			_log.info("获取用户购买过该产品且还有两个匹配名额的记录为空");
+		} else {
+			_log.info("获取用户购买过该产品且还有两个匹配名额的记录为：{}", orderDetailOfTwoCommissionSlot);
+			// 添加购买关系记录
+			_log.info("在购买关系表中添加记录");
+			OrdBuyRelationMo ordBuyRelationMo = new OrdBuyRelationMo();
+			ordBuyRelationMo.setId(_idWorker.getId());
+			ordBuyRelationMo.setUplineOrderId(orderDetailOfTwoCommissionSlot.getOrderId());
+			ordBuyRelationMo.setUplineUserId(orderDetailOfTwoCommissionSlot.getUserId());
+			ordBuyRelationMo.setUplineOrderDetailId(orderDetailOfTwoCommissionSlot.getId());
+			ordBuyRelationMo.setDownlineUserId(id);
+			ordBuyRelationMo.setDownlineOrderDetailId(downLineDetailId);
+			ordBuyRelationMo.setDownlineOrderId(downLineOrderId);
+			ordBuyRelationMo.setRelationSource((byte) 1);
+			_log.error("添加购买关系参数:{}", ordBuyRelationMo);
+			int addBuyRelationResult = ordBuyRelationSvc.add(ordBuyRelationMo);
+			if (addBuyRelationResult != 1) {
+				_log.error("{}添加下级购买信息失败", id);
+				throw new RuntimeException("生成购买关系出错");
+			}
+			// 更新订单详情的返佣名额
+			OrdOrderDetailMo updateOrderDetailMo = new OrdOrderDetailMo();
+			updateOrderDetailMo.setCommissionSlot((byte) 1);
+			updateOrderDetailMo.setId(orderDetailOfTwoCommissionSlot.getId());
+			int updateOrderDetailResult = ordOrderDetailSvc.updateCommissionSlotForBuyRelation(updateOrderDetailMo);
+			if (updateOrderDetailResult != 1) {
+				_log.error("{}更新订单详情返佣名额失败", id);
+				throw new RuntimeException("更新订单详情返现名额失败");
+			}
+			_log.info("根据匹配自己规则匹配差两人匹配购买关系成功，匹配的购买关系ID为:{}" + ordBuyRelationMo.getId());
+			return true;
 		}
-		// 更新购买关系订单详情的返佣名额
-		int updateOrderDetailResult = ordOrderDetailSvc.modify(updateOrderDetailMo);
-		if (updateOrderDetailResult != 1) {
-			_log.error("{}更新订单详情返佣名额失败", id);
-			throw new RuntimeException("更新订单详情返现名额失败");
-		}
-		// 添加购买关系记录
-		_log.info("在购买关系表中添加记录");
-		OrdBuyRelationMo ordBuyRelationMo = new OrdBuyRelationMo();
-		ordBuyRelationMo.setId(_idWorker.getId());
-		ordBuyRelationMo.setUplineOrderId(orderDetailMo.getOrderId());
-		ordBuyRelationMo.setUplineUserId(orderDetailMo.getUserId());
-		ordBuyRelationMo.setUplineOrderDetailId(orderDetailMo.getId());
-		ordBuyRelationMo.setDownlineUserId(id);
-		ordBuyRelationMo.setDownlineOrderDetailId(downLineDetailId);
-		ordBuyRelationMo.setDownlineOrderId(downLineOrderId);
-		_log.error("添加购买关系参数:{}", ordBuyRelationMo);
-		int addBuyRelationResult = ordBuyRelationSvc.add(ordBuyRelationMo);
-		if (addBuyRelationResult != 1) {
-			_log.error("{}添加下级购买信息失败", id);
-			throw new RuntimeException("生成购买关系出错");
-		}
-		return true;
+		return false;
 	}
 
 	/**
-	 * 获取邀请关系并更新购买关系表
+	 * 根据邀请规则匹配购买关系
 	 */
 	@Transactional(readOnly = false, propagation = Propagation.REQUIRED)
-	public boolean getAndUpdateBuyRelationByPromot(long id, long onlineId, BigDecimal buyPrice, long downLineDetailId,
+	public boolean getAndUpdateBuyRelationByPromote(long id, long onlineId, BigDecimal buyPrice, long downLineDetailId,
 			long downLineOrderId) {
 		// 获取用户购买关系
 		_log.info("获取用户购买关系的id:" + id + "onlineId:" + onlineId + "buyPricce:" + buyPrice);
-		Long buyRelation = sucUserSvc.getBuyRelation(id, onlineId);
-		_log.info("获取用户购买关系返回值为：" + buyRelation);
-		if (buyRelation == null || buyRelation == id) {
+		OrdGoodsBuyRelationMo goodsBuyRelationMo = new OrdGoodsBuyRelationMo();
+		goodsBuyRelationMo.setDownlineUserId(id);
+		goodsBuyRelationMo.setOnlineId(onlineId);
+		OrdGoodsBuyRelationMo buyRelationResult = ordGoodsBuyRelationSvc.getBuyRelation(goodsBuyRelationMo);
+		_log.info("获取用户购买关系返回值为：{}", buyRelationResult);
+		if (buyRelationResult == null) {
+			_log.info("获取到的购买关系为空");
 			return false;
 		}
 		// 根据产品上线ID查找购买关系用户的购买记录，看是否有符合要求的订单详情记录
 		OrdOrderDetailMo mo = new OrdOrderDetailMo();
 		mo.setOnlineId(onlineId);
 		mo.setBuyPrice(buyPrice);
-		mo.setUserId(buyRelation);
+		mo.setUserId(buyRelationResult.getUplineUserId());
 		mo.setReturnState((byte) 0);
 		_log.info("获取用户上线购买关系订单详情的参数为：{}" + mo);
-		OrdOrderDetailMo orderDetailMo = ordOrderDetailSvc.getFullReturnDetail(mo);
-		_log.info("获取用户上线购买关系订单详情的返回值为：{}" + orderDetailMo);
-		if (orderDetailMo == null) {
+		OrdOrderDetailMo orderDetailResult = ordOrderDetailSvc.getOrderDetailForBuyRelation(mo);
+		if (orderDetailResult == null) {
+			_log.info("邀请关系没有符合匹配规则的订单详情");
 			return false;
 		}
+		// 添加购买关系记录
+		_log.info("在购买关系表中添加记录");
+		OrdBuyRelationMo ordBuyRelationMo = new OrdBuyRelationMo();
+		ordBuyRelationMo.setId(_idWorker.getId());
+		ordBuyRelationMo.setUplineOrderId(orderDetailResult.getOrderId());
+		ordBuyRelationMo.setUplineUserId(orderDetailResult.getUserId());
+		ordBuyRelationMo.setUplineOrderDetailId(orderDetailResult.getId());
+		ordBuyRelationMo.setDownlineUserId(id);
+		ordBuyRelationMo.setDownlineOrderDetailId(downLineDetailId);
+		ordBuyRelationMo.setDownlineOrderId(downLineOrderId);
+		ordBuyRelationMo.setRelationSource((byte) 2);
+		_log.error("添加购买关系参数:{}", ordBuyRelationMo);
+		int addBuyRelationResult = ordBuyRelationSvc.add(ordBuyRelationMo);
+		if (addBuyRelationResult != 1) {
+			_log.error("{}添加下级购买信息失败", id);
+			throw new RuntimeException("生成购买关系出错");
+		}
 		OrdOrderDetailMo updateOrderDetailMo = new OrdOrderDetailMo();
-		updateOrderDetailMo.setCommissionSlot((byte) (orderDetailMo.getCommissionSlot() - 1));
-		updateOrderDetailMo.setId(orderDetailMo.getId());
-		if ((orderDetailMo.getCommissionSlot() - 1) == 0) {
+		updateOrderDetailMo.setCommissionSlot((byte) (orderDetailResult.getCommissionSlot() - 1));
+		updateOrderDetailMo.setId(orderDetailResult.getId());
+		if ((orderDetailResult.getCommissionSlot() - 1) == 0) {
 			updateOrderDetailMo.setCommissionState((byte) 1);
 		}
 		// 更新购买关系订单详情的返佣名额
-		int updateOrderDetailResult = ordOrderDetailSvc.modify(updateOrderDetailMo);
+		int updateOrderDetailResult = ordOrderDetailSvc.updateCommissionSlotForBuyRelation(updateOrderDetailMo);
 		if (updateOrderDetailResult != 1) {
 			_log.error("{}更新订单详情返佣名额失败", id);
 			throw new RuntimeException("更新订单详情返现名额失败");
 		}
+		_log.info("根据匹配邀请规则匹配购买关系成功，匹配的购买关系ID为:{}" + ordBuyRelationMo.getId());
+		return true;
+	}
+
+	/**
+	 * 根据匹配差一人，且邀请一人（关系来源是购买关系的）的订单详情
+	 */
+
+	@Transactional(readOnly = false, propagation = Propagation.REQUIRED)
+	public boolean getAndUpdateBuyRelationByThree(long id, long onlineId, BigDecimal buyPrice, long downLineDetailId,
+			long downLineOrderId) {
+		// 获取用户购买关系
+		_log.info("匹配差一人，且邀请一人（关系来源是购买关系的）的订单详情的用户id:" + id + "onlineId:" + onlineId + "buyPrice:" + buyPrice);
+		// 获取用户购买该产品还有两个名额的详情记录
+		OrdOrderDetailMo mo = new OrdOrderDetailMo();
+		mo.setOnlineId(onlineId);
+		mo.setBuyPrice(buyPrice);
+		mo.setReturnState((byte) 0);
+		mo.setCommissionSlot((byte) 1);
+		OrdOrderDetailMo orderDetailResult = ordOrderDetailSvc.getOrderDetailForBuyRelationThree(mo);
+		if (orderDetailResult == null) {
+			_log.info("邀请关系没有符合匹配规则的订单详情");
+			return false;
+		}
+		OrdBuyRelationMo relationMo = new OrdBuyRelationMo();
+		relationMo.setUplineOrderDetailId(orderDetailResult.getId());
+		List<OrdBuyRelationMo> relationResult = ordBuyRelationSvc.list(relationMo);
+		_log.info("获取到的购买关系结果为:{}", relationResult);
+		if (relationResult.size() != 0 && relationResult.get(0).getRelationSource() != null
+				&& relationResult.get(0).getRelationSource() == 2) {
+			// 添加购买关系记录
+			_log.info("在购买关系表中添加记录");
+			OrdBuyRelationMo ordBuyRelationMo = new OrdBuyRelationMo();
+			ordBuyRelationMo.setId(_idWorker.getId());
+			ordBuyRelationMo.setUplineOrderId(orderDetailResult.getOrderId());
+			ordBuyRelationMo.setUplineUserId(orderDetailResult.getUserId());
+			ordBuyRelationMo.setUplineOrderDetailId(orderDetailResult.getId());
+			ordBuyRelationMo.setDownlineUserId(id);
+			ordBuyRelationMo.setDownlineOrderDetailId(downLineDetailId);
+			ordBuyRelationMo.setDownlineOrderId(downLineOrderId);
+			ordBuyRelationMo.setRelationSource((byte) 3);
+			_log.error("添加购买关系参数:{}", ordBuyRelationMo);
+			int addBuyRelationResult = ordBuyRelationSvc.add(ordBuyRelationMo);
+			if (addBuyRelationResult != 1) {
+				_log.error("{}添加下级购买信息失败", id);
+				throw new RuntimeException("生成购买关系出错");
+			}
+			OrdOrderDetailMo updateOrderDetailMo = new OrdOrderDetailMo();
+			updateOrderDetailMo.setCommissionSlot((byte) (orderDetailResult.getCommissionSlot() - 1));
+			updateOrderDetailMo.setId(orderDetailResult.getId());
+			if ((orderDetailResult.getCommissionSlot() - 1) == 0) {
+				updateOrderDetailMo.setCommissionState((byte) 1);
+			}
+			// 更新购买关系订单详情的返佣名额
+			int updateOrderDetailResult = ordOrderDetailSvc.updateCommissionSlotForBuyRelation(updateOrderDetailMo);
+			if (updateOrderDetailResult != 1) {
+				_log.error("{}更新订单详情返佣名额失败", id);
+				throw new RuntimeException("更新订单详情返现名额失败");
+			}
+			_log.info("根据匹配差一人，且邀请一人规则匹配购买关系成功，匹配的购买关系ID为:{}" + ordBuyRelationMo.getId());
+			return true;
+		} else {
+			_log.info("邀请关系没有符合匹配规则的订单详情");
+			return false;
+		}
+	}
+
+	/**
+	 * 根据匹配差两人的规则匹配购买关系
+	 */
+	@Transactional(readOnly = false, propagation = Propagation.REQUIRED)
+	public boolean getAndUpdateBuyRelationByFour(long id, long onlineId, BigDecimal buyPrice, long downLineDetailId,
+			long downLineOrderId) {
+		// 获取用户购买关系
+		_log.info("匹配差两人的订单详情的用户id:" + id + "onlineId:" + onlineId + "buyPrice:" + buyPrice);
+		// 获取用户购买该产品还有两个名额的详情记录
+		OrdOrderDetailMo mo = new OrdOrderDetailMo();
+		mo.setOnlineId(onlineId);
+		mo.setBuyPrice(buyPrice);
+		mo.setReturnState((byte) 0);
+		mo.setCommissionSlot((byte) 2);
+		OrdOrderDetailMo orderDetailResult = ordOrderDetailSvc.getOrderDetailForBuyRelation(mo);
+		if (orderDetailResult == null) {
+			_log.info("没有符合差两人匹配规则的订单详情");
+			return false;
+		}
 		// 添加购买关系记录
 		_log.info("在购买关系表中添加记录");
 		OrdBuyRelationMo ordBuyRelationMo = new OrdBuyRelationMo();
 		ordBuyRelationMo.setId(_idWorker.getId());
-		ordBuyRelationMo.setUplineOrderId(orderDetailMo.getOrderId());
-		ordBuyRelationMo.setUplineUserId(orderDetailMo.getUserId());
-		ordBuyRelationMo.setUplineOrderDetailId(orderDetailMo.getId());
+		ordBuyRelationMo.setUplineOrderId(orderDetailResult.getOrderId());
+		ordBuyRelationMo.setUplineUserId(orderDetailResult.getUserId());
+		ordBuyRelationMo.setUplineOrderDetailId(orderDetailResult.getId());
 		ordBuyRelationMo.setDownlineUserId(id);
 		ordBuyRelationMo.setDownlineOrderDetailId(downLineDetailId);
 		ordBuyRelationMo.setDownlineOrderId(downLineOrderId);
+		ordBuyRelationMo.setRelationSource((byte) 4);
 		_log.error("添加购买关系参数:{}", ordBuyRelationMo);
 		int addBuyRelationResult = ordBuyRelationSvc.add(ordBuyRelationMo);
 		if (addBuyRelationResult != 1) {
 			_log.error("{}添加下级购买信息失败", id);
 			throw new RuntimeException("生成购买关系出错");
+		}
+		OrdOrderDetailMo updateOrderDetailMo = new OrdOrderDetailMo();
+		updateOrderDetailMo.setCommissionSlot((byte) (orderDetailResult.getCommissionSlot() - 1));
+		updateOrderDetailMo.setId(orderDetailResult.getId());
+		if ((orderDetailResult.getCommissionSlot() - 1) == 0) {
+			updateOrderDetailMo.setCommissionState((byte) 1);
+		}
+		// 更新购买关系订单详情的返佣名额
+		int updateOrderDetailResult = ordOrderDetailSvc.updateCommissionSlotForBuyRelation(updateOrderDetailMo);
+		if (updateOrderDetailResult != 1) {
+			_log.error("{}更新订单详情返佣名额失败", id);
+			throw new RuntimeException("更新订单详情返现名额失败");
 		}
 		return true;
 	}
 
 	/**
-	 * 获取注册关系并更新购买关系表
-	 *
-	 * @param id
-	 * @param onlineId
-	 * @param buyPrice
-	 * @return
+	 * 匹配差一人的订单详情
 	 */
 	@Transactional(readOnly = false, propagation = Propagation.REQUIRED)
-	public boolean getAndUpdateBuyRelationByReg(long id, long onlineId, BigDecimal buyPrice, long downLineDetailId,
+	public boolean getAndUpdateBuyRelationByFive(long id, long onlineId, BigDecimal buyPrice, long downLineDetailId,
 			long downLineOrderId) {
-		_log.info("获取用户信息参数：{}" + id);
-		SucRegRo sucReg = sucUserSvc.getRegInfo(id);
-		_log.info("获取用户信息返回值为：" + sucReg);
-		if (sucReg.getResult() != 1) {
-			return false;
-		}
-		// 根据产品上线ID查找注册关系用户的购买记录，看是否有符合要求的订单详情记录
+		// 获取用户购买关系
+		_log.info("匹配差一人的订单详情的用户id:" + id + "onlineId:" + onlineId + "buyPrice:" + buyPrice);
+		// 获取用户购买该产品还有两个名额的详情记录
 		OrdOrderDetailMo mo = new OrdOrderDetailMo();
 		mo.setOnlineId(onlineId);
 		mo.setBuyPrice(buyPrice);
-		mo.setUserId(sucReg.getRecord().getId());
 		mo.setReturnState((byte) 0);
-		_log.info("获取用户注册关系订单详情的参数：{}" + mo);
-		OrdOrderDetailMo orderDetailMo = ordOrderDetailSvc.getFullReturnDetail(mo);
-		_log.info("获取用户注册关系订单详情的返回值为：{}" + orderDetailMo);
-		if (orderDetailMo == null) {
+		mo.setCommissionSlot((byte) 1);
+		OrdOrderDetailMo orderDetailResult = ordOrderDetailSvc.getOrderDetailForBuyRelation(mo);
+		if (orderDetailResult == null) {
+			_log.info("没有符合差一人匹配规则的订单详情");
 			return false;
-		}
-		// 更新注册关系上线订单详情的返现名额
-		OrdOrderDetailMo updateOrderDetailMo = new OrdOrderDetailMo();
-		updateOrderDetailMo.setCommissionSlot((byte) (orderDetailMo.getCommissionSlot() - 1));
-		updateOrderDetailMo.setId(orderDetailMo.getId());
-		if ((orderDetailMo.getCommissionSlot() - 1) == 0) {
-			updateOrderDetailMo.setCommissionState((byte) 1);
-		}
-		// 更新注册关系上线订单详情的返现名额
-		int updateOrderDetailResult = ordOrderDetailSvc.modify(updateOrderDetailMo);
-		if (updateOrderDetailResult != 1) {
-			_log.error("{}更新订单详情返现名额失败", id);
-			throw new RuntimeException("更新订单详情返现名额失败");
 		}
 		// 添加购买关系记录
 		_log.info("在购买关系表中添加记录");
 		OrdBuyRelationMo ordBuyRelationMo = new OrdBuyRelationMo();
 		ordBuyRelationMo.setId(_idWorker.getId());
-		ordBuyRelationMo.setUplineOrderId(orderDetailMo.getOrderId());
-		ordBuyRelationMo.setUplineUserId(orderDetailMo.getUserId());
-		ordBuyRelationMo.setUplineOrderDetailId(orderDetailMo.getId());
+		ordBuyRelationMo.setUplineOrderId(orderDetailResult.getOrderId());
+		ordBuyRelationMo.setUplineUserId(orderDetailResult.getUserId());
+		ordBuyRelationMo.setUplineOrderDetailId(orderDetailResult.getId());
 		ordBuyRelationMo.setDownlineUserId(id);
 		ordBuyRelationMo.setDownlineOrderDetailId(downLineDetailId);
 		ordBuyRelationMo.setDownlineOrderId(downLineOrderId);
+		ordBuyRelationMo.setRelationSource((byte) 5);
 		_log.error("添加购买关系参数:{}", ordBuyRelationMo);
 		int addBuyRelationResult = ordBuyRelationSvc.add(ordBuyRelationMo);
 		if (addBuyRelationResult != 1) {
 			_log.error("{}添加下级购买信息失败", id);
 			throw new RuntimeException("生成购买关系出错");
 		}
-		return true;
-	}
-
-	/**
-	 * 获取除购买关系和注册关系外的一个购买上家,并更新购买关系表
-	 */
-	@Transactional(readOnly = false, propagation = Propagation.REQUIRED)
-	public boolean getAndUpdateBuyRelationByOther(long id, long onlineId, BigDecimal buyPrice, long downLineDetailId,
-			long downLineOrderId) {
-		// 根据产品上线ID和价格查找订单详情记录，看是否有符合要求的订单详情
-		OrdOrderDetailMo mo = new OrdOrderDetailMo();
-		mo.setId(downLineDetailId);
-		mo.setOnlineId(onlineId);
-		mo.setBuyPrice(buyPrice);
-		mo.setReturnState((byte) 0);
-		OrdOrderDetailMo orderDetailMo = ordOrderDetailSvc.getOtherFullReturnDetail(mo);
-		_log.info("获取上家订单详情的返回值为：{}" + orderDetailMo);
-		if (orderDetailMo == null) {
-			return false;
-		}
-		// 更新购买关系订单详情的返现名额
 		OrdOrderDetailMo updateOrderDetailMo = new OrdOrderDetailMo();
-		updateOrderDetailMo.setCommissionSlot((byte) (orderDetailMo.getCommissionSlot() - 1));
-		updateOrderDetailMo.setId(orderDetailMo.getId());
-		if ((orderDetailMo.getCommissionSlot() - 1) == 0) {
+		updateOrderDetailMo.setCommissionSlot((byte) (orderDetailResult.getCommissionSlot() - 1));
+		updateOrderDetailMo.setId(orderDetailResult.getId());
+		if ((orderDetailResult.getCommissionSlot() - 1) == 0) {
 			updateOrderDetailMo.setCommissionState((byte) 1);
 		}
-		// 更新购买关系订单详情的返现名额
-		int updateOrderDetailResult = ordOrderDetailSvc.modify(updateOrderDetailMo);
+		// 更新购买关系订单详情的返佣名额
+		int updateOrderDetailResult = ordOrderDetailSvc.updateCommissionSlotForBuyRelation(updateOrderDetailMo);
 		if (updateOrderDetailResult != 1) {
-			_log.error("{}更新订单详情返现名额失败", id);
+			_log.error("{}更新订单详情返佣名额失败", id);
 			throw new RuntimeException("更新订单详情返现名额失败");
-		}
-		// 添加购买关系记录
-		_log.info("在购买关系表中添加记录");
-		OrdBuyRelationMo ordBuyRelationMo = new OrdBuyRelationMo();
-		ordBuyRelationMo.setId(_idWorker.getId());
-		ordBuyRelationMo.setUplineOrderId(orderDetailMo.getOrderId());
-		ordBuyRelationMo.setUplineUserId(orderDetailMo.getUserId());
-		ordBuyRelationMo.setUplineOrderDetailId(orderDetailMo.getId());
-		ordBuyRelationMo.setDownlineUserId(id);
-		ordBuyRelationMo.setDownlineOrderDetailId(downLineDetailId);
-		ordBuyRelationMo.setDownlineOrderId(downLineOrderId);
-		_log.error("添加购买关系参数:{}", ordBuyRelationMo);
-		int addBuyRelationResult = ordBuyRelationSvc.add(ordBuyRelationMo);
-		if (addBuyRelationResult != 1) {
-			_log.error("{}添加下级购买信息失败", id);
-			throw new RuntimeException("生成购买关系出错");
 		}
 		return true;
 	}
-
 }

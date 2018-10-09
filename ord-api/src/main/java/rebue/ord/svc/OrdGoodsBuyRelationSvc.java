@@ -14,4 +14,9 @@ public interface OrdGoodsBuyRelationSvc extends MybatisBaseSvc<OrdGoodsBuyRelati
      *  导出redis中的购买关系到数据库中
      */
     void exportGoodsBuyRelation();
+
+    /**
+     * 获取用户购买关系
+     */
+    OrdGoodsBuyRelationMo getBuyRelation(OrdGoodsBuyRelationMo mo);
 }

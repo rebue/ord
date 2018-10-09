@@ -79,20 +79,26 @@ public class OrdOrderDetailSvcImpl extends MybatisBaseSvcImpl<OrdOrderDetailMo, 
     }
 
     /**
-     * 根据上线ID及价格查找用户全返商品,如有多个则找到时间最早的一个商品详情
+     * 用户匹配自己购买关系，获取用户还有两个匹配名额的订单详情
      */
     @Override
-    public OrdOrderDetailMo getFullReturnDetail(OrdOrderDetailMo mo) {
-        return _mapper.getFullReturnDetail(mo);
+    public OrdOrderDetailMo getOrderDetailForBuyRelation(OrdOrderDetailMo mo) {
+        return _mapper.getOrderDetailForBuyRelation(mo);
     }
 
     @Override
-    public OrdOrderDetailMo getOtherFullReturnDetail(OrdOrderDetailMo mo) {
-        return _mapper.getOtherFullReturnDetail(mo);
+    public int updateCommissionSlotForBuyRelation(OrdOrderDetailMo mo) {
+        return _mapper.updateCommissionSlotForBuyRelation(mo);
     }
 
     @Override
     public int updateCashbackSlot(OrdOrderDetailMo mo) {
         return _mapper.updateCashbackSlot(mo);
+    }
+
+    @Override
+    public OrdOrderDetailMo getOrderDetailForBuyRelationThree(OrdOrderDetailMo mo) {
+        // TODO Auto-generated method stub
+        return _mapper.getOrderDetailForBuyRelationThree(mo);
     }
 }

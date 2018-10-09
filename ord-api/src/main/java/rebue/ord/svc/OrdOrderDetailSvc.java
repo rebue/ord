@@ -33,12 +33,17 @@ public interface OrdOrderDetailSvc extends MybatisBaseSvc<OrdOrderDetailMo, java
      */
     int modifyReturnStateById(long id, byte returnState);
 
-    OrdOrderDetailMo getFullReturnDetail(OrdOrderDetailMo mo);
-
-    OrdOrderDetailMo getOtherFullReturnDetail(OrdOrderDetailMo mo);
-
     /**
      * 更新订单详情的返佣名额字段
      */
     int updateCashbackSlot(OrdOrderDetailMo mo);
+
+    /**
+     * 添加购买关系时，更新订单详情返佣名额字段
+     */
+    int updateCommissionSlotForBuyRelation(OrdOrderDetailMo mo);
+
+    OrdOrderDetailMo getOrderDetailForBuyRelation(OrdOrderDetailMo mo);
+
+    OrdOrderDetailMo getOrderDetailForBuyRelationThree(OrdOrderDetailMo mo);
 }

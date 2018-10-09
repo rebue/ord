@@ -61,5 +61,5 @@ public interface OrdReturnPicMapper extends MybatisBaseMapper<OrdReturnPicMo, Lo
     /**
      *    @mbg.generated 自动生成，如需修改，请删除本行
      */
-    int countSelective(OrdReturnPicMo record);
+    List<OrdReturnPicMo> countSelective(OrdReturnPicMo record);
 }
