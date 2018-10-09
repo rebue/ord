@@ -1,7 +1,11 @@
 package rebue.ord.ro;
 
 import java.math.BigDecimal;
+import java.util.Date;
 
+import org.springframework.format.annotation.DateTimeFormat;
+
+import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
 
@@ -107,5 +111,45 @@ public class OrdOrderRo {
      * 商品类型
      */
     private Byte       subjectType;
+    
+    /**
+     *    订单编号
+     *
+     */
+    private String orderCode;
+    
+    /**
+     *    下单金额
+     *
+     */
+    private BigDecimal orderMoney;
+
+    /**
+     *    实际金额
+
+     */
+    private BigDecimal realMoney;
+    
+    /**
+     *    订单状态（-1：作废  1：已下单（待支付）  2：已支付（待发货）  3：已发货（待签收）  4：已签收（待结算）  5：已结算  ））
+     *                -1：作废
+     *                1：已下单（待支付）
+     *                2：已支付（待发货）
+     *                3：已发货（待签收）
+     *                4：已签收（待结算）
+     *                5：已结算
+     *
+     */
+    private Byte orderState;
+    
+    /**
+     *    下单时间
+     *
+     *    数据库字段: ORD_ORDER.ORDER_TIME
+     *
+     */
+    @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss")
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd HH:mm:ss", timezone = "GMT+8")
+    private Date orderTime;
 
 }

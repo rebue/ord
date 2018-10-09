@@ -14,6 +14,7 @@ import rebue.ord.mo.OrdOrderMo;
 import rebue.ord.ro.CancelDeliveryRo;
 import rebue.ord.ro.CancellationOfOrderRo;
 import rebue.ord.ro.ModifyOrderRealMoneyRo;
+import rebue.ord.ro.OrdOrderRo;
 import rebue.ord.ro.OrderSignInRo;
 import rebue.ord.ro.SetUpExpressCompanyRo;
 import rebue.ord.ro.ShipmentConfirmationRo;
@@ -196,5 +197,5 @@ public interface OrdOrderSvc extends MybatisBaseSvc<OrdOrderMo, java.lang.Long> 
      * @param pageSize
      * @return
      */
-    PageInfo<OrdOrderMo> orderList(OrdOrderTo to, int pageNum, int pageSize);
+    PageInfo<OrdOrderRo> orderList(OrdOrderTo to, int pageNum, int pageSize);
 }

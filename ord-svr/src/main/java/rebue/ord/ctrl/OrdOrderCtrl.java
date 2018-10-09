@@ -29,11 +29,13 @@ import rebue.ord.mo.OrdOrderMo;
 import rebue.ord.ro.CancelDeliveryRo;
 import rebue.ord.ro.CancellationOfOrderRo;
 import rebue.ord.ro.ModifyOrderRealMoneyRo;
+import rebue.ord.ro.OrdOrderRo;
 import rebue.ord.ro.OrderSignInRo;
 import rebue.ord.ro.SetUpExpressCompanyRo;
 import rebue.ord.ro.ShipmentConfirmationRo;
 import rebue.ord.ro.UsersToPlaceTheOrderRo;
 import rebue.ord.svc.OrdOrderSvc;
+import rebue.ord.to.OrdOrderTo;
 import rebue.ord.to.OrderSignInTo;
 import rebue.ord.to.ShipmentConfirmationTo;
 import rebue.robotech.dic.ResultDic;
@@ -89,7 +91,7 @@ public class OrdOrderCtrl {
      * @mbg.generated 自动生成，如需修改，请删除本行
      */
     @GetMapping("/ord/order")
-    PageInfo<OrdOrderMo> list(OrdOrderMo mo, @RequestParam(value = "pageNum", required = false) Integer pageNum, @RequestParam(value = "pageSize", required = false) Integer pageSize) {
+    PageInfo<OrdOrderRo> list(OrdOrderTo mo, @RequestParam(value = "pageNum", required = false) Integer pageNum, @RequestParam(value = "pageSize", required = false) Integer pageSize) {
         if (pageNum == null)
             pageNum = 1;
         if (pageSize == null)
@@ -100,7 +102,7 @@ public class OrdOrderCtrl {
             _log.error(msg);
             throw new IllegalArgumentException(msg);
         }
-        PageInfo<OrdOrderMo> result = svc.list(mo, pageNum, pageSize);
+        PageInfo<OrdOrderRo> result = svc.orderList(mo, pageNum, pageSize);
         _log.info("result: " + result);
         return result;
     }
