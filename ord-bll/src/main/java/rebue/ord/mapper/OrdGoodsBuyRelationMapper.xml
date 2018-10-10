@@ -237,4 +237,13 @@
         and DOWNLINE_USER_ID = #{downlineUserId,jdbcType=BIGINT}
         and ONLINE_ID = #{onlineId,jdbcType=BIGINT}
   </select>
+  <!-- 修改商品推广关系时间 -->
+  <update id="updateGoodsBuyRelationTime" parameterType="rebue.ord.mo.OrdGoodsBuyRelationMo">
+  	update ORD_GOODS_BUY_RELATION
+    set CREATE_TIME = #{createTime,jdbcType=TIMESTAMP}
+    where 
+    UPLINE_USER_ID = #{uplineUserId,jdbcType=BIGINT},
+    DOWNLINE_USER_ID = #{downlineUserId,jdbcType=BIGINT},
+    ONLINE_ID = #{onlineId,jdbcType=BIGINT},
+  </update>
 </mapper>
