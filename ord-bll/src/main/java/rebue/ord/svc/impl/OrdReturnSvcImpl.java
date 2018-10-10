@@ -579,16 +579,16 @@ public class OrdReturnSvcImpl extends MybatisBaseSvcImpl<OrdReturnMo, java.lang.
         OrdOrderDetailMo detailMo = new OrdOrderDetailMo();
         detailMo.setOrderId(orderId);
         detailMo.setId(orderDetailId);
-        _log.info("同意退款查询订单详情的参数为：{}", detailMo);
-        List<OrdOrderDetailMo> detailList = ordOrderDetailSvc.list(detailMo);
+        _log.info("同意退款查询订单详情的ID为：{}", orderDetailId);
+        OrdOrderDetailMo detailList = ordOrderDetailSvc.getById(orderDetailId);
         _log.info("同意退款查询订单详情的返回值为：{}", String.valueOf(detailList));
-        if (detailList.size() == 0) {
+        if (detailList == null) {
             _log.error("同意退货查询订单详情时发现没有该详情信息，退货编号为：{}", returnCode);
             agreeToARefundRo.setResult(AgreeToARefundDic.USER_NOT_PURCHASE_THE_GOODS);
             agreeToARefundRo.setMsg("用户未购买该商品");
             return agreeToARefundRo;
         }
-        if (detailList.get(0).getReturnState() != 1) {
+        if (detailList.getReturnState() != 1) {
             _log.error("同意退款时发现用户未申请退款，退货编号为：{}", returnCode);
             agreeToARefundRo.setResult(AgreeToARefundDic.USER_NOT_APPLYFOR_REFUND);
             agreeToARefundRo.setMsg("用户未申请退款");
@@ -637,16 +637,16 @@ public class OrdReturnSvcImpl extends MybatisBaseSvcImpl<OrdReturnMo, java.lang.
             agreeToARefundRo.setMsg("修改订单退货金额出错");
             return agreeToARefundRo;
         }
-        Integer returnCount = detailList.get(0).getReturnCount();
+        Integer returnCount = detailList.getReturnCount();
         returnCount = returnCount == null ? 0 : returnCount;
         int newReturnCount = returnCount + to.getReturnNum();
-        if (newReturnCount == detailList.get(0).getBuyCount()) {
+        if (newReturnCount == detailList.getBuyCount()) {
             detailMo.setReturnState((byte) 2);
         } else {
             detailMo.setReturnState((byte) 3);
         }
         detailMo.setReturnCount(newReturnCount);
-        BigDecimal cashbackTotal = detailList.get(0).getCashbackTotal();
+        BigDecimal cashbackTotal = detailList.getCashbackTotal();
         cashbackTotal = cashbackTotal == null ? bd : cashbackTotal;
         BigDecimal newCashBackTotal = new BigDecimal(cashbackTotal.subtract(subtractCashback).doubleValue());
         detailMo.setCashbackTotal(newCashBackTotal);
@@ -678,7 +678,7 @@ public class OrdReturnSvcImpl extends MybatisBaseSvcImpl<OrdReturnMo, java.lang.
         refundTo.setOrderDetailId(String.valueOf(orderDetailId));
         refundTo.setBuyerAccountId(returnList.get(0).getApplicationOpId());
         refundTo.setTradeTitle("用户退货-退款");
-        refundTo.setTradeDetail(detailList.get(0).getOnlineTitle());
+        refundTo.setTradeDetail(detailList.getOnlineTitle());
         refundTo.setReturnBalanceToBuyer(returnAmount1);
         refundTo.setReturnCashbackToBuyer(returnCashbackToBuyer);
         refundTo.setOpId(refundOpId);
@@ -700,7 +700,7 @@ public class OrdReturnSvcImpl extends MybatisBaseSvcImpl<OrdReturnMo, java.lang.
             }
         }
         _log.info("删除该定单详情的购买关系记录");
-        int delResult = ordBuyRelationSvc.del(detailList.get(0).getId());
+        int delResult = ordBuyRelationSvc.del(detailList.getId());
         _log.info("删除该定单详情的购买关系记录的返回值为：{}", delResult);
         agreeToARefundRo.setResult(AgreeToARefundDic.SUCCESS);
         agreeToARefundRo.setMsg("退款成功");
