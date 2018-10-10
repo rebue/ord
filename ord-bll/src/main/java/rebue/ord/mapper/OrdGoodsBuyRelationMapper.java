@@ -71,4 +71,11 @@ public interface OrdGoodsBuyRelationMapper extends MybatisBaseMapper<OrdGoodsBuy
      * @return
      */
     int countGoodsBuyRelation(OrdGoodsBuyRelationMo record);
+    
+    /**
+     * 修改商品推广关系时间
+     * @param record
+     * @return
+     */
+    int updateGoodsBuyRelationTime(OrdGoodsBuyRelationMo record);
 }

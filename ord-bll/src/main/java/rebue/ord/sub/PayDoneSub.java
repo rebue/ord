@@ -195,6 +195,7 @@ public class PayDoneSub implements ApplicationListener<ContextRefreshedEvent> {
 		_log.info("获取用户购买关系的id:" + id + "onlineId:" + onlineId + "buyPricce:" + buyPrice);
 		// 获取用户购买该产品还有两个名额的详情记录
 		OrdOrderDetailMo mo = new OrdOrderDetailMo();
+		mo.setId(downLineDetailId);
 		mo.setOnlineId(onlineId);
 		mo.setBuyPrice(buyPrice);
 		mo.setUserId(id);
@@ -301,6 +302,7 @@ public class PayDoneSub implements ApplicationListener<ContextRefreshedEvent> {
 		}
 		// 根据产品上线ID查找购买关系用户的购买记录，看是否有符合要求的订单详情记录
 		OrdOrderDetailMo mo = new OrdOrderDetailMo();
+		mo.setId(downLineDetailId);
 		mo.setOnlineId(onlineId);
 		mo.setBuyPrice(buyPrice);
 		mo.setUserId(buyRelationResult.getUplineUserId());
@@ -335,6 +337,7 @@ public class PayDoneSub implements ApplicationListener<ContextRefreshedEvent> {
 			updateOrderDetailMo.setCommissionState((byte) 1);
 		}
 		// 更新购买关系订单详情的返佣名额
+		_log.error("更新订单详情返佣名额失败", id);
 		int updateOrderDetailResult = ordOrderDetailSvc.updateCommissionSlotForBuyRelation(updateOrderDetailMo);
 		if (updateOrderDetailResult != 1) {
 			_log.error("{}更新订单详情返佣名额失败", id);
@@ -417,6 +420,7 @@ public class PayDoneSub implements ApplicationListener<ContextRefreshedEvent> {
 		_log.info("匹配差两人的订单详情的用户id:" + id + "onlineId:" + onlineId + "buyPrice:" + buyPrice);
 		// 获取用户购买该产品还有两个名额的详情记录
 		OrdOrderDetailMo mo = new OrdOrderDetailMo();
+		mo.setId(downLineDetailId);
 		mo.setOnlineId(onlineId);
 		mo.setBuyPrice(buyPrice);
 		mo.setReturnState((byte) 0);
@@ -468,6 +472,7 @@ public class PayDoneSub implements ApplicationListener<ContextRefreshedEvent> {
 		_log.info("匹配差一人的订单详情的用户id:" + id + "onlineId:" + onlineId + "buyPrice:" + buyPrice);
 		// 获取用户购买该产品还有两个名额的详情记录
 		OrdOrderDetailMo mo = new OrdOrderDetailMo();
+		mo.setId(downLineDetailId);
 		mo.setOnlineId(onlineId);
 		mo.setBuyPrice(buyPrice);
 		mo.setReturnState((byte) 0);
