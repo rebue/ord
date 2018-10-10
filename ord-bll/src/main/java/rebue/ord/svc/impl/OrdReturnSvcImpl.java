@@ -174,7 +174,7 @@ public class OrdReturnSvcImpl extends MybatisBaseSvcImpl<OrdReturnMo, java.lang.
             return addReturnRo;
         }
         OrdOrderDetailMo orderDetailMo = new OrdOrderDetailMo();
-        orderDetailMo.setOrderId(orderId);
+        orderDetailMo.setId(orderDetailId);
         orderDetailMo.setSpecName(to.getSpecName());
         _log.info("查询订单详情的参数为：{}", orderDetailMo);
         List<OrdOrderDetailMo> orderDetailList = new ArrayList<OrdOrderDetailMo>();
