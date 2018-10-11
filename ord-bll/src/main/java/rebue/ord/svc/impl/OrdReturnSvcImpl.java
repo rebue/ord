@@ -177,29 +177,29 @@ public class OrdReturnSvcImpl extends MybatisBaseSvcImpl<OrdReturnMo, java.lang.
         orderDetailMo.setId(orderDetailId);
         orderDetailMo.setSpecName(to.getSpecName());
         _log.info("查询订单详情的参数为：{}", orderDetailMo);
-        List<OrdOrderDetailMo> orderDetailList = new ArrayList<OrdOrderDetailMo>();
+        OrdOrderDetailMo orderDetailList = new OrdOrderDetailMo();
         try {
-            orderDetailList = ordOrderDetailSvc.list(orderDetailMo);
+        	 orderDetailList = ordOrderDetailSvc.getById(orderDetailId);
             _log.info("查询订单详情的返回值为：{}", String.valueOf(orderDetailList));
         } catch (Exception e) {
             _log.error("===========查询订单详情出错了===========");
             e.printStackTrace();
         }
-        if (orderDetailList.size() == 0) {
+        if (orderDetailList == null) {
             _log.error("添加退货信息出现订单详情不存在，订单详情编号为：{}", orderDetailId);
             addReturnRo.setResult(AddReturnDic.ORDER_NOT_EXIST);
             addReturnRo.setMsg("订单不存在");
             return addReturnRo;
         }
-        if (orderDetailList.get(0).getReturnState() != 0) {
+        if (orderDetailList.getReturnState() != 0) {
             _log.error("添加退货信息出现订单详情退货状态不处于未退货状态，订单详情编号为：{}", orderDetailId);
             addReturnRo.setResult(AddReturnDic.CURRENT_STATE_NOT_EXIST_RETURN);
             addReturnRo.setMsg("当前状态不允许退货");
             return addReturnRo;
         }
-        Integer returnCount = orderDetailList.get(0).getReturnCount();
+        Integer returnCount = orderDetailList.getReturnCount();
         returnCount = returnCount == null ? 0 : returnCount;
-        int buyCount = orderDetailList.get(0).getBuyCount();
+        int buyCount = orderDetailList.getBuyCount();
         if (buyCount == returnCount) {
             _log.error("添加退货信息出现订单详情退货数量等于购买数量，订单详情编号为：{}", orderDetailId);
             addReturnRo.setResult(AddReturnDic.GOODS_ALREADY_RETURN_FINISH);
