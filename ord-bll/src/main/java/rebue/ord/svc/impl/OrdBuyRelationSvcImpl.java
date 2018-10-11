@@ -527,7 +527,9 @@ public class OrdBuyRelationSvcImpl extends MybatisBaseSvcImpl<OrdBuyRelationMo, 
 					_log.info("开始获取第二个下家名字id为： {}", dId);
 					SucUserMo dUserName2 = sucUserSvc.getById(dId);
 					_log.info("获取第二个下家的结果为： {}", dUserName2);
-					item.setDownlineUserName2(dUserName2.getWxNickname());
+					if(dUserName2 != null) {
+						item.setDownlineUserName2(dUserName2.getWxNickname());
+					}
 					item.setRelationSource2(list.get(j).getRelationSource());
 				} else {
 					Long uId = list.get(j).getUplineUserId();
@@ -540,8 +542,10 @@ public class OrdBuyRelationSvcImpl extends MybatisBaseSvcImpl<OrdBuyRelationMo, 
 					_log.info("开始获取第一个下家名字id为： {}", dId);
 					SucUserMo dUserName = sucUserSvc.getById(dId);
 					_log.info("获取第一个下家的结果为： {}", dUserName);
-					item.setUplineUserName(uUserName.getWxNickname());
-					item.setDownlineUserName(dUserName.getWxNickname());
+					if(uUserName !=null && dUserName !=null) {
+						item.setUplineUserName(uUserName.getWxNickname());
+						item.setDownlineUserName(dUserName.getWxNickname());
+					}
 					item.setRelationSource(list.get(j).getRelationSource());
 
 				}
