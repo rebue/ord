@@ -303,4 +303,15 @@
     where UPLINE_ORDER_DETAIL_ID = #{uplineOrderDetailId,jdbcType=BIGINT}
   </update>
   
+  
+   <select id="getDetailByOrderId" parameterType="java.lang.Long" resultType="rebue.ord.mo.OrdOrderDetailMo">
+    <!--
+		根据orderId获取订单订单详情
+    -->
+    select *
+    from ORD_ORDER_DETAIL where ORDER_ID=#{orderId,jdbcType=BIGINT}
+  </select>
+  
+  
+  
 </mapper>

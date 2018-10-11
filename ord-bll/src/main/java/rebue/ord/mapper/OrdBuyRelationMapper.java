@@ -2,7 +2,12 @@ package rebue.ord.mapper;
 
 import java.util.List;
 import org.apache.ibatis.annotations.Mapper;
+import org.apache.ibatis.annotations.Param;
+import org.apache.ibatis.annotations.Select;
+
 import rebue.ord.mo.OrdBuyRelationMo;
+import rebue.ord.mo.OrdOrderDetailMo;
+import rebue.ord.ro.DetailandBuyRelationRo;
 import rebue.robotech.mapper.MybatisBaseMapper;
 
 @Mapper
@@ -69,4 +74,40 @@ public interface OrdBuyRelationMapper extends MybatisBaseMapper<OrdBuyRelationMo
      * @return
      */
     int updateByUplineOrderDetailId(OrdBuyRelationMo mo);
+    
+    /**
+     * 根据oderId来获取订单详情
+     * @param id
+     * @return
+     */
+    List<OrdOrderDetailMo> getDetailByOrderId(Long orderId);
+    
+    /**
+     * 获取上家名字
+     * @param id
+     * @return
+     */
+    @Select("SELECT LOGIN_NAME uplineUserName FROM suc.SUC_USER  WHERE ID=#{id,jdbcType=TINYINT}")
+    DetailandBuyRelationRo getUplineUserName(@Param("id") Long id);
+    /**
+     * 获取下家名字
+     * @param id
+     * @return
+     */
+    @Select("SELECT LOGIN_NAME downlineUserName FROM suc.SUC_USER  WHERE ID=#{id,jdbcType=TINYINT}")
+    DetailandBuyRelationRo getDownlineUserName(@Param("id") Long id);
+    
+    /**
+     * 获取下家订单详情
+     * @param id
+     * @return
+     */
+    @Select("SELECT ONLINE_TITLE downOnlineTitle  FROM ORD_ORDER_DETAIL  WHERE ID=#{id,jdbcType=TINYINT}")
+    DetailandBuyRelationRo getDownlineOrdDetail(@Param("id") Long id);
+    
+
+    
+    
+
+    
 }
