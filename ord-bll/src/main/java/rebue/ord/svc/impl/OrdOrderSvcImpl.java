@@ -49,6 +49,7 @@ import rebue.onl.svr.feign.OnlCartSvc;
 import rebue.onl.svr.feign.OnlOnlinePicSvc;
 import rebue.onl.svr.feign.OnlOnlineSpecSvc;
 import rebue.onl.svr.feign.OnlOnlineSvc;
+import rebue.onl.to.DeleteCartAndModifyInventoryTo;
 import rebue.ord.dic.CancelDeliveryDic;
 import rebue.ord.dic.CancellationOfOrderDic;
 import rebue.ord.dic.ModifyOrderRealMoneyDic;
@@ -274,13 +275,13 @@ public class OrdOrderSvcImpl extends MybatisBaseSvcImpl<OrdOrderMo, java.lang.Lo
             placeTheOrderRo.setMsg("生成订单出错");
             return placeTheOrderRo;
         }
-        List<DeleteCartAndModifyInventoryRo> cartAndSpecList = new ArrayList<DeleteCartAndModifyInventoryRo>();
+        List<DeleteCartAndModifyInventoryTo> cartAndSpecList = new ArrayList<DeleteCartAndModifyInventoryTo>();
         for (int i = 0; i < orderList.size(); i++) {
             long onlineId = orderList.get(i).getOnlineId();
             String OnlineSpec = orderList.get(i).getOnlineSpec();
             int buyCount = orderList.get(i).getNumber();
             byte subjectType = orderList.get(i).getSubjectType();
-            DeleteCartAndModifyInventoryRo deleteCartAndModifyInventoryRo = new DeleteCartAndModifyInventoryRo();
+            DeleteCartAndModifyInventoryTo deleteCartAndModifyInventoryRo = new DeleteCartAndModifyInventoryTo();
             deleteCartAndModifyInventoryRo.setOnlineId(onlineId);
             deleteCartAndModifyInventoryRo.setBuyCount(buyCount);
             deleteCartAndModifyInventoryRo.setOnlineSpec(OnlineSpec);
@@ -356,16 +357,11 @@ public class OrdOrderSvcImpl extends MybatisBaseSvcImpl<OrdOrderMo, java.lang.Lo
             throw new RuntimeException("添加取消订单任务失败");
         }
         _log.info("删除购物车和修改上线数量的参数为：{}", String.valueOf(cartAndSpecList));
-        Map<String, Object> deleteAndUpdateMap = onlOnlineSpecSvc.deleteCartAndUpdateOnlineCount(objectMapper.writeValueAsString(cartAndSpecList));
-        if (deleteAndUpdateMap == null || deleteAndUpdateMap.size() == 0) {
+        DeleteCartAndModifyInventoryRo deleteCartAndUpdateOnlineCountResult = onlOnlineSpecSvc.deleteCartAndUpdateOnlineCount(cartAndSpecList);
+        _log.info("删除购物车和修改上线数量的返回值为：{}", deleteCartAndUpdateOnlineCountResult);
+        if (deleteCartAndUpdateOnlineCountResult.getResult() != 1) {
             _log.error("{}删除购物车和修改上线数量失败", id);
-            throw new RuntimeException(String.valueOf(deleteAndUpdateMap.get("msg")));
-        }
-        _log.info("删除购物车和修改上线数量的返回值为：{}", String.valueOf(deleteAndUpdateMap));
-        int deleteAndUpdateResult = Integer.parseInt(String.valueOf(deleteAndUpdateMap.get("result")));
-        if (deleteAndUpdateResult != 1) {
-            _log.error("{}删除购物车和修改上线数量失败", id);
-            throw new RuntimeException(String.valueOf(deleteAndUpdateMap.get("msg")));
+            throw new RuntimeException(deleteCartAndUpdateOnlineCountResult.getMsg());
         }
         placeTheOrderRo.setOrderId(orderId);
         placeTheOrderRo.setResult(UsersToPlaceTheOrderDic.SUCCESS);
