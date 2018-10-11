@@ -92,7 +92,7 @@ public interface OrdOrderDetailMapper extends MybatisBaseMapper<OrdOrderDetailMo
 
     int updateCommissionSlotForBuyRelation(OrdOrderDetailMo mo);
 
-    OrdOrderDetailMo getOrderDetailForBuyRelation(OrdOrderDetailMo mo);
+    OrdOrderDetailMo getOrderDetailForBuyRelation(Map<String, Object> map);
     
     OrdOrderDetailMo getAndUpdateBuyRelationByInvite(Map<String, Object> map);
 

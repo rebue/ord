@@ -82,20 +82,6 @@ public interface OrdBuyRelationMapper extends MybatisBaseMapper<OrdBuyRelationMo
      */
     List<OrdOrderDetailMo> getDetailByOrderId(Long orderId);
     
-    /**
-     * 获取上家名字
-     * @param id
-     * @return
-     */
-    @Select("SELECT LOGIN_NAME uplineUserName FROM suc.SUC_USER  WHERE ID=#{id,jdbcType=TINYINT}")
-    DetailandBuyRelationRo getUplineUserName(@Param("id") Long id);
-    /**
-     * 获取下家名字
-     * @param id
-     * @return
-     */
-    @Select("SELECT LOGIN_NAME downlineUserName FROM suc.SUC_USER  WHERE ID=#{id,jdbcType=TINYINT}")
-    DetailandBuyRelationRo getDownlineUserName(@Param("id") Long id);
     
     /**
      * 获取下家订单详情

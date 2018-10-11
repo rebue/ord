@@ -84,8 +84,8 @@ public class OrdOrderDetailSvcImpl extends MybatisBaseSvcImpl<OrdOrderDetailMo, 
      * 用户匹配自己购买关系，获取用户还有两个匹配名额的订单详情
      */
     @Override
-    public OrdOrderDetailMo getOrderDetailForBuyRelation(OrdOrderDetailMo mo) {
-        return _mapper.getOrderDetailForBuyRelation(mo);
+    public OrdOrderDetailMo getOrderDetailForBuyRelation(Map<String, Object> map) {
+        return _mapper.getOrderDetailForBuyRelation(map);
     }
 
     @Override
@@ -109,4 +109,5 @@ public class OrdOrderDetailSvcImpl extends MybatisBaseSvcImpl<OrdOrderDetailMo, 
 		// TODO Auto-generated method stub
 		return null;
 	}
+
 }
