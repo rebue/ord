@@ -1,5 +1,7 @@
 package rebue.ord.svc;
 
+import java.util.Map;
+
 import rebue.ord.mo.OrdOrderDetailMo;
 import rebue.robotech.svc.MybatisBaseSvc;
 
@@ -44,6 +46,8 @@ public interface OrdOrderDetailSvc extends MybatisBaseSvc<OrdOrderDetailMo, java
     int updateCommissionSlotForBuyRelation(OrdOrderDetailMo mo);
 
     OrdOrderDetailMo getOrderDetailForBuyRelation(OrdOrderDetailMo mo);
+    
+    OrdOrderDetailMo getAndUpdateBuyRelationByInvite(Map<String, Object> map);
 
-    OrdOrderDetailMo getOrderDetailForBuyRelationThree(OrdOrderDetailMo mo);
+    OrdOrderDetailMo getAndUpdateBuyRelationByFour(OrdOrderDetailMo mo);
 }

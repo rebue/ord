@@ -1,5 +1,7 @@
 package rebue.ord.svc.impl;
 
+import java.util.Map;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
@@ -97,8 +99,14 @@ public class OrdOrderDetailSvcImpl extends MybatisBaseSvcImpl<OrdOrderDetailMo, 
     }
 
     @Override
-    public OrdOrderDetailMo getOrderDetailForBuyRelationThree(OrdOrderDetailMo mo) {
+    public OrdOrderDetailMo getAndUpdateBuyRelationByFour(OrdOrderDetailMo mo) {
         // TODO Auto-generated method stub
-        return _mapper.getOrderDetailForBuyRelationThree(mo);
+        return _mapper.getAndUpdateBuyRelationByFour(mo);
     }
+
+	@Override
+	public OrdOrderDetailMo getAndUpdateBuyRelationByInvite(Map<String, Object> map) {
+		// TODO Auto-generated method stub
+		return null;
+	}
 }

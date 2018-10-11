@@ -1,6 +1,8 @@
 package rebue.ord.mapper;
 
 import java.util.List;
+import java.util.Map;
+
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
 import org.apache.ibatis.annotations.Update;
@@ -91,6 +93,8 @@ public interface OrdOrderDetailMapper extends MybatisBaseMapper<OrdOrderDetailMo
     int updateCommissionSlotForBuyRelation(OrdOrderDetailMo mo);
 
     OrdOrderDetailMo getOrderDetailForBuyRelation(OrdOrderDetailMo mo);
+    
+    OrdOrderDetailMo getAndUpdateBuyRelationByInvite(Map<String, Object> map);
 
-    OrdOrderDetailMo getOrderDetailForBuyRelationThree(OrdOrderDetailMo mo);
+    OrdOrderDetailMo getAndUpdateBuyRelationByFour(OrdOrderDetailMo mo);
 }

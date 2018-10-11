@@ -3,6 +3,8 @@ package rebue.ord.ctrl;
 import com.github.pagehelper.PageInfo;
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.List;
+
 import javax.annotation.Resource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -15,6 +17,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import rebue.ord.mo.OrdBuyRelationMo;
+import rebue.ord.ro.DetailandBuyRelationRo;
 import rebue.ord.svc.OrdBuyRelationSvc;
 import rebue.robotech.dic.ResultDic;
 import rebue.robotech.ro.Ro;
@@ -180,5 +183,21 @@ public class OrdBuyRelationCtrl {
     OrdBuyRelationMo getById(@RequestParam("id") java.lang.Long id) {
         _log.info("get OrdBuyRelationMo by id: " + id);
         return svc.getById(id);
+    }
+    
+    
+    /**
+     *  根据oderId获取购买关系 Title: orderDetailInfo Description:
+     *
+     *  @param qo
+     *  @return
+     *  @date 2018年4月9日 下午5:02:41
+     */
+    @GetMapping("/ord/buyrelation/info")
+    List<DetailandBuyRelationRo> orderRelationInfo(@RequestParam("orderId") java.lang.Long orderId ) {
+        _log.info("获取订单购买关系的参数为：{}", orderId);
+        List<DetailandBuyRelationRo> list = svc.getBuyRelationByOrderId(orderId);
+        _log.info("获取到的订单详情为：{}", list);
+        return list;
     }
 }
