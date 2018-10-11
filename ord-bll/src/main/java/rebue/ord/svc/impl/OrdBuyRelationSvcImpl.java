@@ -92,24 +92,38 @@ public class OrdBuyRelationSvcImpl extends MybatisBaseSvcImpl<OrdBuyRelationMo, 
 	public boolean getAndUpdateBuyRelationByOwn(long id, long onlineId, BigDecimal buyPrice, long downLineDetailId,
 			long downLineOrderId) {
 		// 获取用户购买关系
-		_log.info("获取用户购买关系的id:" + id + "onlineId:" + onlineId + "buyPricce:" + buyPrice);
+		_log.info("获取用户购买关系的id:" + id + " onlineId:" + onlineId + " buyPricce:" + buyPrice+" downLineDetailId:"+downLineDetailId+" downLineOrderId"+downLineOrderId);
+		long downLineRelationId1 = 0;
+		long downLineRelationId2 = 0;
+		//获取订单购买关系
+		OrdBuyRelationMo relationMo = new OrdBuyRelationMo();
+		relationMo.setUplineOrderDetailId(downLineDetailId);
+		List<OrdBuyRelationMo> selfRelationResult = selfSvc.list(relationMo);
+		_log.info("获取到的购买关系结果为:{}", selfRelationResult);
+		if(selfRelationResult.size()==1) {
+			downLineRelationId1 = selfRelationResult.get(0).getDownlineOrderDetailId();
+		}else if(selfRelationResult.size()==2) {
+			downLineRelationId1 = selfRelationResult.get(0).getDownlineOrderDetailId();
+			downLineRelationId2 = selfRelationResult.get(1).getDownlineOrderDetailId();
+		}
 		// 获取用户购买该产品还有两个名额的详情记录
-		OrdOrderDetailMo mo = new OrdOrderDetailMo();
-		mo.setId(downLineDetailId);
-		mo.setOnlineId(onlineId);
-		mo.setBuyPrice(buyPrice);
-		mo.setUserId(id);
-		mo.setReturnState((byte) 0);
-		mo.setCommissionSlot((byte) 1);
-		_log.info("获取用户自己购买剩余1个购买名额的订单详情的参数为：{}" + mo);
-		OrdOrderDetailMo orderDetailOfOneCommissionSlot = ordOrderDetailSvc.getOrderDetailForBuyRelation(mo);
+		Map<String, Object> map = new HashMap<>();
+		map.put("id",downLineDetailId);
+		map.put("onlineId",onlineId);
+		map.put("buyPrice",buyPrice);
+		map.put("userId",id);
+		map.put("returnState",(byte) 0);
+		map.put("downLineRelationId1",downLineRelationId1);
+		map.put("downLineRelationId2",downLineRelationId2);
+		_log.info("获取用户自己购买剩余1个购买名额的订单详情的参数为：{}" + map);
+		OrdOrderDetailMo orderDetailOfOneCommissionSlot = ordOrderDetailSvc.getOrderDetailForBuyRelation(map);
 		_log.info("查找订单详情的购买关系记录");
 		if (orderDetailOfOneCommissionSlot == null) {
 			_log.info("获取用户购买过该产品且还有1个匹配名额的记录为空");
 		} else {
-			OrdBuyRelationMo relationMo = new OrdBuyRelationMo();
-			relationMo.setUplineOrderDetailId(orderDetailOfOneCommissionSlot.getId());
-			List<OrdBuyRelationMo> relationResult = selfSvc.list(relationMo);
+			OrdBuyRelationMo relationParam = new OrdBuyRelationMo();
+			relationParam.setUplineOrderDetailId(orderDetailOfOneCommissionSlot.getId());
+			List<OrdBuyRelationMo> relationResult = selfSvc.list(relationParam);
 			_log.info("获取到的购买关系结果为:{}", relationResult);
 			if (relationResult.size() != 0 && relationResult.get(0).getRelationSource() != null
 					&& relationResult.get(0).getRelationSource() != 1) {
@@ -144,9 +158,9 @@ public class OrdBuyRelationSvcImpl extends MybatisBaseSvcImpl<OrdBuyRelationMo, 
 				return true;
 			}
 		}
-		mo.setCommissionSlot((byte) 2);
-		_log.info("获取用户自己购买剩余2个购买名额的订单详情的参数为：{}" + mo);
-		OrdOrderDetailMo orderDetailOfTwoCommissionSlot = ordOrderDetailSvc.getOrderDetailForBuyRelation(mo);
+		map.put("commissionSlot",(byte) 2);
+		_log.info("获取用户自己购买剩余2个购买名额的订单详情的参数为：{}" + map);
+		OrdOrderDetailMo orderDetailOfTwoCommissionSlot = ordOrderDetailSvc.getOrderDetailForBuyRelation(map);
 		if (orderDetailOfTwoCommissionSlot == null) {
 			_log.info("获取用户购买过该产品且还有两个匹配名额的记录为空");
 		} else {
@@ -202,14 +216,14 @@ public class OrdBuyRelationSvcImpl extends MybatisBaseSvcImpl<OrdBuyRelationMo, 
 			return false;
 		}
 		// 根据产品上线ID查找购买关系用户的购买记录，看是否有符合要求的订单详情记录
-		OrdOrderDetailMo mo = new OrdOrderDetailMo();
-		mo.setId(downLineDetailId);
-		mo.setOnlineId(onlineId);
-		mo.setBuyPrice(buyPrice);
-		mo.setUserId(buyRelationResult.getUplineUserId());
-		mo.setReturnState((byte) 0);
-		_log.info("获取用户上线购买关系订单详情的参数为：{}" + mo);
-		OrdOrderDetailMo orderDetailResult = ordOrderDetailSvc.getOrderDetailForBuyRelation(mo);
+		Map<String, Object> map = new HashMap<>();
+		map.put("id",downLineDetailId);
+		map.put("onlineId",onlineId);
+		map.put("buyPrice",buyPrice);
+		map.put("userId",buyRelationResult.getUplineUserId());
+		map.put("returnState",(byte) 0);
+		_log.info("获取用户上线购买关系订单详情的参数为：{}" + map);
+		OrdOrderDetailMo orderDetailResult = ordOrderDetailSvc.getOrderDetailForBuyRelation(map);
 		if (orderDetailResult == null) {
 			_log.info("邀请关系没有符合匹配规则的订单详情");
 			return false;
@@ -273,8 +287,7 @@ public class OrdBuyRelationSvcImpl extends MybatisBaseSvcImpl<OrdBuyRelationMo, 
 		relationMo.setUplineOrderDetailId(orderDetailResult.getId());
 		List<OrdBuyRelationMo> relationResult = selfSvc.list(relationMo);
 		_log.info("获取到的购买关系结果为:{}", relationResult);
-		if (relationResult.size() != 0 && relationResult.get(0).getRelationSource() != null
-				&& relationResult.get(0).getRelationSource() == 2) {
+		if (relationResult.size() == 0|| relationResult.get(0).getRelationSource() !=1 ) {
 			// 添加购买关系记录
 			_log.info("在购买关系表中添加记录");
 			OrdBuyRelationMo ordBuyRelationMo = new OrdBuyRelationMo();
@@ -304,7 +317,7 @@ public class OrdBuyRelationSvcImpl extends MybatisBaseSvcImpl<OrdBuyRelationMo, 
 				_log.error("{}更新订单详情返佣名额失败", id);
 				throw new RuntimeException("更新订单详情返现名额失败");
 			}
-			_log.info("根据匹配差一人，且邀请一人规则匹配购买关系成功，匹配的购买关系ID为:{}" + ordBuyRelationMo.getId());
+			_log.info("根据邀请关系规则匹配的购买关系ID为:{}" + ordBuyRelationMo.getId());
 			return true;
 		} else {
 			_log.info("邀请关系没有符合匹配规则的订单详情");
@@ -386,13 +399,13 @@ public class OrdBuyRelationSvcImpl extends MybatisBaseSvcImpl<OrdBuyRelationMo, 
 		// 获取用户购买关系
 		_log.info("匹配差两人的订单详情的用户id:" + id + "onlineId:" + onlineId + "buyPrice:" + buyPrice);
 		// 获取用户购买该产品还有两个名额的详情记录
-		OrdOrderDetailMo mo = new OrdOrderDetailMo();
-		mo.setId(downLineDetailId);
-		mo.setOnlineId(onlineId);
-		mo.setBuyPrice(buyPrice);
-		mo.setReturnState((byte) 0);
-		mo.setCommissionSlot((byte) 2);
-		OrdOrderDetailMo orderDetailResult = ordOrderDetailSvc.getOrderDetailForBuyRelation(mo);
+		Map<String, Object> map = new HashMap<>();
+		map.put("id",downLineDetailId);
+		map.put("onlineId",onlineId);
+		map.put("buyPrice",buyPrice);
+		map.put("returnState",(byte) 0);
+		map.put("commissionSlot",(byte) 2);
+		OrdOrderDetailMo orderDetailResult = ordOrderDetailSvc.getOrderDetailForBuyRelation(map);
 		if (orderDetailResult == null) {
 			_log.info("没有符合差两人匹配规则的订单详情");
 			return false;
@@ -439,13 +452,13 @@ public class OrdBuyRelationSvcImpl extends MybatisBaseSvcImpl<OrdBuyRelationMo, 
 		// 获取用户购买关系
 		_log.info("匹配差一人的订单详情的用户id:" + id + "onlineId:" + onlineId + "buyPrice:" + buyPrice);
 		// 获取用户购买该产品还有两个名额的详情记录
-		OrdOrderDetailMo mo = new OrdOrderDetailMo();
-		mo.setId(downLineDetailId);
-		mo.setOnlineId(onlineId);
-		mo.setBuyPrice(buyPrice);
-		mo.setReturnState((byte) 0);
-		mo.setCommissionSlot((byte) 1);
-		OrdOrderDetailMo orderDetailResult = ordOrderDetailSvc.getOrderDetailForBuyRelation(mo);
+		Map<String, Object> map = new HashMap<>();
+		map.put("id",downLineDetailId);
+		map.put("onlineId",onlineId);
+		map.put("buyPrice",buyPrice);
+		map.put("returnState",(byte) 0);
+		map.put("commissionSlot",(byte) 1);
+		OrdOrderDetailMo orderDetailResult = ordOrderDetailSvc.getOrderDetailForBuyRelation(map);
 		if (orderDetailResult == null) {
 			_log.info("没有符合差一人匹配规则的订单详情");
 			return false;
