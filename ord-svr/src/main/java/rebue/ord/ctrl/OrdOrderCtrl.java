@@ -1,15 +1,14 @@
 package rebue.ord.ctrl;
 
-import com.fasterxml.jackson.core.JsonParseException;
-import com.fasterxml.jackson.databind.JsonMappingException;
-import com.github.pagehelper.PageInfo;
 import java.beans.IntrospectionException;
 import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
 import java.text.ParseException;
 import java.util.List;
 import java.util.Map;
+
 import javax.annotation.Resource;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -20,6 +19,11 @@ import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+
+import com.fasterxml.jackson.core.JsonParseException;
+import com.fasterxml.jackson.databind.JsonMappingException;
+import com.github.pagehelper.PageInfo;
+
 import rebue.ord.dic.CancelDeliveryDic;
 import rebue.ord.dic.CancellationOfOrderDic;
 import rebue.ord.dic.OrderSignInDic;
@@ -58,7 +62,7 @@ public class OrdOrderCtrl {
      * @mbg.generated 自动生成，如需修改，请删除本行
      */
     @Resource
-    private OrdOrderSvc svc;
+    private OrdOrderSvc         svc;
 
     /**
      * 删除订单信息
@@ -91,7 +95,8 @@ public class OrdOrderCtrl {
      * @mbg.generated 自动生成，如需修改，请删除本行
      */
     @GetMapping("/ord/order")
-    PageInfo<OrdOrderRo> list(OrdOrderTo mo, @RequestParam(value = "pageNum", required = false) Integer pageNum, @RequestParam(value = "pageSize", required = false) Integer pageSize) {
+    PageInfo<OrdOrderRo> list(OrdOrderTo mo, @RequestParam(value = "pageNum", required = false) Integer pageNum,
+            @RequestParam(value = "pageSize", required = false) Integer pageSize) {
         if (pageNum == null)
             pageNum = 1;
         if (pageSize == null)
@@ -119,7 +124,7 @@ public class OrdOrderCtrl {
     }
 
     /**
-     *  修改订单实际金额信息 2018年4月12日14:51:59
+     * 修改订单实际金额信息 2018年4月12日14:51:59
      */
     @PutMapping("/ord/order")
     ModifyOrderRealMoneyRo modifyOrderRealMoney(@RequestBody OrdOrderMo vo) throws Exception {
@@ -128,19 +133,20 @@ public class OrdOrderCtrl {
     }
 
     /**
-     *  查询订单信息 Title: orderInfo Description:
+     * 查询订单信息 Title: orderInfo Description:
      *
-     *  @param qo
-     *  @return
-     *  @throws ParseException
-     *  @throws IntrospectionException
-     *  @throws InvocationTargetException
-     *  @throws IllegalArgumentException
-     *  @throws IllegalAccessException
-     *  @date 2018年4月9日 下午3:06:37
+     * @param qo
+     * @return
+     * @throws ParseException
+     * @throws IntrospectionException
+     * @throws InvocationTargetException
+     * @throws IllegalArgumentException
+     * @throws IllegalAccessException
+     * @date 2018年4月9日 下午3:06:37
      */
     @GetMapping("/ord/order/info")
-    List<Map<String, Object>> orderInfo(@RequestParam Map<String, Object> map) throws ParseException, IllegalAccessException, IllegalArgumentException, InvocationTargetException, IntrospectionException {
+    List<Map<String, Object>> orderInfo(@RequestParam Map<String, Object> map)
+            throws ParseException, IllegalAccessException, IllegalArgumentException, InvocationTargetException, IntrospectionException {
         _log.info("查询订单信息的参数为：{}", map.toString());
         List<Map<String, Object>> list = svc.selectOrderInfo(map);
         _log.info("查询订单信息的返回值：{}", String.valueOf(list));
@@ -148,14 +154,14 @@ public class OrdOrderCtrl {
     }
 
     /**
-     *  用户下订单 Title: placeOrder Description:
+     * 用户下订单 Title: placeOrder Description:
      *
-     *  @param ro
-     *  @return
-     *  @throws IOException
-     *  @throws JsonMappingException
-     *  @throws JsonParseException
-     *  @date 2018年4月9日 上午10:55:18
+     * @param ro
+     * @return
+     * @throws IOException
+     * @throws JsonMappingException
+     * @throws JsonParseException
+     * @date 2018年4月9日 上午10:55:18
      */
     @SuppressWarnings("finally")
     @PostMapping("/ord/order")
@@ -191,7 +197,7 @@ public class OrdOrderCtrl {
                 placeTheOrderRo.setResult(UsersToPlaceTheOrderDic.INSUFFICIENT_INVENTORY);
                 placeTheOrderRo.setMsg(msg);
             } else {
-                _log.error(msg);
+                _log.error(msg, e);
                 placeTheOrderRo.setResult(UsersToPlaceTheOrderDic.ERROR);
                 placeTheOrderRo.setMsg("下订单失败");
             }
@@ -202,11 +208,11 @@ public class OrdOrderCtrl {
     }
 
     /**
-     *  用户取消订单 Title: cancellationOfOrder Description:
+     * 用户取消订单 Title: cancellationOfOrder Description:
      *
-     *  @param qo
-     *  @return
-     *  @date 2018年4月9日 下午7:37:13
+     * @param qo
+     * @return
+     * @date 2018年4月9日 下午7:37:13
      */
     @SuppressWarnings("finally")
     @PutMapping("/ord/order/cancel")
@@ -230,11 +236,11 @@ public class OrdOrderCtrl {
     }
 
     /**
-     *  取消发货 Title: cancellationOfOrder Description:
+     * 取消发货 Title: cancellationOfOrder Description:
      *
-     *  @param qo
-     *  @return
-     *  @date 2018年4月9日 下午7:37:13
+     * @param qo
+     * @return
+     * @date 2018年4月9日 下午7:37:13
      */
     @SuppressWarnings("finally")
     @PutMapping("/ord/order/canceldelivery")
@@ -258,11 +264,11 @@ public class OrdOrderCtrl {
     }
 
     /**
-     *  设置快递公司 Title: setUpExpressCompany Description:
+     * 设置快递公司 Title: setUpExpressCompany Description:
      *
-     *  @param qo
-     *  @return
-     *  @date 2018年4月13日 上午11:24:17
+     * @param qo
+     * @return
+     * @date 2018年4月13日 上午11:24:17
      */
     @PutMapping("/ord/order/setupexpresscompany")
     SetUpExpressCompanyRo setUpExpressCompany(OrdOrderMo qo) {
@@ -271,11 +277,11 @@ public class OrdOrderCtrl {
     }
 
     /**
-     *  确认发货 Title: sendAndPrint Description:
+     * 确认发货 Title: sendAndPrint Description:
      *
-     *  @param qo
-     *  @return
-     *  @date 2018年4月13日 下午6:23:46
+     * @param qo
+     * @return
+     * @date 2018年4月13日 下午6:23:46
      */
     @SuppressWarnings("finally")
     @PutMapping("/ord/order/shipmentconfirmation")
@@ -310,11 +316,11 @@ public class OrdOrderCtrl {
     }
 
     /**
-     *  订单签收 Title: orderSignIn Description:
+     * 订单签收 Title: orderSignIn Description:
      *
-     *  @param qo
-     *  @return
-     *  @date 2018年4月14日 下午2:30:53
+     * @param qo
+     * @return
+     * @date 2018年4月14日 下午2:30:53
      */
     @SuppressWarnings("finally")
     @PutMapping("/ord/order/ordersignin")
@@ -332,14 +338,15 @@ public class OrdOrderCtrl {
     }
 
     /**
-     *  获取用户待返订单:
+     * 获取用户待返订单:
      *
-     *  @param qo
-     *  @return
-     *  @date 2018年4月14日 下午2:30:53
+     * @param qo
+     * @return
+     * @date 2018年4月14日 下午2:30:53
      */
     @GetMapping("/ord/order/getCashBackOrders")
-    List<Map<String, Object>> getCashBackOrders(@RequestParam Map<String, Object> map) throws ParseException, IllegalAccessException, IllegalArgumentException, InvocationTargetException, IntrospectionException {
+    List<Map<String, Object>> getCashBackOrders(@RequestParam Map<String, Object> map)
+            throws ParseException, IllegalAccessException, IllegalArgumentException, InvocationTargetException, IntrospectionException {
         _log.info("查询订单信息的参数为：{}", map.toString());
         List<Map<String, Object>> list = svc.getCashBackOrder(map);
         _log.info("查询订单信息的返回值：{}", String.valueOf(list));
