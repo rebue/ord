@@ -752,16 +752,25 @@
   </resultMap>
   
   <!-- 查询退货分页列表信息 -->
-  <select id="selectReturnPageList" parameterType="rebue.ord.mo.OrdReturnMo" resultMap="ReturnInfoMap">
-  	SELECT a.*, c.USER_NAME, b.ONLINE_ID, b.PRODUCT_ID, b.ONLINE_TITLE, b.SPEC_NAME, b.BUY_COUNT, b.BUY_PRICE, b.CASHBACK_AMOUNT, b.RETURN_STATE, b.BUY_UNIT
+  <select id="selectReturnPageList" parameterType="rebue.ord.ro.OrdReturnRo" resultMap="ReturnInfoMap">
+  	SELECT a.*, c.USER_NAME, b.ONLINE_ID, b.PRODUCT_ID, b.ONLINE_TITLE, b.SPEC_NAME, b.BUY_COUNT, b.BUY_PRICE, b.CASHBACK_AMOUNT, b.RETURN_STATE, b.BUY_UNIT,c.ORDER_CODE
 	FROM ORD_RETURN a
 	LEFT JOIN ORD_ORDER_DETAIL b ON a.ORDER_DETAIL_ID=b.ID AND a.ORDER_ID=b.ORDER_ID,ORD_ORDER c
 	WHERE 1=1 and c.ID=a.ORDER_ID
 	<if test="returnCode != null and returnCode != ''">
       and a.RETURN_CODE = #{returnCode,jdbcType=BIGINT}
     </if>
-    <if test="orderId != null and orderId != ''">
+    <if test="returnState != null and returnState != ''">
+      and b.RETURN_STATE = #{returnState,jdbcType=BIGINT}
+    </if>
+    <if test="userName != null and userName != ''">
+      and c.USER_NAME = #{userName,jdbcType=VARCHAR}
+    </if>
+     <if test="orderId != null and orderId != ''">
       and a.ORDER_ID = #{orderId,jdbcType=BIGINT}
+    </if>
+    <if test="orderCode != null and orderCode != ''">
+      and c.ORDER_CODE = #{orderCode,jdbcType=VARCHAR}
     </if>
     <if test="applicationState != null and applicationState != ''">
       and APPLICATION_STATE = #{applicationState,jdbcType=TINYINT}
@@ -776,7 +785,7 @@
   </update>
   
   <!-- 拒绝退货 -->
-  <update id="refusedReturn" parameterType="rebue.ord.mo.OrdReturnMo">
+  <update id="refusedReturn" parameterType="rebue.ord.ro.OrdReturnRo">
   	UPDATE ORD_RETURN SET APPLICATION_STATE=4, REFUND_STATE=1, REJECT_OP_ID = #{rejectOpId,jdbcType=BIGINT}, REJECT_REASON = #{rejectReason,jdbcType=VARCHAR}, 
   	REJECT_TIME = #{rejectTime,jdbcType=TIMESTAMP}, FINISH_OP_ID = #{finishOpId,jdbcType=BIGINT}, FINISH_TIME = #{finishTime,jdbcType=TIMESTAMP}
   	WHERE RETURN_CODE = #{returnCode,jdbcType=BIGINT}

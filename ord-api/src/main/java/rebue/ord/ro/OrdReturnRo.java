@@ -138,6 +138,12 @@ public class OrdReturnRo {
 
 	/** 退货状态（0：未退货 1：退货中 2：已退货） **/
 	private Byte returnState;
+	
+    /**
+     *    订单编号
+     *
+     */
+    private String orderCode;
 
 
 

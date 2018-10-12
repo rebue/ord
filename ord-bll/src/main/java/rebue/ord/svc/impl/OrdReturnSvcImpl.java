@@ -272,7 +272,7 @@ public class OrdReturnSvcImpl extends MybatisBaseSvcImpl<OrdReturnMo, java.lang.
      *  @date 2018年4月21日 下午3:35:27
      */
     @Override
-    public PageInfo<OrdReturnRo> selectReturnPageList(OrdReturnMo qo, int pageNum, int pageSize) {
+    public PageInfo<OrdReturnRo> selectReturnPageList(OrdReturnRo qo, int pageNum, int pageSize) {
         _log.info("selectReturnPageList: qo-{}; pageNum-{}; pageSize-{}", qo, pageNum, pageSize);
         return PageHelper.startPage(pageNum, pageSize).doSelectPageInfo(() -> _mapper.selectReturnPageList(qo));
     }
@@ -290,7 +290,7 @@ public class OrdReturnSvcImpl extends MybatisBaseSvcImpl<OrdReturnMo, java.lang.
     @SuppressWarnings("unused")
     @Override
     @Transactional(readOnly = false, propagation = Propagation.REQUIRED)
-    public RejectReturnRo rejectReturn(OrdReturnMo record) {
+    public RejectReturnRo rejectReturn(OrdReturnRo record) {
         _log.info("拒绝退货的请求参数为：{}", record);
         RejectReturnRo rejectReturnRo = new RejectReturnRo();
         long returnCode = record.getReturnCode();

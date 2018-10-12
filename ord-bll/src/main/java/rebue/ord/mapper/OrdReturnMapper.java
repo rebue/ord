@@ -5,6 +5,7 @@ import java.util.Map;
 import org.apache.ibatis.annotations.Mapper;
 import rebue.ord.mo.OrdReturnMo;
 import rebue.ord.ro.OrdReturnRo;
+import rebue.ord.ro.OrderDetailRo;
 import rebue.robotech.mapper.MybatisBaseMapper;
 
 @Mapper
@@ -72,7 +73,7 @@ public interface OrdReturnMapper extends MybatisBaseMapper<OrdReturnMo, Long> {
      *  @return
      *  @date 2018年4月21日 下午3:35:27
      */
-    List<OrdReturnRo> selectReturnPageList(OrdReturnMo record);
+    List<OrdReturnRo> selectReturnPageList(OrdReturnRo record);
 
     /**
      *  退货审核通过 Title: updateReturnApprove Description:
@@ -90,7 +91,7 @@ public interface OrdReturnMapper extends MybatisBaseMapper<OrdReturnMo, Long> {
      *  @return
      *  @date 2018年5月7日 上午11:22:50
      */
-    int refusedReturn(OrdReturnMo record);
+    int refusedReturn(OrdReturnRo record);
 
     /**
      *  确认退款 Title: confirmTheRefund Description:
