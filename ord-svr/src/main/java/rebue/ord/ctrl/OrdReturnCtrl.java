@@ -195,7 +195,7 @@ public class OrdReturnCtrl {
      *  @date 2018年4月21日 下午3:59:07
      */
     @GetMapping("/ord/return")
-    PageInfo<OrdReturnRo> selectReturnPageList(OrdReturnMo mo, @RequestParam("pageNum") int pageNum, @RequestParam("pageSize") int pageSize) {
+    PageInfo<OrdReturnRo> selectReturnPageList(OrdReturnRo mo, @RequestParam("pageNum") int pageNum, @RequestParam("pageSize") int pageSize) {
         _log.info("list OrdReturnMo:" + mo + ", pageNum = " + pageNum + ", pageSize = " + pageSize);
         if (pageSize > 50) {
             String msg = "pageSize不能大于50";
@@ -215,7 +215,7 @@ public class OrdReturnCtrl {
      *  @date 2018年4月27日 下午3:31:38
      */
     @PutMapping("/ord/return/reject")
-    RejectReturnRo rejectReturn(@RequestBody OrdReturnMo mo) {
+    RejectReturnRo rejectReturn(@RequestBody OrdReturnRo mo) {
         _log.info("拒绝退货的参数为：{}", mo.toString());
         RejectReturnRo rejectReturnRo = new RejectReturnRo();
         try {

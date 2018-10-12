@@ -39,7 +39,7 @@ public interface OrdReturnSvc extends MybatisBaseSvc<OrdReturnMo, java.lang.Long
      *  @return
      *  @date 2018年4月21日 下午3:35:27
      */
-    PageInfo<OrdReturnRo> selectReturnPageList(OrdReturnMo record, int pageNum, int pageSize);
+    PageInfo<OrdReturnRo> selectReturnPageList(OrdReturnRo record, int pageNum, int pageSize);
 
     /**
      *  拒绝退货 Title: rejectReturn Description:
@@ -48,7 +48,7 @@ public interface OrdReturnSvc extends MybatisBaseSvc<OrdReturnMo, java.lang.Long
      *  @return
      *  @date 2018年4月27日 下午3:10:47
      */
-    RejectReturnRo rejectReturn(OrdReturnMo record);
+    RejectReturnRo rejectReturn(OrdReturnRo record);
 
     /**
      *  同意退货 Title: agreeToReturn Description:
