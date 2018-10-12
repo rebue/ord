@@ -96,7 +96,7 @@ public class OrdBuyRelationSvcImpl extends MybatisBaseSvcImpl<OrdBuyRelationMo, 
 				+ downLineDetailId + " downLineOrderId" + downLineOrderId);
 		long downLineRelationId1 = 0;
 		long downLineRelationId2 = 0;
-		// 获取订单购买关系
+		// 获取该订单购买关系下家
 		OrdBuyRelationMo relationMo = new OrdBuyRelationMo();
 		relationMo.setUplineOrderDetailId(downLineDetailId);
 		List<OrdBuyRelationMo> selfRelationResult = selfSvc.list(relationMo);
@@ -207,6 +207,19 @@ public class OrdBuyRelationSvcImpl extends MybatisBaseSvcImpl<OrdBuyRelationMo, 
 			long downLineOrderId) {
 		// 获取用户购买关系
 		_log.info("获取用户购买关系的id:" + id + "onlineId:" + onlineId + "buyPricce:" + buyPrice);
+		long downLineRelationId1 = 0;
+		long downLineRelationId2 = 0;
+		// 获取订单购买关系
+		OrdBuyRelationMo relationMo = new OrdBuyRelationMo();
+		relationMo.setUplineOrderDetailId(downLineDetailId);
+		List<OrdBuyRelationMo> selfRelationResult = selfSvc.list(relationMo);
+		_log.info("获取到的购买关系结果为:{}", selfRelationResult);
+		if (selfRelationResult.size() == 1) {
+			downLineRelationId1 = selfRelationResult.get(0).getDownlineOrderDetailId();
+		} else if (selfRelationResult.size() == 2) {
+			downLineRelationId1 = selfRelationResult.get(0).getDownlineOrderDetailId();
+			downLineRelationId2 = selfRelationResult.get(1).getDownlineOrderDetailId();
+		}
 		OrdGoodsBuyRelationMo goodsBuyRelationMo = new OrdGoodsBuyRelationMo();
 		goodsBuyRelationMo.setDownlineUserId(id);
 		goodsBuyRelationMo.setOnlineId(onlineId);
@@ -223,6 +236,8 @@ public class OrdBuyRelationSvcImpl extends MybatisBaseSvcImpl<OrdBuyRelationMo, 
 		map.put("buyPrice", buyPrice);
 		map.put("userId", buyRelationResult.getUplineUserId());
 		map.put("returnState", (byte) 0);
+		map.put("downLineRelationId1", downLineRelationId1);
+		map.put("downLineRelationId2", downLineRelationId2);
 		_log.info("获取用户上线购买关系订单详情的参数为：{}" + map);
 		OrdOrderDetailMo orderDetailResult = ordOrderDetailSvc.getOrderDetailForBuyRelation(map);
 		if (orderDetailResult == null) {
@@ -273,12 +288,27 @@ public class OrdBuyRelationSvcImpl extends MybatisBaseSvcImpl<OrdBuyRelationMo, 
 			long downLineOrderId) {
 		// 获取用户购买关系
 		_log.info("匹配邀请关系的订单详情的用户id:" + id + "onlineId:" + onlineId + "buyPrice:" + buyPrice);
+		long downLineRelationId1 = 0;
+		long downLineRelationId2 = 0;
+		// 获取订单购买关系
+		OrdBuyRelationMo downLineRelationMo = new OrdBuyRelationMo();
+		downLineRelationMo.setUplineOrderDetailId(downLineDetailId);
+		List<OrdBuyRelationMo> selfRelationResult = selfSvc.list(downLineRelationMo);
+		_log.info("获取到的购买关系结果为:{}", selfRelationResult);
+		if (selfRelationResult.size() == 1) {
+			downLineRelationId1 = selfRelationResult.get(0).getDownlineOrderDetailId();
+		} else if (selfRelationResult.size() == 2) {
+			downLineRelationId1 = selfRelationResult.get(0).getDownlineOrderDetailId();
+			downLineRelationId2 = selfRelationResult.get(1).getDownlineOrderDetailId();
+		}
 		// 获取用户购买该产品还有两个名额的详情记录
 		Map<String, Object> map = new HashMap<>();
 		map.put("onlineId", onlineId);
 		map.put("buyPrice", buyPrice);
 		map.put("returnState", (byte) 0);
 		map.put("downLineUserId", id);
+		map.put("downLineRelationId1", downLineRelationId1);
+		map.put("downLineRelationId2", downLineRelationId2);
 		OrdOrderDetailMo orderDetailResult = ordOrderDetailSvc.getAndUpdateBuyRelationByInvite(map);
 		if (orderDetailResult == null) {
 			_log.info("邀请关系没有符合匹配规则的订单详情");
@@ -336,13 +366,28 @@ public class OrdBuyRelationSvcImpl extends MybatisBaseSvcImpl<OrdBuyRelationMo, 
 			long downLineOrderId) {
 		// 获取用户购买关系
 		_log.info("匹配差一人，且邀请一人（关系来源是购买关系的）的订单详情的用户id:" + id + "onlineId:" + onlineId + "buyPrice:" + buyPrice);
+		long downLineRelationId1 = 0;
+		long downLineRelationId2 = 0;
+		// 获取订单购买关系
+		OrdBuyRelationMo downLineRelationMo = new OrdBuyRelationMo();
+		downLineRelationMo.setUplineOrderDetailId(downLineDetailId);
+		List<OrdBuyRelationMo> selfRelationResult = selfSvc.list(downLineRelationMo);
+		_log.info("获取到的购买关系结果为:{}", selfRelationResult);
+		if (selfRelationResult.size() == 1) {
+			downLineRelationId1 = selfRelationResult.get(0).getDownlineOrderDetailId();
+		} else if (selfRelationResult.size() == 2) {
+			downLineRelationId1 = selfRelationResult.get(0).getDownlineOrderDetailId();
+			downLineRelationId2 = selfRelationResult.get(1).getDownlineOrderDetailId();
+		}
 		// 获取用户购买该产品还有两个名额的详情记录
-		OrdOrderDetailMo mo = new OrdOrderDetailMo();
-		mo.setOnlineId(onlineId);
-		mo.setBuyPrice(buyPrice);
-		mo.setReturnState((byte) 0);
-		mo.setCommissionSlot((byte) 1);
-		OrdOrderDetailMo orderDetailResult = ordOrderDetailSvc.getAndUpdateBuyRelationByFour(mo);
+		Map<String, Object> map = new HashMap<>();
+		map.put("onlineId",onlineId);
+		map.put("buyPrice",buyPrice);
+		map.put("returnState",(byte) 0);
+		map.put("commissionSlot",(byte) 1);
+		map.put("downLineRelationId1", downLineRelationId1);
+		map.put("downLineRelationId2", downLineRelationId2);
+		OrdOrderDetailMo orderDetailResult = ordOrderDetailSvc.getAndUpdateBuyRelationByFour(map);
 		if (orderDetailResult == null) {
 			_log.info("邀请关系没有符合匹配规则的订单详情");
 			return false;
@@ -399,6 +444,19 @@ public class OrdBuyRelationSvcImpl extends MybatisBaseSvcImpl<OrdBuyRelationMo, 
 			long downLineOrderId) {
 		// 获取用户购买关系
 		_log.info("匹配差两人的订单详情的用户id:" + id + "onlineId:" + onlineId + "buyPrice:" + buyPrice);
+		long downLineRelationId1 = 0;
+		long downLineRelationId2 = 0;
+		// 获取订单购买关系
+		OrdBuyRelationMo relationMo = new OrdBuyRelationMo();
+		relationMo.setUplineOrderDetailId(downLineDetailId);
+		List<OrdBuyRelationMo> selfRelationResult = selfSvc.list(relationMo);
+		_log.info("获取到的购买关系结果为:{}", selfRelationResult);
+		if (selfRelationResult.size() == 1) {
+			downLineRelationId1 = selfRelationResult.get(0).getDownlineOrderDetailId();
+		} else if (selfRelationResult.size() == 2) {
+			downLineRelationId1 = selfRelationResult.get(0).getDownlineOrderDetailId();
+			downLineRelationId2 = selfRelationResult.get(1).getDownlineOrderDetailId();
+		}
 		// 获取用户购买该产品还有两个名额的详情记录
 		Map<String, Object> map = new HashMap<>();
 		map.put("id", downLineDetailId);
@@ -406,6 +464,8 @@ public class OrdBuyRelationSvcImpl extends MybatisBaseSvcImpl<OrdBuyRelationMo, 
 		map.put("buyPrice", buyPrice);
 		map.put("returnState", (byte) 0);
 		map.put("commissionSlot", (byte) 2);
+		map.put("downLineRelationId1", downLineRelationId1);
+		map.put("downLineRelationId2", downLineRelationId2);
 		OrdOrderDetailMo orderDetailResult = ordOrderDetailSvc.getOrderDetailForBuyRelation(map);
 		if (orderDetailResult == null) {
 			_log.info("没有符合差两人匹配规则的订单详情");
@@ -452,6 +512,19 @@ public class OrdBuyRelationSvcImpl extends MybatisBaseSvcImpl<OrdBuyRelationMo, 
 			long downLineOrderId) {
 		// 获取用户购买关系
 		_log.info("匹配差一人的订单详情的用户id:" + id + "onlineId:" + onlineId + "buyPrice:" + buyPrice);
+		long downLineRelationId1 = 0;
+		long downLineRelationId2 = 0;
+		// 获取订单购买关系
+		OrdBuyRelationMo downLineRelationMo = new OrdBuyRelationMo();
+		downLineRelationMo.setUplineOrderDetailId(downLineDetailId);
+		List<OrdBuyRelationMo> selfRelationResult = selfSvc.list(downLineRelationMo);
+		_log.info("获取到的购买关系结果为:{}", selfRelationResult);
+		if (selfRelationResult.size() == 1) {
+			downLineRelationId1 = selfRelationResult.get(0).getDownlineOrderDetailId();
+		} else if (selfRelationResult.size() == 2) {
+			downLineRelationId1 = selfRelationResult.get(0).getDownlineOrderDetailId();
+			downLineRelationId2 = selfRelationResult.get(1).getDownlineOrderDetailId();
+		}
 		// 获取用户购买该产品还有两个名额的详情记录
 		Map<String, Object> map = new HashMap<>();
 		map.put("id", downLineDetailId);
@@ -459,6 +532,8 @@ public class OrdBuyRelationSvcImpl extends MybatisBaseSvcImpl<OrdBuyRelationMo, 
 		map.put("buyPrice", buyPrice);
 		map.put("returnState", (byte) 0);
 		map.put("commissionSlot", (byte) 1);
+		map.put("downLineRelationId1", downLineRelationId1);
+		map.put("downLineRelationId2", downLineRelationId2);
 		OrdOrderDetailMo orderDetailResult = ordOrderDetailSvc.getOrderDetailForBuyRelation(map);
 		if (orderDetailResult == null) {
 			_log.info("没有符合差一人匹配规则的订单详情");

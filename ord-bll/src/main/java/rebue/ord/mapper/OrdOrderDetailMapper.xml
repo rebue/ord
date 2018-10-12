@@ -537,16 +537,16 @@
         and ood.USER_ID = #{userId,jdbcType=BIGINT}
       </if>
       <if test="downLineRelationId1 != null">
-        and ood.ID = #{downLineRelationId1,jdbcType=BIGINT}
+        and ood.ID != #{downLineRelationId1,jdbcType=BIGINT}
       </if>
       <if test="downLineRelationId2 != null">
-        and ood.ID = #{downLineRelationId2,jdbcType=BIGINT}
+        and ood.ID != #{downLineRelationId2,jdbcType=BIGINT}
       </if>
     </where>
-    AND ood.ORDER_ID = oo.ID and oo.ORDER_STATE IN (2,3,4,5) and ood.COMMISSION_SLOT &gt;0 ORDER BY oo.ORDER_TIME ASC limit 1
+    AND ood.ORDER_ID = oo.ID and ood.ID != #{id,jdbcType=BIGINT} and oo.ORDER_STATE IN (2,3,4,5) and ood.COMMISSION_SLOT &gt;0 ORDER BY oo.ORDER_TIME ASC limit 1
   </select>
   
-   <select id="getAndUpdateBuyRelationByFour" parameterType="rebue.ord.mo.OrdOrderDetailMo" resultMap="BaseResultMap">
+   <select id="getAndUpdateBuyRelationByFour" parameterType="java.util.Map" resultMap="BaseResultMap">
   	SELECT  ood.ID, ood.ORDER_ID, ood.ONLINE_ID, ood.PRODUCT_ID, ood.ONLINE_TITLE, ood.SPEC_NAME, ood.BUY_COUNT, ood.BUY_PRICE, 
     ood.CASHBACK_AMOUNT, ood.RETURN_COUNT, ood.CASHBACK_TOTAL, ood.BUY_UNIT, RETURN_STATE, ood.USER_ID, ood.COMMISSION_SLOT, 
     ood.COMMISSION_STATE
@@ -599,6 +599,12 @@
       </if>
       <if test="userId != null">
         and ood.USER_ID = #{userId,jdbcType=BIGINT}
+      </if>
+       <if test="downLineRelationId1 != null">
+        and ood.ID != #{downLineRelationId1,jdbcType=BIGINT}
+      </if>
+      <if test="downLineRelationId2 != null">
+        and ood.ID != #{downLineRelationId2,jdbcType=BIGINT}
       </if>
     </where>
     AND ood.ORDER_ID = oo.ID and ood.id = oor.UPLINE_ORDER_DETAIL_ID and oor.RELATION_SOURCE = 2 and oo.ORDER_STATE IN (2,3,4,5) and ood.COMMISSION_SLOT &gt; 0 ORDER BY oo.ORDER_TIME ASC limit 1
@@ -657,6 +663,12 @@
       </if>
       <if test="userId != null">
         and ood.USER_ID = #{userId,jdbcType=BIGINT}
+      </if>
+       <if test="downLineRelationId1 != null">
+        and ood.ID != #{downLineRelationId1,jdbcType=BIGINT}
+      </if>
+      <if test="downLineRelationId2 != null">
+        and ood.ID != #{downLineRelationId2,jdbcType=BIGINT}
       </if>
     </where>
     AND ood.ORDER_ID = oo.ID and ood.id = oor.UPLINE_ORDER_DETAIL_ID and oog.DOWNLINE_USER_ID = #{downLineUserId,jdbcType=TINYINT} 

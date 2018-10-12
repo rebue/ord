@@ -99,9 +99,9 @@ public class OrdOrderDetailSvcImpl extends MybatisBaseSvcImpl<OrdOrderDetailMo, 
     }
 
     @Override
-    public OrdOrderDetailMo getAndUpdateBuyRelationByFour(OrdOrderDetailMo mo) {
+    public OrdOrderDetailMo getAndUpdateBuyRelationByFour(Map<String, Object> map) {
         // TODO Auto-generated method stub
-        return _mapper.getAndUpdateBuyRelationByFour(mo);
+        return _mapper.getAndUpdateBuyRelationByFour(map);
     }
 
 	@Override
