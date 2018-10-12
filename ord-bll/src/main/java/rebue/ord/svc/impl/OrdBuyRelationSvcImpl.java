@@ -596,7 +596,6 @@ public class OrdBuyRelationSvcImpl extends MybatisBaseSvcImpl<OrdBuyRelationMo, 
 			item.setBuyCount(detailList.get(i).getBuyCount());
 			item.setBuyPrice(detailList.get(i).getBuyPrice());
 			item.setCashbackAmount(detailList.get(i).getCashbackAmount());
-			;
 			item.setBuyUnit(detailList.get(i).getBuyUnit());
 			item.setReturnCount(detailList.get(i).getReturnCount());
 			item.setReturnState(detailList.get(i).getReturnState());
@@ -609,8 +608,22 @@ public class OrdBuyRelationSvcImpl extends MybatisBaseSvcImpl<OrdBuyRelationMo, 
 			List<OrdBuyRelationMo> list = super.list(mo);
 			_log.info("查询购买关系的结果为： {}", list);
 			for (int j = 0; j < list.size(); j++) {
+				_log.info("当前购买关系是： {}", list.get(j).getDownlineOrderDetailId());
+				_log.info("当前订单详情id是： {}", detailList.get(i).getId());
+				//判断当前关系里面该订单详情是不是作为下家
+				if(list.get(j).getDownlineOrderDetailId().equals(detailList.get(i).getId())) {					
+					_log.info("该条关系中当前订单详情是作为下家的,订单详情id是： {}", detailList.get(j).getId());
+					Long uId = list.get(j).getUplineUserId();
+					// 当前条购买关系的上家名字
+					_log.info("开始获取上家名字id为： {}", uId);
+					SucUserMo uUserName = sucUserSvc.getById(uId);
+					_log.info("获取上家的结果为： {}", uUserName);
+					if (uUserName != null ) {
+						item.setUplineUserName(uUserName.getWxNickname());
+					}
+				}
 				// 先根据当前条购买关系去查询上家名字
-				if (j == 1) {
+				if (j > 1 && !list.get(j).getDownlineOrderDetailId().equals(detailList.get(i).getId())) {
 					Long dId = list.get(j).getDownlineUserId();
 					// 当前条购买关系的第二个下家名字和购买关系
 					_log.info("开始获取第二个下家名字id为： {}", dId);
@@ -620,25 +633,19 @@ public class OrdBuyRelationSvcImpl extends MybatisBaseSvcImpl<OrdBuyRelationMo, 
 						item.setDownlineUserName2(dUserName2.getWxNickname());
 					}
 					item.setRelationSource2(list.get(j).getRelationSource());
-				} else {
-					Long uId = list.get(j).getUplineUserId();
+				} 
+				if(!list.get(j).getDownlineOrderDetailId().equals(detailList.get(i).getId())) {
 					Long dId = list.get(j).getDownlineUserId();
-					// 当前条购买关系的上家名字
-					_log.info("开始获取第一个上家名字id为： {}", uId);
-					SucUserMo uUserName = sucUserSvc.getById(uId);
-					_log.info("获取第一上家的结果为： {}", uUserName);
 					// 当前条购买关系的下家名字
 					_log.info("开始获取第一个下家名字id为： {}", dId);
 					SucUserMo dUserName = sucUserSvc.getById(dId);
 					_log.info("获取第一个下家的结果为： {}", dUserName);
-					if (uUserName != null && dUserName != null) {
-						item.setUplineUserName(uUserName.getWxNickname());
+					item.setRelationSource(list.get(j).getRelationSource());
+					if ( dUserName != null) {
 						item.setDownlineUserName(dUserName.getWxNickname());
 					}
-					item.setRelationSource(list.get(j).getRelationSource());
-
 				}
-
+				
 			}
 			result.add(item);
 		}
