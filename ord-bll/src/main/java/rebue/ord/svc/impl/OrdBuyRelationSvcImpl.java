@@ -100,7 +100,7 @@ public class OrdBuyRelationSvcImpl extends MybatisBaseSvcImpl<OrdBuyRelationMo, 
 		OrdBuyRelationMo relationMo = new OrdBuyRelationMo();
 		relationMo.setUplineOrderDetailId(downLineDetailId);
 		List<OrdBuyRelationMo> selfRelationResult = selfSvc.list(relationMo);
-		_log.info("获取到的购买关系结果为:{}", selfRelationResult);
+		_log.info("获取到该详情的购买关系结果为:{}", selfRelationResult);
 		if (selfRelationResult.size() == 1) {
 			downLineRelationId1 = selfRelationResult.get(0).getDownlineOrderDetailId();
 		} else if (selfRelationResult.size() == 2) {
@@ -213,7 +213,7 @@ public class OrdBuyRelationSvcImpl extends MybatisBaseSvcImpl<OrdBuyRelationMo, 
 		OrdBuyRelationMo relationMo = new OrdBuyRelationMo();
 		relationMo.setUplineOrderDetailId(downLineDetailId);
 		List<OrdBuyRelationMo> selfRelationResult = selfSvc.list(relationMo);
-		_log.info("获取到的购买关系结果为:{}", selfRelationResult);
+		_log.info("获取到的该详情购买关系结果为:{}", selfRelationResult);
 		if (selfRelationResult.size() == 1) {
 			downLineRelationId1 = selfRelationResult.get(0).getDownlineOrderDetailId();
 		} else if (selfRelationResult.size() == 2) {
