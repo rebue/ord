@@ -114,6 +114,7 @@ public class OrdBuyRelationSvcImpl extends MybatisBaseSvcImpl<OrdBuyRelationMo, 
 		map.put("buyPrice", buyPrice);
 		map.put("userId", id);
 		map.put("returnState", (byte) 0);
+		map.put("commissionSlot", (byte) 1);
 		map.put("downLineRelationId1", downLineRelationId1);
 		map.put("downLineRelationId2", downLineRelationId2);
 		_log.info("获取用户自己购买剩余1个购买名额的订单详情的参数为：{}" + map);
