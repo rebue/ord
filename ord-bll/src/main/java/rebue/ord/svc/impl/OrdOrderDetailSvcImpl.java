@@ -117,19 +117,16 @@ public class OrdOrderDetailSvcImpl extends MybatisBaseSvcImpl<OrdOrderDetailMo, 
 
     @Override
     public OrdOrderDetailMo getAndUpdateBuyRelationByFour(Map<String, Object> map) {
-        // TODO Auto-generated method stub
         return _mapper.getAndUpdateBuyRelationByFour(map);
     }
 
 	@Override
 	public OrdOrderDetailMo getAndUpdateBuyRelationByInvite(Map<String, Object> map) {
-		// TODO Auto-generated method stub
 		return _mapper.getAndUpdateBuyRelationByInvite(map);
 	}
 	
 	@Override
 	public OrdOrderDetailMo getOrderDetailForOneCommissonSlot(Map<String, Object> map) {
-		
 		return _mapper.getOrderDetailForOneCommissonSlot(map);
 	}
 
