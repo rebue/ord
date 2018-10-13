@@ -49,6 +49,8 @@ public interface OrdOrderDetailSvc extends MybatisBaseSvc<OrdOrderDetailMo, java
 
     OrdOrderDetailMo getOrderDetailForBuyRelation(Map<String, Object> map);
     
+    OrdOrderDetailMo getOrderDetailForOneCommissonSlot(Map<String, Object> map);
+    
     OrdOrderDetailMo getAndUpdateBuyRelationByInvite(Map<String, Object> map);
 
     OrdOrderDetailMo getAndUpdateBuyRelationByFour(Map<String, Object> map);
