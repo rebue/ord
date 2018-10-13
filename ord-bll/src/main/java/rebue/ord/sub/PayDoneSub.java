@@ -1,6 +1,5 @@
 package rebue.ord.sub;
 
-import java.math.BigDecimal;
 import java.util.List;
 
 import javax.annotation.PostConstruct;
@@ -20,16 +19,12 @@ import org.springframework.transaction.annotation.Transactional;
 
 import rebue.afc.co.AfcExchangeCo;
 import rebue.afc.msg.PayDoneMsg;
-import rebue.ord.mo.OrdBuyRelationMo;
-import rebue.ord.mo.OrdGoodsBuyRelationMo;
 import rebue.ord.mo.OrdOrderDetailMo;
-import rebue.ord.mo.OrdOrderMo;
 import rebue.ord.svc.OrdBuyRelationSvc;
 import rebue.ord.svc.OrdGoodsBuyRelationSvc;
 import rebue.ord.svc.OrdOrderDetailSvc;
 import rebue.ord.svc.OrdOrderSvc;
 import rebue.sbs.rabbit.RabbitConsumer;
-import rebue.suc.ro.SucRegRo;
 import rebue.suc.svr.feign.SucUserSvc;
 import rebue.wheel.idworker.IdWorker3;
 
@@ -114,7 +109,7 @@ public class PayDoneSub implements ApplicationListener<ContextRefreshedEvent> {
 							boolean getRegRelationResultByPromote = ordBuyRelationSvc.getAndUpdateBuyRelationByPromote(
 									id, onlineId, detailMoResult.get(i).getBuyPrice(), detailMoResult.get(i).getId(),
 									detailMoResult.get(i).getOrderId());
-							_log.info(detailMoResult.get(i).getId() + "根据购买关系规则匹配购买关系的返回值为：{}",
+							_log.info(detailMoResult.get(i).getId() + "根据邀请关系规则匹配购买关系的返回值为：{}",
 									getRegRelationResultByPromote);
 							if (getRegRelationResultByPromote == false) {
 								_log.info("根据邀请规则匹配购买关系");

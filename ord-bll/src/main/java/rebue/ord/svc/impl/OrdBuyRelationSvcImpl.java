@@ -290,7 +290,7 @@ public class OrdBuyRelationSvcImpl extends MybatisBaseSvcImpl<OrdBuyRelationMo, 
 		_log.info("匹配邀请关系的订单详情的用户id:" + id + "onlineId:" + onlineId + "buyPrice:" + buyPrice);
 		long downLineRelationId1 = 0;
 		long downLineRelationId2 = 0;
-		// 获取订单购买关系
+		// 获取该订单购买关系
 		OrdBuyRelationMo downLineRelationMo = new OrdBuyRelationMo();
 		downLineRelationMo.setUplineOrderDetailId(downLineDetailId);
 		List<OrdBuyRelationMo> selfRelationResult = selfSvc.list(downLineRelationMo);
