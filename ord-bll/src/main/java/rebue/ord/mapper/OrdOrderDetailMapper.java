@@ -94,6 +94,8 @@ public interface OrdOrderDetailMapper extends MybatisBaseMapper<OrdOrderDetailMo
 
     OrdOrderDetailMo getOrderDetailForBuyRelation(Map<String, Object> map);
     
+    OrdOrderDetailMo getOrderDetailForOneCommissonSlot(Map<String, Object> map);
+    
     OrdOrderDetailMo getAndUpdateBuyRelationByInvite(Map<String, Object> map);
 
     OrdOrderDetailMo getAndUpdateBuyRelationByFour(Map<String, Object> map);
