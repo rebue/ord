@@ -16,6 +16,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import rebue.ord.mo.OrdOrderDetailMo;
+import rebue.ord.ro.DetailandBuyRelationRo;
 import rebue.ord.svc.OrdOrderDetailSvc;
 import rebue.robotech.dic.ResultDic;
 import rebue.robotech.ro.Ro;
@@ -184,16 +185,16 @@ public class OrdOrderDetailCtrl {
     }
 
     /**
-     *  查询订单详情信息 Title: orderDetailInfo Description:
+     *  根据订单id获取详情 Title: orderDetailInfo Description:
      *
      *  @param qo
      *  @return
      *  @date 2018年4月9日 下午5:02:41
      */
     @GetMapping("/ord/orderdetail/info")
-    List<OrdOrderDetailMo> orderDetailInfo(OrdOrderDetailMo qo) {
-        _log.info("获取订单详情的参数为：{}", qo.toString());
-        List<OrdOrderDetailMo> list = svc.list(qo);
+    List<DetailandBuyRelationRo> orderDetailInfo(@RequestParam("orderId") java.lang.Long orderId) {
+        _log.info("获取订单详情的参数为：{}", orderId);
+        List<DetailandBuyRelationRo> list = svc.listByOrderId(orderId);
         _log.info("获取到的订单详情为：{}", String.valueOf(list));
         return list;
     }

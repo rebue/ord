@@ -675,4 +675,12 @@
     and ood.USER_ID = oog.UPLINE_USER_ID and oo.ORDER_STATE IN (2,3,4,5) and ood.COMMISSION_SLOT &gt; 0 ORDER BY oog.CREATE_TIME ASC limit 1
   </select>
   
+     <select id="getDetailByOrderId" parameterType="java.lang.Long" resultType="rebue.ord.mo.OrdOrderDetailMo">
+    <!--
+		根据orderId获取订单订单详情
+    -->
+    select *
+    from ORD_ORDER_DETAIL where ORDER_ID=#{orderId,jdbcType=BIGINT}
+  </select>
+  
 </mapper>

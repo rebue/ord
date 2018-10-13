@@ -74,17 +74,20 @@ public class DetailandBuyRelationRo {
 	 */
 	private String uplineUserName;
 	
+	 private Byte uplineRelationSource;
+	    
+	
     /**
      *  第一条关系来源
      *    关系来源（1：自己匹配自己  2：购买关系  3：注册关系  4：差一人且已有购买关系  5：差两人  6：差一人但没有购买关系）
      */
-    private Byte relationSource;
+    private Byte downlineRelationSource1;
     
     /**
      *  第二条关系来源
      *    关系来源（1：自己匹配自己  2：购买关系  3：注册关系  4：差一人且已有购买关系  5：差两人  6：差一人但没有购买关系）
      */
-    private Byte relationSource2;
+    private Byte downlineRelationSource2;
     
     /**
      *    下家用户名字
@@ -93,7 +96,7 @@ public class DetailandBuyRelationRo {
      *
      *   
      */
-    private String downlineUserName;
+    private String downlineUserName1;
     
     /**
      *    第二下家用户名字
@@ -105,7 +108,7 @@ public class DetailandBuyRelationRo {
     private String downlineUserName2;
     
 	/** 第一个下家订单上线标题 **/
-	private String downOnlineTitle;
+	private String downOnlineTitle1;
 	
 	/** 第二个下家订单上线标题 **/
 	private String downOnlineTitle2;

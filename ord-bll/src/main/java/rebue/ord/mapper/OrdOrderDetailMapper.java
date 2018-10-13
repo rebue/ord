@@ -97,4 +97,6 @@ public interface OrdOrderDetailMapper extends MybatisBaseMapper<OrdOrderDetailMo
     OrdOrderDetailMo getAndUpdateBuyRelationByInvite(Map<String, Object> map);
 
     OrdOrderDetailMo getAndUpdateBuyRelationByFour(Map<String, Object> map);
+    
+    List<OrdOrderDetailMo> getDetailByOrderId(Long orderId);
 }
