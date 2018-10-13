@@ -105,11 +105,11 @@ public class PayDoneSub implements ApplicationListener<ContextRefreshedEvent> {
 								detailMoResult.get(i).getOrderId());
 						_log.info(detailMoResult.get(i).getId() + "按匹配自己匹配购买关系的返回值为：{}", getBuyRelationResultByOwn);
 						if (getBuyRelationResultByOwn == false) {
-							_log.info("根据邀请规则匹配购买关系");
+							_log.info("根据购买规则匹配购买关系");
 							boolean getRegRelationResultByPromote = ordBuyRelationSvc.getAndUpdateBuyRelationByPromote(
 									id, onlineId, detailMoResult.get(i).getBuyPrice(), detailMoResult.get(i).getId(),
 									detailMoResult.get(i).getOrderId());
-							_log.info(detailMoResult.get(i).getId() + "根据邀请关系规则匹配购买关系的返回值为：{}",
+							_log.info(detailMoResult.get(i).getId() + "根据购买关系规则匹配购买关系的返回值为：{}",
 									getRegRelationResultByPromote);
 							if (getRegRelationResultByPromote == false) {
 								_log.info("根据邀请规则匹配购买关系");
