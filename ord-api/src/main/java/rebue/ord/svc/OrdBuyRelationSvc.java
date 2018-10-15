@@ -15,21 +15,16 @@ public interface OrdBuyRelationSvc extends MybatisBaseSvc<OrdBuyRelationMo, java
 
 	List<DetailandBuyRelationRo> getBuyRelationByOrderId(long orderId);
 
-	boolean getAndUpdateBuyRelationByOwn(long id, long onlineId, BigDecimal buyPrice, long downLineDetailId,
-			long downLineOrderId);
+	boolean getAndUpdateBuyRelationByOwn(long id, long onlineId, BigDecimal buyPrice, long downLineDetailId,long downLineOrderId);
 
-	boolean getAndUpdateBuyRelationByPromote(long id, long onlineId, BigDecimal buyPrice, long downLineDetailId,
-			long downLineOrderId);
+	boolean getAndUpdateBuyRelationByPromote(long id, long onlineId, BigDecimal buyPrice, long downLineDetailId,long downLineOrderId);
 
-	boolean getAndUpdateBuyRelationByInvite(long id, long onlineId, BigDecimal buyPrice, long downLineDetailId,
-			long downLineOrderId);
+	boolean getAndUpdateBuyRelationByInvite(long id, long onlineId, BigDecimal buyPrice, long downLineDetailId,long downLineOrderId);
 
-	boolean getAndUpdateBuyRelationByFour(long id, long onlineId, BigDecimal buyPrice, long downLineDetailId,
-			long downLineOrderId);
+	boolean getAndUpdateBuyRelationByFour(long id, long onlineId, BigDecimal buyPrice, long downLineDetailId,long downLineOrderId);
 
-	boolean getAndUpdateBuyRelationByFive(long id, long onlineId, BigDecimal buyPrice, long downLineDetailId,
-			long downLineOrderId);
+	boolean getAndUpdateBuyRelationByFive(long id, long onlineId, BigDecimal buyPrice, long downLineDetailId,long downLineOrderId);
 
-	boolean getAndUpdateBuyRelationBySix(long id, long onlineId, BigDecimal buyPrice, long downLineDetailId,
-			long downLineOrderId);
+	boolean getAndUpdateBuyRelationBySix(long id, long onlineId, BigDecimal buyPrice, long downLineDetailId,long downLineOrderId);
+
 }

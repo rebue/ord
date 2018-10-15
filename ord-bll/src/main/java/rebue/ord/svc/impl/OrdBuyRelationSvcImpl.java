@@ -648,6 +648,6 @@ public class OrdBuyRelationSvcImpl extends MybatisBaseSvcImpl<OrdBuyRelationMo, 
 			result.add(item);
 		}
 		return result;
-
 	}
+	
 }
