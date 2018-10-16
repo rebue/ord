@@ -26,5 +26,6 @@ public interface OrdBuyRelationSvc extends MybatisBaseSvc<OrdBuyRelationMo, java
 	boolean getAndUpdateBuyRelationByFive(long id, long onlineId, BigDecimal buyPrice, long downLineDetailId,long downLineOrderId);
 
 	boolean getAndUpdateBuyRelationBySix(long id, long onlineId, BigDecimal buyPrice, long downLineDetailId,long downLineOrderId);
-
+	
+	String matchBuyRelation(long id, long onlineId, BigDecimal buyPrice, long downLineDetailId,long downLineOrderId);
 }

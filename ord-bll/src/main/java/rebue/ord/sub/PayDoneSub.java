@@ -1,5 +1,6 @@
 package rebue.ord.sub;
 
+import java.math.BigDecimal;
 import java.util.List;
 
 import javax.annotation.PostConstruct;
@@ -97,63 +98,14 @@ public class PayDoneSub implements ApplicationListener<ContextRefreshedEvent> {
 					_log.info("订单详情商品类型为：{}" + detailMoResult.get(i).getSubjectType());
 					if (detailMoResult.get(i).getSubjectType() == 1) {
 						_log.info("全返商品添加购买关系");
-						long id = detailMoResult.get(i).getUserId();
+						long userId = detailMoResult.get(i).getUserId();
 						long onlineId = detailMoResult.get(i).getOnlineId();
-						_log.info("按匹配自己匹配购买关系");
-						boolean getBuyRelationResultByOwn = ordBuyRelationSvc.getAndUpdateBuyRelationByOwn(id, onlineId,
-								detailMoResult.get(i).getBuyPrice(), detailMoResult.get(i).getId(),
-								detailMoResult.get(i).getOrderId());
-						_log.info(detailMoResult.get(i).getId() + "按匹配自己匹配购买关系的返回值为：{}", getBuyRelationResultByOwn);
-						if (getBuyRelationResultByOwn == false) {
-							_log.info("根据购买规则匹配购买关系");
-							boolean getRegRelationResultByPromote = ordBuyRelationSvc.getAndUpdateBuyRelationByPromote(
-									id, onlineId, detailMoResult.get(i).getBuyPrice(), detailMoResult.get(i).getId(),
-									detailMoResult.get(i).getOrderId());
-							_log.info(detailMoResult.get(i).getId() + "根据购买关系规则匹配购买关系的返回值为：{}",
-									getRegRelationResultByPromote);
-							if (getRegRelationResultByPromote == false) {
-								_log.info("根据邀请规则匹配购买关系");
-								boolean getAndUpdateBuyRelationByInvite = ordBuyRelationSvc
-										.getAndUpdateBuyRelationByInvite(id, onlineId,
-												detailMoResult.get(i).getBuyPrice(), detailMoResult.get(i).getId(),
-												detailMoResult.get(i).getOrderId());
-								_log.info(detailMoResult.get(i).getId() + "根据邀请关系规则匹配购买关系的返回值为：{}",
-										getAndUpdateBuyRelationByInvite);
-								if (getAndUpdateBuyRelationByInvite == false) {
-									_log.info("根据匹配差一人，且邀请一人（关系来源是购买关系的）规则匹配购买关系");
-									boolean getOtherRelationResultByFour = ordBuyRelationSvc
-											.getAndUpdateBuyRelationByFour(id, onlineId,
-													detailMoResult.get(i).getBuyPrice(), detailMoResult.get(i).getId(),
-													detailMoResult.get(i).getOrderId());
-									_log.info(
-											detailMoResult.get(i).getId() + "根据匹配差一人，且邀请一人（关系来源是购买关系的）规则匹配购买关系的返回值为：{}",
-											getOtherRelationResultByFour);
-									if (getOtherRelationResultByFour == false) {
-										_log.info("根据匹配差两人的规则匹配购买关系");
-										boolean getAndUpdateBuyRelationByFive = ordBuyRelationSvc
-												.getAndUpdateBuyRelationByFive(id, onlineId,
-														detailMoResult.get(i).getBuyPrice(),
-														detailMoResult.get(i).getId(),
-														detailMoResult.get(i).getOrderId());
-										_log.info(detailMoResult.get(i).getId() + "根据匹配差两人的规则匹配购买关系的返回值为：{}",
-												getAndUpdateBuyRelationByFive);
-										if (getAndUpdateBuyRelationByFive == false) {
-											_log.info("根据匹配差一人的规则匹配购买关系");
-											boolean getOtherRelationResultBySix = ordBuyRelationSvc
-													.getAndUpdateBuyRelationByFive(id, onlineId,
-															detailMoResult.get(i).getBuyPrice(),
-															detailMoResult.get(i).getId(),
-															detailMoResult.get(i).getOrderId());
-											_log.info(detailMoResult.get(i).getId() + "根据匹配差一人的规则匹配购买关系的返回值为：{}",
-													getOtherRelationResultBySix);
-											if (getOtherRelationResultBySix == false) {
-												_log.info(detailMoResult.get(i).getId() + "匹配购买关系失败");
-											}
-										}
-									}
-								}
-							}
-						}
+						BigDecimal buyPrice = detailMoResult.get(i).getBuyPrice();
+						long downLineDetailId = detailMoResult.get(i).getId();
+						long downLineOrderId = detailMoResult.get(i).getOrderId();
+						String matchBuyRelationResult = ordBuyRelationSvc.matchBuyRelation(userId, onlineId, buyPrice,
+								downLineDetailId, downLineOrderId);
+						_log.info(matchBuyRelationResult);
 					}
 				} catch (Exception e) {
 					_log.error("匹配购买关系报错：", e);

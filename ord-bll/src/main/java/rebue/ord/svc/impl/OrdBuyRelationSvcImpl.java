@@ -82,6 +82,63 @@ public class OrdBuyRelationSvcImpl extends MybatisBaseSvcImpl<OrdBuyRelationMo, 
 	public int updateByUplineOrderDetailId(OrdBuyRelationMo mo) {
 		return _mapper.updateByUplineOrderDetailId(mo);
 	}
+	
+	@Override
+	@Transactional(readOnly = false, propagation = Propagation.REQUIRED)
+	public String matchBuyRelation(long userId, long onlineId, BigDecimal buyPrice, long downLineDetailId,
+			long downLineOrderId) {
+		_log.info("按匹配自己匹配购买关系");
+		boolean getBuyRelationResultByOwn = selfSvc.getAndUpdateBuyRelationByOwn(userId, onlineId, buyPrice,
+				downLineDetailId, downLineOrderId);
+		_log.info(downLineDetailId + "按匹配自己匹配购买关系的返回值为：{}", getBuyRelationResultByOwn);
+		if (getBuyRelationResultByOwn == false) {
+			_log.info("根据购买规则匹配购买关系");
+			boolean getRegRelationResultByPromote = selfSvc.getAndUpdateBuyRelationByPromote(userId, onlineId, buyPrice,
+					downLineDetailId, downLineOrderId);
+			_log.info(downLineDetailId + "根据购买关系规则匹配购买关系的返回值为：{}", getRegRelationResultByPromote);
+			if (getRegRelationResultByPromote == false) {
+				_log.info("根据邀请规则匹配购买关系");
+				boolean getAndUpdateBuyRelationByInvite = selfSvc.getAndUpdateBuyRelationByInvite(userId, onlineId,
+						buyPrice, downLineDetailId, downLineOrderId);
+				_log.info(downLineDetailId + "根据邀请关系规则匹配购买关系的返回值为：{}", getAndUpdateBuyRelationByInvite);
+				if (getAndUpdateBuyRelationByInvite == false) {
+					_log.info("根据匹配差一人，且邀请一人（关系来源是购买关系的）规则匹配购买关系");
+					boolean getOtherRelationResultByFour = selfSvc.getAndUpdateBuyRelationByFour(userId, onlineId,
+							buyPrice, downLineDetailId, downLineOrderId);
+					_log.info(downLineDetailId + "根据匹配差一人，且邀请一人（关系来源是购买关系的）规则匹配购买关系的返回值为：{}",
+							getOtherRelationResultByFour);
+					if (getOtherRelationResultByFour == false) {
+						_log.info("根据匹配差两人的规则匹配购买关系");
+						boolean getAndUpdateBuyRelationByFive = selfSvc.getAndUpdateBuyRelationByFive(userId, onlineId,
+								buyPrice, downLineDetailId, downLineOrderId);
+						_log.info(downLineDetailId + "根据匹配差两人的规则匹配购买关系的返回值为：{}", getAndUpdateBuyRelationByFive);
+						if (getAndUpdateBuyRelationByFive == false) {
+							_log.info("根据匹配差一人的规则匹配购买关系");
+							boolean getOtherRelationResultBySix = selfSvc.getAndUpdateBuyRelationByFive(userId,
+									onlineId, buyPrice, downLineDetailId, downLineOrderId);
+							_log.info(downLineDetailId + "根据匹配差一人的规则匹配购买关系的返回值为：{}", getOtherRelationResultBySix);
+							if (getOtherRelationResultBySix == false) {
+								_log.info(downLineDetailId + "匹配购买关系失败");
+							} else {
+								return "根据匹配差一人的规则匹配购买关系成功";
+							}
+						} else {
+							return "根据匹配差两人的规则匹配购买关系成功";
+						}
+					} else {
+						return "根据匹配差一人，且邀请一人（关系来源是购买关系的）规则匹配购买关系成功";
+					}
+				} else {
+					return "根据邀请规则匹配购买关系";
+				}
+			} else {
+				return "根据购买规则匹配购买关系成功";
+			}
+		} else {
+			return "按匹配自己匹配购买关系成功";
+		}
+		return "没有匹配到购买关系";
+	}
 
 	@Override
 	/**
@@ -382,10 +439,10 @@ public class OrdBuyRelationSvcImpl extends MybatisBaseSvcImpl<OrdBuyRelationMo, 
 		}
 		// 获取用户购买该产品还有两个名额的详情记录
 		Map<String, Object> map = new HashMap<>();
-		map.put("onlineId",onlineId);
-		map.put("buyPrice",buyPrice);
-		map.put("returnState",(byte) 0);
-		map.put("commissionSlot",(byte) 1);
+		map.put("onlineId", onlineId);
+		map.put("buyPrice", buyPrice);
+		map.put("returnState", (byte) 0);
+		map.put("commissionSlot", (byte) 1);
 		map.put("downLineRelationId1", downLineRelationId1);
 		map.put("downLineRelationId2", downLineRelationId2);
 		OrdOrderDetailMo orderDetailResult = ordOrderDetailSvc.getAndUpdateBuyRelationByFour(map);
@@ -649,5 +706,5 @@ public class OrdBuyRelationSvcImpl extends MybatisBaseSvcImpl<OrdBuyRelationMo, 
 		}
 		return result;
 	}
-	
+
 }

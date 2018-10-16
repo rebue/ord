@@ -744,55 +744,19 @@ public class OrdReturnSvcImpl extends MybatisBaseSvcImpl<OrdReturnMo, java.lang.
 			for (int i = 0; i < buyRelationResult1.size(); i++) {
 				_log.info("重新匹配该定单详情下家购买关系，购买关系ID：" + buyRelationResult1.get(i).getId());
 				_log.info("全返商品添加购买关系");
-				long id = buyRelationResult1.get(i).getDownlineUserId();
+				long userId = buyRelationResult1.get(i).getDownlineUserId();
 				long onlineId = detailList.getOnlineId();
-				_log.info("按匹配自己匹配购买关系");
-				boolean getBuyRelationResultByOwn = ordBuyRelationSvc.getAndUpdateBuyRelationByOwn(id, onlineId,
-						detailList.getBuyPrice(), detailList.getId(), detailList.getOrderId());
-				_log.info(detailList.getId() + "按匹配自己匹配购买关系的返回值为：{}", getBuyRelationResultByOwn);
-				if (getBuyRelationResultByOwn == false) {
-					_log.info("根据购买规则匹配购买关系");
-					boolean getRegRelationResultByPromote = ordBuyRelationSvc.getAndUpdateBuyRelationByPromote(id,
-							onlineId, detailList.getBuyPrice(), detailList.getId(), detailList.getOrderId());
-					_log.info(detailList.getId() + "根据购买关系规则匹配购买关系的返回值为：{}", getRegRelationResultByPromote);
-					if (getRegRelationResultByPromote == false) {
-						_log.info("根据邀请规则匹配购买关系");
-						boolean getAndUpdateBuyRelationByInvite = ordBuyRelationSvc.getAndUpdateBuyRelationByInvite(id,
-								onlineId, detailList.getBuyPrice(), detailList.getId(), detailList.getOrderId());
-						_log.info(detailList.getId() + "根据邀请关系规则匹配购买关系的返回值为：{}", getAndUpdateBuyRelationByInvite);
-						if (getAndUpdateBuyRelationByInvite == false) {
-							_log.info("根据匹配差一人，且邀请一人（关系来源是购买关系的）规则匹配购买关系");
-							boolean getOtherRelationResultByFour = ordBuyRelationSvc.getAndUpdateBuyRelationByFour(id,
-									onlineId, detailList.getBuyPrice(), detailList.getId(), detailList.getOrderId());
-							_log.info(detailList.getId() + "根据匹配差一人，且邀请一人（关系来源是购买关系的）规则匹配购买关系的返回值为：{}",
-									getOtherRelationResultByFour);
-							if (getOtherRelationResultByFour == false) {
-								_log.info("根据匹配差两人的规则匹配购买关系");
-								boolean getAndUpdateBuyRelationByFive = ordBuyRelationSvc.getAndUpdateBuyRelationByFive(
-										id, onlineId, detailList.getBuyPrice(), detailList.getId(),
-										detailList.getOrderId());
-								_log.info(detailList.getId() + "根据匹配差两人的规则匹配购买关系的返回值为：{}",
-										getAndUpdateBuyRelationByFive);
-								if (getAndUpdateBuyRelationByFive == false) {
-									_log.info("根据匹配差一人的规则匹配购买关系");
-									boolean getOtherRelationResultBySix = ordBuyRelationSvc
-											.getAndUpdateBuyRelationByFive(id, onlineId, detailList.getBuyPrice(),
-													detailList.getId(), detailList.getOrderId());
-									_log.info(detailList.getId() + "根据匹配差一人的规则匹配购买关系的返回值为：{}",
-											getOtherRelationResultBySix);
-									if (getOtherRelationResultBySix == false) {
-										_log.info(detailList.getId() + "匹配购买关系失败");
-									}
-								}
-							}
-						}
-					}
-				}
+				BigDecimal buyPrice = detailList.getBuyPrice();
+				long downLineDetailId = detailList.getId();
+				long downLineOrderId = detailList.getOrderId();
+				String matchBuyRelationResult = ordBuyRelationSvc.matchBuyRelation(userId, onlineId, buyPrice,
+						downLineDetailId, downLineOrderId);
+				_log.info(matchBuyRelationResult);
 				_log.info("删除购买关系："+buyRelationResult1.get(i).getId());
 				int delResult  = ordBuyRelationSvc.del(buyRelationResult1.get(i).getId());
 				if(delResult!=1) {
 					_log.info("删除购买关系失败："+buyRelationResult1.get(i).getId());
-					throw new RuntimeException("更新该定单详情上家的返佣名额失败");
+					throw new RuntimeException("删除购买关系失败");
 				}
 			}
 		}

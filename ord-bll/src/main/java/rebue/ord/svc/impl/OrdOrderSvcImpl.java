@@ -1,11 +1,5 @@
 package rebue.ord.svc.impl;
 
-import com.fasterxml.jackson.core.JsonParseException;
-import com.fasterxml.jackson.databind.JavaType;
-import com.fasterxml.jackson.databind.JsonMappingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.github.pagehelper.PageHelper;
-import com.github.pagehelper.PageInfo;
 import java.beans.BeanInfo;
 import java.beans.IntrospectionException;
 import java.beans.Introspector;
@@ -22,7 +16,9 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+
 import javax.annotation.Resource;
+
 import org.dozer.Mapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -30,9 +26,14 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
-import rebue.afc.dic.SettleTaskExecuteStateDic;
-import rebue.afc.dic.TradeTypeDic;
-import rebue.afc.mo.AfcSettleTaskMo;
+
+import com.fasterxml.jackson.core.JsonParseException;
+import com.fasterxml.jackson.databind.JavaType;
+import com.fasterxml.jackson.databind.JsonMappingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.github.pagehelper.PageHelper;
+import com.github.pagehelper.PageInfo;
+
 import rebue.afc.ro.AddSettleTasksRo;
 import rebue.afc.svr.feign.AfcSettleTaskSvc;
 import rebue.afc.to.AddSettleTasksDetailTo;
@@ -173,6 +174,11 @@ public class OrdOrderSvcImpl extends MybatisBaseSvcImpl<OrdOrderMo, java.lang.Lo
      */
     @Resource
     private OrdBuyRelationSvc ordBuyRelationSvc;
+    
+    /**
+     */
+    @Resource
+    private OrdOrderSvc ordOrderSvc;
 
     /**
      *  买家返款时间
@@ -841,9 +847,10 @@ public class OrdOrderSvcImpl extends MybatisBaseSvcImpl<OrdOrderMo, java.lang.Lo
                         orderSignInRo.setMsg("更新购买关系失败");
                         return orderSignInRo;
                     }
-                    // 根据购买关系查找上家定单详情,定单详情存在且不是退货状态才发起返佣任务
+                    // 根据购买关系查找上家定单详情,定单已签收且定单详情存在且不是退货状态才发起返佣任务
                     OrdOrderDetailMo uplineDetailResult = ordOrderDetailSvc.getById(buyRelationResult.getUplineOrderDetailId());
-                    if (uplineDetailResult != null && uplineDetailResult.getReturnState() == 0) {
+                    OrdOrderMo uplineOrderResult = ordOrderSvc.getById(buyRelationResult.getUplineOrderId());
+                    if (uplineDetailResult != null && uplineDetailResult.getReturnState() == 0 && uplineOrderResult.getOrderState()==4) {
                         // 获取上线买家商品详情的的购买关系记录，如果有2个且都已签收则执行返佣任务
                         OrdBuyRelationMo uplineBuyRelationMo = new OrdBuyRelationMo();
                         uplineBuyRelationMo.setUplineOrderDetailId(buyRelationResult.getUplineOrderDetailId());
@@ -855,7 +862,22 @@ public class OrdOrderSvcImpl extends MybatisBaseSvcImpl<OrdOrderMo, java.lang.Lo
                             settleTasksDetailTo.setUplineOrderDetailId(buyRelationResult.getUplineOrderDetailId());
                             settleTasksDetailTo.setSettleUplineCommissionAmount(ordOrderDetailMo.getBuyPrice());
                             settleTasksDetailTo.setSettleUplineCommissionTitle("大卖网络-结算订单上家佣金");
+                            settleTasksDetailTo.setSettleUplineCommissionDetail(uplineDetailResult.getOnlineTitle()+"&&"+uplineDetailResult.getSpecName());
                         }
+                    }
+                    //获取该详情下家购买关系，如有2个下家且已签收，并且没有退货则发起结算本家返佣任务
+                    OrdBuyRelationMo downLineRelationParam = new OrdBuyRelationMo();
+                    downLineRelationParam.setUplineOrderDetailId(ordOrderDetailMo.getId());
+                    downLineRelationParam.setIsSignIn(true);
+                    List<OrdBuyRelationMo> downLineBuyRelationList = ordBuyRelationSvc.list(downLineRelationParam);
+                    if(downLineBuyRelationList.size()==2) {
+                    	OrdOrderDetailMo downLineDetailResult1 = ordOrderDetailSvc.getById(downLineBuyRelationList.get(0).getDownlineOrderDetailId());
+                    	OrdOrderDetailMo downLineDetailResult2 = ordOrderDetailSvc.getById(downLineBuyRelationList.get(1).getDownlineOrderDetailId());
+                    	if(downLineDetailResult1!=null&&downLineDetailResult2!=null&&downLineDetailResult1.getReturnState()==0&&downLineDetailResult2.getReturnState()==0) {
+                    		settleTasksDetailTo.setSettleSelfCommissionAmount(ordOrderDetailMo.getBuyPrice());
+                    		settleTasksDetailTo.setSettleSelfCommissionTitle("大卖网络-结算订单本家佣金");
+                    		settleTasksDetailTo.setSettleSelfCommissionDetail(ordOrderDetailMo.getOnlineTitle()+"&&"+ordOrderDetailMo.getSpecName());
+                    	}
                     }
                 }
             }
@@ -998,83 +1020,83 @@ public class OrdOrderSvcImpl extends MybatisBaseSvcImpl<OrdOrderMo, java.lang.Lo
      *  @throws IllegalArgumentException
      *  @throws IllegalAccessException
      */
-    @Override
-    public List<Map<String, Object>> getCashBackOrder(Map<String, Object> map) throws ParseException, IntrospectionException, IllegalAccessException, IllegalArgumentException, InvocationTargetException {
-        List<Map<String, Object>> list = new ArrayList<Map<String, Object>>();
-        _log.info("查询用户待返现任务的参数为：{}", map.toString());
-        long accountId = Long.parseLong(String.valueOf(map.get("userId")));
-        byte executeState = (byte) SettleTaskExecuteStateDic.NONE.getCode();
-        byte tradType = (byte) TradeTypeDic.SETTLE_CASHBACK.getCode();
-        byte pageNum = Byte.parseByte(String.valueOf(map.get("pageNum")));
-        byte pageSize = Byte.parseByte(String.valueOf(map.get("pageSize")));
-        List<AfcSettleTaskMo> cashBackList = afcSettleTaskSvc.getCashBackTask(accountId, executeState, tradType, pageNum, pageSize);
-        _log.info("获取到的用户待返现任务信息为：{}", String.valueOf(cashBackList));
-        SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-        if (cashBackList.size() != 0) {
-            for (int i = 0; i < cashBackList.size(); i++) {
-                OrdOrderMo mo = new OrdOrderMo();
-                _log.info("获取定单信息的订单号为：{}", cashBackList.get(i).getOrderId());
-                mo.setOrderCode(cashBackList.get(i).getOrderId());
-                List<OrdOrderMo> orderInfo = _mapper.selectSelective(mo);
-                if (orderInfo.size() == 0) {
-                    _log.info("根据订单号查询订单为空：{}");
-                    continue;
-                }
-                _log.info("获取到的订单信息为：{}", String.valueOf(orderInfo));
-                Map<String, Object> hm = new HashMap<String, Object>();
-                String l = simpleDateFormat.format(cashBackList.get(i).getExecutePlanTime());
-                Date date = simpleDateFormat.parse(l);
-                long ts = date.getTime();
-                _log.info("转换时间得到的时间戳为：{}", ts);
-                hm.put("dateline", ts / 1000);
-                hm.put("finishDate", ts / 1000 + 86400);
-                hm.put("system", System.currentTimeMillis() / 1000);
-                OrdOrderMo obj = orderInfo.get(0);
-                BeanInfo beanInfo = Introspector.getBeanInfo(obj.getClass());
-                PropertyDescriptor[] propertyDescriptors = beanInfo.getPropertyDescriptors();
-                for (PropertyDescriptor property : propertyDescriptors) {
-                    String key = property.getName();
-                    if (!key.equals("class")) {
-                        Method getter = property.getReadMethod();
-                        Object value = getter.invoke(obj);
-                        hm.put(key, value);
-                    }
-                }
-                _log.info("查询用户待返现订单信息hm里面的值为：{}", String.valueOf(hm));
-                OrdOrderDetailMo detailMo = new OrdOrderDetailMo();
-                detailMo.setOrderId(Long.parseLong(cashBackList.get(i).getOrderId()));
-                _log.info("查询用户待返现订单获取订单详情的参数为：{}", detailMo.toString());
-                List<OrdOrderDetailMo> orderDetailList = ordOrderDetailSvc.list(detailMo);
-                _log.info("查询用户订单信息获取订单详情的返回值为：{}", String.valueOf(orderDetailList));
-                List<OrderDetailRo> orderDetailRoList = new ArrayList<OrderDetailRo>();
-                for (OrdOrderDetailMo orderDetailMo : orderDetailList) {
-                    _log.info("查询用户订单信息开始获取商品主图");
-                    List<OnlOnlinePicMo> onlinePicList = onlOnlinePicSvc.list(orderDetailMo.getOnlineId(), (byte) 1);
-                    _log.info("获取商品主图的返回值为{}", String.valueOf(onlinePicList));
-                    OrderDetailRo orderDetailRo = new OrderDetailRo();
-                    orderDetailRo.setId(orderDetailMo.getId());
-                    orderDetailRo.setOrderId(orderDetailMo.getOrderId());
-                    orderDetailRo.setOnlineId(orderDetailMo.getOnlineId());
-                    orderDetailRo.setProductId(orderDetailMo.getProductId());
-                    orderDetailRo.setOnlineTitle(orderDetailMo.getOnlineTitle());
-                    orderDetailRo.setSpecName(orderDetailMo.getSpecName());
-                    orderDetailRo.setBuyCount(orderDetailMo.getBuyCount());
-                    orderDetailRo.setBuyPrice(orderDetailMo.getBuyPrice());
-                    orderDetailRo.setCashbackAmount(orderDetailMo.getCashbackAmount());
-                    orderDetailRo.setBuyUnit(orderDetailMo.getBuyUnit());
-                    orderDetailRo.setReturnState(orderDetailMo.getReturnState());
-                    orderDetailRo.setGoodsQsmm(onlinePicList.get(0).getPicPath());
-                    orderDetailRo.setReturnCount(orderDetailMo.getReturnCount());
-                    orderDetailRo.setCashbackTotal(orderDetailMo.getCashbackTotal());
-                    orderDetailRoList.add(orderDetailRo);
-                }
-                hm.put("items", orderDetailRoList);
-                list.add(i, hm);
-            }
-        }
-        _log.info("最新获取用户订单信息的返回值为：{}", String.valueOf(list));
-        return list;
-    }
+//    @Override
+//    public List<Map<String, Object>> getCashBackOrder(Map<String, Object> map) throws ParseException, IntrospectionException, IllegalAccessException, IllegalArgumentException, InvocationTargetException {
+//        List<Map<String, Object>> list = new ArrayList<Map<String, Object>>();
+//        _log.info("查询用户待返现任务的参数为：{}", map.toString());
+//        long accountId = Long.parseLong(String.valueOf(map.get("userId")));
+//        byte executeState = (byte) SettleTaskExecuteStateDic.NONE.getCode();
+//        byte tradType = (byte) TradeTypeDic.SETTLE_CASHBACK.getCode();
+//        byte pageNum = Byte.parseByte(String.valueOf(map.get("pageNum")));
+//        byte pageSize = Byte.parseByte(String.valueOf(map.get("pageSize")));
+//        List<AfcSettleTaskMo> cashBackList = afcSettleTaskSvc.getCashBackTask(accountId, executeState, tradType, pageNum, pageSize);
+//        _log.info("获取到的用户待返现任务信息为：{}", String.valueOf(cashBackList));
+//        SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+//        if (cashBackList.size() != 0) {
+//            for (int i = 0; i < cashBackList.size(); i++) {
+//                OrdOrderMo mo = new OrdOrderMo();
+//                _log.info("获取定单信息的订单号为：{}", cashBackList.get(i).getOrderId());
+//                mo.setOrderCode(cashBackList.get(i).getOrderId());
+//                List<OrdOrderMo> orderInfo = _mapper.selectSelective(mo);
+//                if (orderInfo.size() == 0) {
+//                    _log.info("根据订单号查询订单为空：{}");
+//                    continue;
+//                }
+//                _log.info("获取到的订单信息为：{}", String.valueOf(orderInfo));
+//                Map<String, Object> hm = new HashMap<String, Object>();
+//                String l = simpleDateFormat.format(cashBackList.get(i).getExecutePlanTime());
+//                Date date = simpleDateFormat.parse(l);
+//                long ts = date.getTime();
+//                _log.info("转换时间得到的时间戳为：{}", ts);
+//                hm.put("dateline", ts / 1000);
+//                hm.put("finishDate", ts / 1000 + 86400);
+//                hm.put("system", System.currentTimeMillis() / 1000);
+//                OrdOrderMo obj = orderInfo.get(0);
+//                BeanInfo beanInfo = Introspector.getBeanInfo(obj.getClass());
+//                PropertyDescriptor[] propertyDescriptors = beanInfo.getPropertyDescriptors();
+//                for (PropertyDescriptor property : propertyDescriptors) {
+//                    String key = property.getName();
+//                    if (!key.equals("class")) {
+//                        Method getter = property.getReadMethod();
+//                        Object value = getter.invoke(obj);
+//                        hm.put(key, value);
+//                    }
+//                }
+//                _log.info("查询用户待返现订单信息hm里面的值为：{}", String.valueOf(hm));
+//                OrdOrderDetailMo detailMo = new OrdOrderDetailMo();
+//                detailMo.setOrderId(Long.parseLong(cashBackList.get(i).getOrderId()));
+//                _log.info("查询用户待返现订单获取订单详情的参数为：{}", detailMo.toString());
+//                List<OrdOrderDetailMo> orderDetailList = ordOrderDetailSvc.list(detailMo);
+//                _log.info("查询用户订单信息获取订单详情的返回值为：{}", String.valueOf(orderDetailList));
+//                List<OrderDetailRo> orderDetailRoList = new ArrayList<OrderDetailRo>();
+//                for (OrdOrderDetailMo orderDetailMo : orderDetailList) {
+//                    _log.info("查询用户订单信息开始获取商品主图");
+//                    List<OnlOnlinePicMo> onlinePicList = onlOnlinePicSvc.list(orderDetailMo.getOnlineId(), (byte) 1);
+//                    _log.info("获取商品主图的返回值为{}", String.valueOf(onlinePicList));
+//                    OrderDetailRo orderDetailRo = new OrderDetailRo();
+//                    orderDetailRo.setId(orderDetailMo.getId());
+//                    orderDetailRo.setOrderId(orderDetailMo.getOrderId());
+//                    orderDetailRo.setOnlineId(orderDetailMo.getOnlineId());
+//                    orderDetailRo.setProductId(orderDetailMo.getProductId());
+//                    orderDetailRo.setOnlineTitle(orderDetailMo.getOnlineTitle());
+//                    orderDetailRo.setSpecName(orderDetailMo.getSpecName());
+//                    orderDetailRo.setBuyCount(orderDetailMo.getBuyCount());
+//                    orderDetailRo.setBuyPrice(orderDetailMo.getBuyPrice());
+//                    orderDetailRo.setCashbackAmount(orderDetailMo.getCashbackAmount());
+//                    orderDetailRo.setBuyUnit(orderDetailMo.getBuyUnit());
+//                    orderDetailRo.setReturnState(orderDetailMo.getReturnState());
+//                    orderDetailRo.setGoodsQsmm(onlinePicList.get(0).getPicPath());
+//                    orderDetailRo.setReturnCount(orderDetailMo.getReturnCount());
+//                    orderDetailRo.setCashbackTotal(orderDetailMo.getCashbackTotal());
+//                    orderDetailRoList.add(orderDetailRo);
+//                }
+//                hm.put("items", orderDetailRoList);
+//                list.add(i, hm);
+//            }
+//        }
+//        _log.info("最新获取用户订单信息的返回值为：{}", String.valueOf(list));
+//        return list;
+//    }
 
     /**
      *  分页查询订单
