@@ -144,7 +144,28 @@ public class OrdReturnRo {
      *
      */
     private String orderCode;
-
+    
+    
+	/** 签收时间 **/
+	@DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss")
+	@JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd HH:mm:ss", timezone = "GMT+8")
+	private Date receivedTime;
+	
+    /**
+     *    订单状态（-1：作废  1：已下单（待支付）  2：已支付（待发货）  3：已发货（待签收）  4：已签收（待结算）  5：已结算  ））
+     *                -1：作废
+     *                1：已下单（待支付）
+     *                2：已支付（待发货）
+     *                3：已发货（待签收）
+     *                4：已签收（待结算）
+     *                5：已结算
+     *
+     */
+	
+	/**
+	 * 订单状态
+	 */
+    private Byte orderState;
 
 
 }
