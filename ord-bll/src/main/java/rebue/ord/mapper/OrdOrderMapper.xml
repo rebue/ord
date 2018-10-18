@@ -1161,5 +1161,37 @@
 		</where>
 		ORDER BY ORDER_TIME DESC
 	</select>
-
+	<update id="updateOrderReceiverInfo" parameterType="rebue.ord.mo.OrdOrderMo">
+    <!--
+      修改收件人信息
+    -->
+    update ORD_ORDER
+    <set>
+      <if test="receiverName != null">
+        RECEIVER_NAME = #{receiverName,jdbcType=VARCHAR},
+      </if>
+      <if test="receiverTel != null">
+        RECEIVER_TEL = #{receiverTel,jdbcType=VARCHAR},
+      </if>
+      <if test="receiverMobile != null">
+        RECEIVER_MOBILE = #{receiverMobile,jdbcType=VARCHAR},
+      </if>
+      <if test="receiverProvince != null">
+        RECEIVER_PROVINCE = #{receiverProvince,jdbcType=VARCHAR},
+      </if>
+      <if test="receiverCity != null">
+        RECEIVER_CITY = #{receiverCity,jdbcType=VARCHAR},
+      </if>
+      <if test="receiverExpArea != null">
+        RECEIVER_EXP_AREA = #{receiverExpArea,jdbcType=VARCHAR},
+      </if>
+      <if test="receiverAddress != null">
+        RECEIVER_ADDRESS = #{receiverAddress,jdbcType=VARCHAR},
+      </if>
+      <if test="receiverPostCode != null">
+        RECEIVER_POST_CODE = #{receiverPostCode,jdbcType=CHAR},
+      </if>
+    </set>
+    where ID = #{id,jdbcType=BIGINT} and ORDER_STATE=2
+  </update>
 </mapper>

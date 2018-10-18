@@ -22,6 +22,7 @@ import rebue.ord.ro.UsersToPlaceTheOrderRo;
 import rebue.ord.to.OrdOrderTo;
 import rebue.ord.to.OrderSignInTo;
 import rebue.ord.to.ShipmentConfirmationTo;
+import rebue.robotech.ro.Ro;
 import rebue.robotech.svc.MybatisBaseSvc;
 
 /**
@@ -198,4 +199,11 @@ public interface OrdOrderSvc extends MybatisBaseSvc<OrdOrderMo, java.lang.Long> 
      * @return
      */
     PageInfo<OrdOrderRo> orderList(OrdOrderTo to, int pageNum, int pageSize);
+
+    /**
+     * 修改收件人信息
+     * @param mo
+     * @return
+     */
+	Ro modifyOrderReceiverInfo(OrdOrderMo mo);
 }

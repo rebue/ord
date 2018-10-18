@@ -366,4 +366,15 @@ public class OrdOrderCtrl {
         _log.info("get: " + result);
         return result;
     }
+    
+    /**
+     * 修改收件人信息
+     * @param qo
+     * @return
+     */
+    @PutMapping("/ord/order/modifyreceiverinfo")
+    Ro modifyOrderReceiverInfo(OrdOrderMo qo) {
+    	_log.info("修改收件人信息的参数为：{}", qo);
+    	return svc.modifyOrderReceiverInfo(qo);
+    }
 }
