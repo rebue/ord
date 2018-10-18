@@ -82,6 +82,8 @@ import rebue.ord.svc.OrdTaskSvc;
 import rebue.ord.to.OrdOrderTo;
 import rebue.ord.to.OrderSignInTo;
 import rebue.ord.to.ShipmentConfirmationTo;
+import rebue.robotech.dic.ResultDic;
+import rebue.robotech.ro.Ro;
 import rebue.robotech.svc.impl.MybatisBaseSvcImpl;
 import rebue.suc.svr.feign.SucUserSvc;
 
@@ -1109,5 +1111,27 @@ public class OrdOrderSvcImpl extends MybatisBaseSvcImpl<OrdOrderMo, java.lang.Lo
         _log.info("获取订单的参数为: {}", to);
         _log.info("orderList: ro-{}; pageNum-{}; pageSize-{}", to, pageNum, pageSize);
         return PageHelper.startPage(pageNum, pageSize).doSelectPageInfo(() -> _mapper.orderList(to));
+    }
+    
+    /**
+     * 修改收件人信息
+     * @param mo
+     * @return
+     */
+    @Override
+    @Transactional(readOnly = false, propagation = Propagation.REQUIRED)
+    public Ro modifyOrderReceiverInfo(OrdOrderMo mo) {
+    	Ro ro = new Ro();
+    	_log.info("修改收件人信息的参数为：{}", mo);
+    	int updateOrderReceiverInfoResult = _mapper.updateOrderReceiverInfo(mo);
+    	_log.info("修改收件人信息的返回值为：{}", updateOrderReceiverInfoResult);
+    	if (updateOrderReceiverInfoResult == 0) {
+    		ro.setResult(ResultDic.FAIL);
+    		ro.setMsg("修改出错");
+			return ro;
+		}
+    	ro.setResult(ResultDic.SUCCESS);
+    	ro.setMsg("修改成功");
+    	return ro;
     }
 }

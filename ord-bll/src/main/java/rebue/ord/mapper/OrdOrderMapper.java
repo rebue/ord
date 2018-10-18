@@ -207,4 +207,11 @@ public interface OrdOrderMapper extends MybatisBaseMapper<OrdOrderMo, Long> {
      * @return
      */
     List<OrdOrderMo> orderList(OrdOrderTo to);
+    
+    /**
+     * 修改收件人信息
+     * @param record
+     * @return
+     */
+    int updateOrderReceiverInfo(OrdOrderMo record);
 }
