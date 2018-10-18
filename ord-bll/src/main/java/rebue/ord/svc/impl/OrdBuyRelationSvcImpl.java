@@ -326,7 +326,7 @@ public class OrdBuyRelationSvcImpl extends MybatisBaseSvcImpl<OrdBuyRelationMo, 
 			updateOrderDetailMo.setCommissionState((byte) 1);
 		}
 		// 更新购买关系订单详情的返佣名额
-		_log.error("更新订单详情返佣名额失败", id);
+		_log.error("更新购买关系订单详情的返佣名额");
 		int updateOrderDetailResult = ordOrderDetailSvc.updateCommissionSlotForBuyRelation(updateOrderDetailMo);
 		if (updateOrderDetailResult != 1) {
 			_log.error("{}更新订单详情返佣名额失败", id);
