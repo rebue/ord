@@ -237,9 +237,12 @@ public class OrdOrderSvcImpl extends MybatisBaseSvcImpl<OrdOrderMo, java.lang.Lo
         }
         String orderTitle = "";
         if (orderList.size() > 1) {
-            orderTitle = String.valueOf(orderList.get(0).getOnlineTitle()) + "等商品购买。。。";
+        	for (int i = 0; i < orderList.size(); i++) {
+        		orderTitle+=orderList.get(i).getOnlineTitle()+"("+orderList.get(i).getOnlineSpec()+");";
+			}
+        	orderTitle += "等商品购买...";
         } else {
-            orderTitle = String.valueOf(orderList.get(0).getOnlineTitle());
+            orderTitle = orderList.get(0).getOnlineTitle()+"("+orderList.get(0).getOnlineSpec()+")";
         }
         Date date = new Date();
         long orderId = _idWorker.getId();
