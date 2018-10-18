@@ -812,6 +812,7 @@ public class OrdReturnSvcImpl extends MybatisBaseSvcImpl<OrdReturnMo, java.lang.
 			}
 		}
 		// 取消该详情返佣任务
+		_log.info("取消该详情返佣任务");
 		TaskTo taskTo = new TaskTo();
 		taskTo.setTradeType(TradeTypeDic.SETTLE_COMMISSION);
 		taskTo.setOrderDetailId(String.valueOf(orderDetailId));
