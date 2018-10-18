@@ -12,6 +12,7 @@ import java.math.BigDecimal;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
@@ -20,12 +21,17 @@ import javax.annotation.Resource;
 import org.dozer.Mapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
+
+import rebue.afc.dic.TradeTypeDic;
 import rebue.afc.ro.RefundRo;
 import rebue.afc.svr.feign.AfcRefundSvc;
+import rebue.afc.svr.feign.AfcSettleTaskSvc;
 import rebue.afc.to.RefundTo;
+import rebue.afc.to.TaskTo;
 import rebue.onl.mo.OnlOnlinePicMo;
 import rebue.onl.svr.feign.OnlOnlinePicSvc;
 import rebue.ord.dic.AddReturnDic;
@@ -53,6 +59,8 @@ import rebue.ord.svc.OrdOrderSvc;
 import rebue.ord.svc.OrdReturnPicSvc;
 import rebue.ord.svc.OrdReturnSvc;
 import rebue.ord.to.OrdOrderReturnTo;
+import rebue.robotech.dic.ResultDic;
+import rebue.robotech.ro.Ro;
 import rebue.robotech.svc.impl.MybatisBaseSvcImpl;
 
 /**
@@ -123,6 +131,15 @@ public class OrdReturnSvcImpl extends MybatisBaseSvcImpl<OrdReturnMo, java.lang.
 	@Resource
 	private OnlOnlinePicSvc onlOnlinePicSvc;
 
+	@Resource
+	private AfcSettleTaskSvc afcSettleTaskSvc;
+
+	/**
+	 * 买家返款限制时间
+	 */
+	@Value("${ord.return-limit-time}")
+	private int returnLimitTime;
+
 	/**
 	 * 添加用户退货信息 Title: addEx Description: 1、首先查询订单信息是是否存在和订单的状态 2、查询订单详情是否存在和是否可以退货
 	 * 3、根据订单ID和订单详情ID查询退货订单退货信息，如果该订单退过货，则获取退货的数量 4、判断退货数量是否等于订单数量 5、判断已退数量 +
@@ -147,11 +164,24 @@ public class OrdReturnSvcImpl extends MybatisBaseSvcImpl<OrdReturnMo, java.lang.
 		orderMo.setUserId(userId);
 		_log.info("查询订单信息的参数为：{}", orderMo);
 		List<OrdOrderMo> orderList = ordOrderSvc.list(orderMo);
+
 		if (orderList.size() == 0) {
 			_log.error("添加退货信息出现订单不存在，订单编号为：{}", orderCode);
 			addReturnRo.setResult(AddReturnDic.ORDER_NOT_EXIST);
 			addReturnRo.setMsg("订单不存在");
 			return addReturnRo;
+		}
+		// 获取现在时间,判断退货时间是否在签收后7天内
+		long nowTime = new Date().getTime();
+		Date signInTime = orderList.get(0).getReceivedTime();
+		if(signInTime!=null) {
+			long limitTime = signInTime.getTime() + returnLimitTime * 60 * 60 * 1000;
+			if (limitTime < nowTime) {
+				_log.error("退货时间已超过限制时间：{}", orderCode);
+				addReturnRo.setResult(AddReturnDic.ERROR);
+				addReturnRo.setMsg("退货时间已超过限制时间");
+				return addReturnRo;
+			}
 		}
 		byte orderState = orderList.get(0).getOrderState();
 		if (orderState == OrderStateDic.CANCEL.getCode()) {
@@ -258,6 +288,17 @@ public class OrdReturnSvcImpl extends MybatisBaseSvcImpl<OrdReturnMo, java.lang.
 			_log.error("修改订单详情状态失败，返回值为：{}", updateOrderDetailStateResult);
 			throw new RuntimeException("修改订单详情状态失败");
 		}
+		_log.error("暂停返佣任务");
+		TaskTo taskTo = new TaskTo();
+		taskTo.setTradeType(TradeTypeDic.SETTLE_COMMISSION);
+		taskTo.setOrderDetailId(String.valueOf(orderDetailId));
+		Ro ro = afcSettleTaskSvc.suspendTask(taskTo);
+		_log.info("暂停返佣任务返回值:{}", ro);
+		if (ro.getResult().getCode() == ResultDic.FAIL.getCode()) {
+			_log.info("暂停返佣任务失败");
+			throw new RuntimeException("暂停返佣任务失败");
+		}
+
 		addReturnRo.setResult(AddReturnDic.SUCCESS);
 		addReturnRo.setMsg("提交成功");
 		return addReturnRo;
@@ -376,6 +417,16 @@ public class OrdReturnSvcImpl extends MybatisBaseSvcImpl<OrdReturnMo, java.lang.
 		if (refusedReturnResult != 1) {
 			_log.error("拒绝退货时出现错误，退货编号为：{}", returnCode);
 			throw new RuntimeException("拒绝退货出错");
+		}
+		// 恢复该详情返佣任务
+		TaskTo taskTo = new TaskTo();
+		taskTo.setTradeType(TradeTypeDic.SETTLE_COMMISSION);
+		taskTo.setOrderDetailId(String.valueOf(orderDetailId));
+		Ro ro = afcSettleTaskSvc.resumeTask(taskTo);
+		_log.info("恢复返佣任务返回值:{}", ro);
+		if (ro.getResult().getCode() == ResultDic.FAIL.getCode()) {
+			_log.info("恢复返佣任务失败");
+			throw new RuntimeException("恢复返佣任务失败");
 		}
 		rejectReturnRo.setResult(RejectReturnDic.SUCCESS);
 		rejectReturnRo.setMsg("操作成功");
@@ -752,13 +803,23 @@ public class OrdReturnSvcImpl extends MybatisBaseSvcImpl<OrdReturnMo, java.lang.
 				String matchBuyRelationResult = ordBuyRelationSvc.matchBuyRelation(userId, onlineId, buyPrice,
 						downLineDetailId, downLineOrderId);
 				_log.info(matchBuyRelationResult);
-				_log.info("删除购买关系："+buyRelationResult1.get(i).getId());
-				int delResult  = ordBuyRelationSvc.del(buyRelationResult1.get(i).getId());
-				if(delResult!=1) {
-					_log.info("删除购买关系失败："+buyRelationResult1.get(i).getId());
+				_log.info("删除购买关系：" + buyRelationResult1.get(i).getId());
+				int delResult = ordBuyRelationSvc.del(buyRelationResult1.get(i).getId());
+				if (delResult != 1) {
+					_log.info("删除购买关系失败：" + buyRelationResult1.get(i).getId());
 					throw new RuntimeException("删除购买关系失败");
 				}
 			}
+		}
+		// 取消该详情返佣任务
+		TaskTo taskTo = new TaskTo();
+		taskTo.setTradeType(TradeTypeDic.SETTLE_COMMISSION);
+		taskTo.setOrderDetailId(String.valueOf(orderDetailId));
+		Ro ro = afcSettleTaskSvc.cancelTask(taskTo);
+		_log.info("取消返佣任务返回值:{}", ro);
+		if (ro.getResult().getCode() == ResultDic.FAIL.getCode()) {
+			_log.info("取消返佣任务失败");
+			throw new RuntimeException("取消返佣任务失败");
 		}
 		agreeToARefundRo.setResult(AgreeToARefundDic.SUCCESS);
 		agreeToARefundRo.setMsg("退款成功");
