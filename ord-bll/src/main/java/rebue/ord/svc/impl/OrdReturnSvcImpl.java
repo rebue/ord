@@ -972,6 +972,9 @@ public class OrdReturnSvcImpl extends MybatisBaseSvcImpl<OrdReturnMo, java.lang.
 		return receivedAndRefundedRo;
 	}
 
+	/**
+	 * 查询退货中的数据
+	 */
 	@Override
 	public List<Map<String, Object>> selectReturningInfo(Map<String, Object> map) throws ParseException,
 			IntrospectionException, IllegalAccessException, IllegalArgumentException, InvocationTargetException {
@@ -1039,7 +1042,7 @@ public class OrdReturnSvcImpl extends MybatisBaseSvcImpl<OrdReturnMo, java.lang.
 	@Override
 	public List<Map<String, Object>> selectReturnInfo(Map<String, Object> map) throws ParseException,
 			IntrospectionException, IllegalAccessException, IllegalArgumentException, InvocationTargetException {
-		_log.info("查询用户退货中订单信息的参数为：{}", map.toString());
+		_log.info("查询用户退货完成订单信息的参数为：{}", map.toString());
 		List<Map<String, Object>> list = new ArrayList<Map<String, Object>>();
 		List<OrdReturnMo> orderReturnList = _mapper.selectReturnOrder(map);
 		_log.info("查询的结果为: {}", String.valueOf(orderReturnList));
@@ -1068,31 +1071,30 @@ public class OrdReturnSvcImpl extends MybatisBaseSvcImpl<OrdReturnMo, java.lang.
 				_log.info("查询用户退货订单信息hm里面的值为：{}", String.valueOf(hm));
 				OrdOrderDetailMo detailMo = new OrdOrderDetailMo();
 				detailMo.setId(Long.parseLong(String.valueOf(orderReturnList.get(i).getOrderDetailId())));
-				_log.info("查询用户待返现订单获取订单详情的参数为：{}", detailMo.toString());
-				List<OrdOrderDetailMo> orderDetailList = ordOrderDetailSvc.list(detailMo);
-				_log.info("查询用户订单信息获取订单详情的返回值为：{}", String.valueOf(orderDetailList));
+				_log.info("查询用户退货订单获取订单详情的参数为：{}", detailMo.toString());
+				OrdOrderDetailMo orderDetailResult = ordOrderDetailSvc.getById(detailMo.getId());
+				_log.info("查询用户订单信息获取订单详情的返回值为：{}", orderDetailResult);
 				List<OrderDetailRo> orderDetailRoList = new ArrayList<OrderDetailRo>();
-				for (OrdOrderDetailMo orderDetailMo : orderDetailList) {
-					_log.info("查询用户订单信息开始获取商品主图");
-					List<OnlOnlinePicMo> onlinePicList = onlOnlinePicSvc.list(orderDetailMo.getOnlineId(), (byte) 1);
-					_log.info("获取商品主图的返回值为{}", String.valueOf(onlinePicList));
-					OrderDetailRo orderDetailRo = new OrderDetailRo();
-					orderDetailRo.setId(orderDetailMo.getId());
-					orderDetailRo.setOrderId(orderDetailMo.getOrderId());
-					orderDetailRo.setOnlineId(orderDetailMo.getOnlineId());
-					orderDetailRo.setProductId(orderDetailMo.getProductId());
-					orderDetailRo.setOnlineTitle(orderDetailMo.getOnlineTitle());
-					orderDetailRo.setSpecName(orderDetailMo.getSpecName());
-					orderDetailRo.setBuyCount(orderDetailMo.getBuyCount());
-					orderDetailRo.setBuyPrice(orderDetailMo.getBuyPrice());
-					orderDetailRo.setCashbackAmount(orderDetailMo.getCashbackAmount());
-					orderDetailRo.setBuyUnit(orderDetailMo.getBuyUnit());
-					orderDetailRo.setReturnState(orderDetailMo.getReturnState());
-					orderDetailRo.setGoodsQsmm(onlinePicList.get(0).getPicPath());
-					orderDetailRo.setReturnCount(orderDetailMo.getReturnCount());
-					orderDetailRo.setCashbackTotal(orderDetailMo.getCashbackTotal());
-					orderDetailRoList.add(orderDetailRo);
-				}
+				_log.info("查询用户订单信息开始获取商品主图");
+				List<OnlOnlinePicMo> onlinePicList = onlOnlinePicSvc.list(orderDetailResult.getOnlineId(), (byte) 1);
+				_log.info("获取商品主图的返回值为{}", String.valueOf(onlinePicList));
+				OrderDetailRo orderDetailRo = new OrderDetailRo();
+				orderDetailRo.setId(orderDetailResult.getId());
+				orderDetailRo.setOrderId(orderDetailResult.getOrderId());
+				orderDetailRo.setOnlineId(orderDetailResult.getOnlineId());
+				orderDetailRo.setProductId(orderDetailResult.getProductId());
+				orderDetailRo.setOnlineTitle(orderDetailResult.getOnlineTitle());
+				orderDetailRo.setSpecName(orderDetailResult.getSpecName());
+				orderDetailRo.setBuyCount(orderDetailResult.getBuyCount());
+				orderDetailRo.setBuyPrice(orderDetailResult.getBuyPrice());
+				orderDetailRo.setCashbackAmount(orderDetailResult.getCashbackAmount());
+				orderDetailRo.setBuyUnit(orderDetailResult.getBuyUnit());
+				orderDetailRo.setReturnState(orderDetailResult.getReturnState());
+				orderDetailRo.setGoodsQsmm(onlinePicList.get(0).getPicPath());
+				orderDetailRo.setReturnCount(orderDetailResult.getReturnCount());
+				orderDetailRo.setCashbackTotal(orderDetailResult.getCashbackTotal());
+				orderDetailRo.setSubjectType(orderDetailResult.getSubjectType());
+				orderDetailRoList.add(orderDetailRo);
 				hm.put("items", orderDetailRoList);
 				list.add(i, hm);
 			}
