@@ -1011,7 +1011,7 @@
 		RECEIVED_TIME=#{receivedTime,jdbcType=TIMESTAMP},
 		RECEIVED_OP_ID=#{receivedOpId,jdbcType=BIGINT}
 		WHERE
-		ORDER_CODE=#{orderCode, jdbcType=VARCHAR} AND
+		ID=#{id, jdbcType=VARCHAR} AND
 		ORDER_STATE=#{orderState,jdbcType=TINYINT}
 	</update>
 
