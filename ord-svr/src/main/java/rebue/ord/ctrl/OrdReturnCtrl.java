@@ -364,4 +364,24 @@ public class OrdReturnCtrl {
         _log.info("查询退货订单信息的返回值：{}", String.valueOf(list));
         return list;
     }
+    
+    /**
+     * 取消退货
+     * @param mo
+     * @return
+     */
+    @GetMapping("/ord/order/cancel")
+    Ro cancelReturn(OrdReturnMo mo) {
+    	_log.info("取消退货的参数为：{}", mo);
+    	try {
+			return svc.cancelReturn(mo);
+		} catch (Exception e) {
+			_log.error("取消退货出错", e);
+			String msg = e.getMessage();
+			Ro ro = new Ro();
+			ro.setResult(ResultDic.FAIL);
+			ro.setMsg(msg);
+			return ro;
+		}
+    }
 }

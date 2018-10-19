@@ -14,6 +14,7 @@ import rebue.ord.ro.OrdReturnRo;
 import rebue.ord.ro.ReceivedAndRefundedRo;
 import rebue.ord.ro.RejectReturnRo;
 import rebue.ord.to.OrdOrderReturnTo;
+import rebue.robotech.ro.Ro;
 import rebue.robotech.svc.MybatisBaseSvc;
 
 /**
@@ -88,4 +89,11 @@ public interface OrdReturnSvc extends MybatisBaseSvc<OrdReturnMo, java.lang.Long
      *  @param mo
      */
     List<Map<String, Object>> selectReturnInfo(Map<String, Object> map) throws ParseException, IntrospectionException, IllegalAccessException, IllegalArgumentException, InvocationTargetException;
+
+    /**
+     * 取消退货
+     * @param mo
+     * @return
+     */
+	Ro cancelReturn(OrdReturnMo mo);
 }

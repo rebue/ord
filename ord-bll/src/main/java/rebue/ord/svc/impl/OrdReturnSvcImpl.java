@@ -12,7 +12,6 @@ import java.math.BigDecimal;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Calendar;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
@@ -1100,5 +1099,62 @@ public class OrdReturnSvcImpl extends MybatisBaseSvcImpl<OrdReturnMo, java.lang.
 		}
 		_log.info("最新获取用户退货订单信息的返回值为：{}", String.valueOf(list));
 		return list;
+	}
+	
+	/**
+	 * 取消退货
+	 * @param mo
+	 * @return
+	 */
+	@Override
+	@Transactional(readOnly = false, propagation = Propagation.REQUIRED)
+	public Ro cancelReturn(OrdReturnMo mo) {
+		_log.info("取消退货的请求参数为：{}", mo);
+		Ro ro = new Ro();
+		_log.info("取消退货查询退货信息的参数为：{}", mo);
+		OrdReturnMo ordReturnMo = _mapper.selectByPrimaryKey(mo.getId());
+		_log.info("取消退货查询退货信息的返回值为：{}", ordReturnMo);
+		if (ordReturnMo == null) {
+			_log.error("取消订单查询退货信息返回为空，退货id为: {}", mo.getId());
+			ro.setResult(ResultDic.FAIL);
+			ro.setMsg("参数错误");
+			return ro;
+		}
+		
+		// 修改订单详情退货状态
+		_log.info("取消退货修改订单详情退货状态的参数为：{}", ordReturnMo.getOrderDetailId());
+		int modifyReturnStateByIdResult = ordOrderDetailSvc.modifyReturnStateById(ordReturnMo.getOrderDetailId(), (byte) 0);
+		_log.info("取消退货修改订单详情退货状态的返回值为：{}", modifyReturnStateByIdResult);
+		if (modifyReturnStateByIdResult != 1) {
+			_log.error("取消订单修改订单详情状态失败，退货id为: {}", mo.getId());
+			ro.setResult(ResultDic.FAIL);
+			ro.setMsg("修改状态失败");
+			return ro;
+		}
+		
+		// 恢复该详情返佣任务
+		TaskTo taskTo = new TaskTo();
+		taskTo.setTradeType(TradeTypeDic.SETTLE_COMMISSION);
+		taskTo.setOrderDetailId(String.valueOf(ordReturnMo.getOrderDetailId()));
+		_log.info("取消退货恢复返佣任务的参数为：{}", taskTo);
+		Ro resumeTask = afcSettleTaskSvc.resumeTask(taskTo);
+		_log.info("取消退货恢复返佣任务的返回值为：{}", resumeTask);
+		if (resumeTask.getResult().getCode() == ResultDic.FAIL.getCode()) {
+			_log.error("取消订单恢复返佣任务失败，退货id为: {}", mo.getId());
+			throw new RuntimeException("恢复返佣失败");
+		}
+		
+		// 修改退货信息表申请状态和取消的操作人等信息
+		_log.info("取消退货信息退货信息的参数为：{}", mo);
+		int updateByPrimaryKeySelectiveResult = _mapper.updateByPrimaryKeySelective(mo);
+		_log.info("取消退货信息退货信息的返回值为：{}", updateByPrimaryKeySelectiveResult);
+		if (updateByPrimaryKeySelectiveResult != 1) {
+			_log.error("取消退货修改退货信息出错，退货id为：{}", mo.getId());
+			throw new RuntimeException("操作失败");
+		}
+		_log.info("取消退货成功，退货id为：{}", mo.getId());
+		ro.setResult(ResultDic.SUCCESS);
+		ro.setMsg("操作成功");
+		return ro;
 	}
 }
