@@ -584,13 +584,14 @@ public class OrdReturnSvcImpl extends MybatisBaseSvcImpl<OrdReturnMo, java.lang.
 	@Override
 	@Transactional(readOnly = false, propagation = Propagation.REQUIRED)
 	public AgreeToARefundRo agreeToARefund(OrdOrderReturnTo to) {
+		_log.error("同意退款的参数为：{}", to);
 		AgreeToARefundRo agreeToARefundRo = new AgreeToARefundRo();
 		Long returnCode = to.getReturnCode();
 		Long orderId = to.getOrderId();
 		Long orderDetailId = to.getOrderDetailId();
 		BigDecimal bd = new BigDecimal("0");
-		BigDecimal returnAmount1 = new BigDecimal(to.getReturnAmount1());
-		BigDecimal returnAmount2 = new BigDecimal(to.getReturnAmount2());
+		BigDecimal returnAmount1 = new BigDecimal(Double.toString(to.getReturnAmount1()));
+		BigDecimal returnAmount2 = new BigDecimal(Double.toString(to.getReturnAmount2()));
 		// BigDecimal subtractCashback = new BigDecimal(to.getSubtractCashback());
 		BigDecimal subtractCashback = bd;
 		Long refundOpId = to.getOpId();
@@ -601,7 +602,8 @@ public class OrdReturnSvcImpl extends MybatisBaseSvcImpl<OrdReturnMo, java.lang.
 			agreeToARefundRo.setMsg("参数不正确");
 			return agreeToARefundRo;
 		}
-		BigDecimal returnRental = new BigDecimal(returnAmount1.add(returnAmount2).doubleValue());
+		BigDecimal returnRental = new BigDecimal(returnAmount1.add(returnAmount2).toString());
+		_log.error("本次退款总额=返现金+余额：{}", returnRental);
 		if (returnRental.compareTo(bd) == -1 || returnRental.compareTo(bd) == 0) {
 			_log.error("同意退款时出现退款金额为空，退货编号为：{}", returnCode);
 			agreeToARefundRo.setResult(AgreeToARefundDic.REFUND_AMOUNT_NOT_NULL);
@@ -674,15 +676,37 @@ public class OrdReturnSvcImpl extends MybatisBaseSvcImpl<OrdReturnMo, java.lang.
 			return agreeToARefundRo;
 		}
 		BigDecimal returnTotal = orderList.getReturnTotal();
+		_log.error("查询已经退款总额：{}", returnTotal);
 		if (returnTotal == null) {
 			returnTotal = new BigDecimal("0");
 		}
-		BigDecimal newOrderReturnTotal = new BigDecimal(returnTotal.add(returnRental).doubleValue());
+		BigDecimal newOrderReturnTotal = new BigDecimal(returnTotal.add(returnRental).toString());
+		_log.error("已经退货总额加上(本次退款总额=返现金+余额)：{}", newOrderReturnTotal);
+		_log.error("查询实际金额为：{}", orderList.getRealMoney());
 		if (orderList.getRealMoney().compareTo(newOrderReturnTotal) == 0) {
+			_log.error("实际金额等于退货总额，修改订单状态为-1=取消：realMoney={}, returnTotal={}", orderList.getRealMoney(),newOrderReturnTotal);
 			orderMo.setOrderState((byte) -1);
+		}else {
+			_log.error("实际金额不等于退货总额，不修改订单状态：realMoney={}, returnTotal={}", orderList.getRealMoney(),newOrderReturnTotal);
 		}
-		orderMo.setReturnAmount1(returnAmount1);
-		orderMo.setReturnAmount2(returnAmount2);
+		BigDecimal oldReturnAmount1 = orderList.getReturnAmount1();
+		_log.error("查询已经退款余额：{}", oldReturnAmount1);
+		if (oldReturnAmount1 == null) {
+			oldReturnAmount1 = new BigDecimal("0");
+		}
+		BigDecimal newReturnAmount1 = new BigDecimal(oldReturnAmount1.add(returnAmount1).toString());
+		_log.error("已经退款余额加上本次退款余额：{}", newReturnAmount1);
+		
+		
+		BigDecimal oldReturnAmount2 = orderList.getReturnAmount2();
+		_log.error("查询已经退款返现金：{}", oldReturnAmount2);
+		if (oldReturnAmount2 == null) {
+			oldReturnAmount2 = new BigDecimal("0");
+		}
+		BigDecimal newReturnAmount2 = new BigDecimal(oldReturnAmount2.add(returnAmount2).toString());
+		_log.error("已经退款返现金加上本次退款返现金：{}", newReturnAmount2);
+		orderMo.setReturnAmount1(newReturnAmount1);
+		orderMo.setReturnAmount2(newReturnAmount2);
 		orderMo.setReturnTotal(newOrderReturnTotal);
 		_log.info("同意退款修改订单退货金额的参数为：{}", orderMo.toString());
 		int modifyReturnAmountResult = ordOrderSvc.modifyReturnAmountByorderCode(orderMo);
@@ -715,7 +739,7 @@ public class OrdReturnSvcImpl extends MybatisBaseSvcImpl<OrdReturnMo, java.lang.
 		Date date = new Date();
 		returnMo.setReturnAmount1(returnAmount1);
 		returnMo.setReturnAmount2(returnAmount2);
-		returnMo.setReturnRental(returnRental);
+		//returnMo.setReturnRental(returnRental);
 		returnMo.setSubtractCashback(subtractCashback);
 		returnMo.setRefundOpId(refundOpId);
 		returnMo.setRefundState((byte) 2);
