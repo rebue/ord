@@ -370,8 +370,9 @@ public class OrdReturnCtrl {
      * @param mo
      * @return
      */
-    @GetMapping("/ord/order/cancel")
-    Ro cancelReturn(OrdReturnMo mo) {
+    @PutMapping("/ord/return/cancel")
+    Ro cancelReturn(@RequestBody OrdReturnMo mo) {
+    	mo.setCancelTime(new Date());
     	_log.info("取消退货的参数为：{}", mo);
     	try {
 			return svc.cancelReturn(mo);

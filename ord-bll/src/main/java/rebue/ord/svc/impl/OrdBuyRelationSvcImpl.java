@@ -466,7 +466,7 @@ public class OrdBuyRelationSvcImpl extends MybatisBaseSvcImpl<OrdBuyRelationMo, 
 			ordBuyRelationMo.setDownlineUserId(id);
 			ordBuyRelationMo.setDownlineOrderDetailId(downLineDetailId);
 			ordBuyRelationMo.setDownlineOrderId(downLineOrderId);
-			ordBuyRelationMo.setRelationSource((byte) 3);
+			ordBuyRelationMo.setRelationSource((byte) 4);
 			_log.error("添加购买关系参数:{}", ordBuyRelationMo);
 			int addBuyRelationResult = selfSvc.add(ordBuyRelationMo);
 			if (addBuyRelationResult != 1) {
@@ -539,7 +539,7 @@ public class OrdBuyRelationSvcImpl extends MybatisBaseSvcImpl<OrdBuyRelationMo, 
 		ordBuyRelationMo.setDownlineUserId(id);
 		ordBuyRelationMo.setDownlineOrderDetailId(downLineDetailId);
 		ordBuyRelationMo.setDownlineOrderId(downLineOrderId);
-		ordBuyRelationMo.setRelationSource((byte) 4);
+		ordBuyRelationMo.setRelationSource((byte) 5);
 		_log.error("添加购买关系参数:{}", ordBuyRelationMo);
 		int addBuyRelationResult = selfSvc.add(ordBuyRelationMo);
 		if (addBuyRelationResult != 1) {
@@ -607,7 +607,7 @@ public class OrdBuyRelationSvcImpl extends MybatisBaseSvcImpl<OrdBuyRelationMo, 
 		ordBuyRelationMo.setDownlineUserId(id);
 		ordBuyRelationMo.setDownlineOrderDetailId(downLineDetailId);
 		ordBuyRelationMo.setDownlineOrderId(downLineOrderId);
-		ordBuyRelationMo.setRelationSource((byte) 5);
+		ordBuyRelationMo.setRelationSource((byte) 6);
 		_log.error("添加购买关系参数:{}", ordBuyRelationMo);
 		int addBuyRelationResult = selfSvc.add(ordBuyRelationMo);
 		if (addBuyRelationResult != 1) {
