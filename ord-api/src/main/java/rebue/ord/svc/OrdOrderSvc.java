@@ -93,13 +93,19 @@ public interface OrdOrderSvc extends MybatisBaseSvc<OrdOrderMo, java.lang.Long> 
     CancelDeliveryRo cancelDelivery(OrdOrderMo mo);
 
     /**
-     *  确认发货 Title: sendAndPrint Description:
+     *  本店发货 Title: sendAndPrint Description:
      *
      *  @param mo
      *  @return
      *  @date 2018年4月13日 下午6:19:09
      */
     ShipmentConfirmationRo shipmentConfirmation(ShipmentConfirmationTo mo);
+    
+    /**
+     * 供应商发货
+     */
+    
+    ShipmentConfirmationRo sendBySupplier(ShipmentConfirmationTo to);
 
     /**
      *  订单签收 Title: orderSignIn Description:

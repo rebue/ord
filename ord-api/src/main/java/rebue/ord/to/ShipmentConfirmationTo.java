@@ -164,7 +164,11 @@ public class ShipmentConfirmationTo {
     @ApiModelProperty(value = "组织id")
 	private Long orgId;
     
-    
+    /**
+	 * 物流单号，手工录入物流单号使用
+	 */
+    @ApiModelProperty(value = "物流单号")
+	private Long logisticCode;
 
 	public Long getOrgId() {
 		return orgId;
