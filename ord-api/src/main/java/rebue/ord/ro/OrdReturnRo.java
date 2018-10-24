@@ -2,6 +2,7 @@ package rebue.ord.ro;
 
 import java.math.BigDecimal;
 import java.util.Date;
+import java.util.List;
 
 import org.springframework.format.annotation.DateTimeFormat;
 
@@ -10,6 +11,7 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
 
 import lombok.Data;
+import rebue.ord.mo.OrdReturnPicMo;
 
 /**
  * 创建时间：2018年4月21日 下午3:03:51 项目名称：ord-api
@@ -153,19 +155,31 @@ public class OrdReturnRo {
 	
     /**
      *    订单状态（-1：作废  1：已下单（待支付）  2：已支付（待发货）  3：已发货（待签收）  4：已签收（待结算）  5：已结算  ））
-     *                -1：作废
-     *                1：已下单（待支付）
-     *                2：已支付（待发货）
-     *                3：已发货（待签收）
-     *                4：已签收（待结算）
-     *                5：已结算
      *
      */
-	
-	/**
-	 * 订单状态
-	 */
     private Byte orderState;
+    
+    /**
+     *    版块类型（0：普通，1：全返）
+     *
+
+     */
+    private Byte subjectType;
+    
+    /**
+     *    返佣金名额
+     *
+     */
+    private Byte commissionSlot;
+    
+    /**
+     *    返佣金状态（0：匹配中，1：待返，2：已返）
+     */
+    private Byte commissionState;
+    
+    private List<OrdReturnPicMo> picList;
+    
+
 
 
 }

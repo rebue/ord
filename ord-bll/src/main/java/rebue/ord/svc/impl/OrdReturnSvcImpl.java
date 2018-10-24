@@ -313,7 +313,19 @@ public class OrdReturnSvcImpl extends MybatisBaseSvcImpl<OrdReturnMo, java.lang.
 	@Override
 	public PageInfo<OrdReturnRo> selectReturnPageList(OrdReturnRo qo, int pageNum, int pageSize) {
 		_log.info("selectReturnPageList: qo-{}; pageNum-{}; pageSize-{}", qo, pageNum, pageSize);
-		return PageHelper.startPage(pageNum, pageSize).doSelectPageInfo(() -> _mapper.selectReturnPageList(qo));
+		PageInfo<OrdReturnRo> result=PageHelper.startPage(pageNum, pageSize).doSelectPageInfo(() -> _mapper.selectReturnPageList(qo));
+		_log.info("查询退货信息的返回值为：{}", result.getList());
+			
+			for (OrdReturnRo item : result.getList()) {
+				OrdReturnPicMo mo=new OrdReturnPicMo();
+				mo.setReturnId(item.getId());
+				_log.info("查询退货图片的参数为：{}", mo);
+				 List<OrdReturnPicMo> picList=ordReturnPicSvc.list(mo);
+				 _log.info("查询退货图片的返回值为：{}", picList);
+				 item.setPicList(picList);
+			}
+			_log.info("查询退货信息和图片的返回值为：{}", result.getList());
+		return result;
 	}
 
 	/**
@@ -739,7 +751,7 @@ public class OrdReturnSvcImpl extends MybatisBaseSvcImpl<OrdReturnMo, java.lang.
 		Date date = new Date();
 		returnMo.setReturnAmount1(returnAmount1);
 		returnMo.setReturnAmount2(returnAmount2);
-		//returnMo.setReturnRental(returnRental);
+		returnMo.setReturnRental(returnRental);
 		returnMo.setSubtractCashback(subtractCashback);
 		returnMo.setRefundOpId(refundOpId);
 		returnMo.setRefundState((byte) 2);
