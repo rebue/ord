@@ -39,8 +39,11 @@ import rebue.afc.svr.feign.AfcSettleTaskSvc;
 import rebue.afc.to.AddSettleTasksDetailTo;
 import rebue.afc.to.AddSettleTasksTo;
 import rebue.kdi.mo.KdiCompanyMo;
+import rebue.kdi.mo.KdiLogisticMo;
 import rebue.kdi.ro.EOrderRo;
+import rebue.kdi.ro.KdiLogisticRo;
 import rebue.kdi.svr.feign.KdiSvc;
+import rebue.kdi.to.AddKdiLogisticTo;
 import rebue.kdi.to.EOrderTo;
 import rebue.onl.mo.OnlOnlineMo;
 import rebue.onl.mo.OnlOnlinePicMo;
@@ -774,6 +777,45 @@ public class OrdOrderSvcImpl extends MybatisBaseSvcImpl<OrdOrderMo, java.lang.Lo
 	}
 
 	/**
+	 * 供应商发货
+	 */
+
+	public ShipmentConfirmationRo sendBySupplier(ShipmentConfirmationTo to) {
+		ShipmentConfirmationRo confirmationRo = new ShipmentConfirmationRo();
+		OrdOrderMo mo = dozerMapper.map(to, OrdOrderMo.class);
+		Date date = new Date();
+		mo.setSendTime(date);
+		Calendar calendar = Calendar.getInstance();
+		calendar.setTime(date);
+		calendar.add(Calendar.HOUR, signinOrderTime);
+		// 取消订单的时间
+		Date executePlanTime = calendar.getTime();
+		OrdTaskMo ordTaskMo = new OrdTaskMo();
+		ordTaskMo.setExecutePlanTime(executePlanTime);
+		ordTaskMo.setExecuteState((byte) 0);
+		ordTaskMo.setTaskType((byte) 2);
+		ordTaskMo.setOrderId(String.valueOf(mo.getId()));
+		_log.info("确认发货添加签收任务的参数为：{}", ordTaskMo);
+		// 添加签收任务
+		int taskAddResult = ordTaskSvc.add(ordTaskMo);
+		_log.info("确认发货添加签收任务的返回值为：{}", taskAddResult);
+		if (taskAddResult != 1) {
+			_log.error("确认发货添加签收任务时出错，订单编号为：{}", mo.getOrderCode());
+			throw new RuntimeException("添加签收任务出错");
+		}
+		AddKdiLogisticTo addKdiLogisticTo = dozerMapper.map(to, AddKdiLogisticTo.class);
+		
+		KdiLogisticRo entryResult = kdiSvc.entryLogistics(addKdiLogisticTo);
+		mo.setOrderState((byte) OrderStateDic.ALREADY_PAY.getCode());
+//		mo.setLogisticCode(eOrderRo.getLogisticCode());
+//		mo.setLogisticId(eOrderRo.getLogisticId());
+		_log.info("确认发货并修改订单状态的参数为：{}", mo);
+		int result = _mapper.shipmentConfirmation(mo);
+		return null;
+		
+	}
+
+	/**
 	 * 订单签收 Title: orderSignIn Description:
 	 *
 	 * @param mo
@@ -858,7 +900,7 @@ public class OrdOrderSvcImpl extends MybatisBaseSvcImpl<OrdOrderMo, java.lang.Lo
 					OrdOrderDetailMo uplineDetailResult = ordOrderDetailSvc
 							.getById(buyRelationResult.getUplineOrderDetailId());
 					OrdOrderMo uplineOrderResult = ordOrderSvc.getById(buyRelationResult.getUplineOrderId());
-					_log.info("订单详情做为下家的购买关系记录：{}",uplineDetailResult);
+					_log.info("订单详情做为下家的购买关系记录：{}", uplineDetailResult);
 					if (uplineDetailResult != null && uplineDetailResult.getReturnState() == 0
 							&& uplineOrderResult.getOrderState() == 4) {
 						// 获取上线买家商品详情的的下家购买关系记录，如果有2个且都已签收则执行返佣任务
@@ -873,7 +915,7 @@ public class OrdOrderSvcImpl extends MybatisBaseSvcImpl<OrdOrderMo, java.lang.Lo
 							settleTasksDetailTo.setSettleUplineCommissionAmount(ordOrderDetailMo.getBuyPrice());
 							settleTasksDetailTo.setSettleUplineCommissionTitle("大卖网络-结算订单上家佣金");
 							settleTasksDetailTo.setSettleUplineCommissionDetail(
-							uplineDetailResult.getOnlineTitle() + "&&" + uplineDetailResult.getSpecName());
+									uplineDetailResult.getOnlineTitle() + "&&" + uplineDetailResult.getSpecName());
 						}
 					}
 				}
