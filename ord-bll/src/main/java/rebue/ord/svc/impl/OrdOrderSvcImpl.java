@@ -804,15 +804,25 @@ public class OrdOrderSvcImpl extends MybatisBaseSvcImpl<OrdOrderMo, java.lang.Lo
 			throw new RuntimeException("添加签收任务出错");
 		}
 		AddKdiLogisticTo addKdiLogisticTo = dozerMapper.map(to, AddKdiLogisticTo.class);
-		
 		KdiLogisticRo entryResult = kdiSvc.entryLogistics(addKdiLogisticTo);
+		if (entryResult.getResult() != 1) {
+			_log.error("添加物流信息出错，订单编号为：{}", mo.getOrderCode());
+			throw new RuntimeException("添加物流信息出错");
+		}
 		mo.setOrderState((byte) OrderStateDic.ALREADY_PAY.getCode());
-//		mo.setLogisticCode(eOrderRo.getLogisticCode());
-//		mo.setLogisticId(eOrderRo.getLogisticId());
+		mo.setLogisticCode(to.getLogisticCode().toString());
 		_log.info("确认发货并修改订单状态的参数为：{}", mo);
 		int result = _mapper.shipmentConfirmation(mo);
-		return null;
-		
+		_log.info("确认发货并修改订单状态的返回值为：{}", result);
+		if (result != 1) {
+			_log.error("确认发货出现异常，返回值为：{}", result);
+			confirmationRo.setResult(ShipmentConfirmationDic.ERROR);
+			confirmationRo.setMsg("确认发货失败");
+			return confirmationRo;
+		}
+		confirmationRo.setResult(ShipmentConfirmationDic.SUCCESS);
+		confirmationRo.setMsg("确认发货成功");
+		return confirmationRo;
 	}
 
 	/**

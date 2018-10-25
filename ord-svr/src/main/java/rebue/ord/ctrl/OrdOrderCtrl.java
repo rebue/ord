@@ -320,7 +320,7 @@ public class OrdOrderCtrl {
 	 * 供应商发货
 	 */
 	@SuppressWarnings("finally")
-	@PutMapping("/ord/order/shipmentconfirmation")
+	@PutMapping("/ord/order/sendBySupplier")
 	ShipmentConfirmationRo sendBySupplier(@RequestBody ShipmentConfirmationTo qo) {
 		_log.info("本店发货的参数为：{}", qo);
 		ShipmentConfirmationRo confirmationRo = new ShipmentConfirmationRo();
