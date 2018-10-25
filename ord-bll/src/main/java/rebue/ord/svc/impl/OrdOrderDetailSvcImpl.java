@@ -176,12 +176,14 @@ public class OrdOrderDetailSvcImpl extends MybatisBaseSvcImpl<OrdOrderDetailMo, 
 				if (item.getDownlineUserName1() == null) {
 					_log.info("设置第一个下家名字： {}", dUserName);
 					item.setDownlineRelationSource1(Uplist.get(j).getRelationSource());
+					item.setDownlineIsSignIn1(Uplist.get(j).getIsSignIn());
 					if (dUserName != null) {
 						item.setDownlineUserName1(dUserName.getWxNickname());
 					}
 				} else {
 					_log.info("设置第二个下家名字： {}", dUserName);
 					item.setDownlineRelationSource2(Uplist.get(j).getRelationSource());
+					item.setDownlineIsSignIn2(Uplist.get(j).getIsSignIn());
 					if (dUserName != null) {
 						item.setDownlineUserName2(dUserName.getWxNickname());
 					}
@@ -203,6 +205,7 @@ public class OrdOrderDetailSvcImpl extends MybatisBaseSvcImpl<OrdOrderDetailMo, 
 				SucUserMo uUserName = sucUserSvc.getById(uId);
 				_log.info("获取上家的结果为： {}", uUserName);
 				item.setUplineRelationSource(dwList.get(0).getRelationSource());
+				item.setUplineIsSignIn(dwList.get(0).getIsSignIn());
 				if (uUserName != null) {
 					item.setUplineUserName(uUserName.getWxNickname());
 				}
