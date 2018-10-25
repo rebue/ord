@@ -804,8 +804,6 @@ public class OrdOrderSvcImpl extends MybatisBaseSvcImpl<OrdOrderMo, java.lang.Lo
 			throw new RuntimeException("添加签收任务出错");
 		}
 		AddKdiLogisticTo addKdiLogisticTo = dozerMapper.map(to, AddKdiLogisticTo.class);
-		
-		
 		addKdiLogisticTo.setEntryType((byte)2);
 		KdiLogisticRo entryResult = kdiSvc.entryLogistics(addKdiLogisticTo);
 		if (entryResult.getResult() != 1) {
