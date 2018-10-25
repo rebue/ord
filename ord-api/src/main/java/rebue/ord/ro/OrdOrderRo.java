@@ -151,5 +151,60 @@ public class OrdOrderRo {
     @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss")
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd HH:mm:ss", timezone = "GMT+8")
     private Date orderTime;
+    
+    /**
+     *    支付时间
+     *
+     *    数据库字段: ORD_ORDER.PAY_TIME
+     *
+     *   
+     */
+    @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss")
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd HH:mm:ss", timezone = "GMT+8")
+    private Date payTime;
+
+    /**
+     *    发货时间
+     *
+     *    数据库字段: ORD_ORDER.SEND_TIME
+     *
+     *   
+     */
+    @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss")
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd HH:mm:ss", timezone = "GMT+8")
+    private Date sendTime;
+
+    /**
+     *    签收时间
+     *
+     *    数据库字段: ORD_ORDER.RECEIVED_TIME
+     *
+     *    
+     */
+    @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss")
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd HH:mm:ss", timezone = "GMT+8")
+    private Date receivedTime;
+
+    /**
+     *    结算时间
+     *
+     *    数据库字段: ORD_ORDER.CLOSE_TIME
+     *
+     *   
+     */
+    @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss")
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd HH:mm:ss", timezone = "GMT+8")
+    private Date closeTime;
+
+    /**
+     *    作废时间
+     *
+     *    数据库字段: ORD_ORDER.CANCEL_TIME
+     *
+     *    
+     */
+    @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss")
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd HH:mm:ss", timezone = "GMT+8")
+    private Date cancelTime;
 
 }
