@@ -176,10 +176,9 @@ public class OrdReturnSvcImpl extends MybatisBaseSvcImpl<OrdReturnMo, java.lang.
 		if(signInTime!=null) {
 			long limitTime = signInTime.getTime() + returnLimitTime * 60 * 60 * 1000;
 			if (limitTime < nowTime) {
-				_log.error("退货时间已超过限制时间：{}", orderCode);
-				addReturnRo.setResult(AddReturnDic.ERROR);
-				addReturnRo.setMsg("退货时间已超过限制时间");
-				return addReturnRo;
+				_log.error("超过收货后七天申请退款：{}", orderCode);
+				String returnReason = "超过收货后七天退款:"+to.getReturnReason();
+				to.setReturnReason(returnReason);
 			}
 		}
 		byte orderState = orderList.get(0).getOrderState();

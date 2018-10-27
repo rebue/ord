@@ -71,6 +71,7 @@ import rebue.ord.mo.OrdTaskMo;
 import rebue.ord.ro.CancelDeliveryRo;
 import rebue.ord.ro.CancellationOfOrderRo;
 import rebue.ord.ro.ModifyOrderRealMoneyRo;
+import rebue.ord.ro.OrdBuyRelationRo;
 import rebue.ord.ro.OrdOrderRo;
 import rebue.ord.ro.OrderDetailRo;
 import rebue.ord.ro.OrderSignInRo;
@@ -88,6 +89,7 @@ import rebue.ord.to.ShipmentConfirmationTo;
 import rebue.robotech.dic.ResultDic;
 import rebue.robotech.ro.Ro;
 import rebue.robotech.svc.impl.MybatisBaseSvcImpl;
+import rebue.suc.mo.SucUserMo;
 import rebue.suc.svr.feign.SucUserSvc;
 
 /**
@@ -457,7 +459,32 @@ public class OrdOrderSvcImpl extends MybatisBaseSvcImpl<OrdOrderMo, java.lang.Lo
 					_log.info("参数 " + orderDetailMo.getOnlineId());
 					OnlOnlineMo onlineMo = onlOnlineSvc.getById(orderDetailMo.getOnlineId());
 					_log.info("返回值{}", onlineMo);
+					_log.info("获取订单下家购买关系");
+					OrdBuyRelationMo buyRelationMo = new OrdBuyRelationMo();
+					buyRelationMo.setUplineOrderDetailId(orderDetailMo.getId());
+					List<OrdBuyRelationMo> ordBuyRelationResult = ordBuyRelationSvc.list(buyRelationMo);
+					List<OrdBuyRelationRo> buyRelationList = new ArrayList<OrdBuyRelationRo>();
+					if (ordBuyRelationResult.size() == 0) {
+						_log.info("下家购买关系为空");
+					} else {
+						for (int j = 0; j < ordBuyRelationResult.size(); j++) {
+							_log.info("获取下家用户昵称及头像");
+							SucUserMo userMo = sucUserSvc.getById(ordBuyRelationResult.get(j).getDownlineUserId());
+							if(userMo==null) {
+								_log.info("用户信息为空");
+							}else {
+								_log.info("获取到的用户信息为：{}",userMo);
+								OrdBuyRelationRo buyRelationRo = new OrdBuyRelationRo();
+								buyRelationRo.setDownlineUserNickName(userMo.getWxNickname());
+								buyRelationRo.setDownlineUserWxFace(userMo.getWxFace());
+								buyRelationRo.setIsSignIn(ordBuyRelationResult.get(j).getIsSignIn());
+								_log.info("添加的用户信息为：{}",buyRelationRo);
+								buyRelationList.add(buyRelationRo);
+							}
+						}
+					}
 					OrderDetailRo orderDetailRo = new OrderDetailRo();
+					orderDetailRo.setOrdBuyRelation(buyRelationList);
 					orderDetailRo.setSubjectType(onlineMo.getSubjectType());
 					orderDetailRo.setId(orderDetailMo.getId());
 					orderDetailRo.setOrderId(orderDetailMo.getOrderId());
@@ -804,7 +831,7 @@ public class OrdOrderSvcImpl extends MybatisBaseSvcImpl<OrdOrderMo, java.lang.Lo
 			throw new RuntimeException("添加签收任务出错");
 		}
 		AddKdiLogisticTo addKdiLogisticTo = dozerMapper.map(to, AddKdiLogisticTo.class);
-		addKdiLogisticTo.setEntryType((byte)2);
+		addKdiLogisticTo.setEntryType((byte) 2);
 		KdiLogisticRo entryResult = kdiSvc.entryLogistics(addKdiLogisticTo);
 		if (entryResult.getResult() != 1) {
 			_log.error("添加物流信息出错，订单编号为：{}", mo.getOrderCode());
