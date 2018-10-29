@@ -233,9 +233,9 @@ public class OrdOrderSvcImpl extends MybatisBaseSvcImpl<OrdOrderMo, java.lang.Lo
 		addrMo.setId(orderList.get(0).getAddress());
 		addrMo.setUserId(orderList.get(0).getUserId());
 		_log.info("获取用户收货地址信息的参数为：{}", addrMo);
-		List<OrdAddrMo> addrList = ordAddrSvc.list(addrMo);
-		_log.info("根据收货地址编号和用户编号获取用户收货地址信息的返回值为：{}", addrList.toString());
-		if (addrList.size() == 0) {
+		OrdAddrMo addrResult = ordAddrSvc.getById(addrMo.getId());
+		_log.info("根据收货地址编号和用户编号获取用户收货地址信息的返回值为：{}", addrResult.toString());
+		if (addrResult.getId() == null) {
 			_log.error("用户下订单时出现收货地址为空，用户编号为：{}", orderList.get(0).getUserId());
 			placeTheOrderRo.setResult(UsersToPlaceTheOrderDic.DELIVERY_ADDRESS_NOT_NULL);
 			placeTheOrderRo.setMsg("收货地址不能为空");
@@ -265,21 +265,21 @@ public class OrdOrderSvcImpl extends MybatisBaseSvcImpl<OrdOrderMo, java.lang.Lo
 		orderMo.setUserId(id);
 		orderMo.setUserName(orderList.get(0).getUserName());
 		orderMo.setOrderTime(date);
-		orderMo.setReceiverName(addrList.get(0).getReceiverName());
-		orderMo.setReceiverMobile(addrList.get(0).getReceiverMobile());
-		orderMo.setReceiverProvince(addrList.get(0).getReceiverProvince());
-		orderMo.setReceiverCity(addrList.get(0).getReceiverCity());
-		orderMo.setReceiverExpArea(addrList.get(0).getReceiverExpArea());
-		orderMo.setReceiverAddress(addrList.get(0).getReceiverAddress());
+		orderMo.setReceiverName(addrResult.getReceiverName());
+		orderMo.setReceiverMobile(addrResult.getReceiverMobile());
+		orderMo.setReceiverProvince(addrResult.getReceiverProvince());
+		orderMo.setReceiverCity(addrResult.getReceiverCity());
+		orderMo.setReceiverExpArea(addrResult.getReceiverExpArea());
+		orderMo.setReceiverAddress(addrResult.getReceiverAddress());
 		String orderMessages = orderList.get(0).getOrderMessages();
 		if (orderMessages != null && !orderMessages.equals("") && !orderMessages.equals("null")) {
 			orderMo.setOrderMessages(orderMessages);
 		}
-		if (addrList.get(0).getReceiverPostCode() != null && !addrList.get(0).getReceiverPostCode().equals("")) {
-			orderMo.setReceiverPostCode(addrList.get(0).getReceiverPostCode());
+		if (addrResult.getReceiverPostCode() != null && !addrResult.getReceiverPostCode().equals("")) {
+			orderMo.setReceiverPostCode(addrResult.getReceiverPostCode());
 		}
-		if (addrList.get(0).getReceiverTel() != null && !addrList.get(0).getReceiverTel().equals("")) {
-			orderMo.setReceiverTel(addrList.get(0).getReceiverTel());
+		if (addrResult.getReceiverTel() != null && !addrResult.getReceiverTel().equals("")) {
+			orderMo.setReceiverTel(addrResult.getReceiverTel());
 		}
 		_log.info("添加订单信息的参数为：{}", orderMo);
 		int insertOrderResult = add(orderMo);
