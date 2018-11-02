@@ -39,7 +39,6 @@ import rebue.afc.svr.feign.AfcSettleTaskSvc;
 import rebue.afc.to.AddSettleTasksDetailTo;
 import rebue.afc.to.AddSettleTasksTo;
 import rebue.kdi.mo.KdiCompanyMo;
-import rebue.kdi.mo.KdiLogisticMo;
 import rebue.kdi.ro.EOrderRo;
 import rebue.kdi.ro.KdiLogisticRo;
 import rebue.kdi.svr.feign.KdiSvc;
@@ -766,20 +765,28 @@ public class OrdOrderSvcImpl extends MybatisBaseSvcImpl<OrdOrderMo, java.lang.Lo
 			_log.error("调用快递电子面单失败");
 			throw new RuntimeException("调用快递电子面单失败");
 		}
-		mo.setOrderState((byte) OrderStateDic.ALREADY_PAY.getCode());
+		if(mo.getOrderState()==null) {
+			mo.setOrderState((byte) OrderStateDic.ALREADY_PAY.getCode());
+		}
 		mo.setLogisticCode(eOrderRo.getLogisticCode());
 		mo.setLogisticId(eOrderRo.getLogisticId());
 		_log.info("确认发货并修改订单状态的参数为：{}", mo);
-		int result = _mapper.shipmentConfirmation(mo);
-		_log.info("确认发货并修改订单状态的返回值为：{}", result);
-		if (result != 1) {
-			_log.error("确认发货出现异常，返回值为：{}", result);
-			confirmationRo.setResult(ShipmentConfirmationDic.ERROR);
-			confirmationRo.setMsg("确认发货失败");
-			return confirmationRo;
+
+		if (mo.getOrderState() == 3) {
+			_log.info("不是首次发货，不需要修改订单状态，发货参数：{}", mo);
+		} else {
+			int result = _mapper.shipmentConfirmation(mo);
+			_log.info("确认发货并修改订单状态的返回值为：{}", result);
+			if (result != 1) {
+				_log.error("确认发货出现异常，返回值为：{}", result);
+				confirmationRo.setResult(ShipmentConfirmationDic.ERROR);
+				confirmationRo.setMsg("确认发货失败");
+				return confirmationRo;
+			}
+			_log.info("确认发货成功，返回值为：{}", result);
+			_log.info("调用快递电子面单成功，返回值为：{}", result);
 		}
-		_log.info("确认发货成功，返回值为：{}", result);
-		_log.info("调用快递电子面单成功，返回值为：{}", result);
+
 		confirmationRo.setResult(ShipmentConfirmationDic.SUCCESS);
 		confirmationRo.setMsg("确认发货成功");
 		confirmationRo.setLogisticId(eOrderRo.getLogisticId());
