@@ -1,3 +1,7 @@
+-- 2018年11月3日16:27:51
+	-- ORD_ORDER_DETAIL 添加供应商id和供应商结算类型
+	alter table ORD_BUY_RELATION add SUPPLIER_ID          bigint comment '供应商ID';
+	alter table ORD_BUY_RELATION add SUPPLIER_SETTLE_TYPE tinyint comment '供应商结算类型（1：结算到余额 2：结算到货款）';
 -- 2018年10月8日15:17:14
 	-- 添加订单购买关系（ORD_BUY_RELATION）表字段：关系来源（RELATION_SOURCE）
 	alter table ORD_BUY_RELATION add RELATION_SOURCE      tinyint not null comment '关系来源（1：自己匹配自己  2：购买关系  3：注册关系  4：差一人且已有购买关系  5：差两人  6：差一人但没有购买关系）';

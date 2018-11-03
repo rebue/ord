@@ -1,6 +1,6 @@
 /*==============================================================*/
 /* DBMS name:      MySQL 5.0                                    */
-/* Created on:     2018/10/8 18:27:20                           */
+/* Created on:     2018/11/3 16:27:22                           */
 /*==============================================================*/
 
 
@@ -74,7 +74,7 @@ create table ORD_GOODS_BUY_RELATION
    ONLINE_ID            bigint not null comment '上线ID',
    CREATE_TIME          datetime not null comment '创建时间',
    primary key (ID),
-   unique key AK_UPLINE_USER_AND_DOWNLINE_USER_AND_ONLINE_AND_SALE_PRICE (UPLINE_USER_ID, DOWNLINE_USER_ID, ONLINE_ID)
+   unique key AK_UPLINE_USER_ID_AND_DOWNLINE_USER_ID_AND_ONLINE_ID_AND_SALE_PRICE (UPLINE_USER_ID, DOWNLINE_USER_ID, ONLINE_ID)
 );
 
 alter table ORD_GOODS_BUY_RELATION comment '用户商品购买关系';
@@ -148,6 +148,8 @@ create table ORD_ORDER_DETAIL
    SPEC_NAME            varchar(50) not null comment '规格名称',
    BUY_COUNT            int not null comment '购买数量',
    BUY_PRICE            decimal(18,4) not null comment '购买价格（单价）',
+   SUPPLIER_ID          bigint comment '供应商ID',
+   SUPPLIER_SETTLE_TYPE tinyint comment '供应商结算类型（1：结算到余额 2：结算到货款）',
    CASHBACK_AMOUNT      decimal(18,4) not null comment '返现金额',
    RETURN_COUNT         int comment '退货数量',
    CASHBACK_TOTAL       decimal(18,4) comment '返现总额',
