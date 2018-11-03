@@ -1143,7 +1143,7 @@
 		from ORD_ORDER
 		<where>
 			<if test="userName != null">
-				and USER_NAME = #{userName,jdbcType=VARCHAR}
+				and USER_NAME = #{userName,jdbcType=VARCHAR} OR ORDER_TITLE LIKE '%${userName}%'
 			</if>
 			<if test="orderCode != null and orderCode != ''">
 				and ORDER_CODE = #{orderCode,jdbcType=VARCHAR}
