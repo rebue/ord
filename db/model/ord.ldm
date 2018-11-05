@@ -1599,8 +1599,8 @@ Shadow=0</a:DisplayPreferences>
 <o:RelationshipSymbol Id="o22">
 <a:CreationDate>1522743641</a:CreationDate>
 <a:ModificationDate>1523845584</a:ModificationDate>
-<a:Rect>((-7296,20177), (4278,21873))</a:Rect>
-<a:ListOfPoints>((4278,20977),(-6558,20977))</a:ListOfPoints>
+<a:Rect>((-8068,20177), (4278,21873))</a:Rect>
+<a:ListOfPoints>((4278,20977),(-7310,20977))</a:ListOfPoints>
 <a:CornerStyle>1</a:CornerStyle>
 <a:ArrowStyle>4627</a:ArrowStyle>
 <a:LineColor>11881048</a:LineColor>
@@ -1622,7 +1622,7 @@ DESTINATION 0 新宋体,8,N</a:FontList>
 <a:CreationDate>1523582674</a:CreationDate>
 <a:ModificationDate>1523845586</a:ModificationDate>
 <a:Rect>((-17762,4809), (-12138,12816))</a:Rect>
-<a:ListOfPoints>((-12921,12816),(-13052,9168),(-16849,9168),(-16849,4809))</a:ListOfPoints>
+<a:ListOfPoints>((-13182,12816),(-13052,9168),(-16849,9168),(-16849,4809))</a:ListOfPoints>
 <a:CornerStyle>1</a:CornerStyle>
 <a:ArrowStyle>4627</a:ArrowStyle>
 <a:LineColor>11881048</a:LineColor>
@@ -1688,8 +1688,8 @@ DESTINATION 0 新宋体,8,N</a:FontList>
 <o:RelationshipSymbol Id="o34">
 <a:CreationDate>1536310761</a:CreationDate>
 <a:ModificationDate>1536310761</a:ModificationDate>
-<a:Rect>((-39071,18361), (-25319,20057))</a:Rect>
-<a:ListOfPoints>((-25319,19161),(-39071,19161))</a:ListOfPoints>
+<a:Rect>((-39071,18361), (-24625,20057))</a:Rect>
+<a:ListOfPoints>((-24625,19161),(-39071,19161))</a:ListOfPoints>
 <a:CornerStyle>1</a:CornerStyle>
 <a:ArrowStyle>4627</a:ArrowStyle>
 <a:LineColor>11881048</a:LineColor>
@@ -1711,7 +1711,7 @@ DESTINATION 0 新宋体,8,N</a:FontList>
 <a:CreationDate>1522742117</a:CreationDate>
 <a:ModificationDate>1537005116</a:ModificationDate>
 <a:IconMode>-1</a:IconMode>
-<a:Rect>((-26328,10540), (-6296,28762))</a:Rect>
+<a:Rect>((-25556,10540), (-7068,28762))</a:Rect>
 <a:LineColor>11881048</a:LineColor>
 <a:FillColor>16759472</a:FillColor>
 <a:ShadowColor>12632256</a:ShadowColor>
@@ -2066,13 +2066,13 @@ LABL 0 新宋体,8,N</a:FontList>
 </o:EntityAttribute>
 <o:EntityAttribute Id="o61">
 <a:ObjectID>CC643ACA-3AF3-4658-98EE-7735D96CB24A</a:ObjectID>
-<a:Name>供应商结算类型</a:Name>
-<a:Code>SUPPLIER_SETTLE_TYPE</a:Code>
+<a:Name>押货类型</a:Name>
+<a:Code>PLEDGE_TYPE</a:Code>
 <a:CreationDate>1541232701</a:CreationDate>
 <a:Creator>admin</a:Creator>
-<a:ModificationDate>1541232918</a:ModificationDate>
+<a:ModificationDate>1541408643</a:ModificationDate>
 <a:Modifier>admin</a:Modifier>
-<a:Comment>供应商结算类型（1：结算到余额 2：结算到货款）</a:Comment>
+<a:Comment>押货类型（1：押货 2：供应商发货</a:Comment>
 <a:DataType>BT</a:DataType>
 </o:EntityAttribute>
 <o:EntityAttribute Id="o62">

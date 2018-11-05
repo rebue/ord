@@ -1,3 +1,7 @@
+-- 2018年11月5日17:05:47
+	-- ORD_ORDER_DETAIL 去除供应商结算类型、添加押货类型（PLEDGE_TYPE）
+	alter table ORD_ORDER_DETAIL drop column SUPPLIER_SETTLE_TYPE;
+	alter table ORD_ORDER_DETAIL add PLEDGE_TYPE          tinyint comment '押货类型（1：押货 2：供应商发货';
 -- 2018年11月3日16:27:51
 	-- ORD_ORDER_DETAIL 添加供应商id和供应商结算类型
 	alter table ORD_ORDER_DETAIL add SUPPLIER_ID          bigint comment '供应商ID';
