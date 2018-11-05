@@ -23,6 +23,8 @@
     <result column="BUY_UNIT" jdbcType="VARCHAR" property="buyUnit" />
     <result column="RETURN_STATE" jdbcType="TINYINT" property="returnState" />
     <result column="USER_ID" jdbcType="BIGINT" property="userId" />
+    <result column="SUPPLIER_ID" jdbcType="BIGINT" property="supplierId" />
+    <result column="SUPPLIER_SETTLE_TYPE" jdbcType="TINYINT" property="supplierSettleType" />
   </resultMap>
   <sql id="Base_Column_List">
     <!--
@@ -31,7 +33,7 @@
     -->
     ID, ORDER_ID, ONLINE_ID, PRODUCT_ID, SUBJECT_TYPE, COMMISSION_SLOT, COMMISSION_STATE, 
     ONLINE_TITLE, SPEC_NAME, BUY_COUNT, BUY_PRICE, CASHBACK_AMOUNT, RETURN_COUNT, CASHBACK_TOTAL, 
-    BUY_UNIT, RETURN_STATE, USER_ID
+    BUY_UNIT, RETURN_STATE, USER_ID, SUPPLIER_ID, SUPPLIER_SETTLE_TYPE
   </sql>
   <select id="selectByPrimaryKey" parameterType="java.lang.Long" resultMap="BaseResultMap">
     <!--
@@ -61,13 +63,15 @@
       COMMISSION_STATE, ONLINE_TITLE, SPEC_NAME, 
       BUY_COUNT, BUY_PRICE, CASHBACK_AMOUNT, 
       RETURN_COUNT, CASHBACK_TOTAL, BUY_UNIT, 
-      RETURN_STATE, USER_ID)
+      RETURN_STATE, USER_ID, SUPPLIER_ID, 
+      SUPPLIER_SETTLE_TYPE)
     values (#{id,jdbcType=BIGINT}, #{orderId,jdbcType=BIGINT}, #{onlineId,jdbcType=BIGINT}, 
       #{productId,jdbcType=BIGINT}, #{subjectType,jdbcType=TINYINT}, #{commissionSlot,jdbcType=TINYINT}, 
       #{commissionState,jdbcType=TINYINT}, #{onlineTitle,jdbcType=VARCHAR}, #{specName,jdbcType=VARCHAR}, 
       #{buyCount,jdbcType=INTEGER}, #{buyPrice,jdbcType=DECIMAL}, #{cashbackAmount,jdbcType=DECIMAL}, 
       #{returnCount,jdbcType=INTEGER}, #{cashbackTotal,jdbcType=DECIMAL}, #{buyUnit,jdbcType=VARCHAR}, 
-      #{returnState,jdbcType=TINYINT}, #{userId,jdbcType=BIGINT})
+      #{returnState,jdbcType=TINYINT}, #{userId,jdbcType=BIGINT}, #{supplierId,jdbcType=BIGINT}, 
+      #{supplierSettleType,jdbcType=TINYINT})
   </insert>
   <insert id="insertSelective" parameterType="rebue.ord.mo.OrdOrderDetailMo">
     <!--
@@ -127,6 +131,12 @@
       <if test="userId != null">
         USER_ID,
       </if>
+      <if test="supplierId != null">
+        SUPPLIER_ID,
+      </if>
+      <if test="supplierSettleType != null">
+        SUPPLIER_SETTLE_TYPE,
+      </if>
     </trim>
     <trim prefix="values (" suffix=")" suffixOverrides=",">
       <if test="id != null">
@@ -179,6 +189,12 @@
       </if>
       <if test="userId != null">
         #{userId,jdbcType=BIGINT},
+      </if>
+      <if test="supplierId != null">
+        #{supplierId,jdbcType=BIGINT},
+      </if>
+      <if test="supplierSettleType != null">
+        #{supplierSettleType,jdbcType=TINYINT},
       </if>
     </trim>
   </insert>
@@ -237,6 +253,12 @@
       <if test="userId != null">
         USER_ID = #{userId,jdbcType=BIGINT},
       </if>
+      <if test="supplierId != null">
+        SUPPLIER_ID = #{supplierId,jdbcType=BIGINT},
+      </if>
+      <if test="supplierSettleType != null">
+        SUPPLIER_SETTLE_TYPE = #{supplierSettleType,jdbcType=TINYINT},
+      </if>
     </set>
     where ID = #{id,jdbcType=BIGINT}
   </update>
@@ -261,7 +283,9 @@
       CASHBACK_TOTAL = #{cashbackTotal,jdbcType=DECIMAL},
       BUY_UNIT = #{buyUnit,jdbcType=VARCHAR},
       RETURN_STATE = #{returnState,jdbcType=TINYINT},
-      USER_ID = #{userId,jdbcType=BIGINT}
+      USER_ID = #{userId,jdbcType=BIGINT},
+      SUPPLIER_ID = #{supplierId,jdbcType=BIGINT},
+      SUPPLIER_SETTLE_TYPE = #{supplierSettleType,jdbcType=TINYINT}
     where ID = #{id,jdbcType=BIGINT}
   </update>
   <select id="selectAll" resultMap="BaseResultMap">
@@ -271,7 +295,7 @@
     -->
     select ID, ORDER_ID, ONLINE_ID, PRODUCT_ID, SUBJECT_TYPE, COMMISSION_SLOT, COMMISSION_STATE, 
     ONLINE_TITLE, SPEC_NAME, BUY_COUNT, BUY_PRICE, CASHBACK_AMOUNT, RETURN_COUNT, CASHBACK_TOTAL, 
-    BUY_UNIT, RETURN_STATE, USER_ID
+    BUY_UNIT, RETURN_STATE, USER_ID, SUPPLIER_ID, SUPPLIER_SETTLE_TYPE
     from ORD_ORDER_DETAIL
   </select>
   <select id="selectSelective" parameterType="rebue.ord.mo.OrdOrderDetailMo" resultMap="BaseResultMap">
@@ -330,6 +354,12 @@
       </if>
       <if test="userId != null">
         and USER_ID = #{userId,jdbcType=BIGINT}
+      </if>
+      <if test="supplierId != null">
+        and SUPPLIER_ID = #{supplierId,jdbcType=BIGINT}
+      </if>
+      <if test="supplierSettleType != null">
+        and SUPPLIER_SETTLE_TYPE = #{supplierSettleType,jdbcType=TINYINT}
       </if>
     </where>
   </select>
@@ -401,6 +431,12 @@
       <if test="userId != null and userId != ''">
         and USER_ID = #{userId,jdbcType=BIGINT}
       </if>
+      <if test="supplierId != null and supplierId != ''">
+        and SUPPLIER_ID = #{supplierId,jdbcType=BIGINT}
+      </if>
+      <if test="supplierSettleType != null and supplierSettleType != ''">
+        and SUPPLIER_SETTLE_TYPE = #{supplierSettleType,jdbcType=TINYINT}
+      </if>
     </where>
   </select>
   <select id="countSelective" parameterType="rebue.ord.mo.OrdOrderDetailMo" resultType="int">
@@ -458,6 +494,12 @@
       </if>
       <if test="userId != null">
         and USER_ID = #{userId,jdbcType=BIGINT}
+      </if>
+      <if test="supplierId != null">
+        and SUPPLIER_ID = #{supplierId,jdbcType=BIGINT}
+      </if>
+      <if test="supplierSettleType != null">
+        and SUPPLIER_SETTLE_TYPE = #{supplierSettleType,jdbcType=TINYINT}
       </if>
     </where>
   </select>

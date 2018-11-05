@@ -2,7 +2,6 @@ package rebue.ord.mapper;
 
 import java.util.List;
 import java.util.Map;
-
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
 import org.apache.ibatis.annotations.Update;
@@ -65,7 +64,7 @@ public interface OrdOrderDetailMapper extends MybatisBaseMapper<OrdOrderDetailMo
     /**
      *    @mbg.generated 自动生成，如需修改，请删除本行
      */
-    List<OrdOrderDetailMo> countSelective(OrdOrderDetailMo record);
+    int countSelective(OrdOrderDetailMo record);
 
     /**
      *  根据订单编号订单详情ID修改退货数量和返现总额 Title: modifyReturnCountAndCashBackTotal
@@ -93,12 +92,12 @@ public interface OrdOrderDetailMapper extends MybatisBaseMapper<OrdOrderDetailMo
     int updateCommissionSlotForBuyRelation(OrdOrderDetailMo mo);
 
     OrdOrderDetailMo getOrderDetailForBuyRelation(Map<String, Object> map);
-    
+
     OrdOrderDetailMo getOrderDetailForOneCommissonSlot(Map<String, Object> map);
-    
+
     OrdOrderDetailMo getAndUpdateBuyRelationByInvite(Map<String, Object> map);
 
     OrdOrderDetailMo getAndUpdateBuyRelationByFour(Map<String, Object> map);
-    
+
     List<OrdOrderDetailMo> getDetailByOrderId(Long orderId);
 }

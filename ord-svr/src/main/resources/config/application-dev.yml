@@ -7,4 +7,5 @@ ord:
   signin-order-time: 2
    # 上家返佣时间（按小时计算）
   settle-upline-commission-time: 2
+  return-limit-time: 20
   
