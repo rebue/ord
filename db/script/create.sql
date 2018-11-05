@@ -1,6 +1,6 @@
 /*==============================================================*/
 /* DBMS name:      MySQL 5.0                                    */
-/* Created on:     2018/11/5 17:05:17                           */
+/* Created on:     2018/11/5 17:19:41                           */
 /*==============================================================*/
 
 
@@ -148,8 +148,9 @@ create table ORD_ORDER_DETAIL
    SPEC_NAME            varchar(50) not null comment '规格名称',
    BUY_COUNT            int not null comment '购买数量',
    BUY_PRICE            decimal(18,4) not null comment '购买价格（单价）',
+   COST_PRICE           decimal(18,4) comment '成本价格（单个）',
    SUPPLIER_ID          bigint comment '供应商ID',
-   PLEDGE_TYPE          tinyint comment '押货类型（1：押货 2：供应商发货',
+   PLEDGE_TYPE          tinyint comment '押货类型（1：押货 2：供应商发货）',
    CASHBACK_AMOUNT      decimal(18,4) not null comment '返现金额',
    RETURN_COUNT         int comment '退货数量',
    CASHBACK_TOTAL       decimal(18,4) comment '返现总额',

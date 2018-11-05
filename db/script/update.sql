@@ -1,3 +1,6 @@
+-- 2018年11月5日17:20:08
+	-- ORD_ORDER_DETAIL 添加成本价格（COST_PRICE）
+	alter table ORD_ORDER_DETAIL add COST_PRICE           decimal(18,4) comment '成本价格（单个）';
 -- 2018年11月5日17:05:47
 	-- ORD_ORDER_DETAIL 去除供应商结算类型、添加押货类型（PLEDGE_TYPE）
 	alter table ORD_ORDER_DETAIL drop column SUPPLIER_SETTLE_TYPE;
