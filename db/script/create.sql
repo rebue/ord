@@ -1,6 +1,6 @@
 /*==============================================================*/
 /* DBMS name:      MySQL 5.0                                    */
-/* Created on:     2018/11/5 17:19:41                           */
+/* Created on:     2018/11/6 15:11:34                           */
 /*==============================================================*/
 
 
@@ -10,13 +10,13 @@ drop table if exists ORD_BUY_RELATION;
 
 drop table if exists ORD_GOODS_BUY_RELATION;
 
-drop table if exists ORD_ORDER;
-
-drop table if exists ORD_ORDER_DETAIL;
+drop table if exists ORD_RETURN_PIC;
 
 drop table if exists ORD_RETURN;
 
-drop table if exists ORD_RETURN_PIC;
+drop table if exists ORD_ORDER_DETAIL;
+
+drop table if exists ORD_ORDER;
 
 drop table if exists ORD_TASK;
 
@@ -74,7 +74,7 @@ create table ORD_GOODS_BUY_RELATION
    ONLINE_ID            bigint not null comment '上线ID',
    CREATE_TIME          datetime not null comment '创建时间',
    primary key (ID),
-   unique key AK_UPLINE_USER_ID_AND_DOWNLINE_USER_ID_AND_ONLINE_ID_AND_SALE_PRICE (UPLINE_USER_ID, DOWNLINE_USER_ID, ONLINE_ID)
+   unique key AK_UPLINE_DOWNLINE_USER_AND_ONLINE_AND_SALE_PRICE (UPLINE_USER_ID, DOWNLINE_USER_ID, ONLINE_ID)
 );
 
 alter table ORD_GOODS_BUY_RELATION comment '用户商品购买关系';
