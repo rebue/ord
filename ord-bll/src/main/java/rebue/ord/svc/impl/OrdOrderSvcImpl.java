@@ -312,6 +312,9 @@ public class OrdOrderSvcImpl extends MybatisBaseSvcImpl<OrdOrderMo, java.lang.Lo
 				detailMo.setSpecName(OnlineSpec);
 				detailMo.setBuyCount(buyCount);
 				detailMo.setBuyPrice(orderList.get(i).getSalePrice());
+				detailMo.setCostPrice(orderList.get(i).getCostPrice());
+				detailMo.setSupplierId(orderList.get(i).getSupplierId());
+				detailMo.setPledgeType(orderList.get(i).getPledgeType());
 				detailMo.setCashbackAmount(orderList.get(i).getCashbackAmount());
 				detailMo.setReturnState((byte) 0);
 				detailMo.setUserId(id);
@@ -337,6 +340,9 @@ public class OrdOrderSvcImpl extends MybatisBaseSvcImpl<OrdOrderMo, java.lang.Lo
 					detailMo.setBuyCount(1);
 					detailMo.setSubjectType((byte) 1);
 					detailMo.setBuyPrice(orderList.get(i).getSalePrice());
+					detailMo.setCostPrice(orderList.get(i).getCostPrice());
+					detailMo.setSupplierId(orderList.get(i).getSupplierId());
+					detailMo.setPledgeType(orderList.get(i).getPledgeType());
 					detailMo.setCashbackAmount(new BigDecimal("0"));
 					detailMo.setReturnState((byte) 0);
 					detailMo.setCommissionSlot((byte) 2);
@@ -469,15 +475,15 @@ public class OrdOrderSvcImpl extends MybatisBaseSvcImpl<OrdOrderMo, java.lang.Lo
 						for (int j = 0; j < ordBuyRelationResult.size(); j++) {
 							_log.info("获取下家用户昵称及头像");
 							SucUserMo userMo = sucUserSvc.getById(ordBuyRelationResult.get(j).getDownlineUserId());
-							if(userMo==null) {
+							if (userMo == null) {
 								_log.info("用户信息为空");
-							}else {
-								_log.info("获取到的用户信息为：{}",userMo);
+							} else {
+								_log.info("获取到的用户信息为：{}", userMo);
 								OrdBuyRelationRo buyRelationRo = new OrdBuyRelationRo();
 								buyRelationRo.setDownlineUserNickName(userMo.getWxNickname());
 								buyRelationRo.setDownlineUserWxFace(userMo.getWxFace());
 								buyRelationRo.setIsSignIn(ordBuyRelationResult.get(j).getIsSignIn());
-								_log.info("添加的用户信息为：{}",buyRelationRo);
+								_log.info("添加的用户信息为：{}", buyRelationRo);
 								buyRelationList.add(buyRelationRo);
 							}
 						}
@@ -765,7 +771,7 @@ public class OrdOrderSvcImpl extends MybatisBaseSvcImpl<OrdOrderMo, java.lang.Lo
 			_log.error("调用快递电子面单失败");
 			throw new RuntimeException("调用快递电子面单失败");
 		}
-		if(mo.getOrderState()==null) {
+		if (mo.getOrderState() == null) {
 			mo.setOrderState((byte) OrderStateDic.ALREADY_PAY.getCode());
 		}
 		mo.setLogisticCode(eOrderRo.getLogisticCode());
@@ -813,7 +819,6 @@ public class OrdOrderSvcImpl extends MybatisBaseSvcImpl<OrdOrderMo, java.lang.Lo
 	/**
 	 * 供应商发货
 	 */
-
 	public ShipmentConfirmationRo sendBySupplier(ShipmentConfirmationTo to) {
 		ShipmentConfirmationRo confirmationRo = new ShipmentConfirmationRo();
 		OrdOrderMo mo = dozerMapper.map(to, OrdOrderMo.class);
@@ -961,6 +966,17 @@ public class OrdOrderSvcImpl extends MybatisBaseSvcImpl<OrdOrderMo, java.lang.Lo
 							settleTasksDetailTo.setSettleUplineCommissionTitle("大卖网络-结算订单上家佣金");
 							settleTasksDetailTo.setSettleUplineCommissionDetail(
 									uplineDetailResult.getOnlineTitle() + "&&" + uplineDetailResult.getSpecName());
+						}
+						if (ordOrderDetailMo.getSupplierId() != null) {
+							settleTasksDetailTo.setSupplierAccountId(ordOrderDetailMo.getSupplierId());
+							BigDecimal settleSupplierAmount = ordOrderDetailMo.getCostPrice()
+									.add(new BigDecimal(ordOrderDetailMo.getBuyCount()))
+									.setScale(4, BigDecimal.ROUND_HALF_UP);
+							settleTasksDetailTo.setSettleSupplierAmount(settleSupplierAmount);
+							settleTasksDetailTo.setSettleSupplierTitle("大卖网络-结算订单供应商成本");
+							settleTasksDetailTo.setSettleSupplierDetail("订单编号为：" + ordOrderDetailMo.getOrderId()
+									+ "商品规格为: " + ordOrderDetailMo.getSpecName());
+
 						}
 					}
 				}

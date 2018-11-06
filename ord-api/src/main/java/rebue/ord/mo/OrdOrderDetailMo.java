@@ -178,13 +178,22 @@ public class OrdOrderDetailMo implements Serializable {
     private Long supplierId;
 
     /**
-     *    供应商结算类型（1：结算到余额 2：结算到货款）
+     *    押货类型（1：押货 2：供应商发货）
      *
-     *    数据库字段: ORD_ORDER_DETAIL.SUPPLIER_SETTLE_TYPE
+     *    数据库字段: ORD_ORDER_DETAIL.PLEDGE_TYPE
      *
      *    @mbg.generated 自动生成，如需修改，请删除本行
      */
-    private Byte supplierSettleType;
+    private Byte pledgeType;
+
+    /**
+     *    成本价格（单个）
+     *
+     *    数据库字段: ORD_ORDER_DETAIL.COST_PRICE
+     *
+     *    @mbg.generated 自动生成，如需修改，请删除本行
+     */
+    private BigDecimal costPrice;
 
     /**
      *    @mbg.generated 自动生成，如需修改，请删除本行
@@ -588,25 +597,47 @@ public class OrdOrderDetailMo implements Serializable {
     }
 
     /**
-     *    供应商结算类型（1：结算到余额 2：结算到货款）
+     *    押货类型（1：押货 2：供应商发货）
      *
-     *    数据库字段: ORD_ORDER_DETAIL.SUPPLIER_SETTLE_TYPE
+     *    数据库字段: ORD_ORDER_DETAIL.PLEDGE_TYPE
      *
      *    @mbg.generated 自动生成，如需修改，请删除本行
      */
-    public Byte getSupplierSettleType() {
-        return supplierSettleType;
+    public Byte getPledgeType() {
+        return pledgeType;
     }
 
     /**
-     *    供应商结算类型（1：结算到余额 2：结算到货款）
+     *    押货类型（1：押货 2：供应商发货）
      *
-     *    数据库字段: ORD_ORDER_DETAIL.SUPPLIER_SETTLE_TYPE
+     *    数据库字段: ORD_ORDER_DETAIL.PLEDGE_TYPE
      *
      *    @mbg.generated 自动生成，如需修改，请删除本行
      */
-    public void setSupplierSettleType(Byte supplierSettleType) {
-        this.supplierSettleType = supplierSettleType;
+    public void setPledgeType(Byte pledgeType) {
+        this.pledgeType = pledgeType;
+    }
+
+    /**
+     *    成本价格（单个）
+     *
+     *    数据库字段: ORD_ORDER_DETAIL.COST_PRICE
+     *
+     *    @mbg.generated 自动生成，如需修改，请删除本行
+     */
+    public BigDecimal getCostPrice() {
+        return costPrice;
+    }
+
+    /**
+     *    成本价格（单个）
+     *
+     *    数据库字段: ORD_ORDER_DETAIL.COST_PRICE
+     *
+     *    @mbg.generated 自动生成，如需修改，请删除本行
+     */
+    public void setCostPrice(BigDecimal costPrice) {
+        this.costPrice = costPrice;
     }
 
     /**
@@ -636,7 +667,8 @@ public class OrdOrderDetailMo implements Serializable {
         sb.append(", returnState=").append(returnState);
         sb.append(", userId=").append(userId);
         sb.append(", supplierId=").append(supplierId);
-        sb.append(", supplierSettleType=").append(supplierSettleType);
+        sb.append(", pledgeType=").append(pledgeType);
+        sb.append(", costPrice=").append(costPrice);
         sb.append(", serialVersionUID=").append(serialVersionUID);
         sb.append("]");
         return sb.toString();
