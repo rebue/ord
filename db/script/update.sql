@@ -1,17 +1,30 @@
 -- 2018年11月8日
-    alter table ORD_ORDER_DETAIL                         add     DELIVER_ORG_ID      bigint                                comment '发货组织ID(默认填入上线组织ID，可变更为供应商的ID)';
-
+alter table ORD_ORDER_DETAIL                         add     DELIVER_ORG_ID      bigint                                comment '发货组织ID(默认填入上线组织ID，可变更为供应商的ID)';
+create table ORD_ORDER_DETAIL_DELIVER
+(
+   ID                   bigint not null comment '发货ID',
+   ORDER_ID             bigint not null comment '订单ID',
+   ORDER_DETAIL_ID      bigint not null comment '订单详情ID',
+   LOGISTIC_ID          bigint not null comment '物流订单ID',
+   primary key (ID),
+   unique key AK_ORDER_AND_ORDER_DETAIL_AND_LOGISTIC_ID (ORDER_ID, ORDER_DETAIL_ID, LOGISTIC_ID)
+);
+alter table ORD_ORDER_DETAIL_DELIVER comment '订单详情发货信息';
+alter table ORD_ORDER_DETAIL_DELIVER add constraint FK_Relationship_6 foreign key (ORDER_ID)
+      references ORD_ORDER (ID) on delete restrict on update restrict;
+alter table ORD_ORDER_DETAIL_DELIVER add constraint FK_Relationship_7 foreign key (ORDER_DETAIL_ID)
+      references ORD_ORDER_DETAIL (ID) on delete restrict on update restrict;
 
 
 -- 2018年11月6日
 	-- alter table ORD_ORDER_DETAIL add DELIVER_ORG_TYPE     tinyint comment '发货组织类型（1：本组织发货 2：供应商发货）';
     -- alter table ORD_ORDER_DETAIL add IS_DELIVER                     bool not null default false comment '是否已发货';
-	alter table ORD_ORDER_DETAIL add ONLINE_ORG_ID             bigint comment '上线组织ID';
+alter table ORD_ORDER_DETAIL add ONLINE_ORG_ID             bigint comment '上线组织ID';
 
 
 -- 2018年11月5日17:20:08
 	-- ORD_ORDER_DETAIL 添加成本价格（COST_PRICE）
-	alter table ORD_ORDER_DETAIL add COST_PRICE           decimal(18,4) comment '成本价格（单个）';
+alter table ORD_ORDER_DETAIL add COST_PRICE           decimal(18,4) comment '成本价格（单个）';
 -- 2018年11月5日17:05:47
 	-- ORD_ORDER_DETAIL 去除供应商结算类型、添加押货类型（PLEDGE_TYPE）
 	-- alter table ORD_ORDER_DETAIL add PLEDGE_TYPE          tinyint comment '押货类型（1：押货 2：供应商发货';
@@ -19,11 +32,19 @@
 
 -- 2018年11月3日16:27:51
 	-- ORD_ORDER_DETAIL 添加供应商id和供应商结算类型
-	alter table ORD_ORDER_DETAIL add SUPPLIER_ID          bigint comment '供应商ID';
+alter table ORD_ORDER_DETAIL add SUPPLIER_ID          bigint comment '供应商ID';
+
+
+
+
+
 
 
 
 -- --------------------------------------------------------下面的已更新到线上------------------------------------------------------------
+
+
+
 
 
 
