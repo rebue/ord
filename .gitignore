@@ -9,3 +9,5 @@ logs
 *.gz
 *.log.gz
 *.class
+pom.xml.versionsBackup
+rebel.xml

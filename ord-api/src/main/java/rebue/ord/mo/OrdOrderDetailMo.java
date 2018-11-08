@@ -115,6 +115,42 @@ public class OrdOrderDetailMo implements Serializable {
     private BigDecimal buyPrice;
 
     /**
+     *    成本价格（单个）
+     *
+     *    数据库字段: ORD_ORDER_DETAIL.COST_PRICE
+     *
+     *    @mbg.generated 自动生成，如需修改，请删除本行
+     */
+    private BigDecimal costPrice;
+
+    /**
+     *    上线组织ID
+     *
+     *    数据库字段: ORD_ORDER_DETAIL.ONLINE_ORG_ID
+     *
+     *    @mbg.generated 自动生成，如需修改，请删除本行
+     */
+    private Long onlineOrgId;
+
+    /**
+     *    供应商ID
+     *
+     *    数据库字段: ORD_ORDER_DETAIL.SUPPLIER_ID
+     *
+     *    @mbg.generated 自动生成，如需修改，请删除本行
+     */
+    private Long supplierId;
+
+    /**
+     *    发货组织ID(默认填入上线组织ID，可变更为供应商的ID)
+     *
+     *    数据库字段: ORD_ORDER_DETAIL.DELIVER_ORG_ID
+     *
+     *    @mbg.generated 自动生成，如需修改，请删除本行
+     */
+    private Long deliverOrgId;
+
+    /**
      *    返现金额
      *
      *    数据库字段: ORD_ORDER_DETAIL.CASHBACK_AMOUNT
@@ -167,33 +203,6 @@ public class OrdOrderDetailMo implements Serializable {
      *    @mbg.generated 自动生成，如需修改，请删除本行
      */
     private Long userId;
-
-    /**
-     *    供应商ID
-     *
-     *    数据库字段: ORD_ORDER_DETAIL.SUPPLIER_ID
-     *
-     *    @mbg.generated 自动生成，如需修改，请删除本行
-     */
-    private Long supplierId;
-
-    /**
-     *    押货类型（1：押货 2：供应商发货）
-     *
-     *    数据库字段: ORD_ORDER_DETAIL.PLEDGE_TYPE
-     *
-     *    @mbg.generated 自动生成，如需修改，请删除本行
-     */
-    private Byte pledgeType;
-
-    /**
-     *    成本价格（单个）
-     *
-     *    数据库字段: ORD_ORDER_DETAIL.COST_PRICE
-     *
-     *    @mbg.generated 自动生成，如需修改，请删除本行
-     */
-    private BigDecimal costPrice;
 
     /**
      *    @mbg.generated 自动生成，如需修改，请删除本行
@@ -443,6 +452,94 @@ public class OrdOrderDetailMo implements Serializable {
     }
 
     /**
+     *    成本价格（单个）
+     *
+     *    数据库字段: ORD_ORDER_DETAIL.COST_PRICE
+     *
+     *    @mbg.generated 自动生成，如需修改，请删除本行
+     */
+    public BigDecimal getCostPrice() {
+        return costPrice;
+    }
+
+    /**
+     *    成本价格（单个）
+     *
+     *    数据库字段: ORD_ORDER_DETAIL.COST_PRICE
+     *
+     *    @mbg.generated 自动生成，如需修改，请删除本行
+     */
+    public void setCostPrice(BigDecimal costPrice) {
+        this.costPrice = costPrice;
+    }
+
+    /**
+     *    上线组织ID
+     *
+     *    数据库字段: ORD_ORDER_DETAIL.ONLINE_ORG_ID
+     *
+     *    @mbg.generated 自动生成，如需修改，请删除本行
+     */
+    public Long getOnlineOrgId() {
+        return onlineOrgId;
+    }
+
+    /**
+     *    上线组织ID
+     *
+     *    数据库字段: ORD_ORDER_DETAIL.ONLINE_ORG_ID
+     *
+     *    @mbg.generated 自动生成，如需修改，请删除本行
+     */
+    public void setOnlineOrgId(Long onlineOrgId) {
+        this.onlineOrgId = onlineOrgId;
+    }
+
+    /**
+     *    供应商ID
+     *
+     *    数据库字段: ORD_ORDER_DETAIL.SUPPLIER_ID
+     *
+     *    @mbg.generated 自动生成，如需修改，请删除本行
+     */
+    public Long getSupplierId() {
+        return supplierId;
+    }
+
+    /**
+     *    供应商ID
+     *
+     *    数据库字段: ORD_ORDER_DETAIL.SUPPLIER_ID
+     *
+     *    @mbg.generated 自动生成，如需修改，请删除本行
+     */
+    public void setSupplierId(Long supplierId) {
+        this.supplierId = supplierId;
+    }
+
+    /**
+     *    发货组织ID(默认填入上线组织ID，可变更为供应商的ID)
+     *
+     *    数据库字段: ORD_ORDER_DETAIL.DELIVER_ORG_ID
+     *
+     *    @mbg.generated 自动生成，如需修改，请删除本行
+     */
+    public Long getDeliverOrgId() {
+        return deliverOrgId;
+    }
+
+    /**
+     *    发货组织ID(默认填入上线组织ID，可变更为供应商的ID)
+     *
+     *    数据库字段: ORD_ORDER_DETAIL.DELIVER_ORG_ID
+     *
+     *    @mbg.generated 自动生成，如需修改，请删除本行
+     */
+    public void setDeliverOrgId(Long deliverOrgId) {
+        this.deliverOrgId = deliverOrgId;
+    }
+
+    /**
      *    返现金额
      *
      *    数据库字段: ORD_ORDER_DETAIL.CASHBACK_AMOUNT
@@ -575,72 +672,6 @@ public class OrdOrderDetailMo implements Serializable {
     }
 
     /**
-     *    供应商ID
-     *
-     *    数据库字段: ORD_ORDER_DETAIL.SUPPLIER_ID
-     *
-     *    @mbg.generated 自动生成，如需修改，请删除本行
-     */
-    public Long getSupplierId() {
-        return supplierId;
-    }
-
-    /**
-     *    供应商ID
-     *
-     *    数据库字段: ORD_ORDER_DETAIL.SUPPLIER_ID
-     *
-     *    @mbg.generated 自动生成，如需修改，请删除本行
-     */
-    public void setSupplierId(Long supplierId) {
-        this.supplierId = supplierId;
-    }
-
-    /**
-     *    押货类型（1：押货 2：供应商发货）
-     *
-     *    数据库字段: ORD_ORDER_DETAIL.PLEDGE_TYPE
-     *
-     *    @mbg.generated 自动生成，如需修改，请删除本行
-     */
-    public Byte getPledgeType() {
-        return pledgeType;
-    }
-
-    /**
-     *    押货类型（1：押货 2：供应商发货）
-     *
-     *    数据库字段: ORD_ORDER_DETAIL.PLEDGE_TYPE
-     *
-     *    @mbg.generated 自动生成，如需修改，请删除本行
-     */
-    public void setPledgeType(Byte pledgeType) {
-        this.pledgeType = pledgeType;
-    }
-
-    /**
-     *    成本价格（单个）
-     *
-     *    数据库字段: ORD_ORDER_DETAIL.COST_PRICE
-     *
-     *    @mbg.generated 自动生成，如需修改，请删除本行
-     */
-    public BigDecimal getCostPrice() {
-        return costPrice;
-    }
-
-    /**
-     *    成本价格（单个）
-     *
-     *    数据库字段: ORD_ORDER_DETAIL.COST_PRICE
-     *
-     *    @mbg.generated 自动生成，如需修改，请删除本行
-     */
-    public void setCostPrice(BigDecimal costPrice) {
-        this.costPrice = costPrice;
-    }
-
-    /**
      *    @mbg.generated 自动生成，如需修改，请删除本行
      */
     @Override
@@ -660,15 +691,16 @@ public class OrdOrderDetailMo implements Serializable {
         sb.append(", specName=").append(specName);
         sb.append(", buyCount=").append(buyCount);
         sb.append(", buyPrice=").append(buyPrice);
+        sb.append(", costPrice=").append(costPrice);
+        sb.append(", onlineOrgId=").append(onlineOrgId);
+        sb.append(", supplierId=").append(supplierId);
+        sb.append(", deliverOrgId=").append(deliverOrgId);
         sb.append(", cashbackAmount=").append(cashbackAmount);
         sb.append(", returnCount=").append(returnCount);
         sb.append(", cashbackTotal=").append(cashbackTotal);
         sb.append(", buyUnit=").append(buyUnit);
         sb.append(", returnState=").append(returnState);
         sb.append(", userId=").append(userId);
-        sb.append(", supplierId=").append(supplierId);
-        sb.append(", pledgeType=").append(pledgeType);
-        sb.append(", costPrice=").append(costPrice);
         sb.append(", serialVersionUID=").append(serialVersionUID);
         sb.append("]");
         return sb.toString();

@@ -1,14 +1,32 @@
+-- 2018年11月8日
+    alter table ORD_ORDER_DETAIL                         add     DELIVER_ORG_ID      bigint                                comment '发货组织ID(默认填入上线组织ID，可变更为供应商的ID)';
+
+
+
+-- 2018年11月6日
+	-- alter table ORD_ORDER_DETAIL add DELIVER_ORG_TYPE     tinyint comment '发货组织类型（1：本组织发货 2：供应商发货）';
+    -- alter table ORD_ORDER_DETAIL add IS_DELIVER                     bool not null default false comment '是否已发货';
+	alter table ORD_ORDER_DETAIL add ONLINE_ORG_ID             bigint comment '上线组织ID';
+
+
 -- 2018年11月5日17:20:08
 	-- ORD_ORDER_DETAIL 添加成本价格（COST_PRICE）
 	alter table ORD_ORDER_DETAIL add COST_PRICE           decimal(18,4) comment '成本价格（单个）';
 -- 2018年11月5日17:05:47
 	-- ORD_ORDER_DETAIL 去除供应商结算类型、添加押货类型（PLEDGE_TYPE）
-	alter table ORD_ORDER_DETAIL drop column SUPPLIER_SETTLE_TYPE;
-	alter table ORD_ORDER_DETAIL add PLEDGE_TYPE          tinyint comment '押货类型（1：押货 2：供应商发货';
+	-- alter table ORD_ORDER_DETAIL add PLEDGE_TYPE          tinyint comment '押货类型（1：押货 2：供应商发货';
+
+
 -- 2018年11月3日16:27:51
 	-- ORD_ORDER_DETAIL 添加供应商id和供应商结算类型
 	alter table ORD_ORDER_DETAIL add SUPPLIER_ID          bigint comment '供应商ID';
-	alter table ORD_ORDER_DETAIL add SUPPLIER_SETTLE_TYPE tinyint comment '供应商结算类型（1：结算到余额 2：结算到货款）';
+
+
+
+-- --------------------------------------------------------下面的已更新到线上------------------------------------------------------------
+
+
+
 -- 2018年10月8日15:17:14
 	-- 添加订单购买关系（ORD_BUY_RELATION）表字段：关系来源（RELATION_SOURCE）
 	alter table ORD_BUY_RELATION add RELATION_SOURCE      tinyint not null comment '关系来源（1：自己匹配自己  2：购买关系  3：注册关系  4：差一人且已有购买关系  5：差两人  6：差一人但没有购买关系）';
@@ -35,8 +53,8 @@
 	alter table ORD_ORDER_DETAIL modify column CASHBACK_AMOUNT      decimal(18,4) not null comment '返现金额';
 	alter table ORD_ORDER_DETAIL modify column CASHBACK_TOTAL       decimal(18,4) comment '返现总额';
 	
---2018年9月7日17:49:54  
-	--添加：表下级购买信息（ORD_SUBLEVEL_BUY）
+-- 2018年9月7日17:49:54  
+	-- 添加：表下级购买信息（ORD_SUBLEVEL_BUY）
 	/*==============================================================*/
 	/* Table: ORD_SUBLEVEL_BUY                                      */
 	/*==============================================================*/
@@ -50,6 +68,6 @@
 	
 	alter table ORD_SUBLEVEL_BUY comment '下级购买信息';
 	
-	--在订单详情表（ORD_ORDER_DETAIL）新增表字段：返现佣金名额（CASHBACK_COMMISSION_SLOT）、返现佣金状态（CASHBACK_COMMISSION_STATE）
+	-- 在订单详情表（ORD_ORDER_DETAIL）新增表字段：返现佣金名额（CASHBACK_COMMISSION_SLOT）、返现佣金状态（CASHBACK_COMMISSION_STATE）
 	alter table ORD_ORDER_DETAIL add CASHBACK_COMMISSION_SLOT tinyint comment '返现佣金名额';
 	alter table ORD_ORDER_DETAIL add CASHBACK_COMMISSION_STATE tinyint comment '返现佣金状态（0：匹配中，1：待返，2：已返）';

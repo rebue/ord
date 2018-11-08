@@ -1,6 +1,6 @@
 /*==============================================================*/
 /* DBMS name:      MySQL 5.0                                    */
-/* Created on:     2018/11/6 15:11:34                           */
+/* Created on:     2018/11/8 15:07:02                           */
 /*==============================================================*/
 
 
@@ -9,6 +9,8 @@ drop table if exists ORD_ADDR;
 drop table if exists ORD_BUY_RELATION;
 
 drop table if exists ORD_GOODS_BUY_RELATION;
+
+drop table if exists ORD_ORDER_DETAIL_DELIVER;
 
 drop table if exists ORD_RETURN_PIC;
 
@@ -149,8 +151,9 @@ create table ORD_ORDER_DETAIL
    BUY_COUNT            int not null comment '购买数量',
    BUY_PRICE            decimal(18,4) not null comment '购买价格（单价）',
    COST_PRICE           decimal(18,4) comment '成本价格（单个）',
+   ONLINE_ORG_ID        bigint comment '上线组织ID',
    SUPPLIER_ID          bigint comment '供应商ID',
-   PLEDGE_TYPE          tinyint comment '押货类型（1：押货 2：供应商发货）',
+   DELIVER_ORG_ID       bigint not null comment '发货组织ID(默认填入上线组织ID，可变更为供应商的ID)',
    CASHBACK_AMOUNT      decimal(18,4) not null comment '返现金额',
    RETURN_COUNT         int comment '退货数量',
    CASHBACK_TOTAL       decimal(18,4) comment '返现总额',
@@ -161,6 +164,21 @@ create table ORD_ORDER_DETAIL
 );
 
 alter table ORD_ORDER_DETAIL comment '订单详情';
+
+/*==============================================================*/
+/* Table: ORD_ORDER_DETAIL_DELIVER                              */
+/*==============================================================*/
+create table ORD_ORDER_DETAIL_DELIVER
+(
+   ID                   bigint not null comment '发货ID',
+   ORDER_ID             bigint not null comment '订单ID',
+   ORDER_DETAIL_ID      bigint not null comment '订单详情ID',
+   LOGISTIC_ID          bigint not null comment '物流订单ID',
+   primary key (ID),
+   unique key AK_ORDER_AND_ORDER_DETAIL_AND_LOGISTIC_ID (ORDER_ID, ORDER_DETAIL_ID, LOGISTIC_ID)
+);
+
+alter table ORD_ORDER_DETAIL_DELIVER comment '订单详情发货信息';
 
 /*==============================================================*/
 /* Table: ORD_RETURN                                            */
@@ -235,6 +253,12 @@ alter table ORD_BUY_RELATION add constraint FK_Relationship_5 foreign key (UPLIN
 
 alter table ORD_ORDER_DETAIL add constraint FK_Relationship_1 foreign key (ORDER_ID)
       references ORD_ORDER (ID) on delete restrict on update restrict;
+
+alter table ORD_ORDER_DETAIL_DELIVER add constraint FK_Relationship_6 foreign key (ORDER_ID)
+      references ORD_ORDER (ID) on delete restrict on update restrict;
+
+alter table ORD_ORDER_DETAIL_DELIVER add constraint FK_Relationship_7 foreign key (ORDER_DETAIL_ID)
+      references ORD_ORDER_DETAIL (ID) on delete restrict on update restrict;
 
 alter table ORD_RETURN add constraint FK_Relationship_2 foreign key (ORDER_DETAIL_ID)
       references ORD_ORDER_DETAIL (ID) on delete restrict on update restrict;
