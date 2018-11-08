@@ -8,9 +8,10 @@
 		<artifactId>sb-parent</artifactId>
 		<version>1.0.8</version>
 	</parent>
-
+	
 	<groupId>com.github.rebue.ord</groupId>
 	<artifactId>ord</artifactId>
+	<version>1.0.9</version>
 	<packaging>pom</packaging>
 	<description>用户订单</description>
 
@@ -28,17 +29,17 @@
 			<dependency>
 				<groupId>com.github.rebue.ord</groupId>
 				<artifactId>ord-api</artifactId>
-				<version>1.0.8</version>
+				<version>1.0.9</version>
 			</dependency>
 			<dependency>
 				<groupId>com.github.rebue.ord</groupId>
 				<artifactId>ord-bll</artifactId>
-				<version>1.0.8</version>
+				<version>1.0.9</version>
 			</dependency>
 			<dependency>
 				<groupId>com.github.rebue.ord</groupId>
 				<artifactId>ord-svr-feign</artifactId>
-				<version>1.0.8</version>
+				<version>1.0.9</version>
 			</dependency>
 			<dependency>
 				<groupId>com.github.rebue.suc</groupId>
