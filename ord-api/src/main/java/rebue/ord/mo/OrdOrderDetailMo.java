@@ -214,6 +214,15 @@ public class OrdOrderDetailMo implements Serializable {
     private Long productSpecId;
 
     /**
+     *    上线规格ID
+     *
+     *    数据库字段: ORD_ORDER_DETAIL.ONLINE_SPEC_ID
+     *
+     *    @mbg.generated 自动生成，如需修改，请删除本行
+     */
+    private Long onlineSpecId;
+
+    /**
      *    @mbg.generated 自动生成，如需修改，请删除本行
      */
     private static final long serialVersionUID = 1L;
@@ -703,6 +712,28 @@ public class OrdOrderDetailMo implements Serializable {
     }
 
     /**
+     *    上线规格ID
+     *
+     *    数据库字段: ORD_ORDER_DETAIL.ONLINE_SPEC_ID
+     *
+     *    @mbg.generated 自动生成，如需修改，请删除本行
+     */
+    public Long getOnlineSpecId() {
+        return onlineSpecId;
+    }
+
+    /**
+     *    上线规格ID
+     *
+     *    数据库字段: ORD_ORDER_DETAIL.ONLINE_SPEC_ID
+     *
+     *    @mbg.generated 自动生成，如需修改，请删除本行
+     */
+    public void setOnlineSpecId(Long onlineSpecId) {
+        this.onlineSpecId = onlineSpecId;
+    }
+
+    /**
      *    @mbg.generated 自动生成，如需修改，请删除本行
      */
     @Override
@@ -733,6 +764,7 @@ public class OrdOrderDetailMo implements Serializable {
         sb.append(", returnState=").append(returnState);
         sb.append(", userId=").append(userId);
         sb.append(", productSpecId=").append(productSpecId);
+        sb.append(", onlineSpecId=").append(onlineSpecId);
         sb.append(", serialVersionUID=").append(serialVersionUID);
         sb.append("]");
         return sb.toString();

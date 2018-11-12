@@ -1,6 +1,6 @@
 /*==============================================================*/
 /* DBMS name:      MySQL 5.0                                    */
-/* Created on:     2018/11/12 14:48:05                          */
+/* Created on:     2018/11/12 15:12:47                          */
 /*==============================================================*/
 
 
@@ -142,8 +142,9 @@ create table ORD_ORDER_DETAIL
    ID                   bigint not null comment '订单详情ID',
    ORDER_ID             bigint not null comment '订单ID',
    ONLINE_ID            bigint not null comment '上线ID',
+   ONLINE_SPEC_ID       bigint not null comment '上线规格ID',
    PRODUCT_ID           bigint not null comment '产品ID',
-   PRODUCT_SPEC_ID      bigint not null comment '产品规格ID',
+   PRODUCT_SPEC_ID      bigint comment '产品规格ID',
    SUBJECT_TYPE         tinyint not null default 0 comment '版块类型（0：普通，1：全返）',
    COMMISSION_SLOT      tinyint comment '返佣金名额',
    COMMISSION_STATE     tinyint comment '返佣金状态（0：匹配中，1：待返，2：已返）',

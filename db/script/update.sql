@@ -1,8 +1,9 @@
 -- 2018-11-12
-alter table ORD_ORDER_DETAIL                         add     PRODUCT_SPEC_ID      bigint null comment '产品规格ID';
+alter table ORD_ORDER_DETAIL                         add     PRODUCT_SPEC_ID      bigint null          comment '产品规格ID';
+alter table ORD_ORDER_DETAIL                         add     ONLINE_SPEC_ID           bigint not null   comment '上线规格ID';
 
 -- 2018-11-08
-alter table ORD_ORDER_DETAIL                         add     DELIVER_ORG_ID      bigint                                comment '发货组织ID(默认填入上线组织ID，可变更为供应商的ID)';
+alter table ORD_ORDER_DETAIL                         add     DELIVER_ORG_ID          bigint                comment '发货组织ID(默认填入上线组织ID，可变更为供应商的ID)';
 create table ORD_ORDER_DETAIL_DELIVER
 (
    ID                   bigint not null comment '发货ID',
