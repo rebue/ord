@@ -1,4 +1,7 @@
--- 2018年11月8日
+-- 2018-11-12
+alter table ORD_ORDER_DETAIL                         add     PRODUCT_SPEC_ID      bigint null comment '产品规格ID';
+
+-- 2018-11-08
 alter table ORD_ORDER_DETAIL                         add     DELIVER_ORG_ID      bigint                                comment '发货组织ID(默认填入上线组织ID，可变更为供应商的ID)';
 create table ORD_ORDER_DETAIL_DELIVER
 (

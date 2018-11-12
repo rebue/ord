@@ -1,6 +1,6 @@
 /*==============================================================*/
 /* DBMS name:      MySQL 5.0                                    */
-/* Created on:     2018/11/8 15:07:02                           */
+/* Created on:     2018/11/12 14:48:05                          */
 /*==============================================================*/
 
 
@@ -10,15 +10,15 @@ drop table if exists ORD_BUY_RELATION;
 
 drop table if exists ORD_GOODS_BUY_RELATION;
 
-drop table if exists ORD_ORDER_DETAIL_DELIVER;
-
-drop table if exists ORD_RETURN_PIC;
-
-drop table if exists ORD_RETURN;
+drop table if exists ORD_ORDER;
 
 drop table if exists ORD_ORDER_DETAIL;
 
-drop table if exists ORD_ORDER;
+drop table if exists ORD_ORDER_DETAIL_DELIVER;
+
+drop table if exists ORD_RETURN;
+
+drop table if exists ORD_RETURN_PIC;
 
 drop table if exists ORD_TASK;
 
@@ -101,8 +101,8 @@ create table ORD_ORDER
             3：已发货（待签收）
             4：已签收（待结算）
             5：已结算',
-   USER_ID              bigint not null comment '用户编号',
-   USER_NAME            varchar(50) not null comment '用户姓名',
+   USER_ID              bigint not null comment '下单人用户ID',
+   USER_NAME            varchar(50) not null comment '作废-下单人姓名',
    ORDER_TIME           datetime not null comment '下单时间',
    PAY_TIME             datetime comment '支付时间',
    SEND_TIME            datetime comment '发货时间',
@@ -143,6 +143,7 @@ create table ORD_ORDER_DETAIL
    ORDER_ID             bigint not null comment '订单ID',
    ONLINE_ID            bigint not null comment '上线ID',
    PRODUCT_ID           bigint not null comment '产品ID',
+   PRODUCT_SPEC_ID      bigint not null comment '产品规格ID',
    SUBJECT_TYPE         tinyint not null default 0 comment '版块类型（0：普通，1：全返）',
    COMMISSION_SLOT      tinyint comment '返佣金名额',
    COMMISSION_STATE     tinyint comment '返佣金状态（0：匹配中，1：待返，2：已返）',
