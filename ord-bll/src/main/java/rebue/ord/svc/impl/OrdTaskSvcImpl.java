@@ -131,6 +131,7 @@ public class OrdTaskSvcImpl extends MybatisBaseSvcImpl<OrdTaskMo, java.lang.Long
             try {
                 OrdOrderMo ordOrderMo = new OrdOrderMo();
                 ordOrderMo.setOrderCode(ordTaskMo.getOrderId());
+                ordOrderMo.setId(Long.parseLong(ordTaskMo.getOrderId()));
                 _log.info("执行订单取消任务订单签收的参数为：{}", ordTaskMo.getOrderId());
                 // 订单取消
                 CancellationOfOrderRo cancelRo = ordOrderSvc.cancellationOfOrder(ordOrderMo);
