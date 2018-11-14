@@ -42,6 +42,7 @@
     <result column="SEND_OP_ID" jdbcType="BIGINT" property="sendOpId" />
     <result column="RECEIVED_OP_ID" jdbcType="BIGINT" property="receivedOpId" />
     <result column="CANCEL_REASON" jdbcType="VARCHAR" property="cancelReason" />
+    <result column="PAY_ORDER_ID" jdbcType="BIGINT" property="payOrderId" />
   </resultMap>
   <sql id="Base_Column_List">
     <!--
@@ -53,7 +54,8 @@
     RECEIVED_TIME, CLOSE_TIME, CANCEL_TIME, LOGISTIC_ID, SHIPPER_CODE, SHIPPER_NAME, 
     LOGISTIC_CODE, RECEIVER_NAME, RECEIVER_TEL, RECEIVER_MOBILE, RECEIVER_PROVINCE, RECEIVER_CITY, 
     RECEIVER_EXP_AREA, RECEIVER_ADDRESS, RECEIVER_POST_CODE, ORDER_MESSAGES, MODIFY_REALVERY_MONEY_OP_ID, 
-    CANCELING_ORDER_OP_ID, CANCELDELI_REASON, SEND_OP_ID, RECEIVED_OP_ID, CANCEL_REASON
+    CANCELING_ORDER_OP_ID, CANCELDELI_REASON, SEND_OP_ID, RECEIVED_OP_ID, CANCEL_REASON, 
+    PAY_ORDER_ID
   </sql>
   <select id="selectByPrimaryKey" parameterType="java.lang.Long" resultMap="BaseResultMap">
     <!--
@@ -90,7 +92,7 @@
       RECEIVER_ADDRESS, RECEIVER_POST_CODE, ORDER_MESSAGES, 
       MODIFY_REALVERY_MONEY_OP_ID, CANCELING_ORDER_OP_ID, 
       CANCELDELI_REASON, SEND_OP_ID, RECEIVED_OP_ID, 
-      CANCEL_REASON)
+      CANCEL_REASON, PAY_ORDER_ID)
     values (#{id,jdbcType=BIGINT}, #{orderCode,jdbcType=VARCHAR}, #{orderTitle,jdbcType=VARCHAR}, 
       #{orderMoney,jdbcType=DECIMAL}, #{realMoney,jdbcType=DECIMAL}, #{returnTotal,jdbcType=DECIMAL}, 
       #{returnAmount1,jdbcType=DECIMAL}, #{returnAmount2,jdbcType=DECIMAL}, #{orderState,jdbcType=TINYINT}, 
@@ -103,7 +105,7 @@
       #{receiverAddress,jdbcType=VARCHAR}, #{receiverPostCode,jdbcType=CHAR}, #{orderMessages,jdbcType=VARCHAR}, 
       #{modifyRealveryMoneyOpId,jdbcType=BIGINT}, #{cancelingOrderOpId,jdbcType=BIGINT}, 
       #{canceldeliReason,jdbcType=VARCHAR}, #{sendOpId,jdbcType=BIGINT}, #{receivedOpId,jdbcType=BIGINT}, 
-      #{cancelReason,jdbcType=VARCHAR})
+      #{cancelReason,jdbcType=VARCHAR}, #{payOrderId,jdbcType=BIGINT})
   </insert>
   <insert id="insertSelective" parameterType="rebue.ord.mo.OrdOrderMo">
     <!--
@@ -220,6 +222,9 @@
       <if test="cancelReason != null">
         CANCEL_REASON,
       </if>
+      <if test="payOrderId != null">
+        PAY_ORDER_ID,
+      </if>
     </trim>
     <trim prefix="values (" suffix=")" suffixOverrides=",">
       <if test="id != null">
@@ -329,6 +334,9 @@
       </if>
       <if test="cancelReason != null">
         #{cancelReason,jdbcType=VARCHAR},
+      </if>
+      <if test="payOrderId != null">
+        #{payOrderId,jdbcType=BIGINT},
       </if>
     </trim>
   </insert>
@@ -444,6 +452,9 @@
       <if test="cancelReason != null">
         CANCEL_REASON = #{cancelReason,jdbcType=VARCHAR},
       </if>
+      <if test="payOrderId != null">
+        PAY_ORDER_ID = #{payOrderId,jdbcType=BIGINT},
+      </if>
     </set>
     where ID = #{id,jdbcType=BIGINT}
   </update>
@@ -487,7 +498,8 @@
       CANCELDELI_REASON = #{canceldeliReason,jdbcType=VARCHAR},
       SEND_OP_ID = #{sendOpId,jdbcType=BIGINT},
       RECEIVED_OP_ID = #{receivedOpId,jdbcType=BIGINT},
-      CANCEL_REASON = #{cancelReason,jdbcType=VARCHAR}
+      CANCEL_REASON = #{cancelReason,jdbcType=VARCHAR},
+      PAY_ORDER_ID = #{payOrderId,jdbcType=BIGINT}
     where ID = #{id,jdbcType=BIGINT}
   </update>
   <select id="selectAll" resultMap="BaseResultMap">
@@ -500,7 +512,8 @@
     RECEIVED_TIME, CLOSE_TIME, CANCEL_TIME, LOGISTIC_ID, SHIPPER_CODE, SHIPPER_NAME, 
     LOGISTIC_CODE, RECEIVER_NAME, RECEIVER_TEL, RECEIVER_MOBILE, RECEIVER_PROVINCE, RECEIVER_CITY, 
     RECEIVER_EXP_AREA, RECEIVER_ADDRESS, RECEIVER_POST_CODE, ORDER_MESSAGES, MODIFY_REALVERY_MONEY_OP_ID, 
-    CANCELING_ORDER_OP_ID, CANCELDELI_REASON, SEND_OP_ID, RECEIVED_OP_ID, CANCEL_REASON
+    CANCELING_ORDER_OP_ID, CANCELDELI_REASON, SEND_OP_ID, RECEIVED_OP_ID, CANCEL_REASON, 
+    PAY_ORDER_ID
     from ORD_ORDER
   </select>
   <select id="selectSelective" parameterType="rebue.ord.mo.OrdOrderMo" resultMap="BaseResultMap">
@@ -616,6 +629,9 @@
       </if>
       <if test="cancelReason != null and cancelReason != ''">
         and CANCEL_REASON = #{cancelReason,jdbcType=VARCHAR}
+      </if>
+      <if test="payOrderId != null">
+        and PAY_ORDER_ID = #{payOrderId,jdbcType=BIGINT}
       </if>
     </where>
   </select>
@@ -744,6 +760,9 @@
       <if test="cancelReason != null and cancelReason != ''">
         and CANCEL_REASON = #{cancelReason,jdbcType=VARCHAR}
       </if>
+      <if test="payOrderId != null and payOrderId != ''">
+        and PAY_ORDER_ID = #{payOrderId,jdbcType=BIGINT}
+      </if>
     </where>
   </select>
   <select id="countSelective" parameterType="rebue.ord.mo.OrdOrderMo" resultType="int">
@@ -858,6 +877,9 @@
       </if>
       <if test="cancelReason != null and cancelReason != ''">
         and CANCEL_REASON = #{cancelReason,jdbcType=VARCHAR}
+      </if>
+      <if test="payOrderId != null">
+        and PAY_ORDER_ID = #{payOrderId,jdbcType=BIGINT}
       </if>
     </where>
   </select>

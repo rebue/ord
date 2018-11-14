@@ -1,6 +1,17 @@
+-- 2018-11-14
+alter table ORD_ORDER                                       add         PAY_ORDER_ID         bigint not null comment '支付订单ID
+            提供给第三方支付记录的订单ID（因为有可能会多笔订单合并支付）
+            确认订单时，默认填写为订单ID(ORDER_ID)
+            拆分订单时，拆分后的订单的支付订单ID仍为旧订单的支付订单ID不变';
+update ORD_ORDER set PAY_ORDER_ID=ID;
+update ORD_ORDER_DETAIL set RETURN_COUNT=0 where RETURN_COUNT is null;
+alter table ORD_ORDER_DETAIL                         modify    RETURN_COUNT         int not null default 0 comment '退货数量';
+
 -- 2018-11-12
-alter table ORD_ORDER_DETAIL                         add     PRODUCT_SPEC_ID      bigint null          comment '产品规格ID';
-alter table ORD_ORDER_DETAIL                         add     ONLINE_SPEC_ID           bigint not null   comment '上线规格ID';
+alter table ORD_ORDER_DETAIL                         add         PRODUCT_SPEC_ID      bigint             null          comment '产品规格ID';
+alter table ORD_ORDER_DETAIL                         add         ONLINE_SPEC_ID          bigint            not null    comment '上线规格ID';
+alter table ORD_ORDER                                       modify     USER_NAME                  varchar(50)  null          comment '作废-下单人姓名';
+
 
 -- 2018-11-08
 alter table ORD_ORDER_DETAIL                         add     DELIVER_ORG_ID          bigint                comment '发货组织ID(默认填入上线组织ID，可变更为供应商的ID)';

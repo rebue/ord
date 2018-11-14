@@ -1,6 +1,6 @@
 /*==============================================================*/
 /* DBMS name:      MySQL 5.0                                    */
-/* Created on:     2018/11/12 15:12:47                          */
+/* Created on:     2018/11/14 10:18:45                          */
 /*==============================================================*/
 
 
@@ -94,7 +94,7 @@ create table ORD_ORDER
    RETURN_TOTAL         decimal(50,4) comment '退货总额',
    RETURN_AMOUNT1       decimal(50,4) comment '可退货金额1（退到返现金额）',
    RETURN_AMOUNT2       decimal(50,4) comment '可退货总额2（退到余额）',
-   ORDER_STATE          tinyint not null comment '订单状态（-1：作废  1：已下单（待支付）  2：已支付（待发货）  3：已发货（待签收）  4：已签收（待结算）  5：已结算  ））
+   ORDER_STATE          tinyint not null comment '订单状态（-1：作废  1：已下单（待支付）  2：已支付（待发货）  3：已发货（待签收）  4：已签收（待结算）  5：已结算  ）
             -1：作废
             1：已下单（待支付）
             2：已支付（待发货）
@@ -102,8 +102,12 @@ create table ORD_ORDER
             4：已签收（待结算）
             5：已结算',
    USER_ID              bigint not null comment '下单人用户ID',
-   USER_NAME            varchar(50) not null comment '作废-下单人姓名',
+   USER_NAME            varchar(50) comment '作废-下单人姓名',
    ORDER_TIME           datetime not null comment '下单时间',
+   PAY_ORDER_ID         bigint not null comment '支付订单ID
+            提供给第三方支付记录的订单ID（因为有可能会多笔订单合并支付）
+            确认订单时，默认填写为订单ID(ORDER_ID)
+            拆分订单时，拆分后的订单的支付订单ID仍为旧订单的支付订单ID不变',
    PAY_TIME             datetime comment '支付时间',
    SEND_TIME            datetime comment '发货时间',
    RECEIVED_TIME        datetime comment '签收时间',
@@ -157,7 +161,7 @@ create table ORD_ORDER_DETAIL
    SUPPLIER_ID          bigint comment '供应商ID',
    DELIVER_ORG_ID       bigint not null comment '发货组织ID(默认填入上线组织ID，可变更为供应商的ID)',
    CASHBACK_AMOUNT      decimal(18,4) not null comment '返现金额',
-   RETURN_COUNT         int comment '退货数量',
+   RETURN_COUNT         int not null default 0 comment '退货数量',
    CASHBACK_TOTAL       decimal(18,4) comment '返现总额',
    BUY_UNIT             varchar(10) comment '购买单位',
    RETURN_STATE         tinyint not null comment '退货状态（0：未退货  1：退货中  2：已退货  3：部分已退）',

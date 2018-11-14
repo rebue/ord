@@ -115,7 +115,7 @@ public class OrdOrderMo implements Serializable {
     private Long userId;
 
     /**
-     *    用户姓名
+     *    作废-下单人姓名
      *
      *    数据库字段: ORD_ORDER.USER_NAME
      *
@@ -361,6 +361,18 @@ public class OrdOrderMo implements Serializable {
     private String cancelReason;
 
     /**
+     *    支付订单ID
+     *                提供给第三方支付记录的订单ID（因为有可能会多笔订单合并支付）
+     *                确认订单时，默认填写为订单ID(ORDER_ID)
+     *                拆分订单时，拆分后的订单的支付订单ID仍为旧订单的支付订单ID不变
+     *
+     *    数据库字段: ORD_ORDER.PAY_ORDER_ID
+     *
+     *    @mbg.generated 自动生成，如需修改，请删除本行
+     */
+    private Long payOrderId;
+
+    /**
      *    @mbg.generated 自动生成，如需修改，请删除本行
      */
     private static final long serialVersionUID = 1L;
@@ -598,7 +610,7 @@ public class OrdOrderMo implements Serializable {
     }
 
     /**
-     *    用户姓名
+     *    作废-下单人姓名
      *
      *    数据库字段: ORD_ORDER.USER_NAME
      *
@@ -609,7 +621,7 @@ public class OrdOrderMo implements Serializable {
     }
 
     /**
-     *    用户姓名
+     *    作废-下单人姓名
      *
      *    数据库字段: ORD_ORDER.USER_NAME
      *
@@ -1170,6 +1182,34 @@ public class OrdOrderMo implements Serializable {
     }
 
     /**
+     *    支付订单ID
+     *                提供给第三方支付记录的订单ID（因为有可能会多笔订单合并支付）
+     *                确认订单时，默认填写为订单ID(ORDER_ID)
+     *                拆分订单时，拆分后的订单的支付订单ID仍为旧订单的支付订单ID不变
+     *
+     *    数据库字段: ORD_ORDER.PAY_ORDER_ID
+     *
+     *    @mbg.generated 自动生成，如需修改，请删除本行
+     */
+    public Long getPayOrderId() {
+        return payOrderId;
+    }
+
+    /**
+     *    支付订单ID
+     *                提供给第三方支付记录的订单ID（因为有可能会多笔订单合并支付）
+     *                确认订单时，默认填写为订单ID(ORDER_ID)
+     *                拆分订单时，拆分后的订单的支付订单ID仍为旧订单的支付订单ID不变
+     *
+     *    数据库字段: ORD_ORDER.PAY_ORDER_ID
+     *
+     *    @mbg.generated 自动生成，如需修改，请删除本行
+     */
+    public void setPayOrderId(Long payOrderId) {
+        this.payOrderId = payOrderId;
+    }
+
+    /**
      *    @mbg.generated 自动生成，如需修改，请删除本行
      */
     @Override
@@ -1214,6 +1254,7 @@ public class OrdOrderMo implements Serializable {
         sb.append(", sendOpId=").append(sendOpId);
         sb.append(", receivedOpId=").append(receivedOpId);
         sb.append(", cancelReason=").append(cancelReason);
+        sb.append(", payOrderId=").append(payOrderId);
         sb.append(", serialVersionUID=").append(serialVersionUID);
         sb.append("]");
         return sb.toString();
