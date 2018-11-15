@@ -373,6 +373,15 @@ public class OrdOrderMo implements Serializable {
     private Long payOrderId;
 
     /**
+     *    发货组织ID(默认填入上线组织ID，可变更为供应商的ID)
+     *
+     *    数据库字段: ORD_ORDER.DELIVER_ORG_ID
+     *
+     *    @mbg.generated 自动生成，如需修改，请删除本行
+     */
+    private Long deliverOrgId;
+
+    /**
      *    @mbg.generated 自动生成，如需修改，请删除本行
      */
     private static final long serialVersionUID = 1L;
@@ -1210,6 +1219,28 @@ public class OrdOrderMo implements Serializable {
     }
 
     /**
+     *    发货组织ID(默认填入上线组织ID，可变更为供应商的ID)
+     *
+     *    数据库字段: ORD_ORDER.DELIVER_ORG_ID
+     *
+     *    @mbg.generated 自动生成，如需修改，请删除本行
+     */
+    public Long getDeliverOrgId() {
+        return deliverOrgId;
+    }
+
+    /**
+     *    发货组织ID(默认填入上线组织ID，可变更为供应商的ID)
+     *
+     *    数据库字段: ORD_ORDER.DELIVER_ORG_ID
+     *
+     *    @mbg.generated 自动生成，如需修改，请删除本行
+     */
+    public void setDeliverOrgId(Long deliverOrgId) {
+        this.deliverOrgId = deliverOrgId;
+    }
+
+    /**
      *    @mbg.generated 自动生成，如需修改，请删除本行
      */
     @Override
@@ -1255,6 +1286,7 @@ public class OrdOrderMo implements Serializable {
         sb.append(", receivedOpId=").append(receivedOpId);
         sb.append(", cancelReason=").append(cancelReason);
         sb.append(", payOrderId=").append(payOrderId);
+        sb.append(", deliverOrgId=").append(deliverOrgId);
         sb.append(", serialVersionUID=").append(serialVersionUID);
         sb.append("]");
         return sb.toString();
