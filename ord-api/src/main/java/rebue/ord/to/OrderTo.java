@@ -1,6 +1,5 @@
 package rebue.ord.to;
 
-import java.math.BigDecimal;
 import java.util.List;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
@@ -22,12 +21,6 @@ public class OrderTo {
      * 下单的用户ID
      */
     private Long                userId;
-
-    /**
-     * 下单金额
-     *
-     */
-    private BigDecimal          orderMoney;
 
     /**
      * 订单留言

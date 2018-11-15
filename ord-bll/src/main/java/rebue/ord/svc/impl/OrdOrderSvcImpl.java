@@ -223,9 +223,9 @@ public class OrdOrderSvcImpl extends MybatisBaseSvcImpl<OrdOrderMo, java.lang.Lo
         _log.info("用户下单的参数为：{}", to);
 
         _log.debug("检查参数的正确性");
-        if (to.getOrderMoney() == null || to.getAddrId() == null || to.getDetails() == null || to.getDetails().isEmpty()) {
+        if (to.getAddrId() == null || to.getDetails() == null || to.getDetails().isEmpty()) {
             final String msg = "参数错误";
-            _log.error("{}:{}", msg, "没有传入下单金额/用户收货地址/订单详情");
+            _log.error("{}:{}", msg, "没有传入用户收货地址/订单详情");
             ro.setResult(ResultDic.PARAM_ERROR);
             ro.setMsg(msg);
             return ro;
@@ -377,8 +377,15 @@ public class OrdOrderSvcImpl extends MybatisBaseSvcImpl<OrdOrderMo, java.lang.Lo
             orderMo.setPayOrderId(payOrderId);                                  // 支付订单ID
 
             orderMo.setUserId(to.getUserId());                  // 下单人用户ID
-            orderMo.setOrderMoney(to.getOrderMoney());          // 下单金额
-            orderMo.setRealMoney(to.getOrderMoney());            // 实际金额=下单金额
+
+            _log.debug("计算订单的下单金额");
+            BigDecimal orderAmount = BigDecimal.ZERO;
+            for (final OrdOrderDetailMo orderDetailMo : onlineOrg.getValue()) {
+                orderAmount = orderAmount.add(orderDetailMo.getBuyPrice().multiply(BigDecimal.valueOf(orderDetailMo.getBuyCount())));
+            }
+            _log.debug("订单的下单金额为: {}", orderAmount);
+            orderMo.setOrderMoney(orderAmount);          // 下单金额
+            orderMo.setRealMoney(orderAmount);           // 实际金额=下单金额
 
             // 用户留言
             final String orderMessages = to.getOrderMessages();
