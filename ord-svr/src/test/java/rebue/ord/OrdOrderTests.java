@@ -100,11 +100,25 @@ public class OrdOrderTests {
 
         orderTo.setOrderMessages("订单留言");                                 // 订单留言
         details.clear();
+        // 第一个订单详情
         orderDetailTo = new OrderDetailTo();
         orderDetailTo.setOnlineId(523717218609922183L);
         orderDetailTo.setOnlineSpecId(523717218643476617L);
         orderDetailTo.setBuyCount(3);
         details.add(orderDetailTo);
+        // 第二个订单详情
+        orderDetailTo = new OrderDetailTo();
+        orderDetailTo.setOnlineId(523055292770942981L);
+        orderDetailTo.setOnlineSpecId(523055292825468935L);
+        orderDetailTo.setBuyCount(6);
+        details.add(orderDetailTo);
+        // 第三个订单详情
+        orderDetailTo = new OrderDetailTo();
+        orderDetailTo.setOnlineId(523055292770942981L);
+        orderDetailTo.setOnlineSpecId(523055293202956297L);
+        orderDetailTo.setBuyCount(9);
+        details.add(orderDetailTo);
+        // 下单
         ro = order(orderTo);
         Assert.assertEquals(ResultDic.SUCCESS, ro.getResult());
     }

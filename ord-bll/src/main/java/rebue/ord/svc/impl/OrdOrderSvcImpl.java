@@ -232,8 +232,6 @@ public class OrdOrderSvcImpl extends MybatisBaseSvcImpl<OrdOrderMo, java.lang.Lo
         }
         _log.debug("参数正确");
 
-        // 订单标题
-        String orderTitle = "";
         // 上线列表(获取过的上线信息放进这里，避免重复获取)
         final Map<Long, OnlOnlineMo> onlines = new LinkedHashMap<>();
         // 上线组织列表(不同上线组织的订单详情需要拆单)
@@ -311,6 +309,7 @@ public class OrdOrderSvcImpl extends MybatisBaseSvcImpl<OrdOrderMo, java.lang.Lo
             orderDetailMo.setOnlineSpecId(onlineSpecMo.getId());
             orderDetailMo.setSpecName(onlineSpecMo.getOnlineSpec());
             orderDetailMo.setBuyCount(orderDetailTo.getBuyCount());
+            orderDetailMo.setBuyUnit(onlineSpecMo.getSaleUnit());
             orderDetailMo.setBuyPrice(onlineSpecMo.getSalePrice());
             orderDetailMo.setCostPrice(onlineSpecMo.getCostPrice());
             orderDetailMo.setSupplierId(onlineMo.getSupplierId());
@@ -342,15 +341,6 @@ public class OrdOrderSvcImpl extends MybatisBaseSvcImpl<OrdOrderMo, java.lang.Lo
             }
             orderDetails.add(orderDetailMo);
 
-            // 根据订单详情生成订单标题
-            final String remark = onlineMo.getOnlineTitle() + "(" + onlineSpecMo.getOnlineSpec() //
-                    + " " + onlineSpecMo.getSaleCount() + onlineSpecMo.getSaleUnit() + ");";
-            orderTitle += remark;
-        }
-        orderTitle = orderTitle.trim();
-        if (orderTitle.length() > 200) {
-            _log.debug("订单标题太长，需进行截取: {}", orderTitle);
-            orderTitle = orderTitle.substring(0, 195) + "…………等";
         }
 
         _log.debug("通过地址ID获取地址详细信息");
@@ -365,7 +355,8 @@ public class OrdOrderSvcImpl extends MybatisBaseSvcImpl<OrdOrderMo, java.lang.Lo
         _log.info("获取用户收货地址信息为：{}", addrMo);
 
         final Date now = new Date();
-        final Long payOrderId = _idWorker.getId();                              // 支付订单ID
+        // 支付订单ID
+        final Long payOrderId = _idWorker.getId();
         // 根据上线组织拆单
         for (final Entry<Long, List<OrdOrderDetailMo>> onlineOrg : onlineOrgs.entrySet()) {
             final OrdOrderMo orderMo = new OrdOrderMo();
@@ -378,18 +369,32 @@ public class OrdOrderSvcImpl extends MybatisBaseSvcImpl<OrdOrderMo, java.lang.Lo
 
             orderMo.setUserId(to.getUserId());                  // 下单人用户ID
 
-            _log.debug("计算订单的下单金额");
+            _log.debug("遍历订单详情计算订单的下单金额和生成订单标题");
+            // 订单标题
+            String orderTitle = "";
             BigDecimal orderAmount = BigDecimal.ZERO;
             for (final OrdOrderDetailMo orderDetailMo : onlineOrg.getValue()) {
+                // 计算订单的下单金额
                 orderAmount = orderAmount.add(orderDetailMo.getBuyPrice().multiply(BigDecimal.valueOf(orderDetailMo.getBuyCount())));
+
+                // 根据订单详情生成订单标题
+                final String remark = orderDetailMo.getOnlineTitle() + "(" + orderDetailMo.getSpecName() //
+                        + " " + orderDetailMo.getBuyCount() + orderDetailMo.getBuyUnit() + ");";
+                orderTitle += remark;
             }
             _log.debug("订单的下单金额为: {}", orderAmount);
             orderMo.setOrderMoney(orderAmount);          // 下单金额
             orderMo.setRealMoney(orderAmount);           // 实际金额=下单金额
+            // 生成订单标题，长的截取
+            orderTitle = orderTitle.trim();
+            if (orderTitle.length() > 200) {
+                _log.debug("订单标题太长，需进行截取: {}", orderTitle);
+                orderTitle = orderTitle.substring(0, 195) + "…………等";
+            }
 
             // 用户留言
             final String orderMessages = to.getOrderMessages();
-            if (StringUtils.isBlank(orderMessages)) {
+            if (!StringUtils.isBlank(orderMessages)) {
                 orderMo.setOrderMessages(orderMessages);
             }
 
