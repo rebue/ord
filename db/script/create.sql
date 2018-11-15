@@ -1,6 +1,6 @@
 /*==============================================================*/
 /* DBMS name:      MySQL 5.0                                    */
-/* Created on:     2018/11/15 12:36:24                          */
+/* Created on:     2018/11/15 16:35:56                          */
 /*==============================================================*/
 
 
@@ -159,7 +159,6 @@ create table ORD_ORDER_DETAIL
    BUY_COUNT            int not null comment '购买数量',
    BUY_PRICE            decimal(18,4) not null comment '购买价格（单价）',
    COST_PRICE           decimal(18,4) comment '成本价格（单个）',
-   ONLINE_ORG_ID        bigint comment '上线组织ID',
    SUPPLIER_ID          bigint comment '供应商ID',
    DELIVER_ORG_ID       bigint not null comment '发货组织ID(默认填入上线组织ID，可变更为供应商的ID)',
    CASHBACK_AMOUNT      decimal(18,4) not null comment '返现金额',

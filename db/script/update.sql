@@ -38,7 +38,7 @@ alter table ORD_ORDER_DETAIL_DELIVER add constraint FK_Relationship_7 foreign ke
 -- 2018年11月6日
 	-- alter table ORD_ORDER_DETAIL add DELIVER_ORG_TYPE     tinyint comment '发货组织类型（1：本组织发货 2：供应商发货）';
     -- alter table ORD_ORDER_DETAIL add IS_DELIVER                     bool not null default false comment '是否已发货';
-alter table ORD_ORDER_DETAIL add ONLINE_ORG_ID             bigint comment '上线组织ID';
+    -- alter table ORD_ORDER_DETAIL add ONLINE_ORG_ID             bigint comment '上线组织ID';
 
 
 -- 2018年11月5日17:20:08
