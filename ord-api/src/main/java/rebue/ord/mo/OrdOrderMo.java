@@ -46,6 +46,24 @@ public class OrdOrderMo implements Serializable {
     private String orderTitle;
 
     /**
+     *    上线组织ID
+     *
+     *    数据库字段: ORD_ORDER.ONLINE_ORG_ID
+     *
+     *    @mbg.generated 自动生成，如需修改，请删除本行
+     */
+    private Long onlineOrgId;
+
+    /**
+     *    发货组织ID(默认填入上线组织ID，可变更为供应商的ID)
+     *
+     *    数据库字段: ORD_ORDER.DELIVER_ORG_ID
+     *
+     *    @mbg.generated 自动生成，如需修改，请删除本行
+     */
+    private Long deliverOrgId;
+
+    /**
      *    下单金额
      *
      *    数据库字段: ORD_ORDER.ORDER_MONEY
@@ -74,6 +92,7 @@ public class OrdOrderMo implements Serializable {
 
     /**
      *    可退货金额1（退到返现金额）
+     *                @deprecated
      *
      *    数据库字段: ORD_ORDER.RETURN_AMOUNT1
      *
@@ -83,6 +102,7 @@ public class OrdOrderMo implements Serializable {
 
     /**
      *    可退货总额2（退到余额）
+     *                @deprecated
      *
      *    数据库字段: ORD_ORDER.RETURN_AMOUNT2
      *
@@ -91,7 +111,7 @@ public class OrdOrderMo implements Serializable {
     private BigDecimal returnAmount2;
 
     /**
-     *    订单状态（-1：作废  1：已下单（待支付）  2：已支付（待发货）  3：已发货（待签收）  4：已签收（待结算）  5：已结算  ））
+     *    订单状态（-1：作废  1：已下单（待支付）  2：已支付（待发货）  3：已发货（待签收）  4：已签收（待结算）  5：已结算  ）
      *                -1：作废
      *                1：已下单（待支付）
      *                2：已支付（待发货）
@@ -106,7 +126,7 @@ public class OrdOrderMo implements Serializable {
     private Byte orderState;
 
     /**
-     *    用户编号
+     *    下单人用户ID
      *
      *    数据库字段: ORD_ORDER.USER_ID
      *
@@ -116,6 +136,7 @@ public class OrdOrderMo implements Serializable {
 
     /**
      *    作废-下单人姓名
+     *                @deprecated
      *
      *    数据库字段: ORD_ORDER.USER_NAME
      *
@@ -133,6 +154,18 @@ public class OrdOrderMo implements Serializable {
     @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss")
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd HH:mm:ss", timezone = "GMT+8")
     private Date orderTime;
+
+    /**
+     *    支付订单ID
+     *                提供给第三方支付记录的订单ID（因为有可能会多笔订单合并支付）
+     *                确认订单时，默认填写为订单ID(ORDER_ID)
+     *                拆分订单时，拆分后的订单的支付订单ID仍为旧订单的支付订单ID不变
+     *
+     *    数据库字段: ORD_ORDER.PAY_ORDER_ID
+     *
+     *    @mbg.generated 自动生成，如需修改，请删除本行
+     */
+    private Long payOrderId;
 
     /**
      *    支付时间
@@ -190,7 +223,8 @@ public class OrdOrderMo implements Serializable {
     private Date cancelTime;
 
     /**
-     *    物流订单ID
+     *    作废-物流订单ID
+     *                @deprecated
      *
      *    数据库字段: ORD_ORDER.LOGISTIC_ID
      *
@@ -199,7 +233,8 @@ public class OrdOrderMo implements Serializable {
     private Long logisticId;
 
     /**
-     *    快递公司编号
+     *    作废-快递公司编号
+     *                @deprecated
      *
      *    数据库字段: ORD_ORDER.SHIPPER_CODE
      *
@@ -208,7 +243,8 @@ public class OrdOrderMo implements Serializable {
     private String shipperCode;
 
     /**
-     *    快递公司名称
+     *    作废-快递公司名称
+     *                @deprecated
      *
      *    数据库字段: ORD_ORDER.SHIPPER_NAME
      *
@@ -217,7 +253,8 @@ public class OrdOrderMo implements Serializable {
     private String shipperName;
 
     /**
-     *    快递单号
+     *    作废-快递单号
+     *                @deprecated
      *
      *    数据库字段: ORD_ORDER.LOGISTIC_CODE
      *
@@ -361,36 +398,6 @@ public class OrdOrderMo implements Serializable {
     private String cancelReason;
 
     /**
-     *    支付订单ID
-     *                提供给第三方支付记录的订单ID（因为有可能会多笔订单合并支付）
-     *                确认订单时，默认填写为订单ID(ORDER_ID)
-     *                拆分订单时，拆分后的订单的支付订单ID仍为旧订单的支付订单ID不变
-     *
-     *    数据库字段: ORD_ORDER.PAY_ORDER_ID
-     *
-     *    @mbg.generated 自动生成，如需修改，请删除本行
-     */
-    private Long payOrderId;
-
-    /**
-     *    发货组织ID(默认填入上线组织ID，可变更为供应商的ID)
-     *
-     *    数据库字段: ORD_ORDER.DELIVER_ORG_ID
-     *
-     *    @mbg.generated 自动生成，如需修改，请删除本行
-     */
-    private Long deliverOrgId;
-
-    /**
-     *    上线组织ID
-     *
-     *    数据库字段: ORD_ORDER.ONLINE_ORG_ID
-     *
-     *    @mbg.generated 自动生成，如需修改，请删除本行
-     */
-    private Long onlineOrgId;
-
-    /**
      *    @mbg.generated 自动生成，如需修改，请删除本行
      */
     private static final long serialVersionUID = 1L;
@@ -462,6 +469,50 @@ public class OrdOrderMo implements Serializable {
     }
 
     /**
+     *    上线组织ID
+     *
+     *    数据库字段: ORD_ORDER.ONLINE_ORG_ID
+     *
+     *    @mbg.generated 自动生成，如需修改，请删除本行
+     */
+    public Long getOnlineOrgId() {
+        return onlineOrgId;
+    }
+
+    /**
+     *    上线组织ID
+     *
+     *    数据库字段: ORD_ORDER.ONLINE_ORG_ID
+     *
+     *    @mbg.generated 自动生成，如需修改，请删除本行
+     */
+    public void setOnlineOrgId(Long onlineOrgId) {
+        this.onlineOrgId = onlineOrgId;
+    }
+
+    /**
+     *    发货组织ID(默认填入上线组织ID，可变更为供应商的ID)
+     *
+     *    数据库字段: ORD_ORDER.DELIVER_ORG_ID
+     *
+     *    @mbg.generated 自动生成，如需修改，请删除本行
+     */
+    public Long getDeliverOrgId() {
+        return deliverOrgId;
+    }
+
+    /**
+     *    发货组织ID(默认填入上线组织ID，可变更为供应商的ID)
+     *
+     *    数据库字段: ORD_ORDER.DELIVER_ORG_ID
+     *
+     *    @mbg.generated 自动生成，如需修改，请删除本行
+     */
+    public void setDeliverOrgId(Long deliverOrgId) {
+        this.deliverOrgId = deliverOrgId;
+    }
+
+    /**
      *    下单金额
      *
      *    数据库字段: ORD_ORDER.ORDER_MONEY
@@ -529,6 +580,7 @@ public class OrdOrderMo implements Serializable {
 
     /**
      *    可退货金额1（退到返现金额）
+     *                @deprecated
      *
      *    数据库字段: ORD_ORDER.RETURN_AMOUNT1
      *
@@ -540,6 +592,7 @@ public class OrdOrderMo implements Serializable {
 
     /**
      *    可退货金额1（退到返现金额）
+     *                @deprecated
      *
      *    数据库字段: ORD_ORDER.RETURN_AMOUNT1
      *
@@ -551,6 +604,7 @@ public class OrdOrderMo implements Serializable {
 
     /**
      *    可退货总额2（退到余额）
+     *                @deprecated
      *
      *    数据库字段: ORD_ORDER.RETURN_AMOUNT2
      *
@@ -562,6 +616,7 @@ public class OrdOrderMo implements Serializable {
 
     /**
      *    可退货总额2（退到余额）
+     *                @deprecated
      *
      *    数据库字段: ORD_ORDER.RETURN_AMOUNT2
      *
@@ -572,7 +627,7 @@ public class OrdOrderMo implements Serializable {
     }
 
     /**
-     *    订单状态（-1：作废  1：已下单（待支付）  2：已支付（待发货）  3：已发货（待签收）  4：已签收（待结算）  5：已结算  ））
+     *    订单状态（-1：作废  1：已下单（待支付）  2：已支付（待发货）  3：已发货（待签收）  4：已签收（待结算）  5：已结算  ）
      *                -1：作废
      *                1：已下单（待支付）
      *                2：已支付（待发货）
@@ -589,7 +644,7 @@ public class OrdOrderMo implements Serializable {
     }
 
     /**
-     *    订单状态（-1：作废  1：已下单（待支付）  2：已支付（待发货）  3：已发货（待签收）  4：已签收（待结算）  5：已结算  ））
+     *    订单状态（-1：作废  1：已下单（待支付）  2：已支付（待发货）  3：已发货（待签收）  4：已签收（待结算）  5：已结算  ）
      *                -1：作废
      *                1：已下单（待支付）
      *                2：已支付（待发货）
@@ -606,7 +661,7 @@ public class OrdOrderMo implements Serializable {
     }
 
     /**
-     *    用户编号
+     *    下单人用户ID
      *
      *    数据库字段: ORD_ORDER.USER_ID
      *
@@ -617,7 +672,7 @@ public class OrdOrderMo implements Serializable {
     }
 
     /**
-     *    用户编号
+     *    下单人用户ID
      *
      *    数据库字段: ORD_ORDER.USER_ID
      *
@@ -629,6 +684,7 @@ public class OrdOrderMo implements Serializable {
 
     /**
      *    作废-下单人姓名
+     *                @deprecated
      *
      *    数据库字段: ORD_ORDER.USER_NAME
      *
@@ -640,6 +696,7 @@ public class OrdOrderMo implements Serializable {
 
     /**
      *    作废-下单人姓名
+     *                @deprecated
      *
      *    数据库字段: ORD_ORDER.USER_NAME
      *
@@ -669,6 +726,34 @@ public class OrdOrderMo implements Serializable {
      */
     public void setOrderTime(Date orderTime) {
         this.orderTime = orderTime;
+    }
+
+    /**
+     *    支付订单ID
+     *                提供给第三方支付记录的订单ID（因为有可能会多笔订单合并支付）
+     *                确认订单时，默认填写为订单ID(ORDER_ID)
+     *                拆分订单时，拆分后的订单的支付订单ID仍为旧订单的支付订单ID不变
+     *
+     *    数据库字段: ORD_ORDER.PAY_ORDER_ID
+     *
+     *    @mbg.generated 自动生成，如需修改，请删除本行
+     */
+    public Long getPayOrderId() {
+        return payOrderId;
+    }
+
+    /**
+     *    支付订单ID
+     *                提供给第三方支付记录的订单ID（因为有可能会多笔订单合并支付）
+     *                确认订单时，默认填写为订单ID(ORDER_ID)
+     *                拆分订单时，拆分后的订单的支付订单ID仍为旧订单的支付订单ID不变
+     *
+     *    数据库字段: ORD_ORDER.PAY_ORDER_ID
+     *
+     *    @mbg.generated 自动生成，如需修改，请删除本行
+     */
+    public void setPayOrderId(Long payOrderId) {
+        this.payOrderId = payOrderId;
     }
 
     /**
@@ -782,7 +867,8 @@ public class OrdOrderMo implements Serializable {
     }
 
     /**
-     *    物流订单ID
+     *    作废-物流订单ID
+     *                @deprecated
      *
      *    数据库字段: ORD_ORDER.LOGISTIC_ID
      *
@@ -793,7 +879,8 @@ public class OrdOrderMo implements Serializable {
     }
 
     /**
-     *    物流订单ID
+     *    作废-物流订单ID
+     *                @deprecated
      *
      *    数据库字段: ORD_ORDER.LOGISTIC_ID
      *
@@ -804,7 +891,8 @@ public class OrdOrderMo implements Serializable {
     }
 
     /**
-     *    快递公司编号
+     *    作废-快递公司编号
+     *                @deprecated
      *
      *    数据库字段: ORD_ORDER.SHIPPER_CODE
      *
@@ -815,7 +903,8 @@ public class OrdOrderMo implements Serializable {
     }
 
     /**
-     *    快递公司编号
+     *    作废-快递公司编号
+     *                @deprecated
      *
      *    数据库字段: ORD_ORDER.SHIPPER_CODE
      *
@@ -826,7 +915,8 @@ public class OrdOrderMo implements Serializable {
     }
 
     /**
-     *    快递公司名称
+     *    作废-快递公司名称
+     *                @deprecated
      *
      *    数据库字段: ORD_ORDER.SHIPPER_NAME
      *
@@ -837,7 +927,8 @@ public class OrdOrderMo implements Serializable {
     }
 
     /**
-     *    快递公司名称
+     *    作废-快递公司名称
+     *                @deprecated
      *
      *    数据库字段: ORD_ORDER.SHIPPER_NAME
      *
@@ -848,7 +939,8 @@ public class OrdOrderMo implements Serializable {
     }
 
     /**
-     *    快递单号
+     *    作废-快递单号
+     *                @deprecated
      *
      *    数据库字段: ORD_ORDER.LOGISTIC_CODE
      *
@@ -859,7 +951,8 @@ public class OrdOrderMo implements Serializable {
     }
 
     /**
-     *    快递单号
+     *    作废-快递单号
+     *                @deprecated
      *
      *    数据库字段: ORD_ORDER.LOGISTIC_CODE
      *
@@ -1200,78 +1293,6 @@ public class OrdOrderMo implements Serializable {
     }
 
     /**
-     *    支付订单ID
-     *                提供给第三方支付记录的订单ID（因为有可能会多笔订单合并支付）
-     *                确认订单时，默认填写为订单ID(ORDER_ID)
-     *                拆分订单时，拆分后的订单的支付订单ID仍为旧订单的支付订单ID不变
-     *
-     *    数据库字段: ORD_ORDER.PAY_ORDER_ID
-     *
-     *    @mbg.generated 自动生成，如需修改，请删除本行
-     */
-    public Long getPayOrderId() {
-        return payOrderId;
-    }
-
-    /**
-     *    支付订单ID
-     *                提供给第三方支付记录的订单ID（因为有可能会多笔订单合并支付）
-     *                确认订单时，默认填写为订单ID(ORDER_ID)
-     *                拆分订单时，拆分后的订单的支付订单ID仍为旧订单的支付订单ID不变
-     *
-     *    数据库字段: ORD_ORDER.PAY_ORDER_ID
-     *
-     *    @mbg.generated 自动生成，如需修改，请删除本行
-     */
-    public void setPayOrderId(Long payOrderId) {
-        this.payOrderId = payOrderId;
-    }
-
-    /**
-     *    发货组织ID(默认填入上线组织ID，可变更为供应商的ID)
-     *
-     *    数据库字段: ORD_ORDER.DELIVER_ORG_ID
-     *
-     *    @mbg.generated 自动生成，如需修改，请删除本行
-     */
-    public Long getDeliverOrgId() {
-        return deliverOrgId;
-    }
-
-    /**
-     *    发货组织ID(默认填入上线组织ID，可变更为供应商的ID)
-     *
-     *    数据库字段: ORD_ORDER.DELIVER_ORG_ID
-     *
-     *    @mbg.generated 自动生成，如需修改，请删除本行
-     */
-    public void setDeliverOrgId(Long deliverOrgId) {
-        this.deliverOrgId = deliverOrgId;
-    }
-
-    /**
-     *    上线组织ID
-     *
-     *    数据库字段: ORD_ORDER.ONLINE_ORG_ID
-     *
-     *    @mbg.generated 自动生成，如需修改，请删除本行
-     */
-    public Long getOnlineOrgId() {
-        return onlineOrgId;
-    }
-
-    /**
-     *    上线组织ID
-     *
-     *    数据库字段: ORD_ORDER.ONLINE_ORG_ID
-     *
-     *    @mbg.generated 自动生成，如需修改，请删除本行
-     */
-    public void setOnlineOrgId(Long onlineOrgId) {
-        this.onlineOrgId = onlineOrgId;
-    }
-
-    /**
      *    @mbg.generated 自动生成，如需修改，请删除本行
      */
     @Override
@@ -1283,6 +1304,8 @@ public class OrdOrderMo implements Serializable {
         sb.append(", id=").append(id);
         sb.append(", orderCode=").append(orderCode);
         sb.append(", orderTitle=").append(orderTitle);
+        sb.append(", onlineOrgId=").append(onlineOrgId);
+        sb.append(", deliverOrgId=").append(deliverOrgId);
         sb.append(", orderMoney=").append(orderMoney);
         sb.append(", realMoney=").append(realMoney);
         sb.append(", returnTotal=").append(returnTotal);
@@ -1292,6 +1315,7 @@ public class OrdOrderMo implements Serializable {
         sb.append(", userId=").append(userId);
         sb.append(", userName=").append(userName);
         sb.append(", orderTime=").append(orderTime);
+        sb.append(", payOrderId=").append(payOrderId);
         sb.append(", payTime=").append(payTime);
         sb.append(", sendTime=").append(sendTime);
         sb.append(", receivedTime=").append(receivedTime);
@@ -1316,9 +1340,6 @@ public class OrdOrderMo implements Serializable {
         sb.append(", sendOpId=").append(sendOpId);
         sb.append(", receivedOpId=").append(receivedOpId);
         sb.append(", cancelReason=").append(cancelReason);
-        sb.append(", payOrderId=").append(payOrderId);
-        sb.append(", deliverOrgId=").append(deliverOrgId);
-        sb.append(", onlineOrgId=").append(onlineOrgId);
         sb.append(", serialVersionUID=").append(serialVersionUID);
         sb.append("]");
         return sb.toString();

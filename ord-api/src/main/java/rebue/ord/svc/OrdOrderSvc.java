@@ -140,42 +140,22 @@ public interface OrdOrderSvc extends MybatisBaseSvc<OrdOrderMo, java.lang.Long> 
     OrdOrderMo selectReturnAmountByOrderCode(String orderCode);
 
     /**
-     * 根据订单编号修改订单 Title: updateByOrderCode Description:
-     *
-     * @param OrdOrderMo
-     * @return
-     * @date 2018年5月15日
+     * 根据订单编号修改订单
      */
     int updateByOrderCode(OrdOrderMo record);
 
     /**
-     * 结算完成 Title: finishSettlement Description:
-     *
-     * @param closeTime
-     * @param orderCode
-     * @return
-     * @date 2018年5月17日 下午3:19:25
+     * 结算完成
      */
     int finishSettlement(Date closeTime, String orderId);
 
     /**
-     * 订单支付 Title: orderPay Description:
-     *
-     * @param orderCode
-     * @param payTime
-     * @return
-     * @date 2018年5月18日 上午11:21:01
+     * 订单支付
      */
-    int orderPay(String orderId, Date payTime);
+    boolean handleOrderPaidNotify(Long payOrderId, Date payTime);
 
     /**
      * 根据订单id查询订单状态
-     * Title: selectOrderStateByOrderCode
-     * Description:
-     * 
-     * @param orderCode
-     * @return
-     * @date 2018年5月21日 下午5:01:46
      */
     Byte selectOrderStateByOrderCode(String id);
 

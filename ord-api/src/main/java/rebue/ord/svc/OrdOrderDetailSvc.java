@@ -42,6 +42,11 @@ public interface OrdOrderDetailSvc extends MybatisBaseSvc<OrdOrderDetailMo, java
 
     OrdOrderDetailMo getAndUpdateBuyRelationByFour(Map<String, Object> map);
 
+    /**
+     * 根据支付订单ID获取订单详情列表
+     */
+    List<OrdOrderDetailMo> listByPayOrderId(Long payOrderId);
+
     List<DetailandBuyRelationRo> listByOrderId(Long orderId);
 
     /**

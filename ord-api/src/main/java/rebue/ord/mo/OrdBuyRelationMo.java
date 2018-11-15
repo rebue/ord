@@ -87,6 +87,13 @@ public class OrdBuyRelationMo implements Serializable {
     private Byte relationSource;
 
     /**
+     *    数据库字段: ORD_BUY_RELATION.Attribute_10
+     *
+     *    @mbg.generated 自动生成，如需修改，请删除本行
+     */
+    private String attribute10;
+
+    /**
      *    @mbg.generated 自动生成，如需修改，请删除本行
      */
     private static final long serialVersionUID = 1L;
@@ -265,6 +272,24 @@ public class OrdBuyRelationMo implements Serializable {
      */
     public void setRelationSource(Byte relationSource) {
         this.relationSource = relationSource;
+    }
+
+    /**
+     *    数据库字段: ORD_BUY_RELATION.Attribute_10
+     *
+     *    @mbg.generated 自动生成，如需修改，请删除本行
+     */
+    public String getAttribute10() {
+        return attribute10;
+    }
+
+    /**
+     *    数据库字段: ORD_BUY_RELATION.Attribute_10
+     *
+     *    @mbg.generated 自动生成，如需修改，请删除本行
+     */
+    public void setAttribute10(String attribute10) {
+        this.attribute10 = attribute10;
     }
 
     /**

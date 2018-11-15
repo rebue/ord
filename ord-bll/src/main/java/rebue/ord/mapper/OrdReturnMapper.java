@@ -5,7 +5,6 @@ import java.util.Map;
 import org.apache.ibatis.annotations.Mapper;
 import rebue.ord.mo.OrdReturnMo;
 import rebue.ord.ro.OrdReturnRo;
-import rebue.ord.ro.OrderDetailRo;
 import rebue.robotech.mapper.MybatisBaseMapper;
 
 @Mapper
@@ -64,7 +63,7 @@ public interface OrdReturnMapper extends MybatisBaseMapper<OrdReturnMo, Long> {
     /**
      *    @mbg.generated 自动生成，如需修改，请删除本行
      */
-    List<OrdReturnMo> countSelective(OrdReturnMo record);
+    int countSelective(OrdReturnMo record);
 
     /**
      *  查询分页列表信息 Title: selectReturnPageList Description:

@@ -220,4 +220,13 @@ public class OrdOrderDetailSvcImpl extends MybatisBaseSvcImpl<OrdOrderDetailMo, 
         _log.info("得到买家已下单指定上线规格商品的数量(以此来限制买家购买): userId-{} onlineSpecId-{}", userId, onlineSpecId);
         return _mapper.getBuyerOrderedCount(userId, onlineSpecId);
     }
+
+    /**
+     * 根据支付订单ID获取订单详情列表
+     */
+    @Override
+    public List<OrdOrderDetailMo> listByPayOrderId(final Long payOrderId) {
+        _log.info("根据支付订单ID获取订单详情列表: payOrderId-{}", payOrderId);
+        return _mapper.listByPayOrderId(payOrderId);
+    }
 }

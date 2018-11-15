@@ -43,6 +43,15 @@ public class OrdOrderDetailMo implements Serializable {
     private Long onlineId;
 
     /**
+     *    上线规格ID
+     *
+     *    数据库字段: ORD_ORDER_DETAIL.ONLINE_SPEC_ID
+     *
+     *    @mbg.generated 自动生成，如需修改，请删除本行
+     */
+    private Long onlineSpecId;
+
+    /**
      *    产品ID
      *
      *    数据库字段: ORD_ORDER_DETAIL.PRODUCT_ID
@@ -50,6 +59,15 @@ public class OrdOrderDetailMo implements Serializable {
      *    @mbg.generated 自动生成，如需修改，请删除本行
      */
     private Long productId;
+
+    /**
+     *    产品规格ID
+     *
+     *    数据库字段: ORD_ORDER_DETAIL.PRODUCT_SPEC_ID
+     *
+     *    @mbg.generated 自动生成，如需修改，请删除本行
+     */
+    private Long productSpecId;
 
     /**
      *    版块类型（0：普通，1：全返）
@@ -124,15 +142,6 @@ public class OrdOrderDetailMo implements Serializable {
     private BigDecimal costPrice;
 
     /**
-     *    上线组织ID
-     *
-     *    数据库字段: ORD_ORDER_DETAIL.ONLINE_ORG_ID
-     *
-     *    @mbg.generated 自动生成，如需修改，请删除本行
-     */
-    private Long onlineOrgId;
-
-    /**
      *    供应商ID
      *
      *    数据库字段: ORD_ORDER_DETAIL.SUPPLIER_ID
@@ -203,24 +212,6 @@ public class OrdOrderDetailMo implements Serializable {
      *    @mbg.generated 自动生成，如需修改，请删除本行
      */
     private Long userId;
-
-    /**
-     *    产品规格ID
-     *
-     *    数据库字段: ORD_ORDER_DETAIL.PRODUCT_SPEC_ID
-     *
-     *    @mbg.generated 自动生成，如需修改，请删除本行
-     */
-    private Long productSpecId;
-
-    /**
-     *    上线规格ID
-     *
-     *    数据库字段: ORD_ORDER_DETAIL.ONLINE_SPEC_ID
-     *
-     *    @mbg.generated 自动生成，如需修改，请删除本行
-     */
-    private Long onlineSpecId;
 
     /**
      *    @mbg.generated 自动生成，如需修改，请删除本行
@@ -294,6 +285,28 @@ public class OrdOrderDetailMo implements Serializable {
     }
 
     /**
+     *    上线规格ID
+     *
+     *    数据库字段: ORD_ORDER_DETAIL.ONLINE_SPEC_ID
+     *
+     *    @mbg.generated 自动生成，如需修改，请删除本行
+     */
+    public Long getOnlineSpecId() {
+        return onlineSpecId;
+    }
+
+    /**
+     *    上线规格ID
+     *
+     *    数据库字段: ORD_ORDER_DETAIL.ONLINE_SPEC_ID
+     *
+     *    @mbg.generated 自动生成，如需修改，请删除本行
+     */
+    public void setOnlineSpecId(Long onlineSpecId) {
+        this.onlineSpecId = onlineSpecId;
+    }
+
+    /**
      *    产品ID
      *
      *    数据库字段: ORD_ORDER_DETAIL.PRODUCT_ID
@@ -313,6 +326,28 @@ public class OrdOrderDetailMo implements Serializable {
      */
     public void setProductId(Long productId) {
         this.productId = productId;
+    }
+
+    /**
+     *    产品规格ID
+     *
+     *    数据库字段: ORD_ORDER_DETAIL.PRODUCT_SPEC_ID
+     *
+     *    @mbg.generated 自动生成，如需修改，请删除本行
+     */
+    public Long getProductSpecId() {
+        return productSpecId;
+    }
+
+    /**
+     *    产品规格ID
+     *
+     *    数据库字段: ORD_ORDER_DETAIL.PRODUCT_SPEC_ID
+     *
+     *    @mbg.generated 自动生成，如需修改，请删除本行
+     */
+    public void setProductSpecId(Long productSpecId) {
+        this.productSpecId = productSpecId;
     }
 
     /**
@@ -492,28 +527,6 @@ public class OrdOrderDetailMo implements Serializable {
     }
 
     /**
-     *    上线组织ID
-     *
-     *    数据库字段: ORD_ORDER_DETAIL.ONLINE_ORG_ID
-     *
-     *    @mbg.generated 自动生成，如需修改，请删除本行
-     */
-    public Long getOnlineOrgId() {
-        return onlineOrgId;
-    }
-
-    /**
-     *    上线组织ID
-     *
-     *    数据库字段: ORD_ORDER_DETAIL.ONLINE_ORG_ID
-     *
-     *    @mbg.generated 自动生成，如需修改，请删除本行
-     */
-    public void setOnlineOrgId(Long onlineOrgId) {
-        this.onlineOrgId = onlineOrgId;
-    }
-
-    /**
      *    供应商ID
      *
      *    数据库字段: ORD_ORDER_DETAIL.SUPPLIER_ID
@@ -690,50 +703,6 @@ public class OrdOrderDetailMo implements Serializable {
     }
 
     /**
-     *    产品规格ID
-     *
-     *    数据库字段: ORD_ORDER_DETAIL.PRODUCT_SPEC_ID
-     *
-     *    @mbg.generated 自动生成，如需修改，请删除本行
-     */
-    public Long getProductSpecId() {
-        return productSpecId;
-    }
-
-    /**
-     *    产品规格ID
-     *
-     *    数据库字段: ORD_ORDER_DETAIL.PRODUCT_SPEC_ID
-     *
-     *    @mbg.generated 自动生成，如需修改，请删除本行
-     */
-    public void setProductSpecId(Long productSpecId) {
-        this.productSpecId = productSpecId;
-    }
-
-    /**
-     *    上线规格ID
-     *
-     *    数据库字段: ORD_ORDER_DETAIL.ONLINE_SPEC_ID
-     *
-     *    @mbg.generated 自动生成，如需修改，请删除本行
-     */
-    public Long getOnlineSpecId() {
-        return onlineSpecId;
-    }
-
-    /**
-     *    上线规格ID
-     *
-     *    数据库字段: ORD_ORDER_DETAIL.ONLINE_SPEC_ID
-     *
-     *    @mbg.generated 自动生成，如需修改，请删除本行
-     */
-    public void setOnlineSpecId(Long onlineSpecId) {
-        this.onlineSpecId = onlineSpecId;
-    }
-
-    /**
      *    @mbg.generated 自动生成，如需修改，请删除本行
      */
     @Override
@@ -745,7 +714,9 @@ public class OrdOrderDetailMo implements Serializable {
         sb.append(", id=").append(id);
         sb.append(", orderId=").append(orderId);
         sb.append(", onlineId=").append(onlineId);
+        sb.append(", onlineSpecId=").append(onlineSpecId);
         sb.append(", productId=").append(productId);
+        sb.append(", productSpecId=").append(productSpecId);
         sb.append(", subjectType=").append(subjectType);
         sb.append(", commissionSlot=").append(commissionSlot);
         sb.append(", commissionState=").append(commissionState);
@@ -754,7 +725,6 @@ public class OrdOrderDetailMo implements Serializable {
         sb.append(", buyCount=").append(buyCount);
         sb.append(", buyPrice=").append(buyPrice);
         sb.append(", costPrice=").append(costPrice);
-        sb.append(", onlineOrgId=").append(onlineOrgId);
         sb.append(", supplierId=").append(supplierId);
         sb.append(", deliverOrgId=").append(deliverOrgId);
         sb.append(", cashbackAmount=").append(cashbackAmount);
@@ -763,8 +733,6 @@ public class OrdOrderDetailMo implements Serializable {
         sb.append(", buyUnit=").append(buyUnit);
         sb.append(", returnState=").append(returnState);
         sb.append(", userId=").append(userId);
-        sb.append(", productSpecId=").append(productSpecId);
-        sb.append(", onlineSpecId=").append(onlineSpecId);
         sb.append(", serialVersionUID=").append(serialVersionUID);
         sb.append("]");
         return sb.toString();
