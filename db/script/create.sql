@@ -1,6 +1,6 @@
 /*==============================================================*/
 /* DBMS name:      MySQL 5.0                                    */
-/* Created on:     2018/11/15 16:35:56                          */
+/* Created on:     2018/11/15 17:37:03                          */
 /*==============================================================*/
 
 
@@ -93,7 +93,7 @@ create table ORD_ORDER
    DELIVER_ORG_ID       bigint comment '发货组织ID(默认填入上线组织ID，可变更为供应商的ID)',
    ORDER_MONEY          decimal(50,4) not null comment '下单金额',
    REAL_MONEY           decimal(50,4) not null comment '实际金额',
-   RETURN_TOTAL         decimal(50,4) comment '退货总额',
+   RETURN_TOTAL         decimal(50,4) not null default 0 comment '退货总额',
    RETURN_AMOUNT1       decimal(50,4) comment '可退货金额1（退到返现金额）',
    RETURN_AMOUNT2       decimal(50,4) comment '可退货总额2（退到余额）',
    ORDER_STATE          tinyint not null comment '订单状态（-1：作废  1：已下单（待支付）  2：已支付（待发货）  3：已发货（待签收）  4：已签收（待结算）  5：已结算  ）

@@ -1,7 +1,6 @@
 package rebue.ord;
 
 import java.io.IOException;
-import java.math.BigDecimal;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -37,7 +36,6 @@ public class OrdOrderTests {
         final List<OrderDetailTo> details = new LinkedList<>();
         final OrderTo orderTo = new OrderTo();
         orderTo.setUserId(515488916007157761L);                  // 下单的用户ID
-        orderTo.setOrderMoney(BigDecimal.valueOf(11.11));         // 下单金额
 
         Ro ro = order(orderTo);
         Assert.assertEquals("参数错误", ro.getMsg());
