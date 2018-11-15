@@ -1178,7 +1178,7 @@
 		where ORDER_CODE = #{orderCode,jdbcType=VARCHAR}
 	</update>
 
-	<select id="listOrder" parameterType="rebue.ord.to.OrdOrderTo" resultType="rebue.ord.ro.OrdOrderRo">
+	<select id="listOrder" parameterType="rebue.ord.to.ListOrderTo" resultType="rebue.ord.ro.OrdOrderRo">
 		<!-- 查询订单 -->
 		select
 		<include refid="Base_Column_List" />

@@ -14,11 +14,10 @@ import java.util.Calendar;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
-import java.util.LinkedHashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
+import java.util.Map.Entry;
 
 import javax.annotation.Resource;
 
@@ -238,9 +237,7 @@ public class OrdOrderSvcImpl extends MybatisBaseSvcImpl<OrdOrderMo, java.lang.Lo
         // 上线列表(获取过的上线信息放进这里，避免重复获取)
         final Map<Long, OnlOnlineMo> onlines = new LinkedHashMap<>();
         // 上线组织列表(不同上线组织的订单详情需要拆单)
-        final Set<Long> onlineOrgIds = new LinkedHashSet<>();
-        // 要添加的订单详情列表
-        final List<OrdOrderDetailMo> orderDetails = new LinkedList<>();
+        final Map<Long, List<OrdOrderDetailMo>> onlineOrgs = new LinkedHashMap<>();
         // 要更新的上线规格列表
         final List<UpdateOnlineSpecAfterOrderTo> specList = new ArrayList<>();
         _log.debug("遍历订单详情");
@@ -328,7 +325,6 @@ public class OrdOrderSvcImpl extends MybatisBaseSvcImpl<OrdOrderMo, java.lang.Lo
                 orderDetailMo.setCashbackAmount(BigDecimal.ZERO);
                 orderDetailMo.setCashbackTotal(BigDecimal.ZERO);
             }
-            orderDetails.add(orderDetailMo);
 
             // 添加要更新的上线规格信息
             final UpdateOnlineSpecAfterOrderTo specTo = new UpdateOnlineSpecAfterOrderTo();
@@ -338,8 +334,13 @@ public class OrdOrderSvcImpl extends MybatisBaseSvcImpl<OrdOrderMo, java.lang.Lo
             specTo.setCartId(orderDetailTo.getCartId());
             specList.add(specTo);
 
-            // 添加上线组织
-            onlineOrgIds.add(onlineMo.getOnlineOrgId());
+            // 添加订单详情到上线组织列表中(根据上线组织拆分订单详情)
+            List<OrdOrderDetailMo> orderDetails = onlineOrgs.get(onlineMo.getOnlineOrgId());
+            if (orderDetails == null) {
+                orderDetails = new LinkedList<>();
+                onlineOrgs.put(onlineMo.getOnlineOrgId(), orderDetails);
+            }
+            orderDetails.add(orderDetailMo);
 
             // 根据订单详情生成订单标题
             final String remark = onlineMo.getOnlineTitle() + "(" + onlineSpecMo.getOnlineSpec() //
@@ -366,13 +367,13 @@ public class OrdOrderSvcImpl extends MybatisBaseSvcImpl<OrdOrderMo, java.lang.Lo
         final Date now = new Date();
         final Long payOrderId = _idWorker.getId();                              // 支付订单ID
         // 根据上线组织拆单
-        for (final Long onlineOrgId : onlineOrgIds) {
+        for (final Entry<Long, List<OrdOrderDetailMo>> onlineOrg : onlineOrgs.entrySet()) {
             final OrdOrderMo orderMo = new OrdOrderMo();
             orderMo.setId(_idWorker.getId());
             orderMo.setOrderCode(_idWorker.getIdStr());                         // 订单编号 TODO 重写订单编号的生成算法
             orderMo.setOrderState((byte) OrderStateDic.ORDERED.getCode());      // 订单状态已下单
             orderMo.setOrderTime(now);                                          // 下单时间
-            orderMo.setOnlineOrgId(onlineOrgId);                                // 上线组织ID
+            orderMo.setOnlineOrgId(onlineOrg.getKey());                         // 上线组织ID
             orderMo.setPayOrderId(payOrderId);                                  // 支付订单ID
 
             orderMo.setUserId(to.getUserId());                  // 下单人用户ID
@@ -401,7 +402,7 @@ public class OrdOrderSvcImpl extends MybatisBaseSvcImpl<OrdOrderMo, java.lang.Lo
             // 添加订单信息
             add(orderMo);
             // 添加订单详情
-            for (final OrdOrderDetailMo orderDetailMo : orderDetails) {
+            for (final OrdOrderDetailMo orderDetailMo : onlineOrg.getValue()) {
                 _log.info("添加订单详情的参数为：{}", orderDetailMo);
                 orderDetailMo.setOrderId(orderMo.getId());
                 orderDetailMo.setUserId(to.getUserId());
