@@ -8,40 +8,42 @@ import com.fasterxml.jackson.annotation.JsonCreator;
 import rebue.wheel.baseintf.EnumBase;
 
 /**
- * 订单状态字典
- * -1. 作废（取消）
- * 1. 已下单（待支付）
- * 2. 已支付（待发货）
- * 3. 已发货（待签收）
- * 4. 已签收（待结算）
- * 5. 已结算
+ * 下订单返回值字典
  */
-public enum OrderStateDic implements EnumBase {
+public enum OrderResultDic implements EnumBase {
 
-    /**
-     * -1. 作废（取消）
-     */
-    CANCEL(-1),
-    /**
-     * 1. 已下单（待支付）
-     */
-    ORDERED(1),
-    /**
-     * 2. 已支付（待发货）
-     */
-    PAID(2),
-    /**
-     * 3. 已发货（待签收）
-     */
-    DELIVERED(3),
-    /**
-     * 4. 已签收（待结算）
-     */
-    SIGNED(4),
-    /**
-     * 5. 已结算
-     */
-    SETTLED(5);
+    /** 下单成功 **/
+    SUCCESS(1),
+
+    /** 收货地址不能为空 **/
+    DELIVERY_ADDRESS_NOT_NULL(-1),
+
+    /** 生成订单出错 **/
+    CREATE_ORDER_ERROR(-2),
+
+    /** 生成订单详情出错 **/
+    CREATE_ORDER_DETAIL_ERROR(-3),
+
+    /** 删除购物车和修改上线数量出错 **/
+    DELETE_CART_AND_MODIFY_ONLINE_COUNT_ERROR(-4),
+
+    /** 商品不存在购物车 **/
+    GOODS_NOT_EXIST_CART(-5),
+
+    /** 商品未上线 **/
+    GOODS_NOT_ONLINE(-6),
+
+    /** 扣减上线数量失败 **/
+    SUBTRACT_ONLINE_COUNT_ERROR(-7),
+
+    /** 删除购物车失败 **/
+    DELETE_CART_ERROR(-8),
+
+    /** 库存不足 **/
+    INSUFFICIENT_INVENTORY(-9),
+
+    /** 下单失败 **/
+    ERROR(-10);
 
     /**
      * 枚举的所有项，注意这个变量是静态单例的
@@ -60,12 +62,12 @@ public enum OrderStateDic implements EnumBase {
      * 否则jackson将调用默认的反序列化方法，而不会调用本方法
      */
     @JsonCreator
-    public static OrderStateDic getItem(final int code) {
+    public static OrderResultDic getItem(final int code) {
         final EnumBase result = valueMap.get(code);
         if (result == null) {
             throw new IllegalArgumentException("输入的code" + code + "不在枚举的取值范围内");
         }
-        return (OrderStateDic) result;
+        return (OrderResultDic) result;
     }
 
     private int code;
@@ -73,7 +75,7 @@ public enum OrderStateDic implements EnumBase {
     /**
      * 构造器，传入code
      */
-    OrderStateDic(final int code) {
+    OrderResultDic(final int code) {
         this.code = code;
     }
 

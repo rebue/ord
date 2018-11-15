@@ -8,40 +8,20 @@ import com.fasterxml.jackson.annotation.JsonCreator;
 import rebue.wheel.baseintf.EnumBase;
 
 /**
- * 订单状态字典
- * -1. 作废（取消）
- * 1. 已下单（待支付）
- * 2. 已支付（待发货）
- * 3. 已发货（待签收）
- * 4. 已签收（待结算）
- * 5. 已结算
+ * 订单任务类型字典
+ * 1：取消订单
+ * 2：订单签收
  */
-public enum OrderStateDic implements EnumBase {
+public enum OrderTaskTypeDic implements EnumBase {
 
     /**
-     * -1. 作废（取消）
+     * 1：取消订单
      */
-    CANCEL(-1),
+    CANCEL(1),
     /**
-     * 1. 已下单（待支付）
+     * 2：订单签收
      */
-    ORDERED(1),
-    /**
-     * 2. 已支付（待发货）
-     */
-    PAID(2),
-    /**
-     * 3. 已发货（待签收）
-     */
-    DELIVERED(3),
-    /**
-     * 4. 已签收（待结算）
-     */
-    SIGNED(4),
-    /**
-     * 5. 已结算
-     */
-    SETTLED(5);
+    SIGNED(2);
 
     /**
      * 枚举的所有项，注意这个变量是静态单例的
@@ -60,12 +40,12 @@ public enum OrderStateDic implements EnumBase {
      * 否则jackson将调用默认的反序列化方法，而不会调用本方法
      */
     @JsonCreator
-    public static OrderStateDic getItem(final int code) {
+    public static OrderTaskTypeDic getItem(final int code) {
         final EnumBase result = valueMap.get(code);
         if (result == null) {
             throw new IllegalArgumentException("输入的code" + code + "不在枚举的取值范围内");
         }
-        return (OrderStateDic) result;
+        return (OrderTaskTypeDic) result;
     }
 
     private int code;
@@ -73,7 +53,7 @@ public enum OrderStateDic implements EnumBase {
     /**
      * 构造器，传入code
      */
-    OrderStateDic(final int code) {
+    OrderTaskTypeDic(final int code) {
         this.code = code;
     }
 

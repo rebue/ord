@@ -188,7 +188,7 @@ public class OrdReturnSvcImpl extends MybatisBaseSvcImpl<OrdReturnMo, java.lang.
 			addReturnRo.setMsg("订单已取消");
 			return addReturnRo;
 		}
-		if (orderState == OrderStateDic.ALREADY_PLACE_AN_ORDER.getCode()) {
+		if (orderState == OrderStateDic.ORDERED.getCode()) {
 			_log.error("添加退货信息出现订单未支付，订单编号为：{}", orderCode);
 			addReturnRo.setResult(AddReturnDic.ORDER_NOT_PAY);
 			addReturnRo.setMsg("订单未支付");
@@ -504,7 +504,7 @@ public class OrdReturnSvcImpl extends MybatisBaseSvcImpl<OrdReturnMo, java.lang.
 			return agreeToReturnRo;
 		}
 		if (orderList.get(0).getOrderState() == OrderStateDic.CANCEL.getCode()
-				|| orderList.get(0).getOrderState() == OrderStateDic.ALREADY_PLACE_AN_ORDER.getCode()) {
+				|| orderList.get(0).getOrderState() == OrderStateDic.ORDERED.getCode()) {
 			_log.error("同意退货时发现该订单未支付或已取消，退货编号为：{}", returnCode);
 			agreeToReturnRo.setResult(AgreeToReturnDic.ORDER_NOT_PAY_OR_ALREADY_CANCEL);
 			agreeToReturnRo.setMsg("该订单未支付或已取消");
@@ -634,15 +634,15 @@ public class OrdReturnSvcImpl extends MybatisBaseSvcImpl<OrdReturnMo, java.lang.
 		}
 		byte orderState = orderList.getOrderState();
 		if (orderState == OrderStateDic.CANCEL.getCode()
-				|| orderState == OrderStateDic.ALREADY_PLACE_AN_ORDER.getCode()) {
+				|| orderState == OrderStateDic.ORDERED.getCode()) {
 			_log.error("同意退款时发现订单未支付或已取消，退货编号为：{}", returnCode);
 			agreeToARefundRo.setResult(AgreeToARefundDic.ORDER_NOT_PAY_OR_ALREADY_CANCEL);
 			agreeToARefundRo.setMsg("该订单未支付或已取消");
 			return agreeToARefundRo;
 		}
 		BigDecimal returnCashbackToBuyer = returnAmount2;
-		if (orderState == OrderStateDic.ALREADY_SIGN_IN.getCode()
-				|| orderState == OrderStateDic.ALREADY_SETTLEMENT.getCode()) {
+		if (orderState == OrderStateDic.SIGNED.getCode()
+				|| orderState == OrderStateDic.SETTLED.getCode()) {
 			returnCashbackToBuyer = returnAmount2.subtract(subtractCashback).setScale(4, BigDecimal.ROUND_HALF_UP);
 		}
 		OrdOrderDetailMo detailMo = new OrdOrderDetailMo();
@@ -914,15 +914,15 @@ public class OrdReturnSvcImpl extends MybatisBaseSvcImpl<OrdReturnMo, java.lang.
 			return receivedAndRefundedRo;
 		}
 		if (orderList.get(0).getOrderState() == OrderStateDic.CANCEL.getCode()
-				|| orderList.get(0).getOrderState() == OrderStateDic.ALREADY_PLACE_AN_ORDER.getCode()) {
+				|| orderList.get(0).getOrderState() == OrderStateDic.ORDERED.getCode()) {
 			_log.error("已收到货并退款时发现订单处于取消或待支付状态，退货编号为：{}", returnCode);
 			receivedAndRefundedRo.setResult(ReceivedAndRefundedDic.ORDER_NOT_PAY_OR_ALREADY_CANCEL);
 			receivedAndRefundedRo.setMsg("该订单已取消或未支付");
 			return receivedAndRefundedRo;
 		}
 		BigDecimal returnCashbackToBuyer = returnList.get(0).getReturnAmount2();
-		if (orderList.get(0).getOrderState() == OrderStateDic.ALREADY_SIGN_IN.getCode()
-				|| orderList.get(0).getOrderState() == OrderStateDic.ALREADY_SETTLEMENT.getCode()) {
+		if (orderList.get(0).getOrderState() == OrderStateDic.SIGNED.getCode()
+				|| orderList.get(0).getOrderState() == OrderStateDic.SETTLED.getCode()) {
 			returnCashbackToBuyer = returnList.get(0).getReturnAmount2()
 					.subtract(returnList.get(0).getSubtractCashback()).setScale(4, BigDecimal.ROUND_HALF_UP);
 		}

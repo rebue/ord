@@ -42,6 +42,11 @@
 				<version>1.0.9</version>
 			</dependency>
 			<dependency>
+				<groupId>com.github.rebue.onl</groupId>
+				<artifactId>onl-svr-feign</artifactId>
+				<version>1.0.9</version>
+			</dependency>
+			<dependency>
 				<groupId>com.github.rebue.suc</groupId>
 				<artifactId>suc-svr-feign</artifactId>
 				<version>1.0.8</version>
@@ -54,11 +59,6 @@
 			<dependency>
 				<groupId>com.github.rebue.afc</groupId>
 				<artifactId>afc-svr-feign</artifactId>
-				<version>1.0.8</version>
-			</dependency>
-			<dependency>
-				<groupId>com.github.rebue.onl</groupId>
-				<artifactId>onl-svr-feign</artifactId>
 				<version>1.0.8</version>
 			</dependency>
 			<dependency>

@@ -3,12 +3,15 @@ package rebue.ord.svc.impl;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+
 import javax.annotation.Resource;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
+
 import rebue.ord.mapper.OrdOrderDetailMapper;
 import rebue.ord.mo.OrdBuyRelationMo;
 import rebue.ord.mo.OrdOrderDetailMo;
@@ -47,7 +50,7 @@ public class OrdOrderDetailSvcImpl extends MybatisBaseSvcImpl<OrdOrderDetailMo, 
      */
     @Override
     @Transactional(readOnly = false, propagation = Propagation.REQUIRED)
-    public int add(OrdOrderDetailMo mo) {
+    public int add(final OrdOrderDetailMo mo) {
         _log.info("添加订单详情");
         // 如果id为空那么自动生成分布式id
         if (mo.getId() == null || mo.getId() == 0) {
@@ -59,39 +62,39 @@ public class OrdOrderDetailSvcImpl extends MybatisBaseSvcImpl<OrdOrderDetailMo, 
     /**
      */
     @Resource
-    private SucUserSvc sucUserSvc;
+    private SucUserSvc        sucUserSvc;
 
     @Resource
     private OrdBuyRelationSvc selfSvc;
 
     /**
-     *  根据订单编号、详情ID修改退货数量和返现总额 Title: modifyReturnCountAndCashBackTotal
-     *  Description:
+     * 根据订单编号、详情ID修改退货数量和返现总额 Title: modifyReturnCountAndCashBackTotal
+     * Description:
      *
-     *  @param orderId
-     *  @param orderDetailId
-     *  @param returnCount
-     *  @param cashbackTotal
-     *  @return
-     *  @date 2018年5月7日 上午9:53:45
+     * @param orderId
+     * @param orderDetailId
+     * @param returnCount
+     * @param cashbackTotal
+     * @return
+     * @date 2018年5月7日 上午9:53:45
      */
     @Override
     @Transactional(readOnly = false, propagation = Propagation.REQUIRED)
-    public int modifyReturnCountAndCashBackTotal(OrdOrderDetailMo mo) {
+    public int modifyReturnCountAndCashBackTotal(final OrdOrderDetailMo mo) {
         return _mapper.modifyReturnCountAndCashBackTotal(mo);
     }
 
     /**
-     *  根据详情ID修改退货状态 Title: modifyReturnStateById Description:
+     * 根据详情ID修改退货状态 Title: modifyReturnStateById Description:
      *
-     *  @param id
-     *  @param returnState
-     *  @return
-     *  @date 2018年5月8日 上午10:59:02
+     * @param id
+     * @param returnState
+     * @return
+     * @date 2018年5月8日 上午10:59:02
      */
     @Override
     @Transactional(readOnly = false, propagation = Propagation.REQUIRED)
-    public int modifyReturnStateById(long id, byte returnState) {
+    public int modifyReturnStateById(final long id, final byte returnState) {
         return _mapper.modifyReturnStateById(returnState, id);
     }
 
@@ -99,49 +102,49 @@ public class OrdOrderDetailSvcImpl extends MybatisBaseSvcImpl<OrdOrderDetailMo, 
      * 用户匹配自己购买关系，获取用户还有两个匹配名额的订单详情
      */
     @Override
-    public OrdOrderDetailMo getOrderDetailForBuyRelation(Map<String, Object> map) {
+    public OrdOrderDetailMo getOrderDetailForBuyRelation(final Map<String, Object> map) {
         return _mapper.getOrderDetailForBuyRelation(map);
     }
 
     @Override
-    public int updateCommissionSlotForBuyRelation(OrdOrderDetailMo mo) {
+    public int updateCommissionSlotForBuyRelation(final OrdOrderDetailMo mo) {
         return _mapper.updateCommissionSlotForBuyRelation(mo);
     }
 
     @Override
-    public int updateCashbackSlot(OrdOrderDetailMo mo) {
+    public int updateCashbackSlot(final OrdOrderDetailMo mo) {
         return _mapper.updateCashbackSlot(mo);
     }
 
     @Override
-    public OrdOrderDetailMo getAndUpdateBuyRelationByFour(Map<String, Object> map) {
+    public OrdOrderDetailMo getAndUpdateBuyRelationByFour(final Map<String, Object> map) {
         return _mapper.getAndUpdateBuyRelationByFour(map);
     }
 
     @Override
-    public OrdOrderDetailMo getAndUpdateBuyRelationByInvite(Map<String, Object> map) {
+    public OrdOrderDetailMo getAndUpdateBuyRelationByInvite(final Map<String, Object> map) {
         return _mapper.getAndUpdateBuyRelationByInvite(map);
     }
 
     @Override
-    public OrdOrderDetailMo getOrderDetailForOneCommissonSlot(Map<String, Object> map) {
+    public OrdOrderDetailMo getOrderDetailForOneCommissonSlot(final Map<String, Object> map) {
         return _mapper.getOrderDetailForOneCommissonSlot(map);
     }
 
     @Override
-    public List<DetailandBuyRelationRo> listByOrderId(Long orderId) {
-        List<DetailandBuyRelationRo> result = new ArrayList<DetailandBuyRelationRo>();
+    public List<DetailandBuyRelationRo> listByOrderId(final Long orderId) {
+        final List<DetailandBuyRelationRo> result = new ArrayList<>();
         _log.info("根据orderId获取购买关系参数为： {}", orderId);
         _log.info("先查询订单详情参数为： {}", orderId);
         // 查询回来的订单详情列表
-        List<OrdOrderDetailMo> detailList = _mapper.getDetailByOrderId(orderId);
+        final List<OrdOrderDetailMo> detailList = _mapper.getDetailByOrderId(orderId);
         _log.info("查询订单详情的返回值： {}", detailList);
         // 根据订单详情列表中的id去获取购买关系
-        OrdBuyRelationMo uPmo = new OrdBuyRelationMo();
-        OrdBuyRelationMo dWmo = new OrdBuyRelationMo();
+        final OrdBuyRelationMo uPmo = new OrdBuyRelationMo();
+        final OrdBuyRelationMo dWmo = new OrdBuyRelationMo();
         for (int i = 0; i < detailList.size(); i++) {
             // 映射当前详情的所有字段
-            DetailandBuyRelationRo item = new DetailandBuyRelationRo();
+            final DetailandBuyRelationRo item = new DetailandBuyRelationRo();
             item.setId(detailList.get(i).getId());
             item.setOrderId(detailList.get(i).getOrderId());
             item.setProductId(detailList.get(i).getProductId());
@@ -158,13 +161,13 @@ public class OrdOrderDetailSvcImpl extends MybatisBaseSvcImpl<OrdOrderDetailMo, 
             item.setSubjectType(detailList.get(i).getSubjectType());
             uPmo.setUplineOrderDetailId(detailList.get(i).getId());
             _log.info("当前下家关系的的参数为： {}", uPmo);
-            List<OrdBuyRelationMo> Uplist = selfSvc.list(uPmo);
+            final List<OrdBuyRelationMo> Uplist = selfSvc.list(uPmo);
             _log.info("查询下家关系的结果为： {}", Uplist);
             for (int j = 0; j < Uplist.size(); j++) {
-                Long dId = Uplist.get(j).getDownlineUserId();
+                final Long dId = Uplist.get(j).getDownlineUserId();
                 // 当前条购买关系的下家名字
                 _log.info("开始获取下家名字id为： {}", dId);
-                SucUserMo dUserName = sucUserSvc.getById(dId);
+                final SucUserMo dUserName = sucUserSvc.getById(dId);
                 _log.info("获取下家的结果为： {}", dUserName);
                 if (item.getDownlineUserName1() == null) {
                     _log.info("设置第一个下家名字： {}", dUserName);
@@ -185,13 +188,13 @@ public class OrdOrderDetailSvcImpl extends MybatisBaseSvcImpl<OrdOrderDetailMo, 
             dWmo.setDownlineOrderDetailId(detailList.get(i).getId());
             _log.info("当前订单详情上家关系的参数为： {}", dWmo);
             // 已经获取到第一条订单详情的所有购买关系
-            List<OrdBuyRelationMo> dwList = selfSvc.list(dWmo);
+            final List<OrdBuyRelationMo> dwList = selfSvc.list(dWmo);
             _log.info("当前订单详情上家关系的结果为： {}", dwList);
             for (int j = 0; j < dwList.size(); j++) {
-                Long uId = dwList.get(0).getUplineUserId();
+                final Long uId = dwList.get(0).getUplineUserId();
                 // 当前条购买关系的上家名字
                 _log.info("开始获取上家名字id为： {}", uId);
-                SucUserMo uUserName = sucUserSvc.getById(uId);
+                final SucUserMo uUserName = sucUserSvc.getById(uId);
                 _log.info("获取上家的结果为： {}", uUserName);
                 item.setUplineRelationSource(dwList.get(0).getRelationSource());
                 item.setUplineIsSignIn(dwList.get(0).getIsSignIn());
@@ -202,5 +205,19 @@ public class OrdOrderDetailSvcImpl extends MybatisBaseSvcImpl<OrdOrderDetailMo, 
             result.add(item);
         }
         return result;
+    }
+
+    /**
+     * 得到买家已下单指定上线规格商品的数量(以此来限制买家购买)
+     * 
+     * @param userId
+     *            购买用户的用户ID
+     * @param onlineSpecId
+     *            上线规格ID
+     */
+    @Override
+    public int getBuyerOrderedCount(final Long userId, final Long onlineSpecId) {
+        _log.info("得到买家已下单指定上线规格商品的数量(以此来限制买家购买): userId-{} onlineSpecId-{}", userId, onlineSpecId);
+        return _mapper.getBuyerOrderedCount(userId, onlineSpecId);
     }
 }
