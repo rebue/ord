@@ -1,6 +1,6 @@
 /*==============================================================*/
 /* DBMS name:      MySQL 5.0                                    */
-/* Created on:     2018/11/15 11:46:56                          */
+/* Created on:     2018/11/15 12:36:24                          */
 /*==============================================================*/
 
 
@@ -89,6 +89,7 @@ create table ORD_ORDER
    ID                   bigint not null comment '订单ID',
    ORDER_CODE           varchar(50) not null comment '订单编号',
    ORDER_TITLE          varchar(200) not null comment '订单标题',
+   ONLINE_ORG_ID        bigint comment '上线组织ID',
    DELIVER_ORG_ID       bigint comment '发货组织ID(默认填入上线组织ID，可变更为供应商的ID)',
    ORDER_MONEY          decimal(50,4) not null comment '下单金额',
    REAL_MONEY           decimal(50,4) not null comment '实际金额',

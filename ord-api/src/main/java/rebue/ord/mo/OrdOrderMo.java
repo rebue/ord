@@ -382,6 +382,15 @@ public class OrdOrderMo implements Serializable {
     private Long deliverOrgId;
 
     /**
+     *    上线组织ID
+     *
+     *    数据库字段: ORD_ORDER.ONLINE_ORG_ID
+     *
+     *    @mbg.generated 自动生成，如需修改，请删除本行
+     */
+    private Long onlineOrgId;
+
+    /**
      *    @mbg.generated 自动生成，如需修改，请删除本行
      */
     private static final long serialVersionUID = 1L;
@@ -1241,6 +1250,28 @@ public class OrdOrderMo implements Serializable {
     }
 
     /**
+     *    上线组织ID
+     *
+     *    数据库字段: ORD_ORDER.ONLINE_ORG_ID
+     *
+     *    @mbg.generated 自动生成，如需修改，请删除本行
+     */
+    public Long getOnlineOrgId() {
+        return onlineOrgId;
+    }
+
+    /**
+     *    上线组织ID
+     *
+     *    数据库字段: ORD_ORDER.ONLINE_ORG_ID
+     *
+     *    @mbg.generated 自动生成，如需修改，请删除本行
+     */
+    public void setOnlineOrgId(Long onlineOrgId) {
+        this.onlineOrgId = onlineOrgId;
+    }
+
+    /**
      *    @mbg.generated 自动生成，如需修改，请删除本行
      */
     @Override
@@ -1287,6 +1318,7 @@ public class OrdOrderMo implements Serializable {
         sb.append(", cancelReason=").append(cancelReason);
         sb.append(", payOrderId=").append(payOrderId);
         sb.append(", deliverOrgId=").append(deliverOrgId);
+        sb.append(", onlineOrgId=").append(onlineOrgId);
         sb.append(", serialVersionUID=").append(serialVersionUID);
         sb.append("]");
         return sb.toString();

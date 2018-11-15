@@ -44,6 +44,7 @@
     <result column="CANCEL_REASON" jdbcType="VARCHAR" property="cancelReason" />
     <result column="PAY_ORDER_ID" jdbcType="BIGINT" property="payOrderId" />
     <result column="DELIVER_ORG_ID" jdbcType="BIGINT" property="deliverOrgId" />
+    <result column="ONLINE_ORG_ID" jdbcType="BIGINT" property="onlineOrgId" />
   </resultMap>
   <sql id="Base_Column_List">
     <!--
@@ -56,7 +57,7 @@
     LOGISTIC_CODE, RECEIVER_NAME, RECEIVER_TEL, RECEIVER_MOBILE, RECEIVER_PROVINCE, RECEIVER_CITY, 
     RECEIVER_EXP_AREA, RECEIVER_ADDRESS, RECEIVER_POST_CODE, ORDER_MESSAGES, MODIFY_REALVERY_MONEY_OP_ID, 
     CANCELING_ORDER_OP_ID, CANCELDELI_REASON, SEND_OP_ID, RECEIVED_OP_ID, CANCEL_REASON, 
-    PAY_ORDER_ID, DELIVER_ORG_ID
+    PAY_ORDER_ID, DELIVER_ORG_ID, ONLINE_ORG_ID
   </sql>
   <select id="selectByPrimaryKey" parameterType="java.lang.Long" resultMap="BaseResultMap">
     <!--
@@ -93,8 +94,8 @@
       RECEIVER_ADDRESS, RECEIVER_POST_CODE, ORDER_MESSAGES, 
       MODIFY_REALVERY_MONEY_OP_ID, CANCELING_ORDER_OP_ID, 
       CANCELDELI_REASON, SEND_OP_ID, RECEIVED_OP_ID, 
-      CANCEL_REASON, PAY_ORDER_ID, DELIVER_ORG_ID
-      )
+      CANCEL_REASON, PAY_ORDER_ID, DELIVER_ORG_ID, 
+      ONLINE_ORG_ID)
     values (#{id,jdbcType=BIGINT}, #{orderCode,jdbcType=VARCHAR}, #{orderTitle,jdbcType=VARCHAR}, 
       #{orderMoney,jdbcType=DECIMAL}, #{realMoney,jdbcType=DECIMAL}, #{returnTotal,jdbcType=DECIMAL}, 
       #{returnAmount1,jdbcType=DECIMAL}, #{returnAmount2,jdbcType=DECIMAL}, #{orderState,jdbcType=TINYINT}, 
@@ -107,8 +108,8 @@
       #{receiverAddress,jdbcType=VARCHAR}, #{receiverPostCode,jdbcType=CHAR}, #{orderMessages,jdbcType=VARCHAR}, 
       #{modifyRealveryMoneyOpId,jdbcType=BIGINT}, #{cancelingOrderOpId,jdbcType=BIGINT}, 
       #{canceldeliReason,jdbcType=VARCHAR}, #{sendOpId,jdbcType=BIGINT}, #{receivedOpId,jdbcType=BIGINT}, 
-      #{cancelReason,jdbcType=VARCHAR}, #{payOrderId,jdbcType=BIGINT}, #{deliverOrgId,jdbcType=BIGINT}
-      )
+      #{cancelReason,jdbcType=VARCHAR}, #{payOrderId,jdbcType=BIGINT}, #{deliverOrgId,jdbcType=BIGINT}, 
+      #{onlineOrgId,jdbcType=BIGINT})
   </insert>
   <insert id="insertSelective" parameterType="rebue.ord.mo.OrdOrderMo">
     <!--
@@ -231,6 +232,9 @@
       <if test="deliverOrgId != null">
         DELIVER_ORG_ID,
       </if>
+      <if test="onlineOrgId != null">
+        ONLINE_ORG_ID,
+      </if>
     </trim>
     <trim prefix="values (" suffix=")" suffixOverrides=",">
       <if test="id != null">
@@ -346,6 +350,9 @@
       </if>
       <if test="deliverOrgId != null">
         #{deliverOrgId,jdbcType=BIGINT},
+      </if>
+      <if test="onlineOrgId != null">
+        #{onlineOrgId,jdbcType=BIGINT},
       </if>
     </trim>
   </insert>
@@ -467,6 +474,9 @@
       <if test="deliverOrgId != null">
         DELIVER_ORG_ID = #{deliverOrgId,jdbcType=BIGINT},
       </if>
+      <if test="onlineOrgId != null">
+        ONLINE_ORG_ID = #{onlineOrgId,jdbcType=BIGINT},
+      </if>
     </set>
     where ID = #{id,jdbcType=BIGINT}
   </update>
@@ -512,7 +522,8 @@
       RECEIVED_OP_ID = #{receivedOpId,jdbcType=BIGINT},
       CANCEL_REASON = #{cancelReason,jdbcType=VARCHAR},
       PAY_ORDER_ID = #{payOrderId,jdbcType=BIGINT},
-      DELIVER_ORG_ID = #{deliverOrgId,jdbcType=BIGINT}
+      DELIVER_ORG_ID = #{deliverOrgId,jdbcType=BIGINT},
+      ONLINE_ORG_ID = #{onlineOrgId,jdbcType=BIGINT}
     where ID = #{id,jdbcType=BIGINT}
   </update>
   <select id="selectAll" resultMap="BaseResultMap">
@@ -526,7 +537,7 @@
     LOGISTIC_CODE, RECEIVER_NAME, RECEIVER_TEL, RECEIVER_MOBILE, RECEIVER_PROVINCE, RECEIVER_CITY, 
     RECEIVER_EXP_AREA, RECEIVER_ADDRESS, RECEIVER_POST_CODE, ORDER_MESSAGES, MODIFY_REALVERY_MONEY_OP_ID, 
     CANCELING_ORDER_OP_ID, CANCELDELI_REASON, SEND_OP_ID, RECEIVED_OP_ID, CANCEL_REASON, 
-    PAY_ORDER_ID, DELIVER_ORG_ID
+    PAY_ORDER_ID, DELIVER_ORG_ID, ONLINE_ORG_ID
     from ORD_ORDER
   </select>
   <select id="selectSelective" parameterType="rebue.ord.mo.OrdOrderMo" resultMap="BaseResultMap">
@@ -648,6 +659,9 @@
       </if>
       <if test="deliverOrgId != null">
         and DELIVER_ORG_ID = #{deliverOrgId,jdbcType=BIGINT}
+      </if>
+      <if test="onlineOrgId != null">
+        and ONLINE_ORG_ID = #{onlineOrgId,jdbcType=BIGINT}
       </if>
     </where>
   </select>
@@ -782,6 +796,9 @@
       <if test="deliverOrgId != null and deliverOrgId != ''">
         and DELIVER_ORG_ID = #{deliverOrgId,jdbcType=BIGINT}
       </if>
+      <if test="onlineOrgId != null and onlineOrgId != ''">
+        and ONLINE_ORG_ID = #{onlineOrgId,jdbcType=BIGINT}
+      </if>
     </where>
   </select>
   <select id="countSelective" parameterType="rebue.ord.mo.OrdOrderMo" resultType="int">
@@ -902,6 +919,9 @@
       </if>
       <if test="deliverOrgId != null">
         and DELIVER_ORG_ID = #{deliverOrgId,jdbcType=BIGINT}
+      </if>
+      <if test="onlineOrgId != null">
+        and ONLINE_ORG_ID = #{onlineOrgId,jdbcType=BIGINT}
       </if>
     </where>
   </select>

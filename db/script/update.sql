@@ -1,6 +1,6 @@
 -- 2018-11-15
 alter table ORD_ORDER                                      add          DELIVER_ORG_ID       bigint                               comment '发货组织ID(默认填入上线组织ID，可变更为供应商的ID)';
- 
+alter table ORD_ORDER                                      add          ONLINE_ORG_ID         bigint                               comment '上线组织ID'; 
 
 -- 2018-11-14
 alter table ORD_ORDER                                       add         PAY_ORDER_ID         bigint not null                     comment '支付订单ID
