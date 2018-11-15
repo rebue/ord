@@ -26,13 +26,9 @@ import rebue.robotech.ro.Ro;
 @Setter
 public class OrderRo extends Ro {
 
-//    /** 用户下订单返回值字典 **/
-//    private OrderResultDic result;
-//
-//    /** 用户下订单返回值 **/
-//    private String         msg;
-
-    /** 订单编号 */
-    private Long orderId;
+    /**
+     * 订单编号
+     */
+    private Long payOrderId;
 
 }

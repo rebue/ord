@@ -14,9 +14,11 @@ import java.util.Calendar;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
+import java.util.LinkedHashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import javax.annotation.Resource;
 
@@ -235,6 +237,8 @@ public class OrdOrderSvcImpl extends MybatisBaseSvcImpl<OrdOrderMo, java.lang.Lo
         String orderTitle = "";
         // 上线列表(获取过的上线信息放进这里，避免重复获取)
         final Map<Long, OnlOnlineMo> onlines = new LinkedHashMap<>();
+        // 上线组织列表(不同上线组织的订单详情需要拆单)
+        final Set<Long> onlineOrgIds = new LinkedHashSet<>();
         // 要添加的订单详情列表
         final List<OrdOrderDetailMo> orderDetails = new LinkedList<>();
         // 要更新的上线规格列表
@@ -334,6 +338,9 @@ public class OrdOrderSvcImpl extends MybatisBaseSvcImpl<OrdOrderMo, java.lang.Lo
             specTo.setCartId(orderDetailTo.getCartId());
             specList.add(specTo);
 
+            // 添加上线组织
+            onlineOrgIds.add(onlineMo.getOnlineOrgId());
+
             // 根据订单详情生成订单标题
             final String remark = onlineMo.getOnlineTitle() + "(" + onlineSpecMo.getOnlineSpec() //
                     + " " + onlineSpecMo.getSaleCount() + onlineSpecMo.getSaleUnit() + ");";
@@ -357,185 +364,80 @@ public class OrdOrderSvcImpl extends MybatisBaseSvcImpl<OrdOrderMo, java.lang.Lo
         _log.info("获取用户收货地址信息为：{}", addrMo);
 
         final Date now = new Date();
-        final OrdOrderMo orderMo = new OrdOrderMo();
-        orderMo.setId(_idWorker.getId());
-        orderMo.setOrderCode(_idWorker.getIdStr());                         // 订单编号 TODO 重写订单编号的生成算法
-        orderMo.setOrderState((byte) OrderStateDic.ORDERED.getCode());      // 订单状态已下单
-        orderMo.setOrderTime(now);                                          // 下单时间
-        orderMo.setPayOrderId(orderMo.getId());                             // 支付订单ID
+        final Long payOrderId = _idWorker.getId();                              // 支付订单ID
+        // 根据上线组织拆单
+        for (final Long onlineOrgId : onlineOrgIds) {
+            final OrdOrderMo orderMo = new OrdOrderMo();
+            orderMo.setId(_idWorker.getId());
+            orderMo.setOrderCode(_idWorker.getIdStr());                         // 订单编号 TODO 重写订单编号的生成算法
+            orderMo.setOrderState((byte) OrderStateDic.ORDERED.getCode());      // 订单状态已下单
+            orderMo.setOrderTime(now);                                          // 下单时间
+            orderMo.setPayOrderId(payOrderId);                                  // 支付订单ID
 
-        orderMo.setUserId(to.getUserId());                  // 下单人用户ID
-        orderMo.setOrderMoney(to.getOrderMoney());          // 下单金额
-        orderMo.setRealMoney(to.getOrderMoney());            // 实际金额=下单金额
+            orderMo.setUserId(to.getUserId());                  // 下单人用户ID
+            orderMo.setOrderMoney(to.getOrderMoney());          // 下单金额
+            orderMo.setRealMoney(to.getOrderMoney());            // 实际金额=下单金额
 
-        // 用户留言
-        final String orderMessages = to.getOrderMessages();
-        if (StringUtils.isBlank(orderMessages)) {
-            orderMo.setOrderMessages(orderMessages);
+            // 用户留言
+            final String orderMessages = to.getOrderMessages();
+            if (StringUtils.isBlank(orderMessages)) {
+                orderMo.setOrderMessages(orderMessages);
+            }
+
+            // 收件人信息
+            orderMo.setReceiverName(addrMo.getReceiverName());
+            orderMo.setReceiverMobile(addrMo.getReceiverMobile());
+            orderMo.setReceiverProvince(addrMo.getReceiverProvince());
+            orderMo.setReceiverCity(addrMo.getReceiverCity());
+            orderMo.setReceiverExpArea(addrMo.getReceiverExpArea());
+            orderMo.setReceiverAddress(addrMo.getReceiverAddress());
+            orderMo.setReceiverPostCode(addrMo.getReceiverPostCode());
+            orderMo.setReceiverTel(addrMo.getReceiverTel());
+
+            orderMo.setOrderTitle(orderTitle);
+
+            _log.info("添加订单信息的参数为：{}", orderMo);
+            // 添加订单信息
+            add(orderMo);
+            // 添加订单详情
+            for (final OrdOrderDetailMo orderDetailMo : orderDetails) {
+                _log.info("添加订单详情的参数为：{}", orderDetailMo);
+                orderDetailMo.setOrderId(orderMo.getId());
+                orderDetailMo.setUserId(to.getUserId());
+                orderDetailMo.setReturnState((byte) ReturnStateDic.NONE.getCode());
+                ordOrderDetailSvc.add(orderDetailMo);
+            }
+
+            _log.debug("计算自动取消订单的执行时间");
+            final Calendar calendar = Calendar.getInstance();
+            calendar.setTime(now);
+            calendar.add(Calendar.MINUTE, cancelOrderTime);
+            final Date executePlanTime = calendar.getTime();
+            _log.debug("取消订单的执行时间为: {}", executePlanTime);
+
+            _log.debug("准备添加自动取消订单的任务");
+            final OrdTaskMo ordTaskMo = new OrdTaskMo();
+            ordTaskMo.setExecuteState((byte) TaskExecuteStateDic.NONE.getCode());
+            ordTaskMo.setExecutePlanTime(executePlanTime);
+            ordTaskMo.setTaskType((byte) OrderTaskTypeDic.CANCEL.getCode());
+            ordTaskMo.setOrderId(String.valueOf(orderMo.getId()));
+            _log.debug("添加自动取消订单任务的参数为：{}", ordTaskMo);
+            // 添加取消订单任务
+            ordTaskSvc.add(ordTaskMo);
+
+            final UpdateOnlineAfterOrderTo updateOnlineTo = new UpdateOnlineAfterOrderTo();
+            updateOnlineTo.setUserId(to.getUserId());
+            updateOnlineTo.setSpecList(specList);
+            _log.debug("更新上线信息(下单后)：{}", updateOnlineTo);
+            final Ro updateOnlineRo = onlOnlineSvc.updateOnlineAfterOrder(updateOnlineTo);
+            _log.info("更新上线信息(下单后)的返回值为：{}", updateOnlineRo);
+            if (updateOnlineRo.getResult() != ResultDic.SUCCESS) {
+                _log.error("更新上线信息(下单后)失败: {}", updateOnlineRo);
+                throw new RuntimeException(updateOnlineRo.getMsg());
+            }
         }
 
-        // 收件人信息
-        orderMo.setReceiverName(addrMo.getReceiverName());
-        orderMo.setReceiverMobile(addrMo.getReceiverMobile());
-        orderMo.setReceiverProvince(addrMo.getReceiverProvince());
-        orderMo.setReceiverCity(addrMo.getReceiverCity());
-        orderMo.setReceiverExpArea(addrMo.getReceiverExpArea());
-        orderMo.setReceiverAddress(addrMo.getReceiverAddress());
-        orderMo.setReceiverPostCode(addrMo.getReceiverPostCode());
-        orderMo.setReceiverTel(addrMo.getReceiverTel());
-
-        orderMo.setOrderTitle(orderTitle);
-
-        _log.info("添加订单信息的参数为：{}", orderMo);
-        // 添加订单信息
-        add(orderMo);
-        // 添加订单详情
-        for (final OrdOrderDetailMo orderDetailMo : orderDetails) {
-            _log.info("添加订单详情的参数为：{}", orderDetailMo);
-            orderDetailMo.setOrderId(orderMo.getId());
-            orderDetailMo.setUserId(to.getUserId());
-            orderDetailMo.setReturnState((byte) ReturnStateDic.NONE.getCode());
-            ordOrderDetailSvc.add(orderDetailMo);
-        }
-
-        _log.debug("计算自动取消订单的执行时间");
-        final Calendar calendar = Calendar.getInstance();
-        calendar.setTime(now);
-        calendar.add(Calendar.MINUTE, cancelOrderTime);
-        final Date executePlanTime = calendar.getTime();
-        _log.debug("取消订单的执行时间为: {}", executePlanTime);
-
-        _log.debug("准备添加自动取消订单的任务");
-        final OrdTaskMo ordTaskMo = new OrdTaskMo();
-        ordTaskMo.setExecuteState((byte) TaskExecuteStateDic.NONE.getCode());
-        ordTaskMo.setExecutePlanTime(executePlanTime);
-        ordTaskMo.setTaskType((byte) OrderTaskTypeDic.CANCEL.getCode());
-        ordTaskMo.setOrderId(String.valueOf(orderMo.getId()));
-        _log.debug("添加自动取消订单任务的参数为：{}", ordTaskMo);
-        // 添加取消订单任务
-        ordTaskSvc.add(ordTaskMo);
-
-        final UpdateOnlineAfterOrderTo updateOnlineTo = new UpdateOnlineAfterOrderTo();
-        updateOnlineTo.setUserId(to.getUserId());
-        updateOnlineTo.setSpecList(specList);
-        _log.debug("更新上线信息(下单后)：{}", updateOnlineTo);
-        final Ro updateOnlineRo = onlOnlineSvc.updateOnlineAfterOrder(updateOnlineTo);
-        _log.info("更新上线信息(下单后)的返回值为：{}", updateOnlineRo);
-        if (updateOnlineRo.getResult() != ResultDic.SUCCESS) {
-            _log.error("更新上线信息(下单后)失败: {}", updateOnlineRo);
-            throw new RuntimeException(updateOnlineRo.getMsg());
-        }
-
-//        _log.debug("删除购物车和修改上线数量的参数为：{}", String.valueOf(cartAndSpecList));
-//        final Ro deleteCartAndUpdateOnlineCountResult = onlOnlineSpecSvc.deleteCartAndUpdateOnlineCount(cartAndSpecList);
-//        _log.info("删除购物车和修改上线数量的返回值为：{}", deleteCartAndUpdateOnlineCountResult);
-//        if (deleteCartAndUpdateOnlineCountResult.getResult() != 1) {
-//            _log.error("{}删除购物车和修改上线数量失败", userId);
-//            throw new RuntimeException(deleteCartAndUpdateOnlineCountResult.getMsg());
-//        }
-
-//        _log.info("添加订单信息的返回值为：{}", insertOrderResult);
-//        if (insertOrderResult != 1) {
-//            _log.error("{}添加订单信息失败", userId);
-//            ro.setResult(OrderResultDic.CREATE_ORDER_ERROR);
-//            ro.setMsg("生成订单出错");
-//            return ro;
-//        }
-//        final List<DeleteCartAndModifyInventoryTo> cartAndSpecList = new ArrayList<>();
-//        for (int i = 0; i < orderList.size(); i++) {
-//            final long onlineId = orderList.get(i).getOnlineId();
-//            final String OnlineSpec = orderList.get(i).getOnlineSpec();
-//            final int buyCount = orderList.get(i).getNumber();
-//            final byte subjectType = orderList.get(i).getSubjectType();
-//            final DeleteCartAndModifyInventoryTo deleteCartAndModifyInventoryRo = new DeleteCartAndModifyInventoryTo();
-//            deleteCartAndModifyInventoryRo.setOnlineId(onlineId);
-//            deleteCartAndModifyInventoryRo.setBuyCount(buyCount);
-//            deleteCartAndModifyInventoryRo.setOnlineSpec(OnlineSpec);
-//            deleteCartAndModifyInventoryRo.setCartId(orderList.get(i).getCartId());
-//            cartAndSpecList.add(deleteCartAndModifyInventoryRo);
-//            if (subjectType == 0) {
-//                _log.info("普通商品添加订单详情");
-//                final OrdOrderDetailMo detailMo = new OrdOrderDetailMo();
-//                detailMo.setId(_idWorker.getId());
-//                detailMo.setOrderId(orderId);
-//                detailMo.setOnlineId(onlineId);
-//                detailMo.setProductId(orderList.get(i).getProductId());
-//                detailMo.setOnlineTitle(orderList.get(i).getOnlineTitle());
-//                detailMo.setSpecName(OnlineSpec);
-//                detailMo.setBuyCount(buyCount);
-//                detailMo.setBuyPrice(orderList.get(i).getSalePrice());
-//                detailMo.setCostPrice(orderList.get(i).getCostPrice());
-//                detailMo.setSupplierId(orderList.get(i).getSupplierId());
-//                detailMo.setPledgeType(orderList.get(i).getPledgeType());
-//                detailMo.setCashbackAmount(orderList.get(i).getCashbackAmount());
-//                detailMo.setReturnState((byte) 0);
-//                detailMo.setUserId(userId);
-//                detailMo.setCashbackTotal(new BigDecimal(String.valueOf(buyCount)).multiply(orderList.get(i).getCashbackAmount()));
-//                _log.info("添加订单详情的参数为：{}", detailMo);
-//                final int intserOrderDetailresult = ordOrderDetailSvc.add(detailMo);
-//                _log.info("添加订单详情的返回值为：{}", intserOrderDetailresult);
-//                if (intserOrderDetailresult != 1) {
-//                    _log.error("{}添加订单详情失败", userId);
-//                    throw new RuntimeException("生成订单详情出错");
-//                }
-//            } else {
-//                _log.info("全返商品添加订单详情");
-//                for (int j = 0; j < buyCount; j++) {
-//                    final OrdOrderDetailMo detailMo = new OrdOrderDetailMo();
-//                    detailMo.setId(_idWorker.getId());
-//                    detailMo.setOrderId(orderId);
-//                    detailMo.setOnlineId(onlineId);
-//                    detailMo.setProductId(orderList.get(i).getProductId());
-//                    detailMo.setOnlineTitle(orderList.get(i).getOnlineTitle());
-//                    detailMo.setSpecName(OnlineSpec);
-//                    detailMo.setBuyCount(1);
-//                    detailMo.setSubjectType((byte) 1);
-//                    detailMo.setBuyPrice(orderList.get(i).getSalePrice());
-//                    detailMo.setCostPrice(orderList.get(i).getCostPrice());
-//                    detailMo.setSupplierId(orderList.get(i).getSupplierId());
-//                    detailMo.setPledgeType(orderList.get(i).getPledgeType());
-//                    detailMo.setCashbackAmount(new BigDecimal("0"));
-//                    detailMo.setReturnState((byte) 0);
-//                    detailMo.setCommissionSlot((byte) 2);
-//                    detailMo.setCommissionState((byte) 0);
-//                    detailMo.setUserId(userId);
-//                    detailMo.setCashbackTotal(new BigDecimal("0"));
-//                    _log.info("添加订单详情的参数为：{}", detailMo);
-//                    final int intserOrderDetailresult = ordOrderDetailSvc.add(detailMo);
-//                    _log.info("添加订单详情的返回值为：{}", intserOrderDetailresult);
-//                    if (intserOrderDetailresult != 1) {
-//                        _log.error("{}添加订单详情失败", userId);
-//                        throw new RuntimeException("生成订单详情出错");
-//                    }
-//                }
-//            }
-//        }
-//        final Calendar calendar = Calendar.getInstance();
-//        calendar.setTime(now);
-//        calendar.add(Calendar.MINUTE, cancelOrderTime);
-//        // 取消订单的时间
-//        final Date executePlanTime = calendar.getTime();
-//        final OrdTaskMo ordTaskMo = new OrdTaskMo();
-//        ordTaskMo.setExecuteState((byte) 0);
-//        ordTaskMo.setExecutePlanTime(executePlanTime);
-//        ordTaskMo.setTaskType((byte) 1);
-//        ordTaskMo.setOrderId(String.valueOf(orderId));
-//        _log.info("用户下订单添加取消订单任务的参数为：{}", ordTaskMo);
-//        // 添加取消订单任务
-//        final int taskAddResult = ordTaskSvc.add(ordTaskMo);
-//        _log.info("用户下订单添加取消订单任务的返回值为：{}", taskAddResult);
-//        if (taskAddResult != 1) {
-//            _log.error("用户下订单添加取消订单任务时出现错误，用户编号为：{}", userId);
-//            throw new RuntimeException("添加取消订单任务失败");
-//        }
-//        _log.info("删除购物车和修改上线数量的参数为：{}", String.valueOf(cartAndSpecList));
-//        final DeleteCartAndModifyInventoryRo deleteCartAndUpdateOnlineCountResult = onlOnlineSpecSvc.deleteCartAndUpdateOnlineCount(cartAndSpecList);
-//        _log.info("删除购物车和修改上线数量的返回值为：{}", deleteCartAndUpdateOnlineCountResult);
-//        if (deleteCartAndUpdateOnlineCountResult.getResult() != 1) {
-//            _log.error("{}删除购物车和修改上线数量失败", userId);
-//            throw new RuntimeException(deleteCartAndUpdateOnlineCountResult.getMsg());
-//        }
-        ro.setOrderId(orderMo.getId());
+        ro.setPayOrderId(payOrderId);
         ro.setResult(ResultDic.SUCCESS);
         ro.setMsg("下单成功");
         return ro;
