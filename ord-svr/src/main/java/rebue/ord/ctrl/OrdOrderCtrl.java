@@ -37,7 +37,7 @@ import rebue.ord.ro.OrderSignInRo;
 import rebue.ord.ro.SetUpExpressCompanyRo;
 import rebue.ord.ro.ShipmentConfirmationRo;
 import rebue.ord.svc.OrdOrderSvc;
-import rebue.ord.to.OrdOrderTo;
+import rebue.ord.to.ListOrderTo;
 import rebue.ord.to.OrderSignInTo;
 import rebue.ord.to.OrderTo;
 import rebue.ord.to.ShipmentConfirmationTo;
@@ -97,25 +97,36 @@ public class OrdOrderCtrl {
 
     /**
      * 查询订单信息
-     *
-     * @mbg.generated 自动生成，如需修改，请删除本行
+     * 
+     * @mbg.overrideByMethodName
      */
     @GetMapping("/ord/order")
-    PageInfo<OrdOrderRo> list(final OrdOrderTo mo, @RequestParam(value = "pageNum", required = false) Integer pageNum,
-            @RequestParam(value = "pageSize", required = false) Integer pageSize) {
+    PageInfo<OrdOrderRo> list(final ListOrderTo to, @RequestParam(value = "pageNum", required = false) Integer pageNum,
+            @RequestParam(value = "pageSize", required = false) Integer pageSize, final HttpServletRequest req) throws ParseException {
         if (pageNum == null) {
             pageNum = 1;
         }
         if (pageSize == null) {
             pageSize = 5;
         }
-        _log.info("list OrdOrderMo:" + mo + ", pageNum = " + pageNum + ", pageSize = " + pageSize);
+        _log.info("list OrdOrderMo:" + to + ", pageNum = " + pageNum + ", pageSize = " + pageSize);
         if (pageSize > 50) {
             final String msg = "pageSize不能大于50";
             _log.error(msg);
             throw new IllegalArgumentException(msg);
         }
-        final PageInfo<OrdOrderRo> result = svc.orderList(mo, pageNum, pageSize);
+
+        _log.info("设置查询订单的所属组织为当前用户的组织");
+        if (!isDebug || to.getOrgId() == null) {
+            final Long orgId = (Long) JwtUtils.getJwtAdditionItemInCookie(req, "orgId");
+            if (orgId == null) {
+                return new PageInfo<>();
+            }
+            to.setOrgId(orgId);
+        }
+
+        // 查询订单
+        final PageInfo<OrdOrderRo> result = svc.listOrder(to, pageNum, pageSize);
         _log.info("result: " + result);
         return result;
     }
@@ -141,16 +152,7 @@ public class OrdOrderCtrl {
     }
 
     /**
-     * 查询订单信息 Title: orderInfo Description:
-     *
-     * @param qo
-     * @return
-     * @throws ParseException
-     * @throws IntrospectionException
-     * @throws InvocationTargetException
-     * @throws IllegalArgumentException
-     * @throws IllegalAccessException
-     * @date 2018年4月9日 下午3:06:37
+     * 查询订单信息
      */
     @GetMapping("/ord/order/info")
     List<Map<String, Object>> orderInfo(@RequestParam final Map<String, Object> map)
@@ -184,11 +186,7 @@ public class OrdOrderCtrl {
     }
 
     /**
-     * 用户取消订单 Title: cancellationOfOrder Description:
-     *
-     * @param qo
-     * @return
-     * @date 2018年4月9日 下午7:37:13
+     * 用户取消订单
      */
     @SuppressWarnings("finally")
     @PutMapping("/ord/order/cancel")

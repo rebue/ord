@@ -84,7 +84,7 @@ import rebue.ord.svc.OrdBuyRelationSvc;
 import rebue.ord.svc.OrdOrderDetailSvc;
 import rebue.ord.svc.OrdOrderSvc;
 import rebue.ord.svc.OrdTaskSvc;
-import rebue.ord.to.OrdOrderTo;
+import rebue.ord.to.ListOrderTo;
 import rebue.ord.to.OrderDetailTo;
 import rebue.ord.to.OrderSignInTo;
 import rebue.ord.to.OrderTo;
@@ -1369,10 +1369,10 @@ public class OrdOrderSvcImpl extends MybatisBaseSvcImpl<OrdOrderMo, java.lang.Lo
      * 分页查询订单
      */
     @Override
-    public PageInfo<OrdOrderRo> orderList(final OrdOrderTo to, final int pageNum, final int pageSize) {
+    public PageInfo<OrdOrderRo> listOrder(final ListOrderTo to, final int pageNum, final int pageSize) {
         _log.info("获取订单的参数为: {}", to);
         _log.info("orderList: ro-{}; pageNum-{}; pageSize-{}", to, pageNum, pageSize);
-        return PageHelper.startPage(pageNum, pageSize).doSelectPageInfo(() -> _mapper.orderList(to));
+        return PageHelper.startPage(pageNum, pageSize).doSelectPageInfo(() -> _mapper.listOrder(to));
     }
 
     /**

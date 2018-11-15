@@ -18,7 +18,7 @@ import rebue.ord.ro.OrderRo;
 import rebue.ord.ro.OrderSignInRo;
 import rebue.ord.ro.SetUpExpressCompanyRo;
 import rebue.ord.ro.ShipmentConfirmationRo;
-import rebue.ord.to.OrdOrderTo;
+import rebue.ord.to.ListOrderTo;
 import rebue.ord.to.OrderSignInTo;
 import rebue.ord.to.OrderTo;
 import rebue.ord.to.ShipmentConfirmationTo;
@@ -180,28 +180,14 @@ public interface OrdOrderSvc extends MybatisBaseSvc<OrdOrderMo, java.lang.Long> 
     Byte selectOrderStateByOrderCode(String id);
 
     /**
-     * 查询用户待返现订单信息 Title: selectOrderInfo Description:
-     *
-     * @param mo
-     * @return
-     * @throws ParseException
-     * @throws IntrospectionException
-     * @throws InvocationTargetException
-     * @throws IllegalArgumentException
-     * @throws IllegalAccessException
-     * @date 2018年4月9日 下午4:48:40
+     * 查询用户待返现订单信息
      */
 //    List<Map<String, Object>> getCashBackOrder(Map<String, Object> map) throws ParseException, IntrospectionException, IllegalAccessException, IllegalArgumentException, InvocationTargetException;
 
     /**
      * 分页查询订单
-     * 
-     * @param to
-     * @param pageNum
-     * @param pageSize
-     * @return
      */
-    PageInfo<OrdOrderRo> orderList(OrdOrderTo to, int pageNum, int pageSize);
+    PageInfo<OrdOrderRo> listOrder(ListOrderTo to, int pageNum, int pageSize);
 
     /**
      * 修改收件人信息

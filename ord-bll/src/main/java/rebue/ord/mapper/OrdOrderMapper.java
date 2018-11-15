@@ -8,7 +8,7 @@ import org.apache.ibatis.annotations.Param;
 import org.apache.ibatis.annotations.Select;
 import org.apache.ibatis.annotations.Update;
 import rebue.ord.mo.OrdOrderMo;
-import rebue.ord.to.OrdOrderTo;
+import rebue.ord.to.ListOrderTo;
 import rebue.robotech.mapper.MybatisBaseMapper;
 
 @Mapper
@@ -206,7 +206,7 @@ public interface OrdOrderMapper extends MybatisBaseMapper<OrdOrderMo, Long> {
      * @param to
      * @return
      */
-    List<OrdOrderMo> orderList(OrdOrderTo to);
+    List<OrdOrderMo> listOrder(ListOrderTo to);
 
     /**
      * 修改收件人信息
