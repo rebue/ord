@@ -308,9 +308,11 @@ public class OrdOrderSvcImpl extends MybatisBaseSvcImpl<OrdOrderMo, java.lang.Lo
             orderDetailMo.setProductSpecId(onlineSpecMo.getProductSpecId());
             orderDetailMo.setOnlineSpecId(onlineSpecMo.getId());
             orderDetailMo.setSpecName(onlineSpecMo.getOnlineSpec());
-            orderDetailMo.setBuyCount(orderDetailTo.getBuyCount());
-            orderDetailMo.setBuyUnit(onlineSpecMo.getSaleUnit());
             orderDetailMo.setBuyPrice(onlineSpecMo.getSalePrice());
+            orderDetailMo.setBuyCount(orderDetailTo.getBuyCount());
+            // 计算实际价格=单价*数量
+            orderDetailMo.setActualAmount(onlineSpecMo.getSalePrice().multiply(BigDecimal.valueOf(orderDetailTo.getBuyCount())));
+            orderDetailMo.setBuyUnit(onlineSpecMo.getSaleUnit());
             orderDetailMo.setCostPrice(onlineSpecMo.getCostPrice());
             orderDetailMo.setSupplierId(onlineMo.getSupplierId());
             orderDetailMo.setDeliverOrgId(onlineMo.getDeliverOrgId());
@@ -419,6 +421,7 @@ public class OrdOrderSvcImpl extends MybatisBaseSvcImpl<OrdOrderMo, java.lang.Lo
                 orderDetailMo.setOrderId(orderMo.getId());
                 orderDetailMo.setUserId(to.getUserId());
                 orderDetailMo.setReturnState((byte) ReturnStateDic.NONE.getCode());
+                orderDetailMo.setIsSettleBuyer(false);
                 ordOrderDetailSvc.add(orderDetailMo);
             }
 
