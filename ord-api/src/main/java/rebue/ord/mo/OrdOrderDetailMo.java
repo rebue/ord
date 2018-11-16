@@ -214,6 +214,24 @@ public class OrdOrderDetailMo implements Serializable {
     private Long userId;
 
     /**
+     *    是否结算给买家
+     *
+     *    数据库字段: ORD_ORDER_DETAIL.IS_SETTLE_BUYER
+     *
+     *    @mbg.generated 自动生成，如需修改，请删除本行
+     */
+    private Boolean isSettleBuyer;
+
+    /**
+     *    实际成交金额
+     *
+     *    数据库字段: ORD_ORDER_DETAIL.ACTUAL_AMOUNT
+     *
+     *    @mbg.generated 自动生成，如需修改，请删除本行
+     */
+    private BigDecimal actualAmount;
+
+    /**
      *    @mbg.generated 自动生成，如需修改，请删除本行
      */
     private static final long serialVersionUID = 1L;
@@ -703,6 +721,50 @@ public class OrdOrderDetailMo implements Serializable {
     }
 
     /**
+     *    是否结算给买家
+     *
+     *    数据库字段: ORD_ORDER_DETAIL.IS_SETTLE_BUYER
+     *
+     *    @mbg.generated 自动生成，如需修改，请删除本行
+     */
+    public Boolean getIsSettleBuyer() {
+        return isSettleBuyer;
+    }
+
+    /**
+     *    是否结算给买家
+     *
+     *    数据库字段: ORD_ORDER_DETAIL.IS_SETTLE_BUYER
+     *
+     *    @mbg.generated 自动生成，如需修改，请删除本行
+     */
+    public void setIsSettleBuyer(Boolean isSettleBuyer) {
+        this.isSettleBuyer = isSettleBuyer;
+    }
+
+    /**
+     *    实际成交金额
+     *
+     *    数据库字段: ORD_ORDER_DETAIL.ACTUAL_AMOUNT
+     *
+     *    @mbg.generated 自动生成，如需修改，请删除本行
+     */
+    public BigDecimal getActualAmount() {
+        return actualAmount;
+    }
+
+    /**
+     *    实际成交金额
+     *
+     *    数据库字段: ORD_ORDER_DETAIL.ACTUAL_AMOUNT
+     *
+     *    @mbg.generated 自动生成，如需修改，请删除本行
+     */
+    public void setActualAmount(BigDecimal actualAmount) {
+        this.actualAmount = actualAmount;
+    }
+
+    /**
      *    @mbg.generated 自动生成，如需修改，请删除本行
      */
     @Override
@@ -733,6 +795,8 @@ public class OrdOrderDetailMo implements Serializable {
         sb.append(", buyUnit=").append(buyUnit);
         sb.append(", returnState=").append(returnState);
         sb.append(", userId=").append(userId);
+        sb.append(", isSettleBuyer=").append(isSettleBuyer);
+        sb.append(", actualAmount=").append(actualAmount);
         sb.append(", serialVersionUID=").append(serialVersionUID);
         sb.append("]");
         return sb.toString();

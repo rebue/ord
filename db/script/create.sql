@@ -1,6 +1,6 @@
 /*==============================================================*/
 /* DBMS name:      MySQL 5.0                                    */
-/* Created on:     2018/11/15 22:28:45                          */
+/* Created on:     2018/11/16 15:00:10                          */
 /*==============================================================*/
 
 
@@ -10,17 +10,17 @@ drop table if exists ORD_BUY_RELATION;
 
 drop table if exists ORD_GOODS_BUY_RELATION;
 
-drop table if exists ORD_ORDER_DETAIL_DELIVER;
-
-drop table if exists ORD_RETURN_PIC;
-
-drop table if exists ORD_RETURN;
-
-drop table if exists ORD_TASK;
+drop table if exists ORD_ORDER;
 
 drop table if exists ORD_ORDER_DETAIL;
 
-drop table if exists ORD_ORDER;
+drop table if exists ORD_ORDER_DETAIL_DELIVER;
+
+drop table if exists ORD_RETURN;
+
+drop table if exists ORD_RETURN_PIC;
+
+drop table if exists ORD_TASK;
 
 /*==============================================================*/
 /* Table: ORD_ADDR                                              */
@@ -58,7 +58,6 @@ create table ORD_BUY_RELATION
    DOWNLINE_ORDER_DETAIL_ID bigint not null comment '下家订单详情ID',
    IS_SIGN_IN           bool not null default false comment '是否已签收',
    RELATION_SOURCE      tinyint not null comment '关系来源（1：自己匹配自己  2：购买关系  3：注册关系  4：差一人且已有购买关系  5：差两人  6：差一人但没有购买关系）',
-   Attribute_10         char(10),
    primary key (ID),
    unique key AK_UPLINE_AND_DOWNLINE_ORDER_DETAIL (UPLINE_ORDER_DETAIL_ID, DOWNLINE_ORDER_DETAIL_ID)
 );
@@ -163,6 +162,8 @@ create table ORD_ORDER_DETAIL
    COMMISSION_STATE     tinyint comment '返佣金状态（0：匹配中，1：待返，2：已返）',
    ONLINE_TITLE         varchar(200) not null comment '上线标题',
    SPEC_NAME            varchar(50) not null comment '规格名称',
+   IS_SETTLE_BUYER      bool comment '是否结算给买家',
+   ACTUAL_AMOUNT        decimal(18,4) comment '实际成交金额',
    BUY_COUNT            int not null comment '购买数量',
    BUY_PRICE            decimal(18,4) not null comment '购买价格（单价）',
    COST_PRICE           decimal(18,4) comment '成本价格（单个）',

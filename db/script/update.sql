@@ -1,3 +1,8 @@
+-- 2018-11-16
+alter table ORD_ORDER_DETAIL						  add            IS_SETTLE_BUYER      bool comment '是否结算给买家';
+alter table ORD_ORDER_DETAIL						  add            ACTUAL_AMOUNT        decimal(18,4) comment '实际成交金额';
+
+
 -- 2018-11-15
 alter table ORD_ORDER                                      add          DELIVER_ORG_ID       bigint                               comment '发货组织ID(默认填入上线组织ID，可变更为供应商的ID)';
 alter table ORD_ORDER                                      add          ONLINE_ORG_ID         bigint                               comment '上线组织ID'; 
