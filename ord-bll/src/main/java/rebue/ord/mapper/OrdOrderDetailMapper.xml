@@ -908,7 +908,14 @@
 	<select id="listByPayOrderId" parameterType="java.lang.Long" resultMap="BaseResultMap">
 		<!-- 根据支付订单ID获取订单详情列表 -->
 		SELECT
-		<include refid="Base_Column_List" />
+			a.ID, a.ORDER_ID, a.ONLINE_ID, 
+			a.ONLINE_SPEC_ID, a.PRODUCT_ID, a.PRODUCT_SPEC_ID, 
+			a.SUBJECT_TYPE, a.COMMISSION_SLOT, a.COMMISSION_STATE, 
+			a.ONLINE_TITLE, a.SPEC_NAME, a.BUY_COUNT, 
+			a.BUY_PRICE, a.COST_PRICE, a.SUPPLIER_ID, 
+			a.DELIVER_ORG_ID, a.CASHBACK_AMOUNT, a.RETURN_COUNT, 
+			a.CASHBACK_TOTAL, a.BUY_UNIT, a.RETURN_STATE, 
+			a.USER_ID, a.IS_SETTLE_BUYER, a.ACTUAL_AMOUNT
 		FROM ORD_ORDER_DETAIL AS a
 		INNER JOIN
 		ORD_ORDER AS b ON a.ORDER_ID = b.ID

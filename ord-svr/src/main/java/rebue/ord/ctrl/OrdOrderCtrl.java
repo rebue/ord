@@ -390,11 +390,12 @@ public class OrdOrderCtrl {
 
 	/**
 	 * 查询订单信息(list)
+	 * 
 	 * @param mo
 	 * @return
 	 */
 	@GetMapping("/ord/order/listselective")
-	List<OrdOrderMo> listSelective(@RequestBody final OrdOrderMo mo) {
+	List<OrdOrderMo> listSelective(final OrdOrderMo mo) {
 		_log.info("listSelective OrdOrderMo:", mo);
 		return svc.list(mo);
 	}

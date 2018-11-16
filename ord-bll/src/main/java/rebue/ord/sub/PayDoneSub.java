@@ -94,7 +94,7 @@ public class PayDoneSub implements ApplicationListener<ContextRefreshedEvent> {
      */
     private boolean handlePayNotify(final PayDoneMsg msg) {
         try {
-            _log.info("订单支付完成通知修改订单信息的参数为：", msg);
+            _log.info("订单支付完成通知修改订单信息的参数为：{}", msg);
             // 订单支付
             return ordOrderSvc.handleOrderPaidNotify(Long.parseLong(msg.getOrderId()), msg.getPayTime());
         } catch (final DuplicateKeyException e) {
