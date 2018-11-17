@@ -211,4 +211,13 @@ public interface OrdOrderMapper extends MybatisBaseMapper<OrdOrderMo, Long> {
      * @return
      */
     int updateOrderReceiverInfo(OrdOrderMo record);
+    
+    /**
+     * 根据订单id修改支付订单id
+     * @param payOrderId
+     * @param id
+     * @return
+     */
+    @Update("update ORD_ORDER set PAY_ORDER_ID = #{payOrderId,jdbcType=BIGINT} where ID = #{id,jdbcType=BIGINT}")
+    int updatePayOrderId(@Param("payOrderId") Long payOrderId, @Param("id") Long id);
 }

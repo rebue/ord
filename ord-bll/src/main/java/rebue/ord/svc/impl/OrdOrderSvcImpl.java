@@ -1331,4 +1331,27 @@ public class OrdOrderSvcImpl extends MybatisBaseSvcImpl<OrdOrderMo, java.lang.Lo
         ro.setMsg("修改成功");
         return ro;
     }
+    
+    /**
+     * 根据订单id修改支付订单id
+     * @param id
+     * @return
+     */
+    @Override
+    @Transactional(readOnly = false, propagation = Propagation.REQUIRED)
+    public Ro modifyPayOrderId(Long id) {
+    	Ro ro = new Ro();
+    	Long payOrderId = _idWorker.getId();
+    	int result = _mapper.updatePayOrderId(payOrderId, id);
+    	if (result != 1) {
+			_log.error("根据订单id修改支付订单id时出现错误, 订单id为: {]", id);
+			ro.setResult(ResultDic.FAIL);
+			ro.setMsg("请求失败");
+			return ro;
+		}
+    	_log.error("根据订单id修改支付订单id成功, 订单id为: {]", id);
+    	ro.setResult(ResultDic.SUCCESS);
+    	ro.setMsg(String.valueOf(payOrderId));
+    	return ro;
+    }
 }

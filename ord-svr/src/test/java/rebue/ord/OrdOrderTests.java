@@ -31,7 +31,7 @@ public class OrdOrderTests {
     /**
      * 测试下单
      */
-    @Test
+//    @Test
     public void test01() throws IOException {
         final List<OrderDetailTo> details = new LinkedList<>();
         final OrderTo orderTo = new OrderTo();
@@ -131,5 +131,13 @@ public class OrdOrderTests {
         final OrderRo ro = _objectMapper.readValue(OkhttpUtils.postByJsonParams(hostUrl + "/ord/order", to), OrderRo.class);
         _log.info("获取到返回值: {}", ro);
         return ro;
+    }
+    
+    @Test
+    public void modifyPayOrderIdTest() throws IOException {
+    	String orderId = "520129105039982599";
+    	_log.info("修改支付订单Id的参数为: {}", orderId);
+		String results = OkhttpUtils.put(hostUrl + "/ord/order/modifypayorderid?id=" + orderId);
+		_log.info("修改支付订单id的返回值为: {}", results);
     }
 }

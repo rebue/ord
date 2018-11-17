@@ -176,4 +176,11 @@ public interface OrdOrderSvc extends MybatisBaseSvc<OrdOrderMo, java.lang.Long> 
      * @return
      */
     Ro modifyOrderReceiverInfo(OrdOrderMo mo);
+
+    /**
+     * 根据订单id修改支付订单id
+     * @param id
+     * @return
+     */
+    Ro modifyPayOrderId(Long id);
 }
