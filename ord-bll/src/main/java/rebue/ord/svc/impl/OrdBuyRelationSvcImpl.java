@@ -132,12 +132,12 @@ public class OrdBuyRelationSvcImpl extends MybatisBaseSvcImpl<OrdBuyRelationMo, 
         return "没有匹配到购买关系";
     }
 
-    @Override
     /**
      * 根据匹配自己规则匹配购买关系
      * 1.查找用户购买同款产品中剩余1个购买名额的记录，如果已有购买关系下家不是自己，则添加购买关系记录;
      * 2.如1结果为空，查用户购买同款产品中剩余两个购买名额的记录，并添加购买关系记录；
      */
+    @Override
     @Transactional(readOnly = false, propagation = Propagation.REQUIRED)
     public boolean getAndUpdateBuyRelationByOwn(final long id, final long onlineId, final BigDecimal buyPrice, final long downLineDetailId, final long downLineOrderId) {
         // 获取用户购买关系
@@ -246,10 +246,10 @@ public class OrdBuyRelationSvcImpl extends MybatisBaseSvcImpl<OrdBuyRelationMo, 
         return false;
     }
 
-    @Override
     /**
      * 根据邀请购买规则匹配购买关系
      */
+    @Override
     @Transactional(readOnly = false, propagation = Propagation.REQUIRED)
     public boolean getAndUpdateBuyRelationByPromote(final long id, final long onlineId, final BigDecimal buyPrice, final long downLineDetailId, final long downLineOrderId) {
         // 获取用户购买关系
@@ -325,11 +325,10 @@ public class OrdBuyRelationSvcImpl extends MybatisBaseSvcImpl<OrdBuyRelationMo, 
         return true;
     }
 
-    @Override
     /**
      * 匹配邀请关系
      */
-
+    @Override
     @Transactional(readOnly = false, propagation = Propagation.REQUIRED)
     public boolean getAndUpdateBuyRelationByInvite(final long id, final long onlineId, final BigDecimal buyPrice, final long downLineDetailId, final long downLineOrderId) {
         // 获取用户购买关系
@@ -402,11 +401,10 @@ public class OrdBuyRelationSvcImpl extends MybatisBaseSvcImpl<OrdBuyRelationMo, 
         }
     }
 
-    @Override
     /**
      * 根据匹配差一人，且邀请一人（关系来源是购买关系的）的订单详情
      */
-
+    @Override
     @Transactional(readOnly = false, propagation = Propagation.REQUIRED)
     public boolean getAndUpdateBuyRelationByFour(final long id, final long onlineId, final BigDecimal buyPrice, final long downLineDetailId, final long downLineOrderId) {
         // 获取用户购买关系
@@ -479,10 +477,10 @@ public class OrdBuyRelationSvcImpl extends MybatisBaseSvcImpl<OrdBuyRelationMo, 
         }
     }
 
-    @Override
     /**
      * 根据匹配差两人的规则匹配购买关系
      */
+    @Override
     @Transactional(readOnly = false, propagation = Propagation.REQUIRED)
     public boolean getAndUpdateBuyRelationByFive(final long id, final long onlineId, final BigDecimal buyPrice, final long downLineDetailId, final long downLineOrderId) {
         // 获取用户购买关系
@@ -546,10 +544,10 @@ public class OrdBuyRelationSvcImpl extends MybatisBaseSvcImpl<OrdBuyRelationMo, 
         return true;
     }
 
-    @Override
     /**
      * 匹配差一人的订单详情
      */
+    @Override
     @Transactional(readOnly = false, propagation = Propagation.REQUIRED)
     public boolean getAndUpdateBuyRelationBySix(final long id, final long onlineId, final BigDecimal buyPrice, final long downLineDetailId, final long downLineOrderId) {
         // 获取用户购买关系
