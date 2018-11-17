@@ -33,6 +33,7 @@ import org.springframework.transaction.annotation.Transactional;
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
 
+import rebue.afc.msg.PayDoneMsg;
 import rebue.afc.ro.AddSettleTasksRo;
 import rebue.afc.svr.feign.AfcSettleTaskSvc;
 import rebue.afc.to.AddSettleTasksDetailTo;
@@ -187,7 +188,7 @@ public class OrdOrderSvcImpl extends MybatisBaseSvcImpl<OrdOrderMo, java.lang.Lo
     /**
      */
     @Resource
-    private OrdOrderSvc       ordOrderSvc;
+    private OrdOrderSvc       orderSvc;
 
     /**
      * 买家返款时间
@@ -1018,7 +1019,7 @@ public class OrdOrderSvcImpl extends MybatisBaseSvcImpl<OrdOrderMo, java.lang.Lo
                     }
                     // 根据购买关系查找上家定单详情,定单已签收且定单详情存在且不是退货状态才发起返佣任务
                     final OrdOrderDetailMo uplineDetailResult = orderDetailSvc.getById(buyRelationResult.getUplineOrderDetailId());
-                    final OrdOrderMo uplineOrderResult = ordOrderSvc.getById(buyRelationResult.getUplineOrderId());
+                    final OrdOrderMo uplineOrderResult = orderSvc.getById(buyRelationResult.getUplineOrderId());
                     _log.info("订单详情做为下家的购买关系记录：{}", uplineDetailResult);
                     if (uplineDetailResult != null && uplineDetailResult.getReturnState() == 0 && uplineOrderResult.getOrderState() == 4) {
                         // 获取上线买家商品详情的的下家购买关系记录，如果有2个且都已签收则执行返佣任务
@@ -1169,19 +1170,38 @@ public class OrdOrderSvcImpl extends MybatisBaseSvcImpl<OrdOrderMo, java.lang.Lo
      */
     @Override
     @Transactional(readOnly = false, propagation = Propagation.REQUIRED)
-    public boolean handleOrderPaidNotify(final Long payOrderId, final Date payTime) {
-        _log.info("处理订单支付完成的通知：payOrderId-{}，payTime-{}", payOrderId, payTime);
+    public boolean handleOrderPaidNotify(final PayDoneMsg payDoneMsg) {
+        _log.info("处理订单支付完成的通知：payDoneMsg-{}", payDoneMsg);
 
-        final int result = _mapper.orderPaid(payOrderId, payTime);
+        // XXX 在本服务中支付传递的orderId实际上是payOrderId
+        final Long payOrderId = Long.parseLong(payDoneMsg.getOrderId());
+
+        _log.info("订单支付完成，根据PAY_ORDER_ID修改订单状态为已支付: payOrderId-{}, payTime-{}", payOrderId, payDoneMsg.getPayTime());
+        final int result = _mapper.paidOrder(payOrderId, payDoneMsg.getPayTime());
         _log.debug("订单支付完成通知修改订单信息的返回值为：{}", result);
         if (result == 0) {
             _log.warn("根据支付订单ID找不到正在支付状态的订单: payOrderId-{}", payOrderId);
             return true;
         }
 
-        _log.debug("根据支付订单ID获取用户订单详情列表");
-        final List<OrdOrderDetailMo> orderDetails = orderDetailSvc.listByPayOrderId(payOrderId);
-        _log.debug("获取到的订单详情为：{}" + orderDetails);
+        _log.info("根据支付订单ID获取用户订单列表");
+        final List<OrdOrderMo> orders = _mapper.listByPayOrderId(payOrderId);
+        _log.debug("获取到的订单列表为：{}", orders);
+
+        _log.info("遍历订单详情: 根据不同发货组织进行拆单");
+        final List<OrdOrderDetailMo> orderDetails = new ArrayList<>();
+//        for (final OrdOrderDetailMo orderDetail : orderDetails) {
+//            // 从临时列表中获取订单信息，避免多次获取
+//            OrdOrderMo order = orders.get(orderDetail.getOrderId());
+//            if (order == null) {
+//                // 临时列表中没有，才从数据库中获取，并放入临时列表中
+//                order = orderSvc.getById(orderDetail.getOrderId());
+//                orders.put(order.getId(), order);
+//            }
+//
+//            // 判断订单详情中的发货组织与订单的发货组织相同，如果不相同，拆到新的订单
+//
+//        }
 
         _log.info("遍历订单详情: 添加订单购买关系");
         for (final OrdOrderDetailMo orderDetail : orderDetails) {
@@ -1332,27 +1352,28 @@ public class OrdOrderSvcImpl extends MybatisBaseSvcImpl<OrdOrderMo, java.lang.Lo
         ro.setMsg("修改成功");
         return ro;
     }
-    
+
     /**
      * 根据订单id修改支付订单id
+     * 
      * @param id
      * @return
      */
     @Override
     @Transactional(readOnly = false, propagation = Propagation.REQUIRED)
-    public Ro modifyPayOrderId(Long id) {
-    	Ro ro = new Ro();
-    	Long payOrderId = _idWorker.getId();
-    	int result = _mapper.updatePayOrderId(payOrderId, id);
-    	if (result != 1) {
-			_log.error("根据订单id修改支付订单id时出现错误, 订单id为: {]", id);
-			ro.setResult(ResultDic.FAIL);
-			ro.setMsg("请求失败");
-			return ro;
-		}
-    	_log.error("根据订单id修改支付订单id成功, 订单id为: {]", id);
-    	ro.setResult(ResultDic.SUCCESS);
-    	ro.setMsg(String.valueOf(payOrderId));
-    	return ro;
+    public Ro modifyPayOrderId(final Long id) {
+        final Ro ro = new Ro();
+        final Long payOrderId = _idWorker.getId();
+        final int result = _mapper.updatePayOrderId(payOrderId, id);
+        if (result != 1) {
+            _log.error("根据订单id修改支付订单id时出现错误, 订单id为: {]", id);
+            ro.setResult(ResultDic.FAIL);
+            ro.setMsg("请求失败");
+            return ro;
+        }
+        _log.error("根据订单id修改支付订单id成功, 订单id为: {]", id);
+        ro.setResult(ResultDic.SUCCESS);
+        ro.setMsg(String.valueOf(payOrderId));
+        return ro;
     }
 }

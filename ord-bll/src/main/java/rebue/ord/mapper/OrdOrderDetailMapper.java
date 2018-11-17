@@ -134,8 +134,4 @@ public interface OrdOrderDetailMapper extends MybatisBaseMapper<OrdOrderDetailMo
             + "        AND b.ORDER_STATE > 0")
     int getBuyerOrderedCount(Long userId, Long onlineSpecId);
 
-    /**
-     * 根据支付订单ID获取订单详情列表
-     */
-    List<OrdOrderDetailMo> listByPayOrderId(Long payOrderId);
 }

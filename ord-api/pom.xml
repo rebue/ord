@@ -6,7 +6,7 @@
 		<artifactId>ord</artifactId>
 		<version>1.0.9</version>
 	</parent>
-	
+
 	<artifactId>ord-api</artifactId>
 
 	<dependencies>
@@ -25,7 +25,12 @@
 			<groupId>com.github.rebue.robotech</groupId>
 			<artifactId>robotech-api</artifactId>
 		</dependency>
-		
+
+		<dependency>
+			<groupId>com.github.rebue.afc</groupId>
+			<artifactId>afc-svr-feign</artifactId>
+		</dependency>
+
 		<dependency>
 			<groupId>com.github.rebue.kdi</groupId>
 			<artifactId>kdi-api</artifactId>

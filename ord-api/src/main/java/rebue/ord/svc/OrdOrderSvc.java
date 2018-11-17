@@ -9,6 +9,7 @@ import java.util.Map;
 
 import com.github.pagehelper.PageInfo;
 
+import rebue.afc.msg.PayDoneMsg;
 import rebue.ord.mo.OrdOrderMo;
 import rebue.ord.ro.CancelDeliveryRo;
 import rebue.ord.ro.CancellationOfOrderRo;
@@ -152,7 +153,7 @@ public interface OrdOrderSvc extends MybatisBaseSvc<OrdOrderMo, java.lang.Long> 
     /**
      * 订单支付
      */
-    boolean handleOrderPaidNotify(Long payOrderId, Date payTime);
+    boolean handleOrderPaidNotify(PayDoneMsg msg);
 
     /**
      * 根据订单id查询订单状态
@@ -179,6 +180,7 @@ public interface OrdOrderSvc extends MybatisBaseSvc<OrdOrderMo, java.lang.Long> 
 
     /**
      * 根据订单id修改支付订单id
+     * 
      * @param id
      * @return
      */
