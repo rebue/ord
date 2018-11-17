@@ -399,4 +399,15 @@ public class OrdOrderCtrl {
 		_log.info("listSelective OrdOrderMo:", mo);
 		return svc.list(mo);
 	}
+	
+	/**
+	 * 根据订单id修改支付订单id
+	 * @param id
+	 * @return
+	 */
+	@PutMapping("/ord/order/modifypayorderid")
+	Ro modifyPayOrderId(@RequestParam("id") final java.lang.Long id) {
+		_log.info("modifyPayOrderId OrdOrderMo by id: {}", id);
+		return svc.modifyPayOrderId(id);
+	}
 }
