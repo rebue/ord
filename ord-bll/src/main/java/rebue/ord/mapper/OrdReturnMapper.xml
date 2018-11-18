@@ -763,6 +763,9 @@
     <if test="returnState != null and returnState != ''">
       and b.RETURN_STATE = #{returnState,jdbcType=BIGINT}
     </if>
+    <if test="returnType != null and returnType != ''">
+      and a.RETURN_TYPE = #{returnType,jdbcType=BIGINT}
+    </if>
     <if test="userName != null and userName != ''">
       and c.USER_NAME = #{userName,jdbcType=VARCHAR}
     </if>
