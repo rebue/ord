@@ -1,3 +1,19 @@
+-- 2018年11月20日16:12:17新增结算任务表（ORD_SETTLE_TASK）
+create table ORD_SETTLE_TASK
+(
+   ID                   bigint not null comment '任务ID',
+   EXECUTE_STATE        tinyint not null default 0 comment '执行状态(-1:取消；0:未执行；1:已执行；暂停)',
+   EXECUTE_PLAN_TIME    datetime not null comment '计划执行时间',
+   EXECUTE_FACT_TIME    datetime comment '实际执行时间',
+   TRADE_TYPE           tinyint not null comment '结算类型(交易类型中的几种结算类型)',
+   ORDER_ID             varchar(150) not null comment '订单ID(销售订单ID)',
+   IP                   varchar(150) not null comment 'IP地址',
+   primary key (ID),
+   key AK_TRADE_TYPE_AND_ACCOUNT_AND_ORDER_DETAIL (TRADE_TYPE)
+);
+
+alter table ORD_SETTLE_TASK comment '结算任务';
+
 -- 2018-11-16
 alter table ORD_ORDER_DETAIL						  add            IS_SETTLE_BUYER      bool comment '是否结算给买家';
 alter table ORD_ORDER_DETAIL						  add            ACTUAL_AMOUNT        decimal(18,4) comment '实际成交金额';

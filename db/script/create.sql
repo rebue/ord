@@ -1,6 +1,6 @@
 /*==============================================================*/
 /* DBMS name:      MySQL 5.0                                    */
-/* Created on:     2018/11/19 15:02:14                          */
+/* Created on:     2018/11/20 16:14:47                          */
 /*==============================================================*/
 
 
@@ -19,6 +19,8 @@ drop table if exists ORD_ORDER_DETAIL_DELIVER;
 drop table if exists ORD_RETURN;
 
 drop table if exists ORD_RETURN_PIC;
+
+drop table if exists ORD_SETTLE_TASK;
 
 drop table if exists ORD_TASK;
 
@@ -245,6 +247,24 @@ create table ORD_RETURN_PIC
 );
 
 alter table ORD_RETURN_PIC comment '退货图片';
+
+/*==============================================================*/
+/* Table: ORD_SETTLE_TASK                                       */
+/*==============================================================*/
+create table ORD_SETTLE_TASK
+(
+   ID                   bigint not null comment '任务ID',
+   EXECUTE_STATE        tinyint not null default 0 comment '执行状态(-1:取消；0:未执行；1:已执行；暂停)',
+   EXECUTE_PLAN_TIME    datetime not null comment '计划执行时间',
+   EXECUTE_FACT_TIME    datetime comment '实际执行时间',
+   TRADE_TYPE           tinyint not null comment '结算类型(交易类型中的几种结算类型)',
+   ORDER_ID             varchar(150) not null comment '订单ID(销售订单ID)',
+   IP                   varchar(150) not null comment 'IP地址',
+   primary key (ID),
+   key AK_TRADE_TYPE_AND_ACCOUNT_AND_ORDER_DETAIL (TRADE_TYPE)
+);
+
+alter table ORD_SETTLE_TASK comment '结算任务';
 
 /*==============================================================*/
 /* Table: ORD_TASK                                              */
