@@ -20,7 +20,7 @@ alter table ORD_ORDER_DETAIL                         modify    RETURN_COUNT     
 
 -- 2018-11-12
 alter table ORD_ORDER_DETAIL                         add         PRODUCT_SPEC_ID      bigint             null          comment '产品规格ID';
-alter table ORD_ORDER_DETAIL                         add         ONLINE_SPEC_ID          bigint            not null    comment '上线规格ID';
+-- alter table ORD_ORDER_DETAIL                         add         ONLINE_SPEC_ID          bigint            not null    comment '上线规格ID';
 alter table ORD_ORDER                                       modify     USER_NAME                  varchar(50)  null          comment '作废-下单人姓名';
 
 
