@@ -1,6 +1,6 @@
 /*==============================================================*/
 /* DBMS name:      MySQL 5.0                                    */
-/* Created on:     2018/11/20 16:14:47                          */
+/* Created on:     2018/11/20 17:48:26                          */
 /*==============================================================*/
 
 
@@ -261,7 +261,7 @@ create table ORD_SETTLE_TASK
    ORDER_ID             varchar(150) not null comment '订单ID(销售订单ID)',
    IP                   varchar(150) not null comment 'IP地址',
    primary key (ID),
-   key AK_TRADE_TYPE_AND_ACCOUNT_AND_ORDER_DETAIL (TRADE_TYPE)
+   unique key AK_TRADE_TYPE_AND_ORDER_ID (TRADE_TYPE, ORDER_ID)
 );
 
 alter table ORD_SETTLE_TASK comment '结算任务';

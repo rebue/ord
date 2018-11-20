@@ -3919,11 +3919,11 @@ LABL 0 新宋体,8,N</a:FontList>
 </o:Identifier>
 <o:Identifier Id="o202">
 <a:ObjectID>11712891-3818-47C6-B892-7E96E01C0E1D</a:ObjectID>
-<a:Name>交易类型/账户/订单详情ID</a:Name>
-<a:Code>TRADE_TYPE_AND_ACCOUNT_AND_ORDER_DETAIL</a:Code>
+<a:Name>结算类型/订单ID</a:Name>
+<a:Code>TRADE_TYPE_AND_ORDER_ID</a:Code>
 <a:CreationDate>1542700262</a:CreationDate>
 <a:Creator>admin</a:Creator>
-<a:ModificationDate>1542701199</a:ModificationDate>
+<a:ModificationDate>1542707164</a:ModificationDate>
 <a:Modifier>admin</a:Modifier>
 <c:Identifier.Attributes>
 <o:EntityAttribute Ref="o203"/>
@@ -4564,12 +4564,12 @@ LABL 0 新宋体,8,N</a:FontList>
 <a:Code>ord-mysql</a:Code>
 <a:CreationDate>1542701309</a:CreationDate>
 <a:Creator>admin</a:Creator>
-<a:ModificationDate>1542701658</a:ModificationDate>
+<a:ModificationDate>1542707193</a:ModificationDate>
 <a:Modifier>admin</a:Modifier>
 <a:TargetModelURL>file:///D|/eclipse-damai/ord/db/model/ord-mysql.pdm</a:TargetModelURL>
 <a:TargetModelID>2E4A3071-C496-45CB-91CC-27216E4E4AA2</a:TargetModelID>
 <a:TargetModelClassID>CDE44E21-9669-11D1-9914-006097355D9B</a:TargetModelClassID>
-<a:TargetModelLastModificationDate>1542701658</a:TargetModelLastModificationDate>
+<a:TargetModelLastModificationDate>1542707193</a:TargetModelLastModificationDate>
 <c:SessionShortcuts>
 <o:Shortcut Ref="o21"/>
 </c:SessionShortcuts>
