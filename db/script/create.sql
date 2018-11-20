@@ -1,6 +1,6 @@
 /*==============================================================*/
 /* DBMS name:      MySQL 5.0                                    */
-/* Created on:     2018/11/20 19:16:15                          */
+/* Created on:     2018/11/20 20:21:30                          */
 /*==============================================================*/
 
 
@@ -94,7 +94,7 @@ create table ORD_ORDER
    DELIVER_ORG_ID       bigint comment '发货组织ID',
    ORDER_MONEY          decimal(50,4) not null comment '下单金额',
    REAL_MONEY           decimal(50,4) not null comment '实际金额',
-   RETURN_TOTAL         decimal(50,4) not null default 0 comment '退货总额',
+   RETURN_TOTAL         decimal(50,4) not null default 0 comment '已退款总额',
    RETURN_AMOUNT1       decimal(50,4) comment '可退货金额1（退到返现金额）
             @deprecated',
    RETURN_AMOUNT2       decimal(50,4) comment '可退货总额2（退到余额）
@@ -206,10 +206,10 @@ create table ORD_RETURN
    ORDER_ID             bigint not null comment '订单ID',
    ORDER_DETAIL_ID      bigint not null comment '订单详情ID',
    RETURN_COUNT         int not null comment '退货数量',
-   RETURN_RENTAL        decimal(18,4) not null comment '退货总额',
-   RETURN_AMOUNT1       decimal(18,4) comment '退货金额（余额）',
-   RETURN_AMOUNT2       decimal(18,4) comment '退货金额（返现金）',
-   SUBTRACT_CASHBACK    decimal(18,4) comment '扣减返现金额',
+   RETURN_TOTAL         decimal(18,4) not null comment '退款总额（退款总额=退款余额+退款返现金+扣除补偿金）',
+   RETURN_AMOUNT1       decimal(18,4) comment '退款金额（余额）',
+   RETURN_AMOUNT2       decimal(18,4) comment '退款金额（返现金）',
+   DEDUCT_AMOUNT        decimal(18,4) not null default 0 comment '扣除补偿金额(扣除需补偿的金额，例如补偿运费)',
    RETURN_TYPE          tinyint not null comment '退款类型（1：仅退款  2：退货并退款）',
    APPLICATION_STATE    tinyint not null comment '申请状态（-1：已取消  1：待审核  2：退货中  3：已完成   4：已拒绝）',
    RETURN_REASON        varchar(500) not null comment '退货原因',
