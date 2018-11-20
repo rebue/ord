@@ -118,15 +118,6 @@ public class OrdReturnMo implements Serializable {
     private Byte applicationState;
 
     /**
-     *    退款状态（1：未退款  2、已退款）
-     *
-     *    数据库字段: ORD_RETURN.REFUND_STATE
-     *
-     *    @mbg.generated 自动生成，如需修改，请删除本行
-     */
-    private Byte refundState;
-
-    /**
      *    退货原因
      *
      *    数据库字段: ORD_RETURN.RETURN_REASON
@@ -541,28 +532,6 @@ public class OrdReturnMo implements Serializable {
     }
 
     /**
-     *    退款状态（1：未退款  2、已退款）
-     *
-     *    数据库字段: ORD_RETURN.REFUND_STATE
-     *
-     *    @mbg.generated 自动生成，如需修改，请删除本行
-     */
-    public Byte getRefundState() {
-        return refundState;
-    }
-
-    /**
-     *    退款状态（1：未退款  2、已退款）
-     *
-     *    数据库字段: ORD_RETURN.REFUND_STATE
-     *
-     *    @mbg.generated 自动生成，如需修改，请删除本行
-     */
-    public void setRefundState(Byte refundState) {
-        this.refundState = refundState;
-    }
-
-    /**
      *    退货原因
      *
      *    数据库字段: ORD_RETURN.RETURN_REASON
@@ -956,7 +925,6 @@ public class OrdReturnMo implements Serializable {
         sb.append(", subtractCashback=").append(subtractCashback);
         sb.append(", returnType=").append(returnType);
         sb.append(", applicationState=").append(applicationState);
-        sb.append(", refundState=").append(refundState);
         sb.append(", returnReason=").append(returnReason);
         sb.append(", userId=").append(userId);
         sb.append(", applicationOpId=").append(applicationOpId);

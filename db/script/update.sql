@@ -1,4 +1,8 @@
--- 2018年11月20日16:12:17新增结算任务表（ORD_SETTLE_TASK）
+-- 2018-11-20
+alter table ORD_RETURN drop column REFUND_STATE;
+
+
+-- 新增结算任务表（ORD_SETTLE_TASK）
 create table ORD_SETTLE_TASK
 (
    ID                   bigint not null comment '任务ID',
@@ -11,8 +15,8 @@ create table ORD_SETTLE_TASK
    primary key (ID),
    unique key AK_TRADE_TYPE_AND_ORDER_ID (TRADE_TYPE, ORDER_ID)
 );
-
 alter table ORD_SETTLE_TASK comment '结算任务';
+
 
 -- 2018-11-16
 alter table ORD_ORDER_DETAIL						  add            IS_SETTLE_BUYER      bool comment '是否结算给买家';

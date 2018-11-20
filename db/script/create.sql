@@ -1,6 +1,6 @@
 /*==============================================================*/
 /* DBMS name:      MySQL 5.0                                    */
-/* Created on:     2018/11/20 17:48:26                          */
+/* Created on:     2018/11/20 19:16:15                          */
 /*==============================================================*/
 
 
@@ -211,8 +211,7 @@ create table ORD_RETURN
    RETURN_AMOUNT2       decimal(18,4) comment '退货金额（返现金）',
    SUBTRACT_CASHBACK    decimal(18,4) comment '扣减返现金额',
    RETURN_TYPE          tinyint not null comment '退款类型（1：仅退款  2：退货并退款）',
-   APPLICATION_STATE    tinyint not null comment '申请状态（-1：已取消  1：待审核  2：退货中  3：已退货   4：已拒绝）',
-   REFUND_STATE         tinyint not null comment '退款状态（1：未退款  2、已退款）',
+   APPLICATION_STATE    tinyint not null comment '申请状态（-1：已取消  1：待审核  2：退货中  3：已完成   4：已拒绝）',
    RETURN_REASON        varchar(500) not null comment '退货原因',
    USER_ID              bigint not null comment '用户ID',
    APPLICATION_OP_ID    bigint not null comment '申请操作人',
