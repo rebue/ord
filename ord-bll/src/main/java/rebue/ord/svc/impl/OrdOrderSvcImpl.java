@@ -915,6 +915,7 @@ public class OrdOrderSvcImpl extends MybatisBaseSvcImpl<OrdOrderMo, java.lang.Lo
         }
         final AddKdiLogisticTo addKdiLogisticTo = dozerMapper.map(to, AddKdiLogisticTo.class);
         addKdiLogisticTo.setEntryType((byte) 2);
+        addKdiLogisticTo.setOrderId(to.getId());
         final KdiLogisticRo entryResult = kdiSvc.entryLogistics(addKdiLogisticTo);
         if (entryResult.getResult() != 1) {
             _log.error("添加物流信息出错，订单编号为：{}", mo.getOrderCode());
