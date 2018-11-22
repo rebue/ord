@@ -1,7 +1,13 @@
+-- 2018-11-22
+alter table ORD_RETURN           change          RETURN_RENTAL      RETURN_TOTAL         decimal(18,4) not null comment '退款总额（退款总额=退款余额+退款返现金+扣除补偿金）';
+alter table ORD_RETURN           drop column  RETURN_AMOUNT1;
+alter table ORD_RETURN           drop column  RETURN_AMOUNT2;
+
+
 -- 2018-11-20
-alter table ORD_RETURN           drop column REFUND_STATE;
-alter table ORD_RETURN           drop column SUBTRACT_CASHBACK;
-alter table ORD_RETURN			 add               DEDUCT_AMOUNT        decimal(18,4) not null default 0 comment '扣除补偿金额(扣除需补偿的金额，例如补偿运费)';
+alter table ORD_RETURN           drop column  REFUND_STATE;
+alter table ORD_RETURN           drop column  SUBTRACT_CASHBACK;
+alter table ORD_RETURN			 add                DEDUCT_AMOUNT        decimal(18,4) not null default 0 comment '扣除补偿金额(扣除需补偿的金额，例如补偿运费)';
 
 
 -- 新增结算任务表（ORD_SETTLE_TASK）

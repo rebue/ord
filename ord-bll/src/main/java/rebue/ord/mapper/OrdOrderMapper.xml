@@ -1056,19 +1056,17 @@
 		ORDER_STATE=#{orderState,jdbcType=TINYINT}
 	</update>
 
-	<!-- 修改退货金额 -->
-	<update id="modifyReturnAmountByorderCode" parameterType="rebue.ord.mo.OrdOrderMo">
-		UPDATE ORD_ORDER SET RETURN_TOTAL=#{returnTotal,jdbcType=DECIMAL},
-		RETURN_AMOUNT1=#{returnAmount1,jdbcType=DECIMAL},
-		RETURN_AMOUNT2=#{returnAmount2,jdbcType=DECIMAL}
+	<!-- 修改退款金额(根据订单ID和已退款总额) -->
+	<update id="modifyRefund">
+		UPDATE ORD_ORDER
+		SET RETURN_TOTAL=#{returnTotal,jdbcType=DECIMAL}
 		<if test="orderState != null">
 			,ORDER_STATE = #{orderState,jdbcType=TINYINT}
 		</if>
-		WHERE ID=#{id, jdbcType=VARCHAR}
+		WHERE ID=#{id, jdbcType=BIGINT} AND RETURN_TOTAL=#{returnedTotal,jdbcType=DECIMAL}
 	</update>
 
 	<update id="updateByOrderCode" parameterType="rebue.ord.mo.OrdOrderMo">
-
 		update ORD_ORDER
 		<set>
 			<if test="orderTitle != null">

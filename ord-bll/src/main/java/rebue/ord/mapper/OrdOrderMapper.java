@@ -1,5 +1,6 @@
 package rebue.ord.mapper;
 
+import java.math.BigDecimal;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
@@ -145,13 +146,20 @@ public interface OrdOrderMapper extends MybatisBaseMapper<OrdOrderMo, Long> {
     int orderSignIn(OrdOrderMo record);
 
     /**
-     * 修改退货金额 Title: modifyReturnAmount Description:
-     *
-     * @param record
-     * @return
-     * @date 2018年5月7日 上午9:09:35
+     * 修改订单退款金额(根据订单ID和已退款总额)
+     * 
+     * @param refundTotal
+     *            退款总额
+     * @param orderState
+     *            订单状态
+     * @param whereOrderId
+     *            where条件-订单ID
+     * @param whereRefundedTotal
+     *            where条件-已退款总额
      */
-    int modifyReturnAmountByorderCode(OrdOrderMo record);
+    int updateRefund(@Param("returnTotal") BigDecimal refundTotal,//
+            @Param("orderState") Byte orderState,//
+            @Param("id") Long whereOrderId, @Param("returnedTotal") BigDecimal whereRefundedTotal);
 
     /**
      * 根据订单编号修改订单状态 Title: modifyOrderStateByOderCode Description:

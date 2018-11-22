@@ -21,7 +21,7 @@ public class OrderDetailTo {
     private Long    onlineId;
 
     /**
-     * 上线规格ID
+     * 上线规格名称
      */
     private Long    onlineSpecId;
 

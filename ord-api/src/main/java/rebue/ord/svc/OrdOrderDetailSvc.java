@@ -1,5 +1,6 @@
 package rebue.ord.svc;
 
+import java.math.BigDecimal;
 import java.util.List;
 import java.util.Map;
 
@@ -15,9 +16,29 @@ import rebue.robotech.svc.MybatisBaseSvc;
 public interface OrdOrderDetailSvc extends MybatisBaseSvc<OrdOrderDetailMo, java.lang.Long> {
 
     /**
-     * 根据订单编号、详情ID修改退货数量、返现总额
+     * 根据OrderId获取订单详情列表
      */
-    int modifyReturnCountAndCashBackTotal(OrdOrderDetailMo mo);
+    List<OrdOrderDetailMo> listByOrderId(Long orderId);
+
+    /**
+     * 修改订单详情的退货情况(根据订单详情ID、已退货数量、旧的返现金总额，修改退货总数、返现金总额以及退货状态)
+     *
+     * @param returnTotal
+     *            退货总数
+     * @param newCashbackTotal
+     *            新的返现金总额
+     * @param returnState
+     *            退货状态
+     * @param whereDetailId
+     *            where-订单详情ID
+     * @param whereReturnedCount
+     *            where-之前的已退货数量
+     * @param whereOldCashbackTotal
+     *            where-退货之前的返现金总额
+     */
+    int modifyReturn(Integer returnTotal, BigDecimal newCashbackTotal,//
+            Byte returnState, Long whereDetailId, //
+            Integer whereReturnedCount, BigDecimal whereOldCashbackTotal);
 
     /**
      * 根据详情ID修改退货状态 Title: modifyReturnStateById Description:
@@ -42,7 +63,7 @@ public interface OrdOrderDetailSvc extends MybatisBaseSvc<OrdOrderDetailMo, java
 
     OrdOrderDetailMo getAndUpdateBuyRelationByFour(Map<String, Object> map);
 
-    List<DetailandBuyRelationRo> listByOrderId(Long orderId);
+    List<DetailandBuyRelationRo> listBuyRelationByOrderId(Long orderId);
 
     /**
      * 得到买家已下单指定上线规格商品的数量(以此来限制买家购买)

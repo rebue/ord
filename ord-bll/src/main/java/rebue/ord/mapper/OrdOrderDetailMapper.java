@@ -1,5 +1,6 @@
 package rebue.ord.mapper;
 
+import java.math.BigDecimal;
 import java.util.List;
 import java.util.Map;
 
@@ -80,14 +81,24 @@ public interface OrdOrderDetailMapper extends MybatisBaseMapper<OrdOrderDetailMo
     int countSelective(OrdOrderDetailMo record);
 
     /**
-     * 根据订单编号订单详情ID修改退货数量和返现总额 Title: modifyReturnCountAndCashBackTotal
-     * Description:
-     *
-     * @param record
-     * @return
-     * @date 2018年5月7日 上午9:46:55
+     * 修改订单详情的退货情况(根据订单详情ID、已退货数量、旧的返现金总额，修改退货总数、返现金总额以及退货状态)
+     * 
+     * @param returnTotal
+     *            退货总数
+     * @param newCashbackTotal
+     *            新的返现金总额
+     * @param returnState
+     *            退货状态
+     * @param whereDetailId
+     *            where-订单详情ID
+     * @param whereReturnedCount
+     *            where-之前的已退货数量
+     * @param whereOldCashbackTotal
+     *            where-退货之前的返现金总额
      */
-    int modifyReturnCountAndCashBackTotal(OrdOrderDetailMo record);
+    int updateReturn(@Param("returnTotal") Integer returnTotal, @Param("newCashbackTotal") BigDecimal newCashbackTotal,//
+            @Param("returnState") Byte returnState, @Param("id") Long whereDetailId, //
+            @Param("returnedCount") Integer whereReturnedCount, @Param("oldCashbackTotal") BigDecimal whereOldCashbackTotal);
 
     /**
      * 根据详情ID修改退货状态 Title: modifyReturnStateById Description:
@@ -122,16 +133,15 @@ public interface OrdOrderDetailMapper extends MybatisBaseMapper<OrdOrderDetailMo
      * @param onlineSpecId
      *            上线规格ID
      */
-    @Select("SELECT " //
-            + "    IFNULL(SUM(a.BUY_COUNT - a.RETURN_COUNT),0) " //
-            + "FROM" //
-            + "    ORD_ORDER_DETAIL AS a," //
-            + "    ORD_ORDER AS b " //
-            + "WHERE" //
-            + "    a.ORDER_ID = b.ID"//
-            + "        AND a.USER_ID = #{userId}" //
-            + "        AND a.ONLINE_SPEC_ID = #{onlineSpecId}" //
-            + "        AND b.ORDER_STATE > 0")
+    @//
+    Select(//
+    "SELECT " + //
+            "    IFNULL(SUM(a.BUY_COUNT - a.RETURN_COUNT),0) " + //
+            "FROM" + //
+            "    ORD_ORDER_DETAIL AS a," + //
+            "    ORD_ORDER AS b " + //
+            "WHERE" + //
+            "    a.ORDER_ID = b.ID" + //
+            "        AND a.USER_ID = #{userId}" + "        AND a.ONLINE_SPEC_ID = #{onlineSpecId}" + "        AND b.ORDER_STATE > 0")
     int getBuyerOrderedCount(Long userId, Long onlineSpecId);
-
 }

@@ -1,5 +1,6 @@
 package rebue.ord.svc.impl;
 
+import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -68,20 +69,28 @@ public class OrdOrderDetailSvcImpl extends MybatisBaseSvcImpl<OrdOrderDetailMo, 
     private OrdBuyRelationSvc selfSvc;
 
     /**
-     * 根据订单编号、详情ID修改退货数量和返现总额 Title: modifyReturnCountAndCashBackTotal
-     * Description:
+     * 修改订单详情的退货情况(根据订单详情ID、已退货数量、旧的返现金总额，修改退货总数、返现金总额以及退货状态)
      *
-     * @param orderId
-     * @param orderDetailId
-     * @param returnCount
-     * @param cashbackTotal
-     * @return
-     * @date 2018年5月7日 上午9:53:45
+     * @param returnTotal
+     *            退货总数
+     * @param newCashbackTotal
+     *            新的返现金总额
+     * @param returnState
+     *            退货状态
+     * @param whereDetailId
+     *            where-订单详情ID
+     * @param whereReturnedCount
+     *            where-之前的已退货数量
+     * @param whereOldCashbackTotal
+     *            where-退货之前的返现金总额
      */
     @Override
     @Transactional(readOnly = false, propagation = Propagation.REQUIRED)
-    public int modifyReturnCountAndCashBackTotal(final OrdOrderDetailMo mo) {
-        return _mapper.modifyReturnCountAndCashBackTotal(mo);
+    public int modifyReturn(final Integer returnTotal, final BigDecimal newCashbackTotal, final Byte returnState, final Long whereDetailId, final Integer whereReturnedCount,
+            final BigDecimal whereOldCashbackTotal) {
+        _log.info("修改订单详情的退货情况: 退货总数-{}, 新的返现金总额-{}, 退货状态-{}, where-订单详情ID-{}, where-之前的已退货数量-{}, where-退货之前的返现金总额-{}", returnTotal, newCashbackTotal, returnState, whereDetailId,
+                whereReturnedCount, whereOldCashbackTotal);
+        return _mapper.updateReturn(returnTotal, newCashbackTotal, returnState, whereDetailId, whereReturnedCount, whereOldCashbackTotal);
     }
 
     /**
@@ -104,6 +113,17 @@ public class OrdOrderDetailSvcImpl extends MybatisBaseSvcImpl<OrdOrderDetailMo, 
     @Override
     public OrdOrderDetailMo getOrderDetailForBuyRelation(final Map<String, Object> map) {
         return _mapper.getOrderDetailForBuyRelation(map);
+    }
+
+    /**
+     * 根据OrderId获取订单详情列表
+     */
+    @Override
+    public List<OrdOrderDetailMo> listByOrderId(final Long orderId) {
+        _log.info("根据OrderId获取订单详情列表", orderId);
+        final OrdOrderDetailMo conditions = new OrdOrderDetailMo();
+        conditions.setOrderId(orderId);
+        return _mapper.selectSelective(conditions);
     }
 
     @Override
@@ -132,7 +152,7 @@ public class OrdOrderDetailSvcImpl extends MybatisBaseSvcImpl<OrdOrderDetailMo, 
     }
 
     @Override
-    public List<DetailandBuyRelationRo> listByOrderId(final Long orderId) {
+    public List<DetailandBuyRelationRo> listBuyRelationByOrderId(final Long orderId) {
         final List<DetailandBuyRelationRo> result = new ArrayList<>();
         _log.info("根据orderId获取购买关系参数为： {}", orderId);
         _log.info("先查询订单详情参数为： {}", orderId);
