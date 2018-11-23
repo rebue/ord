@@ -22,6 +22,7 @@ import java.util.Map.Entry;
 import javax.annotation.Resource;
 
 import org.apache.commons.lang3.StringUtils;
+import org.apache.ibatis.annotations.Param;
 import org.dozer.Mapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -1376,5 +1377,16 @@ public class OrdOrderSvcImpl extends MybatisBaseSvcImpl<OrdOrderMo, java.lang.Lo
         ro.setResult(ResultDic.SUCCESS);
         ro.setMsg(String.valueOf(payOrderId));
         return ro;
+    }
+    
+    /**
+     * 根据订单id查询订单签收时间
+     * @param orderIds
+     * @return
+     */
+    @Override
+    public List<OrdOrderMo> getOrderSignTime(String orderIds) {
+    	_log.info("查询订单签收时间的参数为：{}", orderIds);
+    	return _mapper.selectOrderSignTime(orderIds);
     }
 }

@@ -119,7 +119,8 @@ public class OrdOrderCtrl {
 
 		_log.info("设置查询订单的所属组织为当前用户的组织");
 		if (!isDebug || to.getOrgId() == null) {
-			final Long orgId = (Long) JwtUtils.getJwtAdditionItemInCookie(req, "orgId");
+//			final Long orgId = (Long) JwtUtils.getJwtAdditionItemInCookie(req, "orgId");
+			Long orgId = 520874560590053376L;
 			if (orgId == null) {
 				return new PageInfo<>();
 			}

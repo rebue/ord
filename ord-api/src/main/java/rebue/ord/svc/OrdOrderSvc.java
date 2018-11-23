@@ -185,4 +185,11 @@ public interface OrdOrderSvc extends MybatisBaseSvc<OrdOrderMo, java.lang.Long> 
      * @return
      */
     Ro modifyPayOrderId(Long id);
+
+    /**
+     * 根据订单id查询订单签收时间
+     * @param orderIds
+     * @return
+     */
+	List<OrdOrderMo> getOrderSignTime(String orderIds);
 }

@@ -228,4 +228,12 @@ public interface OrdOrderMapper extends MybatisBaseMapper<OrdOrderMo, Long> {
      */
     @Update("update ORD_ORDER set PAY_ORDER_ID = #{payOrderId,jdbcType=BIGINT} where ID = #{id,jdbcType=BIGINT}")
     int updatePayOrderId(@Param("payOrderId") Long payOrderId, @Param("id") Long id);
+    
+    /**
+     * 根据订单id查询订单签收时间
+     * @param orderIds
+     * @return
+     */
+    @Select("select RECEIVED_TIME from ORD_ORDER where ID in (${orderIds}) order by RECEIVED_TIME desc")
+    List<OrdOrderMo> selectOrderSignTime(@Param("orderIds") String orderIds);
 }

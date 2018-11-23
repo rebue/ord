@@ -8,4 +8,21 @@ ord:
    # 上家返佣时间（按小时计算）
   settle-upline-commission-time: 2
   return-limit-time: 20
-  
+  # 供应商结算计划执行时间（按小时计算）
+  supplier-settle-execute-plan-time: 1
+  # 已占用保证金结算计划执行时间（按小时计算）
+  occupied-deposit-settle-execute-plan-time: 1
+  # 卖家结算计划执行时间（按小时计算）
+  seller-settle-execute-plan-time: 1
+  # 用户返现中结算计划执行时间（按小时计算）
+  user-cashbacking-settle-execute-plan-time: 1
+  # 用户返现结算计划执行时间（按小时计算）
+  user-cashback-settle-execute-plan-time: 1
+  # 用户返佣中结算计划执行时间（按小时计算）
+  user-commissioning-settle-execute-plan-time: 1
+  # 用户返佣结算计划执行时间（按小时计算）
+  user-commission-settle-execute-plan-time: 1
+  # 平台服务费结算计划执行时间（按小时计算）
+  platform-service-fee-settle-execute-plan-time: 1
+  # 平台服务费比例
+  platform-service-fee-ratio: 0
