@@ -443,11 +443,16 @@ public class OrdReturnSvcImpl extends MybatisBaseSvcImpl<OrdReturnMo, java.lang.
         _log.info("同意退款的参数为：{}", to);
         final Ro ro = new Ro();
 
+        // 退款补偿金参数为空设置默认值
+        if (to.getRefundCompensation() != null) {
+            to.setRefundCompensation(BigDecimal.ZERO);
+        }
+
         _log.debug("检查参数的正确性");
         if (to.getReturnId() == null || to.getOrderId() == null || to.getOrderDetailId() == null || to.getOpId() == null //
                 || (to.getRefundAmount() == null && (to.getRefundAmount1() == null || to.getRefundAmount2() == null))) {
             final String msg = "参数错误";
-            _log.error("{}: {}", msg, "没有传入退货ID/订单ID/退款金额/退款金额1(余额)/退款金额2(返现金)/订单详情ID/操作人");
+            _log.error("{}: {}", msg, "没有传入退货ID/订单ID/退款金额/退款金额1(余额)/退款金额2(返现金)/退款补偿金/订单详情ID/操作人");
             ro.setResult(ResultDic.PARAM_ERROR);
             ro.setMsg(msg);
             return ro;
