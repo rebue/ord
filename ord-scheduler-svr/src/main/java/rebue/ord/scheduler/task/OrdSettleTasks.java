@@ -10,29 +10,29 @@ import org.springframework.scheduling.annotation.Scheduled;
 
 import rebue.ord.svr.feign.OrdSettleTaskSvc;
 
-
 public class OrdSettleTasks {
 
-	private final static Logger _log = LoggerFactory.getLogger(CancleOrderTasks.class);
+    private final static Logger _log = LoggerFactory.getLogger(CancleOrderTasks.class);
 
     @Resource
-    private OrdSettleTaskSvc          settleTaskSvc;
+    private OrdSettleTaskSvc    settleTaskSvc;
 
-    @Scheduled(fixedDelayString = "${ord.scheduler.cancelTradeFixedDelay}")
+    // settleFixedDelay:结算任务执行的间隔（毫秒）
+    @Scheduled(fixedDelayString = "${ord.scheduler.settleFixedDelay:608400000}")
     public void executeTasks() {
         _log.info("定时执行需要自动取消订单的任务");
         try {
             _log.info("获取所有需要执行取消订单的任务列表");
-            List<Long> tasks = settleTaskSvc.getTaskIdsThatShouldExecute();
+            final List<Long> tasks = settleTaskSvc.getTaskIdsThatShouldExecute();
             _log.info("获取到所有需要执行取消订单任务的列表为：{}", String.valueOf(tasks));
-            for (Long id : tasks) {
+            for (final Long id : tasks) {
                 try {
-                	settleTaskSvc.executeSettleTask(id);
-                } catch (RuntimeException e) {
+                    settleTaskSvc.executeSettleTask(id);
+                } catch (final RuntimeException e) {
                     _log.info("执行订单取消失败", e);
                 }
             }
-        } catch (RuntimeException e) {
+        } catch (final RuntimeException e) {
             _log.info("获取需要执行自动取消任务时出现异常", e);
         }
     }

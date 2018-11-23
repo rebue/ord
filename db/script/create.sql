@@ -1,6 +1,6 @@
 /*==============================================================*/
 /* DBMS name:      MySQL 5.0                                    */
-/* Created on:     2018/11/23 15:24:28                          */
+/* Created on:     2018/11/23 16:51:53                          */
 /*==============================================================*/
 
 
@@ -207,8 +207,8 @@ create table ORD_RETURN
    ORDER_ID             bigint not null comment '订单ID',
    ORDER_DETAIL_ID      bigint not null comment '订单详情ID',
    RETURN_COUNT         int not null comment '退货数量',
-   REFUND_TOTAL         decimal(18,4) not null comment '退款总额（退款总额=退款余额+退款返现金+退款补偿金）',
-   REFUND_COMPENSATION  decimal(18,4) not null default 0 comment '退款补偿金额(退货退款产生的需补偿给卖家的金额，例如补偿运费)',
+   REFUND_TOTAL         decimal(18,4) comment '退款总额（退款总额=退款余额+退款返现金+退款补偿金）',
+   REFUND_COMPENSATION  decimal(18,4) default 0 comment '退款补偿金额(退货退款产生的需补偿给卖家的金额，例如补偿运费)',
    RETURN_TYPE          tinyint not null comment '退货类型（1：仅退款  2：退货并退款）',
    APPLICATION_STATE    tinyint not null comment '申请状态（-1：已取消  1：待审核  2：退货中  3：已退货   4：已拒绝）',
    RETURN_REASON        varchar(500) not null comment '退货原因',
