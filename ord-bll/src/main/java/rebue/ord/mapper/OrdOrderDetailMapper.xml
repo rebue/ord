@@ -29,6 +29,7 @@
     <result column="USER_ID" jdbcType="BIGINT" property="userId" />
     <result column="IS_SETTLE_BUYER" jdbcType="TINYINT" property="isSettleBuyer" />
     <result column="ACTUAL_AMOUNT" jdbcType="DECIMAL" property="actualAmount" />
+    <result column="IS_DELIVERED" jdbcType="TINYINT" property="isDelivered" />
   </resultMap>
   <sql id="Base_Column_List">
     <!--
@@ -38,7 +39,7 @@
     ID, ORDER_ID, ONLINE_ID, PRODUCT_ID, PRODUCT_SPEC_ID, SUBJECT_TYPE, COMMISSION_SLOT, 
     COMMISSION_STATE, ONLINE_TITLE, SPEC_NAME, BUY_COUNT, BUY_PRICE, COST_PRICE, SUPPLIER_ID, 
     DELIVER_ORG_ID, CASHBACK_AMOUNT, RETURN_COUNT, CASHBACK_TOTAL, BUY_UNIT, RETURN_STATE, 
-    USER_ID, IS_SETTLE_BUYER, ACTUAL_AMOUNT
+    USER_ID, IS_SETTLE_BUYER, ACTUAL_AMOUNT, IS_DELIVERED
   </sql>
   <select id="selectByPrimaryKey" parameterType="java.lang.Long" resultMap="BaseResultMap">
     <!--
@@ -70,7 +71,8 @@
       COST_PRICE, SUPPLIER_ID, DELIVER_ORG_ID, 
       CASHBACK_AMOUNT, RETURN_COUNT, CASHBACK_TOTAL, 
       BUY_UNIT, RETURN_STATE, USER_ID, 
-      IS_SETTLE_BUYER, ACTUAL_AMOUNT)
+      IS_SETTLE_BUYER, ACTUAL_AMOUNT, IS_DELIVERED
+      )
     values (#{id,jdbcType=BIGINT}, #{orderId,jdbcType=BIGINT}, #{onlineId,jdbcType=BIGINT}, 
       #{productId,jdbcType=BIGINT}, #{productSpecId,jdbcType=BIGINT}, #{subjectType,jdbcType=TINYINT}, 
       #{commissionSlot,jdbcType=TINYINT}, #{commissionState,jdbcType=TINYINT}, #{onlineTitle,jdbcType=VARCHAR}, 
@@ -78,7 +80,8 @@
       #{costPrice,jdbcType=DECIMAL}, #{supplierId,jdbcType=BIGINT}, #{deliverOrgId,jdbcType=BIGINT}, 
       #{cashbackAmount,jdbcType=DECIMAL}, #{returnCount,jdbcType=INTEGER}, #{cashbackTotal,jdbcType=DECIMAL}, 
       #{buyUnit,jdbcType=VARCHAR}, #{returnState,jdbcType=TINYINT}, #{userId,jdbcType=BIGINT}, 
-      #{isSettleBuyer,jdbcType=TINYINT}, #{actualAmount,jdbcType=DECIMAL})
+      #{isSettleBuyer,jdbcType=TINYINT}, #{actualAmount,jdbcType=DECIMAL}, #{isDelivered,jdbcType=TINYINT}
+      )
   </insert>
   <insert id="insertSelective" parameterType="rebue.ord.mo.OrdOrderDetailMo">
     <!--
@@ -156,6 +159,9 @@
       <if test="actualAmount != null">
         ACTUAL_AMOUNT,
       </if>
+      <if test="isDelivered != null">
+        IS_DELIVERED,
+      </if>
     </trim>
     <trim prefix="values (" suffix=")" suffixOverrides=",">
       <if test="id != null">
@@ -226,6 +232,9 @@
       </if>
       <if test="actualAmount != null">
         #{actualAmount,jdbcType=DECIMAL},
+      </if>
+      <if test="isDelivered != null">
+        #{isDelivered,jdbcType=TINYINT},
       </if>
     </trim>
   </insert>
@@ -302,6 +311,9 @@
       <if test="actualAmount != null">
         ACTUAL_AMOUNT = #{actualAmount,jdbcType=DECIMAL},
       </if>
+      <if test="isDelivered != null">
+        IS_DELIVERED = #{isDelivered,jdbcType=TINYINT},
+      </if>
     </set>
     where ID = #{id,jdbcType=BIGINT}
   </update>
@@ -332,7 +344,8 @@
       RETURN_STATE = #{returnState,jdbcType=TINYINT},
       USER_ID = #{userId,jdbcType=BIGINT},
       IS_SETTLE_BUYER = #{isSettleBuyer,jdbcType=TINYINT},
-      ACTUAL_AMOUNT = #{actualAmount,jdbcType=DECIMAL}
+      ACTUAL_AMOUNT = #{actualAmount,jdbcType=DECIMAL},
+      IS_DELIVERED = #{isDelivered,jdbcType=TINYINT}
     where ID = #{id,jdbcType=BIGINT}
   </update>
   <select id="selectAll" resultMap="BaseResultMap">
@@ -343,7 +356,7 @@
     select ID, ORDER_ID, ONLINE_ID, PRODUCT_ID, PRODUCT_SPEC_ID, SUBJECT_TYPE, COMMISSION_SLOT, 
     COMMISSION_STATE, ONLINE_TITLE, SPEC_NAME, BUY_COUNT, BUY_PRICE, COST_PRICE, SUPPLIER_ID, 
     DELIVER_ORG_ID, CASHBACK_AMOUNT, RETURN_COUNT, CASHBACK_TOTAL, BUY_UNIT, RETURN_STATE, 
-    USER_ID, IS_SETTLE_BUYER, ACTUAL_AMOUNT
+    USER_ID, IS_SETTLE_BUYER, ACTUAL_AMOUNT, IS_DELIVERED
     from ORD_ORDER_DETAIL
   </select>
   <select id="selectSelective" parameterType="rebue.ord.mo.OrdOrderDetailMo" resultMap="BaseResultMap">
@@ -420,6 +433,9 @@
       </if>
       <if test="actualAmount != null">
         and ACTUAL_AMOUNT = #{actualAmount,jdbcType=DECIMAL}
+      </if>
+      <if test="isDelivered != null">
+        and IS_DELIVERED = #{isDelivered,jdbcType=TINYINT}
       </if>
     </where>
   </select>
@@ -509,6 +525,9 @@
       <if test="actualAmount != null and actualAmount != ''">
         and ACTUAL_AMOUNT = #{actualAmount,jdbcType=DECIMAL}
       </if>
+      <if test="isDelivered != null">
+        and IS_DELIVERED = #{isDelivered,jdbcType=TINYINT}
+      </if>
     </where>
   </select>
   <select id="countSelective" parameterType="rebue.ord.mo.OrdOrderDetailMo" resultType="int">
@@ -584,6 +603,9 @@
       </if>
       <if test="actualAmount != null">
         and ACTUAL_AMOUNT = #{actualAmount,jdbcType=DECIMAL}
+      </if>
+      <if test="isDelivered != null">
+        and IS_DELIVERED = #{isDelivered,jdbcType=TINYINT}
       </if>
     </where>
   </select>

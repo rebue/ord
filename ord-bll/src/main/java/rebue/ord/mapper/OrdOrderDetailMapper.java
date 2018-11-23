@@ -70,9 +70,7 @@ public interface OrdOrderDetailMapper extends MybatisBaseMapper<OrdOrderDetailMo
 
     // 
     // 
-    // 
-    int updateReturn(// 
-    @Param("returnTotal") Integer returnTotal, @Param("newCashbackTotal") BigDecimal newCashbackTotal, @Param("returnState") Byte returnState, @Param("id") Long whereDetailId, @Param("returnedCount") Integer whereReturnedCount, @Param("oldCashbackTotal") BigDecimal whereOldCashbackTotal);
+    int updateReturn(@Param("returnTotal") Integer returnTotal, @Param("newCashbackTotal") BigDecimal newCashbackTotal, @Param("returnState") Byte returnState, @Param("id") Long whereDetailId, @Param("returnedCount") Integer whereReturnedCount, @Param("oldCashbackTotal") BigDecimal whereOldCashbackTotal);
 
     /**
      * 根据详情ID修改退货状态 Title: modifyReturnStateById Description:
@@ -110,8 +108,6 @@ public interface OrdOrderDetailMapper extends MybatisBaseMapper<OrdOrderDetailMo
     @// 
     Select(// 
     "SELECT " + // 
-    "    IFNULL(SUM(a.BUY_COUNT - a.RETURN_COUNT),0) " + // 
-    "FROM" + // 
-    "    ORD_ORDER_DETAIL AS a," + "    ORD_ORDER AS b " + "WHERE" + "    a.ORDER_ID = b.ID" + "        AND a.USER_ID = #{userId}" + "        AND a.ONLINE_SPEC_ID = #{onlineSpecId}" + "        AND b.ORDER_STATE > 0")
+    "    IFNULL(SUM(a.BUY_COUNT - a.RETURN_COUNT),0) " + "FROM" + "    ORD_ORDER_DETAIL AS a," + "    ORD_ORDER AS b " + "WHERE" + "    a.ORDER_ID = b.ID" + "        AND a.USER_ID = #{userId}" + "        AND a.ONLINE_SPEC_ID = #{onlineSpecId}" + "        AND b.ORDER_STATE > 0")
     int getBuyerOrderedCount(Long userId, Long onlineSpecId);
 }

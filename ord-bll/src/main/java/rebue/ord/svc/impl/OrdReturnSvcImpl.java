@@ -134,13 +134,14 @@ public class OrdReturnSvcImpl extends MybatisBaseSvcImpl<OrdReturnMo, java.lang.
     private int               returnLimitTime;
 
     /**
-     * 添加用户退货信息 Title: addEx Description: 1、首先查询订单信息是是否存在和订单的状态 2、查询订单详情是否存在和是否可以退货
-     * 3、根据订单ID和订单详情ID查询退货订单退货信息，如果该订单退过货，则获取退货的数量 4、判断退货数量是否等于订单数量 5、判断已退数量 +
-     * 当前退货数量是否大于订单数量 6、添加退货信息 7、修改订单详情退货数量和修改订单详情退货状态
-     *
-     * @param to
-     * @return
-     * @date 2018年4月19日 下午2:52:14
+     * 添加用户退货信息
+     * 1、首先查询订单信息是是否存在和订单的状态
+     * 2、查询订单详情是否存在和是否可以退货
+     * 3、根据订单ID和订单详情ID查询退货订单退货信息，如果该订单退过货，则获取退货的数量
+     * 4、判断退货数量是否等于订单数量
+     * 5、判断已退数量 + 当前退货数量是否大于订单数量
+     * 6、添加退货信息
+     * 7、修改订单详情退货数量和修改订单详情退货状态
      */
     @Override
     @Transactional(readOnly = false, propagation = Propagation.REQUIRED)
@@ -325,9 +326,6 @@ public class OrdReturnSvcImpl extends MybatisBaseSvcImpl<OrdReturnMo, java.lang.
      * 3、查询订单信息并判断订单状态是否处于已取消状态
      * 4、根据订单编号和订单详情ID查询订单详情信息并判断该订单详情的状态是否处于已退货的状态
      * 5、修改订单详情退货数量和状态 6、修改退货订单信息
-     * 
-     * @param record
-     * @return
      */
     @SuppressWarnings("unused")
     @Override

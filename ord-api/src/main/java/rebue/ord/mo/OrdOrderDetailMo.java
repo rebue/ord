@@ -106,7 +106,7 @@ public class OrdOrderDetailMo implements Serializable {
     private String specName;
 
     /**
-     *    购买数量
+     *    购买数量(实际数量=购买数量-退货数量)
      *
      *    数据库字段: ORD_ORDER_DETAIL.BUY_COUNT
      *
@@ -169,7 +169,7 @@ public class OrdOrderDetailMo implements Serializable {
     private Integer returnCount;
 
     /**
-     *    返现总额
+     *    返现总额(返现总额=返现金额 * (购买数量-退货数量)
      *
      *    数据库字段: ORD_ORDER_DETAIL.CASHBACK_TOTAL
      *
@@ -221,6 +221,15 @@ public class OrdOrderDetailMo implements Serializable {
      *    @mbg.generated 自动生成，如需修改，请删除本行
      */
     private BigDecimal actualAmount;
+
+    /**
+     *    是否已发货
+     *
+     *    数据库字段: ORD_ORDER_DETAIL.IS_DELIVERED
+     *
+     *    @mbg.generated 自动生成，如需修改，请删除本行
+     */
+    private Boolean isDelivered;
 
     /**
      *    @mbg.generated 自动生成，如需修改，请删除本行
@@ -448,7 +457,7 @@ public class OrdOrderDetailMo implements Serializable {
     }
 
     /**
-     *    购买数量
+     *    购买数量(实际数量=购买数量-退货数量)
      *
      *    数据库字段: ORD_ORDER_DETAIL.BUY_COUNT
      *
@@ -459,7 +468,7 @@ public class OrdOrderDetailMo implements Serializable {
     }
 
     /**
-     *    购买数量
+     *    购买数量(实际数量=购买数量-退货数量)
      *
      *    数据库字段: ORD_ORDER_DETAIL.BUY_COUNT
      *
@@ -602,7 +611,7 @@ public class OrdOrderDetailMo implements Serializable {
     }
 
     /**
-     *    返现总额
+     *    返现总额(返现总额=返现金额 * (购买数量-退货数量)
      *
      *    数据库字段: ORD_ORDER_DETAIL.CASHBACK_TOTAL
      *
@@ -613,7 +622,7 @@ public class OrdOrderDetailMo implements Serializable {
     }
 
     /**
-     *    返现总额
+     *    返现总额(返现总额=返现金额 * (购买数量-退货数量)
      *
      *    数据库字段: ORD_ORDER_DETAIL.CASHBACK_TOTAL
      *
@@ -734,6 +743,28 @@ public class OrdOrderDetailMo implements Serializable {
     }
 
     /**
+     *    是否已发货
+     *
+     *    数据库字段: ORD_ORDER_DETAIL.IS_DELIVERED
+     *
+     *    @mbg.generated 自动生成，如需修改，请删除本行
+     */
+    public Boolean getIsDelivered() {
+        return isDelivered;
+    }
+
+    /**
+     *    是否已发货
+     *
+     *    数据库字段: ORD_ORDER_DETAIL.IS_DELIVERED
+     *
+     *    @mbg.generated 自动生成，如需修改，请删除本行
+     */
+    public void setIsDelivered(Boolean isDelivered) {
+        this.isDelivered = isDelivered;
+    }
+
+    /**
      *    @mbg.generated 自动生成，如需修改，请删除本行
      */
     @Override
@@ -765,6 +796,7 @@ public class OrdOrderDetailMo implements Serializable {
         sb.append(", userId=").append(userId);
         sb.append(", isSettleBuyer=").append(isSettleBuyer);
         sb.append(", actualAmount=").append(actualAmount);
+        sb.append(", isDelivered=").append(isDelivered);
         sb.append(", serialVersionUID=").append(serialVersionUID);
         sb.append("]");
         return sb.toString();
