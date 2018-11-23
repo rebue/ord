@@ -5,14 +5,13 @@ alter table ORD_RETURN           		drop column  	RETURN_AMOUNT2;
 alter table ORD_ORDER_DETAIL		add                	IS_DELIVERED         											bool comment '是否已发货';
 alter table ORD_ORDER_DETAIL		modify 			CASHBACK_TOTAL       									decimal(18,4) not null comment '返现总额(返现总额=返现金额 * (购买数量-退货数量)';
 alter table ORD_ORDER_DETAIL		modify 			BUY_COUNT            											int not null comment '购买数量(实际数量=购买数量-退货数量)';
-alter table ORD_RETURN					modify 			REFUND_TOTAL         decimal(18,4) comment '退款总额（退款总额=退款余额+退款返现金+退款补偿金）';
-alter table ORD_RETURN					modify 			REFUND_COMPENSATION  decimal(18,4) default 0 comment '退款补偿金额(退货退款产生的需补偿给卖家的金额，例如补偿运费)';
+alter table ORD_RETURN					modify 			REFUND_TOTAL         										decimal(18,4) comment '退款总额（退款总额=退款余额+退款返现金+退款补偿金）';
 
 
 -- 2018-11-20
 alter table ORD_RETURN          		drop column  	REFUND_STATE;
 alter table ORD_RETURN           		drop column  	SUBTRACT_CASHBACK;
-alter table ORD_RETURN			 		add                	REFUND_COMPENSATION  decimal(18,4) not null default 0 comment '退款补偿金额(退货退款产生的需补偿给卖家的金额，例如补偿运费)';
+alter table ORD_RETURN			 		add                	REFUND_COMPENSATION  							decimal(18,4) default 0 comment '退款补偿金额(退货退款产生的需补偿给卖家的金额，例如补偿运费)';
 
 
 -- 新增结算任务表（ORD_SETTLE_TASK）
