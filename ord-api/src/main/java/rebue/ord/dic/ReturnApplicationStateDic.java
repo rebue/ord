@@ -30,7 +30,7 @@ public enum ReturnApplicationStateDic implements EnumBase {
      */
     RETURNING(2),
     /**
-     * 3. 已退货
+     * 3. 已退款退货
      */
     TURNED(3),
     /**

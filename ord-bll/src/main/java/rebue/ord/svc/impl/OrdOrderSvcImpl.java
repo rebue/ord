@@ -367,7 +367,7 @@ public class OrdOrderSvcImpl extends MybatisBaseSvcImpl<OrdOrderMo, java.lang.Lo
             orderMo.setOrderCode(_idWorker.getIdStr());                         // 订单编号 TODO 重写订单编号的生成算法
             orderMo.setOrderState((byte) OrderStateDic.ORDERED.getCode());      // 订单状态已下单
             orderMo.setOrderTime(now);                                          // 下单时间
-            orderMo.setOnlineOrgId(onlineOrg.getKey());                         // 上线组织ID
+            orderMo.setOnlineOrgId(onlineOrg.getKey());                         // 上线组织ID(卖家ID)
             orderMo.setPayOrderId(payOrderId);                                  // 支付订单ID
 
             orderMo.setUserId(to.getUserId());                  // 下单人用户ID

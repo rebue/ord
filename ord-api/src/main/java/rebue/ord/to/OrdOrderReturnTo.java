@@ -44,9 +44,9 @@ public class OrdOrderReturnTo {
      */
     private BigDecimal refundAmount2;
     /**
-     * 扣除补偿金额(扣除需补偿的金额，例如补偿运费)
+     * 退款补偿金额(退货退款产生的需补偿给卖家的金额，例如补偿运费)
      */
-    private BigDecimal deductAmount;
+    private BigDecimal refundCompensation;
 
     /** 规格名称 **/
 //    private String     specName;

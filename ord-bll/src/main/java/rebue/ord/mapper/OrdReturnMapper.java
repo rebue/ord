@@ -109,11 +109,11 @@ public interface OrdReturnMapper extends MybatisBaseMapper<OrdReturnMo, Long> {
 
     /**
      * 确认退款
-     * 
+     *
      * @param refundTotal
      *            退款总额
-     * @param deductAmount
-     *            扣除补偿金额
+     * @param refundCompensation
+     *            退款补偿金
      * @param applicationState
      *            申请状态为已完成
      * @param opId
@@ -124,9 +124,11 @@ public interface OrdReturnMapper extends MybatisBaseMapper<OrdReturnMo, Long> {
      *            退货单ID
      * @return
      */
-    int confirmRefund(@Param("returnTotal") BigDecimal refundTotal, @Param("deductAmount") BigDecimal deductAmount, //
-            @Param("applicationState") Byte applicationState, @Param("opId") Long opId, //
-            @Param("opTime") Date opTime, @Param("id") Long returnId);
+    //
+    //
+    int confirmRefund(//
+            @Param("refundTotal") BigDecimal refundTotal, @Param("refundCompensation") BigDecimal refundCompensation, @Param("applicationState") Byte applicationState,
+            @Param("opId") Long opId, @Param("opTime") Date opTime, @Param("id") Long returnId);
 
     /**
      * 退货确认收到货 Title: confirmReceiptOfGoods Description:

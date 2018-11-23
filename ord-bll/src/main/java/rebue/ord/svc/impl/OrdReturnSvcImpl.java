@@ -519,7 +519,7 @@ public class OrdReturnSvcImpl extends MybatisBaseSvcImpl<OrdReturnMo, java.lang.
         // 订单已经退款总额
         final BigDecimal refundedTotal = order.getReturnTotal();
         // 订单退款总额 = 订单已经退款总额 + 本次退款金额 + 扣除补偿金
-        final BigDecimal refundTotal = refundedTotal.add(to.getRefundAmount()).add(to.getDeductAmount());
+        final BigDecimal refundTotal = refundedTotal.add(to.getRefundAmount()).add(to.getRefundCompensation());
         _log.debug("订单已经退款总额：{}, 本次退款金额: {}", refundedTotal, to.getRefundAmount());
         _log.debug("订单退款总额 = 订单已经退款总额 + 本次退款金额 + 扣除补偿金：{}", refundTotal);
         _log.debug("订单实际支付金额：{}", order.getRealMoney());
@@ -584,11 +584,11 @@ public class OrdReturnSvcImpl extends MybatisBaseSvcImpl<OrdReturnMo, java.lang.
             // 修改退货单
             final Date now = new Date();
             // 本次退款总额 = 本次退款金额 + 本次扣除补偿金额
-            final BigDecimal currentRefundTotal = to.getRefundAmount().add(to.getDeductAmount());
+            final BigDecimal currentRefundTotal = to.getRefundAmount().add(to.getRefundCompensation());
             _log.info("确认退款修改退货单的参数为：本次退款总额-{} 扣除补偿金额-{} 操作人ID-{} 操作时间-{} 退货ID-{}", currentRefundTotal, //
-                    to.getDeductAmount(), to.getOpId(), now, to.getReturnId());
+                    to.getRefundCompensation(), to.getOpId(), now, to.getReturnId());
             final int confirmRefundRowCount = _mapper.confirmRefund(currentRefundTotal, //
-                    to.getDeductAmount(), (byte) ReturnApplicationStateDic.TURNED.getCode(), to.getOpId(), now, to.getReturnId());
+                    to.getRefundCompensation(), (byte) ReturnApplicationStateDic.TURNED.getCode(), to.getOpId(), now, to.getReturnId());
             _log.info("同意退款修改退货信息的返回值为：{}", confirmRefundRowCount);
 
         }
@@ -665,11 +665,14 @@ public class OrdReturnSvcImpl extends MybatisBaseSvcImpl<OrdReturnMo, java.lang.
         refundTo.setOrderId(String.valueOf(to.getOrderId()));
         refundTo.setOrderDetailId(String.valueOf(to.getReturnId()));
         refundTo.setBuyerAccountId(order.getUserId());
+        refundTo.setSellerAccountId(order.getOnlineOrgId());
+        refundTo.setSupplierAccountId(detail.getSupplierId());
         refundTo.setTradeTitle("用户退货-退款");
-        refundTo.setTradeDetail(detail.getOnlineTitle());
+        refundTo.setTradeDetail(detail.getOnlineTitle() + detail.getSpecName());
         refundTo.setRefundAmount(to.getRefundAmount());
-//        refundTo.setReturnBalanceToBuyer(returnAmount1);
-//        refundTo.setReturnCashbackToBuyer(returnCashbackToBuyer);
+        refundTo.setReturnCompensationToSeller(to.getRefundCompensation());
+        refundTo.setReturnBalanceToBuyer(to.getRefundAmount1());
+        refundTo.setReturnCashbackToBuyer(to.getRefundAmount2());
         refundTo.setOpId(to.getOpId());
         refundTo.setIp(to.getIp());
         _log.info("退款的参数为：{}", refundTo);

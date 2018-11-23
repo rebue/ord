@@ -64,25 +64,25 @@ public class OrdReturnMo implements Serializable {
     private Integer returnCount;
 
     /**
-     *    退款总额（退款总额=退款余额+退款返现金+扣除补偿金）
+     *    退款总额（退款总额=退款余额+退款返现金+退款补偿金）
      *
-     *    数据库字段: ORD_RETURN.RETURN_TOTAL
-     *
-     *    @mbg.generated 自动生成，如需修改，请删除本行
-     */
-    private BigDecimal returnTotal;
-
-    /**
-     *    扣除补偿金额(扣除需补偿的金额，例如补偿运费)
-     *
-     *    数据库字段: ORD_RETURN.DEDUCT_AMOUNT
+     *    数据库字段: ORD_RETURN.REFUND_TOTAL
      *
      *    @mbg.generated 自动生成，如需修改，请删除本行
      */
-    private BigDecimal deductAmount;
+    private BigDecimal refundTotal;
 
     /**
-     *    退款类型（1：仅退款  2：退货并退款）
+     *    退款补偿金额(退货退款产生的需补偿给卖家的金额，例如补偿运费)
+     *
+     *    数据库字段: ORD_RETURN.REFUND_COMPENSATION
+     *
+     *    @mbg.generated 自动生成，如需修改，请删除本行
+     */
+    private BigDecimal refundCompensation;
+
+    /**
+     *    退货类型（1：仅退款  2：退货并退款）
      *
      *    数据库字段: ORD_RETURN.RETURN_TYPE
      *
@@ -91,7 +91,7 @@ public class OrdReturnMo implements Serializable {
     private Byte returnType;
 
     /**
-     *    申请状态（-1：已取消  1：待审核  2：退货中  3：已完成   4：已拒绝）
+     *    申请状态（-1：已取消  1：待审核  2：退货中  3：已退货   4：已拒绝）
      *
      *    数据库字段: ORD_RETURN.APPLICATION_STATE
      *
@@ -382,51 +382,51 @@ public class OrdReturnMo implements Serializable {
     }
 
     /**
-     *    退款总额（退款总额=退款余额+退款返现金+扣除补偿金）
+     *    退款总额（退款总额=退款余额+退款返现金+退款补偿金）
      *
-     *    数据库字段: ORD_RETURN.RETURN_TOTAL
-     *
-     *    @mbg.generated 自动生成，如需修改，请删除本行
-     */
-    public BigDecimal getReturnTotal() {
-        return returnTotal;
-    }
-
-    /**
-     *    退款总额（退款总额=退款余额+退款返现金+扣除补偿金）
-     *
-     *    数据库字段: ORD_RETURN.RETURN_TOTAL
+     *    数据库字段: ORD_RETURN.REFUND_TOTAL
      *
      *    @mbg.generated 自动生成，如需修改，请删除本行
      */
-    public void setReturnTotal(BigDecimal returnTotal) {
-        this.returnTotal = returnTotal;
+    public BigDecimal getRefundTotal() {
+        return refundTotal;
     }
 
     /**
-     *    扣除补偿金额(扣除需补偿的金额，例如补偿运费)
+     *    退款总额（退款总额=退款余额+退款返现金+退款补偿金）
      *
-     *    数据库字段: ORD_RETURN.DEDUCT_AMOUNT
+     *    数据库字段: ORD_RETURN.REFUND_TOTAL
      *
      *    @mbg.generated 自动生成，如需修改，请删除本行
      */
-    public BigDecimal getDeductAmount() {
-        return deductAmount;
+    public void setRefundTotal(BigDecimal refundTotal) {
+        this.refundTotal = refundTotal;
     }
 
     /**
-     *    扣除补偿金额(扣除需补偿的金额，例如补偿运费)
+     *    退款补偿金额(退货退款产生的需补偿给卖家的金额，例如补偿运费)
      *
-     *    数据库字段: ORD_RETURN.DEDUCT_AMOUNT
+     *    数据库字段: ORD_RETURN.REFUND_COMPENSATION
      *
      *    @mbg.generated 自动生成，如需修改，请删除本行
      */
-    public void setDeductAmount(BigDecimal deductAmount) {
-        this.deductAmount = deductAmount;
+    public BigDecimal getRefundCompensation() {
+        return refundCompensation;
     }
 
     /**
-     *    退款类型（1：仅退款  2：退货并退款）
+     *    退款补偿金额(退货退款产生的需补偿给卖家的金额，例如补偿运费)
+     *
+     *    数据库字段: ORD_RETURN.REFUND_COMPENSATION
+     *
+     *    @mbg.generated 自动生成，如需修改，请删除本行
+     */
+    public void setRefundCompensation(BigDecimal refundCompensation) {
+        this.refundCompensation = refundCompensation;
+    }
+
+    /**
+     *    退货类型（1：仅退款  2：退货并退款）
      *
      *    数据库字段: ORD_RETURN.RETURN_TYPE
      *
@@ -437,7 +437,7 @@ public class OrdReturnMo implements Serializable {
     }
 
     /**
-     *    退款类型（1：仅退款  2：退货并退款）
+     *    退货类型（1：仅退款  2：退货并退款）
      *
      *    数据库字段: ORD_RETURN.RETURN_TYPE
      *
@@ -448,7 +448,7 @@ public class OrdReturnMo implements Serializable {
     }
 
     /**
-     *    申请状态（-1：已取消  1：待审核  2：退货中  3：已完成   4：已拒绝）
+     *    申请状态（-1：已取消  1：待审核  2：退货中  3：已退货   4：已拒绝）
      *
      *    数据库字段: ORD_RETURN.APPLICATION_STATE
      *
@@ -459,7 +459,7 @@ public class OrdReturnMo implements Serializable {
     }
 
     /**
-     *    申请状态（-1：已取消  1：待审核  2：退货中  3：已完成   4：已拒绝）
+     *    申请状态（-1：已取消  1：待审核  2：退货中  3：已退货   4：已拒绝）
      *
      *    数据库字段: ORD_RETURN.APPLICATION_STATE
      *
@@ -857,8 +857,8 @@ public class OrdReturnMo implements Serializable {
         sb.append(", orderId=").append(orderId);
         sb.append(", orderDetailId=").append(orderDetailId);
         sb.append(", returnCount=").append(returnCount);
-        sb.append(", returnTotal=").append(returnTotal);
-        sb.append(", deductAmount=").append(deductAmount);
+        sb.append(", refundTotal=").append(refundTotal);
+        sb.append(", refundCompensation=").append(refundCompensation);
         sb.append(", returnType=").append(returnType);
         sb.append(", applicationState=").append(applicationState);
         sb.append(", returnReason=").append(returnReason);

@@ -1,12 +1,14 @@
 package rebue.ord.mo;
 
-import com.fasterxml.jackson.annotation.JsonFormat;
-import com.fasterxml.jackson.annotation.JsonInclude;
-import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import java.io.Serializable;
 import java.math.BigDecimal;
 import java.util.Date;
+
 import org.springframework.format.annotation.DateTimeFormat;
+
+import com.fasterxml.jackson.annotation.JsonFormat;
+import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.annotation.JsonInclude.Include;
 
 /**
  * 订单信息
@@ -19,1285 +21,1327 @@ import org.springframework.format.annotation.DateTimeFormat;
 public class OrdOrderMo implements Serializable {
 
     /**
-     *    订单ID
+     * 订单ID
      *
-     *    数据库字段: ORD_ORDER.ID
+     * 数据库字段: ORD_ORDER.ID
      *
-     *    @mbg.generated 自动生成，如需修改，请删除本行
+     * @mbg.generated 自动生成，如需修改，请删除本行
      */
-    private Long id;
+    private Long              id;
 
     /**
-     *    订单编号
+     * 订单编号
      *
-     *    数据库字段: ORD_ORDER.ORDER_CODE
+     * 数据库字段: ORD_ORDER.ORDER_CODE
      *
-     *    @mbg.generated 自动生成，如需修改，请删除本行
+     * @mbg.generated 自动生成，如需修改，请删除本行
      */
-    private String orderCode;
+    private String            orderCode;
 
     /**
-     *    订单标题
+     * 订单标题
      *
-     *    数据库字段: ORD_ORDER.ORDER_TITLE
+     * 数据库字段: ORD_ORDER.ORDER_TITLE
      *
-     *    @mbg.generated 自动生成，如需修改，请删除本行
+     * @mbg.generated 自动生成，如需修改，请删除本行
      */
-    private String orderTitle;
+    private String            orderTitle;
 
     /**
-     *    上线组织ID
+     * 上线组织ID
      *
-     *    数据库字段: ORD_ORDER.ONLINE_ORG_ID
+     * 数据库字段: ORD_ORDER.ONLINE_ORG_ID
      *
-     *    @mbg.generated 自动生成，如需修改，请删除本行
+     * @mbg.generated 自动生成，如需修改，请删除本行
      */
-    private Long onlineOrgId;
+    private Long              onlineOrgId;
 
     /**
-     *    发货组织ID(默认填入上线组织ID，可变更为供应商的ID)
+     * 发货组织ID(默认填入上线组织ID，可变更为供应商的ID)
      *
-     *    数据库字段: ORD_ORDER.DELIVER_ORG_ID
+     * 数据库字段: ORD_ORDER.DELIVER_ORG_ID
      *
-     *    @mbg.generated 自动生成，如需修改，请删除本行
+     * @mbg.generated 自动生成，如需修改，请删除本行
      */
-    private Long deliverOrgId;
+    private Long              deliverOrgId;
 
     /**
-     *    下单金额
+     * 下单金额
      *
-     *    数据库字段: ORD_ORDER.ORDER_MONEY
+     * 数据库字段: ORD_ORDER.ORDER_MONEY
      *
-     *    @mbg.generated 自动生成，如需修改，请删除本行
+     * @mbg.generated 自动生成，如需修改，请删除本行
      */
-    private BigDecimal orderMoney;
+    private BigDecimal        orderMoney;
 
     /**
-     *    实际金额
+     * 实际金额
      *
-     *    数据库字段: ORD_ORDER.REAL_MONEY
+     * 数据库字段: ORD_ORDER.REAL_MONEY
      *
-     *    @mbg.generated 自动生成，如需修改，请删除本行
+     * @mbg.generated 自动生成，如需修改，请删除本行
      */
-    private BigDecimal realMoney;
+    private BigDecimal        realMoney;
 
     /**
-     *    退货总额
+     * 退货总额
      *
-     *    数据库字段: ORD_ORDER.RETURN_TOTAL
+     * 数据库字段: ORD_ORDER.RETURN_TOTAL
      *
-     *    @mbg.generated 自动生成，如需修改，请删除本行
+     * @mbg.generated 自动生成，如需修改，请删除本行
      */
-    private BigDecimal returnTotal;
+    private BigDecimal        returnTotal;
 
     /**
-     *    可退货金额1（退到返现金额）
-     *                @deprecated
+     * 可退货金额1（退到返现金额）
+     * 
+     * @deprecated
      *
-     *    数据库字段: ORD_ORDER.RETURN_AMOUNT1
+     *             数据库字段: ORD_ORDER.RETURN_AMOUNT1
      *
-     *    @mbg.generated 自动生成，如需修改，请删除本行
+     * @mbg.generated 自动生成，如需修改，请删除本行
      */
-    private BigDecimal returnAmount1;
+    @Deprecated
+    private BigDecimal        returnAmount1;
 
     /**
-     *    可退货总额2（退到余额）
-     *                @deprecated
+     * 可退货总额2（退到余额）
+     * 
+     * @deprecated
      *
-     *    数据库字段: ORD_ORDER.RETURN_AMOUNT2
+     *             数据库字段: ORD_ORDER.RETURN_AMOUNT2
      *
-     *    @mbg.generated 自动生成，如需修改，请删除本行
+     * @mbg.generated 自动生成，如需修改，请删除本行
      */
-    private BigDecimal returnAmount2;
+    @Deprecated
+    private BigDecimal        returnAmount2;
 
     /**
-     *    订单状态（-1：作废  1：已下单（待支付）  2：已支付（待发货）  3：已发货（待签收）  4：已签收（待结算）  5：已结算  ）
-     *                -1：作废
-     *                1：已下单（待支付）
-     *                2：已支付（待发货）
-     *                3：已发货（待签收）
-     *                4：已签收（待结算）
-     *                5：已结算
+     * 订单状态（-1：作废 1：已下单（待支付） 2：已支付（待发货） 3：已发货（待签收） 4：已签收（待结算） 5：已结算 ）
+     * -1：作废
+     * 1：已下单（待支付）
+     * 2：已支付（待发货）
+     * 3：已发货（待签收）
+     * 4：已签收（待结算）
+     * 5：已结算
      *
-     *    数据库字段: ORD_ORDER.ORDER_STATE
+     * 数据库字段: ORD_ORDER.ORDER_STATE
      *
-     *    @mbg.generated 自动生成，如需修改，请删除本行
+     * @mbg.generated 自动生成，如需修改，请删除本行
      */
-    private Byte orderState;
+    private Byte              orderState;
 
     /**
-     *    下单人用户ID
+     * 下单人用户ID
      *
-     *    数据库字段: ORD_ORDER.USER_ID
+     * 数据库字段: ORD_ORDER.USER_ID
      *
-     *    @mbg.generated 自动生成，如需修改，请删除本行
+     * @mbg.generated 自动生成，如需修改，请删除本行
      */
-    private Long userId;
+    private Long              userId;
 
     /**
-     *    作废-下单人姓名
-     *                @deprecated
+     * 作废-下单人姓名
+     * 
+     * @deprecated
      *
-     *    数据库字段: ORD_ORDER.USER_NAME
+     *             数据库字段: ORD_ORDER.USER_NAME
      *
-     *    @mbg.generated 自动生成，如需修改，请删除本行
+     * @mbg.generated 自动生成，如需修改，请删除本行
      */
-    private String userName;
+    @Deprecated
+    private String            userName;
 
     /**
-     *    下单时间
+     * 下单时间
      *
-     *    数据库字段: ORD_ORDER.ORDER_TIME
+     * 数据库字段: ORD_ORDER.ORDER_TIME
      *
-     *    @mbg.generated 自动生成，如需修改，请删除本行
-     */
-    @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss")
-    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd HH:mm:ss", timezone = "GMT+8")
-    private Date orderTime;
-
-    /**
-     *    支付订单ID
-     *                提供给第三方支付记录的订单ID（因为有可能会多笔订单合并支付）
-     *                确认订单时，默认填写为订单ID(ORDER_ID)
-     *                拆分订单时，拆分后的订单的支付订单ID仍为旧订单的支付订单ID不变
-     *
-     *    数据库字段: ORD_ORDER.PAY_ORDER_ID
-     *
-     *    @mbg.generated 自动生成，如需修改，请删除本行
-     */
-    private Long payOrderId;
-
-    /**
-     *    支付时间
-     *
-     *    数据库字段: ORD_ORDER.PAY_TIME
-     *
-     *    @mbg.generated 自动生成，如需修改，请删除本行
+     * @mbg.generated 自动生成，如需修改，请删除本行
      */
     @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss")
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd HH:mm:ss", timezone = "GMT+8")
-    private Date payTime;
+    private Date              orderTime;
 
     /**
-     *    发货时间
+     * 支付订单ID
+     * 提供给第三方支付记录的订单ID（因为有可能会多笔订单合并支付）
+     * 确认订单时，默认填写为订单ID(ORDER_ID)
+     * 拆分订单时，拆分后的订单的支付订单ID仍为旧订单的支付订单ID不变
      *
-     *    数据库字段: ORD_ORDER.SEND_TIME
+     * 数据库字段: ORD_ORDER.PAY_ORDER_ID
      *
-     *    @mbg.generated 自动生成，如需修改，请删除本行
+     * @mbg.generated 自动生成，如需修改，请删除本行
+     */
+    private Long              payOrderId;
+
+    /**
+     * 支付时间
+     *
+     * 数据库字段: ORD_ORDER.PAY_TIME
+     *
+     * @mbg.generated 自动生成，如需修改，请删除本行
      */
     @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss")
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd HH:mm:ss", timezone = "GMT+8")
-    private Date sendTime;
+    private Date              payTime;
 
     /**
-     *    签收时间
+     * 发货时间
      *
-     *    数据库字段: ORD_ORDER.RECEIVED_TIME
+     * 数据库字段: ORD_ORDER.SEND_TIME
      *
-     *    @mbg.generated 自动生成，如需修改，请删除本行
+     * @mbg.generated 自动生成，如需修改，请删除本行
      */
     @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss")
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd HH:mm:ss", timezone = "GMT+8")
-    private Date receivedTime;
+    private Date              sendTime;
 
     /**
-     *    结算时间
+     * 签收时间
      *
-     *    数据库字段: ORD_ORDER.CLOSE_TIME
+     * 数据库字段: ORD_ORDER.RECEIVED_TIME
      *
-     *    @mbg.generated 自动生成，如需修改，请删除本行
+     * @mbg.generated 自动生成，如需修改，请删除本行
      */
     @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss")
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd HH:mm:ss", timezone = "GMT+8")
-    private Date closeTime;
+    private Date              receivedTime;
 
     /**
-     *    作废时间
+     * 结算时间
      *
-     *    数据库字段: ORD_ORDER.CANCEL_TIME
+     * 数据库字段: ORD_ORDER.CLOSE_TIME
      *
-     *    @mbg.generated 自动生成，如需修改，请删除本行
+     * @mbg.generated 自动生成，如需修改，请删除本行
      */
     @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss")
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd HH:mm:ss", timezone = "GMT+8")
-    private Date cancelTime;
+    private Date              closeTime;
 
     /**
-     *    作废-物流订单ID
-     *                @deprecated
+     * 作废时间
      *
-     *    数据库字段: ORD_ORDER.LOGISTIC_ID
+     * 数据库字段: ORD_ORDER.CANCEL_TIME
      *
-     *    @mbg.generated 自动生成，如需修改，请删除本行
+     * @mbg.generated 自动生成，如需修改，请删除本行
      */
-    private Long logisticId;
+    @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss")
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd HH:mm:ss", timezone = "GMT+8")
+    private Date              cancelTime;
 
     /**
-     *    作废-快递公司编号
-     *                @deprecated
+     * 作废-物流订单ID
+     * 
+     * @deprecated
      *
-     *    数据库字段: ORD_ORDER.SHIPPER_CODE
+     *             数据库字段: ORD_ORDER.LOGISTIC_ID
      *
-     *    @mbg.generated 自动生成，如需修改，请删除本行
+     * @mbg.generated 自动生成，如需修改，请删除本行
      */
-    private String shipperCode;
+    @Deprecated
+    private Long              logisticId;
 
     /**
-     *    作废-快递公司名称
-     *                @deprecated
+     * 作废-快递公司编号
+     * 
+     * @deprecated
      *
-     *    数据库字段: ORD_ORDER.SHIPPER_NAME
+     *             数据库字段: ORD_ORDER.SHIPPER_CODE
      *
-     *    @mbg.generated 自动生成，如需修改，请删除本行
+     * @mbg.generated 自动生成，如需修改，请删除本行
      */
-    private String shipperName;
+    @Deprecated
+    private String            shipperCode;
 
     /**
-     *    作废-快递单号
-     *                @deprecated
+     * 作废-快递公司名称
+     * 
+     * @deprecated
      *
-     *    数据库字段: ORD_ORDER.LOGISTIC_CODE
+     *             数据库字段: ORD_ORDER.SHIPPER_NAME
      *
-     *    @mbg.generated 自动生成，如需修改，请删除本行
+     * @mbg.generated 自动生成，如需修改，请删除本行
      */
-    private String logisticCode;
+    @Deprecated
+    private String            shipperName;
 
     /**
-     *    收件人名称
+     * 作废-快递单号
+     * 
+     * @deprecated
      *
-     *    数据库字段: ORD_ORDER.RECEIVER_NAME
+     *             数据库字段: ORD_ORDER.LOGISTIC_CODE
      *
-     *    @mbg.generated 自动生成，如需修改，请删除本行
+     * @mbg.generated 自动生成，如需修改，请删除本行
      */
-    private String receiverName;
+    @Deprecated
+    private String            logisticCode;
 
     /**
-     *    收件人电话
+     * 收件人名称
      *
-     *    数据库字段: ORD_ORDER.RECEIVER_TEL
+     * 数据库字段: ORD_ORDER.RECEIVER_NAME
      *
-     *    @mbg.generated 自动生成，如需修改，请删除本行
+     * @mbg.generated 自动生成，如需修改，请删除本行
      */
-    private String receiverTel;
+    private String            receiverName;
 
     /**
-     *    收件人手机
+     * 收件人电话
      *
-     *    数据库字段: ORD_ORDER.RECEIVER_MOBILE
+     * 数据库字段: ORD_ORDER.RECEIVER_TEL
      *
-     *    @mbg.generated 自动生成，如需修改，请删除本行
+     * @mbg.generated 自动生成，如需修改，请删除本行
      */
-    private String receiverMobile;
+    private String            receiverTel;
 
     /**
-     *    收件省
+     * 收件人手机
      *
-     *    数据库字段: ORD_ORDER.RECEIVER_PROVINCE
+     * 数据库字段: ORD_ORDER.RECEIVER_MOBILE
      *
-     *    @mbg.generated 自动生成，如需修改，请删除本行
+     * @mbg.generated 自动生成，如需修改，请删除本行
      */
-    private String receiverProvince;
+    private String            receiverMobile;
 
     /**
-     *    收件市
+     * 收件省
      *
-     *    数据库字段: ORD_ORDER.RECEIVER_CITY
+     * 数据库字段: ORD_ORDER.RECEIVER_PROVINCE
      *
-     *    @mbg.generated 自动生成，如需修改，请删除本行
+     * @mbg.generated 自动生成，如需修改，请删除本行
      */
-    private String receiverCity;
+    private String            receiverProvince;
 
     /**
-     *    收件区
+     * 收件市
      *
-     *    数据库字段: ORD_ORDER.RECEIVER_EXP_AREA
+     * 数据库字段: ORD_ORDER.RECEIVER_CITY
      *
-     *    @mbg.generated 自动生成，如需修改，请删除本行
+     * @mbg.generated 自动生成，如需修改，请删除本行
      */
-    private String receiverExpArea;
+    private String            receiverCity;
 
     /**
-     *    收件人详细地址
+     * 收件区
      *
-     *    数据库字段: ORD_ORDER.RECEIVER_ADDRESS
+     * 数据库字段: ORD_ORDER.RECEIVER_EXP_AREA
      *
-     *    @mbg.generated 自动生成，如需修改，请删除本行
+     * @mbg.generated 自动生成，如需修改，请删除本行
      */
-    private String receiverAddress;
+    private String            receiverExpArea;
 
     /**
-     *    收件地邮编
+     * 收件人详细地址
      *
-     *    数据库字段: ORD_ORDER.RECEIVER_POST_CODE
+     * 数据库字段: ORD_ORDER.RECEIVER_ADDRESS
      *
-     *    @mbg.generated 自动生成，如需修改，请删除本行
+     * @mbg.generated 自动生成，如需修改，请删除本行
      */
-    private String receiverPostCode;
+    private String            receiverAddress;
 
     /**
-     *    订单留言
+     * 收件地邮编
      *
-     *    数据库字段: ORD_ORDER.ORDER_MESSAGES
+     * 数据库字段: ORD_ORDER.RECEIVER_POST_CODE
      *
-     *    @mbg.generated 自动生成，如需修改，请删除本行
+     * @mbg.generated 自动生成，如需修改，请删除本行
      */
-    private String orderMessages;
+    private String            receiverPostCode;
 
     /**
-     *    修改实际金额操作人ID
+     * 订单留言
      *
-     *    数据库字段: ORD_ORDER.MODIFY_REALVERY_MONEY_OP_ID
+     * 数据库字段: ORD_ORDER.ORDER_MESSAGES
      *
-     *    @mbg.generated 自动生成，如需修改，请删除本行
+     * @mbg.generated 自动生成，如需修改，请删除本行
      */
-    private Long modifyRealveryMoneyOpId;
+    private String            orderMessages;
 
     /**
-     *    取消订单操作人ID
+     * 修改实际金额操作人ID
      *
-     *    数据库字段: ORD_ORDER.CANCELING_ORDER_OP_ID
+     * 数据库字段: ORD_ORDER.MODIFY_REALVERY_MONEY_OP_ID
      *
-     *    @mbg.generated 自动生成，如需修改，请删除本行
+     * @mbg.generated 自动生成，如需修改，请删除本行
      */
-    private Long cancelingOrderOpId;
+    private Long              modifyRealveryMoneyOpId;
 
     /**
-     *    取消发货的原因
+     * 取消订单操作人ID
      *
-     *    数据库字段: ORD_ORDER.CANCELDELI_REASON
+     * 数据库字段: ORD_ORDER.CANCELING_ORDER_OP_ID
      *
-     *    @mbg.generated 自动生成，如需修改，请删除本行
+     * @mbg.generated 自动生成，如需修改，请删除本行
      */
-    private String canceldeliReason;
+    private Long              cancelingOrderOpId;
 
     /**
-     *    发货操作人
+     * 取消发货的原因
      *
-     *    数据库字段: ORD_ORDER.SEND_OP_ID
+     * 数据库字段: ORD_ORDER.CANCELDELI_REASON
      *
-     *    @mbg.generated 自动生成，如需修改，请删除本行
+     * @mbg.generated 自动生成，如需修改，请删除本行
      */
-    private Long sendOpId;
+    private String            canceldeliReason;
 
     /**
-     *    签收人
+     * 发货操作人
      *
-     *    数据库字段: ORD_ORDER.RECEIVED_OP_ID
+     * 数据库字段: ORD_ORDER.SEND_OP_ID
      *
-     *    @mbg.generated 自动生成，如需修改，请删除本行
+     * @mbg.generated 自动生成，如需修改，请删除本行
      */
-    private Long receivedOpId;
+    private Long              sendOpId;
 
     /**
-     *    作废原因
+     * 签收人
      *
-     *    数据库字段: ORD_ORDER.CANCEL_REASON
+     * 数据库字段: ORD_ORDER.RECEIVED_OP_ID
      *
-     *    @mbg.generated 自动生成，如需修改，请删除本行
+     * @mbg.generated 自动生成，如需修改，请删除本行
      */
-    private String cancelReason;
+    private Long              receivedOpId;
 
     /**
-     *    @mbg.generated 自动生成，如需修改，请删除本行
+     * 作废原因
+     *
+     * 数据库字段: ORD_ORDER.CANCEL_REASON
+     *
+     * @mbg.generated 自动生成，如需修改，请删除本行
+     */
+    private String            cancelReason;
+
+    /**
+     * @mbg.generated 自动生成，如需修改，请删除本行
      */
     private static final long serialVersionUID = 1L;
 
     /**
-     *    订单ID
+     * 订单ID
      *
-     *    数据库字段: ORD_ORDER.ID
+     * 数据库字段: ORD_ORDER.ID
      *
-     *    @mbg.generated 自动生成，如需修改，请删除本行
+     * @mbg.generated 自动生成，如需修改，请删除本行
      */
     public Long getId() {
         return id;
     }
 
     /**
-     *    订单ID
+     * 订单ID
      *
-     *    数据库字段: ORD_ORDER.ID
+     * 数据库字段: ORD_ORDER.ID
      *
-     *    @mbg.generated 自动生成，如需修改，请删除本行
+     * @mbg.generated 自动生成，如需修改，请删除本行
      */
-    public void setId(Long id) {
+    public void setId(final Long id) {
         this.id = id;
     }
 
     /**
-     *    订单编号
+     * 订单编号
      *
-     *    数据库字段: ORD_ORDER.ORDER_CODE
+     * 数据库字段: ORD_ORDER.ORDER_CODE
      *
-     *    @mbg.generated 自动生成，如需修改，请删除本行
+     * @mbg.generated 自动生成，如需修改，请删除本行
      */
     public String getOrderCode() {
         return orderCode;
     }
 
     /**
-     *    订单编号
+     * 订单编号
      *
-     *    数据库字段: ORD_ORDER.ORDER_CODE
+     * 数据库字段: ORD_ORDER.ORDER_CODE
      *
-     *    @mbg.generated 自动生成，如需修改，请删除本行
+     * @mbg.generated 自动生成，如需修改，请删除本行
      */
-    public void setOrderCode(String orderCode) {
+    public void setOrderCode(final String orderCode) {
         this.orderCode = orderCode;
     }
 
     /**
-     *    订单标题
+     * 订单标题
      *
-     *    数据库字段: ORD_ORDER.ORDER_TITLE
+     * 数据库字段: ORD_ORDER.ORDER_TITLE
      *
-     *    @mbg.generated 自动生成，如需修改，请删除本行
+     * @mbg.generated 自动生成，如需修改，请删除本行
      */
     public String getOrderTitle() {
         return orderTitle;
     }
 
     /**
-     *    订单标题
+     * 订单标题
      *
-     *    数据库字段: ORD_ORDER.ORDER_TITLE
+     * 数据库字段: ORD_ORDER.ORDER_TITLE
      *
-     *    @mbg.generated 自动生成，如需修改，请删除本行
+     * @mbg.generated 自动生成，如需修改，请删除本行
      */
-    public void setOrderTitle(String orderTitle) {
+    public void setOrderTitle(final String orderTitle) {
         this.orderTitle = orderTitle;
     }
 
     /**
-     *    上线组织ID
+     * 上线组织ID
      *
-     *    数据库字段: ORD_ORDER.ONLINE_ORG_ID
+     * 数据库字段: ORD_ORDER.ONLINE_ORG_ID
      *
-     *    @mbg.generated 自动生成，如需修改，请删除本行
+     * @mbg.generated 自动生成，如需修改，请删除本行
      */
     public Long getOnlineOrgId() {
         return onlineOrgId;
     }
 
     /**
-     *    上线组织ID
+     * 上线组织ID
      *
-     *    数据库字段: ORD_ORDER.ONLINE_ORG_ID
+     * 数据库字段: ORD_ORDER.ONLINE_ORG_ID
      *
-     *    @mbg.generated 自动生成，如需修改，请删除本行
+     * @mbg.generated 自动生成，如需修改，请删除本行
      */
-    public void setOnlineOrgId(Long onlineOrgId) {
+    public void setOnlineOrgId(final Long onlineOrgId) {
         this.onlineOrgId = onlineOrgId;
     }
 
     /**
-     *    发货组织ID(默认填入上线组织ID，可变更为供应商的ID)
+     * 发货组织ID(默认填入上线组织ID，可变更为供应商的ID)
      *
-     *    数据库字段: ORD_ORDER.DELIVER_ORG_ID
+     * 数据库字段: ORD_ORDER.DELIVER_ORG_ID
      *
-     *    @mbg.generated 自动生成，如需修改，请删除本行
+     * @mbg.generated 自动生成，如需修改，请删除本行
      */
     public Long getDeliverOrgId() {
         return deliverOrgId;
     }
 
     /**
-     *    发货组织ID(默认填入上线组织ID，可变更为供应商的ID)
+     * 发货组织ID(默认填入上线组织ID，可变更为供应商的ID)
      *
-     *    数据库字段: ORD_ORDER.DELIVER_ORG_ID
+     * 数据库字段: ORD_ORDER.DELIVER_ORG_ID
      *
-     *    @mbg.generated 自动生成，如需修改，请删除本行
+     * @mbg.generated 自动生成，如需修改，请删除本行
      */
-    public void setDeliverOrgId(Long deliverOrgId) {
+    public void setDeliverOrgId(final Long deliverOrgId) {
         this.deliverOrgId = deliverOrgId;
     }
 
     /**
-     *    下单金额
+     * 下单金额
      *
-     *    数据库字段: ORD_ORDER.ORDER_MONEY
+     * 数据库字段: ORD_ORDER.ORDER_MONEY
      *
-     *    @mbg.generated 自动生成，如需修改，请删除本行
+     * @mbg.generated 自动生成，如需修改，请删除本行
      */
     public BigDecimal getOrderMoney() {
         return orderMoney;
     }
 
     /**
-     *    下单金额
+     * 下单金额
      *
-     *    数据库字段: ORD_ORDER.ORDER_MONEY
+     * 数据库字段: ORD_ORDER.ORDER_MONEY
      *
-     *    @mbg.generated 自动生成，如需修改，请删除本行
+     * @mbg.generated 自动生成，如需修改，请删除本行
      */
-    public void setOrderMoney(BigDecimal orderMoney) {
+    public void setOrderMoney(final BigDecimal orderMoney) {
         this.orderMoney = orderMoney;
     }
 
     /**
-     *    实际金额
+     * 实际金额
      *
-     *    数据库字段: ORD_ORDER.REAL_MONEY
+     * 数据库字段: ORD_ORDER.REAL_MONEY
      *
-     *    @mbg.generated 自动生成，如需修改，请删除本行
+     * @mbg.generated 自动生成，如需修改，请删除本行
      */
     public BigDecimal getRealMoney() {
         return realMoney;
     }
 
     /**
-     *    实际金额
+     * 实际金额
      *
-     *    数据库字段: ORD_ORDER.REAL_MONEY
+     * 数据库字段: ORD_ORDER.REAL_MONEY
      *
-     *    @mbg.generated 自动生成，如需修改，请删除本行
+     * @mbg.generated 自动生成，如需修改，请删除本行
      */
-    public void setRealMoney(BigDecimal realMoney) {
+    public void setRealMoney(final BigDecimal realMoney) {
         this.realMoney = realMoney;
     }
 
     /**
-     *    退货总额
+     * 退货总额
      *
-     *    数据库字段: ORD_ORDER.RETURN_TOTAL
+     * 数据库字段: ORD_ORDER.RETURN_TOTAL
      *
-     *    @mbg.generated 自动生成，如需修改，请删除本行
+     * @mbg.generated 自动生成，如需修改，请删除本行
      */
     public BigDecimal getReturnTotal() {
         return returnTotal;
     }
 
     /**
-     *    退货总额
+     * 退货总额
      *
-     *    数据库字段: ORD_ORDER.RETURN_TOTAL
+     * 数据库字段: ORD_ORDER.RETURN_TOTAL
      *
-     *    @mbg.generated 自动生成，如需修改，请删除本行
+     * @mbg.generated 自动生成，如需修改，请删除本行
      */
-    public void setReturnTotal(BigDecimal returnTotal) {
+    public void setReturnTotal(final BigDecimal returnTotal) {
         this.returnTotal = returnTotal;
     }
 
     /**
-     *    可退货金额1（退到返现金额）
-     *                @deprecated
+     * 可退货金额1（退到返现金额）
+     * 
+     * @deprecated
      *
-     *    数据库字段: ORD_ORDER.RETURN_AMOUNT1
+     *             数据库字段: ORD_ORDER.RETURN_AMOUNT1
      *
-     *    @mbg.generated 自动生成，如需修改，请删除本行
+     * @mbg.generated 自动生成，如需修改，请删除本行
      */
+    @Deprecated
     public BigDecimal getReturnAmount1() {
         return returnAmount1;
     }
 
     /**
-     *    可退货金额1（退到返现金额）
-     *                @deprecated
+     * 可退货金额1（退到返现金额）
+     * 
+     * @deprecated
      *
-     *    数据库字段: ORD_ORDER.RETURN_AMOUNT1
+     *             数据库字段: ORD_ORDER.RETURN_AMOUNT1
      *
-     *    @mbg.generated 自动生成，如需修改，请删除本行
+     * @mbg.generated 自动生成，如需修改，请删除本行
      */
-    public void setReturnAmount1(BigDecimal returnAmount1) {
+    @Deprecated
+    public void setReturnAmount1(final BigDecimal returnAmount1) {
         this.returnAmount1 = returnAmount1;
     }
 
     /**
-     *    可退货总额2（退到余额）
-     *                @deprecated
+     * 可退货总额2（退到余额）
+     * 
+     * @deprecated
      *
-     *    数据库字段: ORD_ORDER.RETURN_AMOUNT2
+     *             数据库字段: ORD_ORDER.RETURN_AMOUNT2
      *
-     *    @mbg.generated 自动生成，如需修改，请删除本行
+     * @mbg.generated 自动生成，如需修改，请删除本行
      */
+    @Deprecated
     public BigDecimal getReturnAmount2() {
         return returnAmount2;
     }
 
     /**
-     *    可退货总额2（退到余额）
-     *                @deprecated
+     * 可退货总额2（退到余额）
+     * 
+     * @deprecated
      *
-     *    数据库字段: ORD_ORDER.RETURN_AMOUNT2
+     *             数据库字段: ORD_ORDER.RETURN_AMOUNT2
      *
-     *    @mbg.generated 自动生成，如需修改，请删除本行
+     * @mbg.generated 自动生成，如需修改，请删除本行
      */
-    public void setReturnAmount2(BigDecimal returnAmount2) {
+    @Deprecated
+    public void setReturnAmount2(final BigDecimal returnAmount2) {
         this.returnAmount2 = returnAmount2;
     }
 
     /**
-     *    订单状态（-1：作废  1：已下单（待支付）  2：已支付（待发货）  3：已发货（待签收）  4：已签收（待结算）  5：已结算  ）
-     *                -1：作废
-     *                1：已下单（待支付）
-     *                2：已支付（待发货）
-     *                3：已发货（待签收）
-     *                4：已签收（待结算）
-     *                5：已结算
+     * 订单状态（-1：作废 1：已下单（待支付） 2：已支付（待发货） 3：已发货（待签收） 4：已签收（待结算） 5：已结算 ）
+     * -1：作废
+     * 1：已下单（待支付）
+     * 2：已支付（待发货）
+     * 3：已发货（待签收）
+     * 4：已签收（待结算）
+     * 5：已结算
      *
-     *    数据库字段: ORD_ORDER.ORDER_STATE
+     * 数据库字段: ORD_ORDER.ORDER_STATE
      *
-     *    @mbg.generated 自动生成，如需修改，请删除本行
+     * @mbg.generated 自动生成，如需修改，请删除本行
      */
     public Byte getOrderState() {
         return orderState;
     }
 
     /**
-     *    订单状态（-1：作废  1：已下单（待支付）  2：已支付（待发货）  3：已发货（待签收）  4：已签收（待结算）  5：已结算  ）
-     *                -1：作废
-     *                1：已下单（待支付）
-     *                2：已支付（待发货）
-     *                3：已发货（待签收）
-     *                4：已签收（待结算）
-     *                5：已结算
+     * 订单状态（-1：作废 1：已下单（待支付） 2：已支付（待发货） 3：已发货（待签收） 4：已签收（待结算） 5：已结算 ）
+     * -1：作废
+     * 1：已下单（待支付）
+     * 2：已支付（待发货）
+     * 3：已发货（待签收）
+     * 4：已签收（待结算）
+     * 5：已结算
      *
-     *    数据库字段: ORD_ORDER.ORDER_STATE
+     * 数据库字段: ORD_ORDER.ORDER_STATE
      *
-     *    @mbg.generated 自动生成，如需修改，请删除本行
+     * @mbg.generated 自动生成，如需修改，请删除本行
      */
-    public void setOrderState(Byte orderState) {
+    public void setOrderState(final Byte orderState) {
         this.orderState = orderState;
     }
 
     /**
-     *    下单人用户ID
+     * 下单人用户ID
      *
-     *    数据库字段: ORD_ORDER.USER_ID
+     * 数据库字段: ORD_ORDER.USER_ID
      *
-     *    @mbg.generated 自动生成，如需修改，请删除本行
+     * @mbg.generated 自动生成，如需修改，请删除本行
      */
     public Long getUserId() {
         return userId;
     }
 
     /**
-     *    下单人用户ID
+     * 下单人用户ID
      *
-     *    数据库字段: ORD_ORDER.USER_ID
+     * 数据库字段: ORD_ORDER.USER_ID
      *
-     *    @mbg.generated 自动生成，如需修改，请删除本行
+     * @mbg.generated 自动生成，如需修改，请删除本行
      */
-    public void setUserId(Long userId) {
+    public void setUserId(final Long userId) {
         this.userId = userId;
     }
 
     /**
-     *    作废-下单人姓名
-     *                @deprecated
+     * 作废-下单人姓名
+     * 
+     * @deprecated
      *
-     *    数据库字段: ORD_ORDER.USER_NAME
+     *             数据库字段: ORD_ORDER.USER_NAME
      *
-     *    @mbg.generated 自动生成，如需修改，请删除本行
+     * @mbg.generated 自动生成，如需修改，请删除本行
      */
+    @Deprecated
     public String getUserName() {
         return userName;
     }
 
     /**
-     *    作废-下单人姓名
-     *                @deprecated
+     * 作废-下单人姓名
+     * 
+     * @deprecated
      *
-     *    数据库字段: ORD_ORDER.USER_NAME
+     *             数据库字段: ORD_ORDER.USER_NAME
      *
-     *    @mbg.generated 自动生成，如需修改，请删除本行
+     * @mbg.generated 自动生成，如需修改，请删除本行
      */
-    public void setUserName(String userName) {
+    @Deprecated
+    public void setUserName(final String userName) {
         this.userName = userName;
     }
 
     /**
-     *    下单时间
+     * 下单时间
      *
-     *    数据库字段: ORD_ORDER.ORDER_TIME
+     * 数据库字段: ORD_ORDER.ORDER_TIME
      *
-     *    @mbg.generated 自动生成，如需修改，请删除本行
+     * @mbg.generated 自动生成，如需修改，请删除本行
      */
     public Date getOrderTime() {
         return orderTime;
     }
 
     /**
-     *    下单时间
+     * 下单时间
      *
-     *    数据库字段: ORD_ORDER.ORDER_TIME
+     * 数据库字段: ORD_ORDER.ORDER_TIME
      *
-     *    @mbg.generated 自动生成，如需修改，请删除本行
+     * @mbg.generated 自动生成，如需修改，请删除本行
      */
-    public void setOrderTime(Date orderTime) {
+    public void setOrderTime(final Date orderTime) {
         this.orderTime = orderTime;
     }
 
     /**
-     *    支付订单ID
-     *                提供给第三方支付记录的订单ID（因为有可能会多笔订单合并支付）
-     *                确认订单时，默认填写为订单ID(ORDER_ID)
-     *                拆分订单时，拆分后的订单的支付订单ID仍为旧订单的支付订单ID不变
+     * 支付订单ID
+     * 提供给第三方支付记录的订单ID（因为有可能会多笔订单合并支付）
+     * 确认订单时，默认填写为订单ID(ORDER_ID)
+     * 拆分订单时，拆分后的订单的支付订单ID仍为旧订单的支付订单ID不变
      *
-     *    数据库字段: ORD_ORDER.PAY_ORDER_ID
+     * 数据库字段: ORD_ORDER.PAY_ORDER_ID
      *
-     *    @mbg.generated 自动生成，如需修改，请删除本行
+     * @mbg.generated 自动生成，如需修改，请删除本行
      */
     public Long getPayOrderId() {
         return payOrderId;
     }
 
     /**
-     *    支付订单ID
-     *                提供给第三方支付记录的订单ID（因为有可能会多笔订单合并支付）
-     *                确认订单时，默认填写为订单ID(ORDER_ID)
-     *                拆分订单时，拆分后的订单的支付订单ID仍为旧订单的支付订单ID不变
+     * 支付订单ID
+     * 提供给第三方支付记录的订单ID（因为有可能会多笔订单合并支付）
+     * 确认订单时，默认填写为订单ID(ORDER_ID)
+     * 拆分订单时，拆分后的订单的支付订单ID仍为旧订单的支付订单ID不变
      *
-     *    数据库字段: ORD_ORDER.PAY_ORDER_ID
+     * 数据库字段: ORD_ORDER.PAY_ORDER_ID
      *
-     *    @mbg.generated 自动生成，如需修改，请删除本行
+     * @mbg.generated 自动生成，如需修改，请删除本行
      */
-    public void setPayOrderId(Long payOrderId) {
+    public void setPayOrderId(final Long payOrderId) {
         this.payOrderId = payOrderId;
     }
 
     /**
-     *    支付时间
+     * 支付时间
      *
-     *    数据库字段: ORD_ORDER.PAY_TIME
+     * 数据库字段: ORD_ORDER.PAY_TIME
      *
-     *    @mbg.generated 自动生成，如需修改，请删除本行
+     * @mbg.generated 自动生成，如需修改，请删除本行
      */
     public Date getPayTime() {
         return payTime;
     }
 
     /**
-     *    支付时间
+     * 支付时间
      *
-     *    数据库字段: ORD_ORDER.PAY_TIME
+     * 数据库字段: ORD_ORDER.PAY_TIME
      *
-     *    @mbg.generated 自动生成，如需修改，请删除本行
+     * @mbg.generated 自动生成，如需修改，请删除本行
      */
-    public void setPayTime(Date payTime) {
+    public void setPayTime(final Date payTime) {
         this.payTime = payTime;
     }
 
     /**
-     *    发货时间
+     * 发货时间
      *
-     *    数据库字段: ORD_ORDER.SEND_TIME
+     * 数据库字段: ORD_ORDER.SEND_TIME
      *
-     *    @mbg.generated 自动生成，如需修改，请删除本行
+     * @mbg.generated 自动生成，如需修改，请删除本行
      */
     public Date getSendTime() {
         return sendTime;
     }
 
     /**
-     *    发货时间
+     * 发货时间
      *
-     *    数据库字段: ORD_ORDER.SEND_TIME
+     * 数据库字段: ORD_ORDER.SEND_TIME
      *
-     *    @mbg.generated 自动生成，如需修改，请删除本行
+     * @mbg.generated 自动生成，如需修改，请删除本行
      */
-    public void setSendTime(Date sendTime) {
+    public void setSendTime(final Date sendTime) {
         this.sendTime = sendTime;
     }
 
     /**
-     *    签收时间
+     * 签收时间
      *
-     *    数据库字段: ORD_ORDER.RECEIVED_TIME
+     * 数据库字段: ORD_ORDER.RECEIVED_TIME
      *
-     *    @mbg.generated 自动生成，如需修改，请删除本行
+     * @mbg.generated 自动生成，如需修改，请删除本行
      */
     public Date getReceivedTime() {
         return receivedTime;
     }
 
     /**
-     *    签收时间
+     * 签收时间
      *
-     *    数据库字段: ORD_ORDER.RECEIVED_TIME
+     * 数据库字段: ORD_ORDER.RECEIVED_TIME
      *
-     *    @mbg.generated 自动生成，如需修改，请删除本行
+     * @mbg.generated 自动生成，如需修改，请删除本行
      */
-    public void setReceivedTime(Date receivedTime) {
+    public void setReceivedTime(final Date receivedTime) {
         this.receivedTime = receivedTime;
     }
 
     /**
-     *    结算时间
+     * 结算时间
      *
-     *    数据库字段: ORD_ORDER.CLOSE_TIME
+     * 数据库字段: ORD_ORDER.CLOSE_TIME
      *
-     *    @mbg.generated 自动生成，如需修改，请删除本行
+     * @mbg.generated 自动生成，如需修改，请删除本行
      */
     public Date getCloseTime() {
         return closeTime;
     }
 
     /**
-     *    结算时间
+     * 结算时间
      *
-     *    数据库字段: ORD_ORDER.CLOSE_TIME
+     * 数据库字段: ORD_ORDER.CLOSE_TIME
      *
-     *    @mbg.generated 自动生成，如需修改，请删除本行
+     * @mbg.generated 自动生成，如需修改，请删除本行
      */
-    public void setCloseTime(Date closeTime) {
+    public void setCloseTime(final Date closeTime) {
         this.closeTime = closeTime;
     }
 
     /**
-     *    作废时间
+     * 作废时间
      *
-     *    数据库字段: ORD_ORDER.CANCEL_TIME
+     * 数据库字段: ORD_ORDER.CANCEL_TIME
      *
-     *    @mbg.generated 自动生成，如需修改，请删除本行
+     * @mbg.generated 自动生成，如需修改，请删除本行
      */
     public Date getCancelTime() {
         return cancelTime;
     }
 
     /**
-     *    作废时间
+     * 作废时间
      *
-     *    数据库字段: ORD_ORDER.CANCEL_TIME
+     * 数据库字段: ORD_ORDER.CANCEL_TIME
      *
-     *    @mbg.generated 自动生成，如需修改，请删除本行
+     * @mbg.generated 自动生成，如需修改，请删除本行
      */
-    public void setCancelTime(Date cancelTime) {
+    public void setCancelTime(final Date cancelTime) {
         this.cancelTime = cancelTime;
     }
 
     /**
-     *    作废-物流订单ID
-     *                @deprecated
+     * 作废-物流订单ID
+     * 
+     * @deprecated
      *
-     *    数据库字段: ORD_ORDER.LOGISTIC_ID
+     *             数据库字段: ORD_ORDER.LOGISTIC_ID
      *
-     *    @mbg.generated 自动生成，如需修改，请删除本行
+     * @mbg.generated 自动生成，如需修改，请删除本行
      */
+    @Deprecated
     public Long getLogisticId() {
         return logisticId;
     }
 
     /**
-     *    作废-物流订单ID
-     *                @deprecated
+     * 作废-物流订单ID
+     * 
+     * @deprecated
      *
-     *    数据库字段: ORD_ORDER.LOGISTIC_ID
+     *             数据库字段: ORD_ORDER.LOGISTIC_ID
      *
-     *    @mbg.generated 自动生成，如需修改，请删除本行
+     * @mbg.generated 自动生成，如需修改，请删除本行
      */
-    public void setLogisticId(Long logisticId) {
+    @Deprecated
+    public void setLogisticId(final Long logisticId) {
         this.logisticId = logisticId;
     }
 
     /**
-     *    作废-快递公司编号
-     *                @deprecated
+     * 作废-快递公司编号
+     * 
+     * @deprecated
      *
-     *    数据库字段: ORD_ORDER.SHIPPER_CODE
+     *             数据库字段: ORD_ORDER.SHIPPER_CODE
      *
-     *    @mbg.generated 自动生成，如需修改，请删除本行
+     * @mbg.generated 自动生成，如需修改，请删除本行
      */
+    @Deprecated
     public String getShipperCode() {
         return shipperCode;
     }
 
     /**
-     *    作废-快递公司编号
-     *                @deprecated
+     * 作废-快递公司编号
+     * 
+     * @deprecated
      *
-     *    数据库字段: ORD_ORDER.SHIPPER_CODE
+     *             数据库字段: ORD_ORDER.SHIPPER_CODE
      *
-     *    @mbg.generated 自动生成，如需修改，请删除本行
+     * @mbg.generated 自动生成，如需修改，请删除本行
      */
-    public void setShipperCode(String shipperCode) {
+    @Deprecated
+    public void setShipperCode(final String shipperCode) {
         this.shipperCode = shipperCode;
     }
 
     /**
-     *    作废-快递公司名称
-     *                @deprecated
+     * 作废-快递公司名称
+     * 
+     * @deprecated
      *
-     *    数据库字段: ORD_ORDER.SHIPPER_NAME
+     *             数据库字段: ORD_ORDER.SHIPPER_NAME
      *
-     *    @mbg.generated 自动生成，如需修改，请删除本行
+     * @mbg.generated 自动生成，如需修改，请删除本行
      */
+    @Deprecated
     public String getShipperName() {
         return shipperName;
     }
 
     /**
-     *    作废-快递公司名称
-     *                @deprecated
+     * 作废-快递公司名称
+     * 
+     * @deprecated
      *
-     *    数据库字段: ORD_ORDER.SHIPPER_NAME
+     *             数据库字段: ORD_ORDER.SHIPPER_NAME
      *
-     *    @mbg.generated 自动生成，如需修改，请删除本行
+     * @mbg.generated 自动生成，如需修改，请删除本行
      */
-    public void setShipperName(String shipperName) {
+    @Deprecated
+    public void setShipperName(final String shipperName) {
         this.shipperName = shipperName;
     }
 
     /**
-     *    作废-快递单号
-     *                @deprecated
+     * 作废-快递单号
+     * 
+     * @deprecated
      *
-     *    数据库字段: ORD_ORDER.LOGISTIC_CODE
+     *             数据库字段: ORD_ORDER.LOGISTIC_CODE
      *
-     *    @mbg.generated 自动生成，如需修改，请删除本行
+     * @mbg.generated 自动生成，如需修改，请删除本行
      */
+    @Deprecated
     public String getLogisticCode() {
         return logisticCode;
     }
 
     /**
-     *    作废-快递单号
-     *                @deprecated
+     * 作废-快递单号
+     * 
+     * @deprecated
      *
-     *    数据库字段: ORD_ORDER.LOGISTIC_CODE
+     *             数据库字段: ORD_ORDER.LOGISTIC_CODE
      *
-     *    @mbg.generated 自动生成，如需修改，请删除本行
+     * @mbg.generated 自动生成，如需修改，请删除本行
      */
-    public void setLogisticCode(String logisticCode) {
+    @Deprecated
+    public void setLogisticCode(final String logisticCode) {
         this.logisticCode = logisticCode;
     }
 
     /**
-     *    收件人名称
+     * 收件人名称
      *
-     *    数据库字段: ORD_ORDER.RECEIVER_NAME
+     * 数据库字段: ORD_ORDER.RECEIVER_NAME
      *
-     *    @mbg.generated 自动生成，如需修改，请删除本行
+     * @mbg.generated 自动生成，如需修改，请删除本行
      */
     public String getReceiverName() {
         return receiverName;
     }
 
     /**
-     *    收件人名称
+     * 收件人名称
      *
-     *    数据库字段: ORD_ORDER.RECEIVER_NAME
+     * 数据库字段: ORD_ORDER.RECEIVER_NAME
      *
-     *    @mbg.generated 自动生成，如需修改，请删除本行
+     * @mbg.generated 自动生成，如需修改，请删除本行
      */
-    public void setReceiverName(String receiverName) {
+    public void setReceiverName(final String receiverName) {
         this.receiverName = receiverName;
     }
 
     /**
-     *    收件人电话
+     * 收件人电话
      *
-     *    数据库字段: ORD_ORDER.RECEIVER_TEL
+     * 数据库字段: ORD_ORDER.RECEIVER_TEL
      *
-     *    @mbg.generated 自动生成，如需修改，请删除本行
+     * @mbg.generated 自动生成，如需修改，请删除本行
      */
     public String getReceiverTel() {
         return receiverTel;
     }
 
     /**
-     *    收件人电话
+     * 收件人电话
      *
-     *    数据库字段: ORD_ORDER.RECEIVER_TEL
+     * 数据库字段: ORD_ORDER.RECEIVER_TEL
      *
-     *    @mbg.generated 自动生成，如需修改，请删除本行
+     * @mbg.generated 自动生成，如需修改，请删除本行
      */
-    public void setReceiverTel(String receiverTel) {
+    public void setReceiverTel(final String receiverTel) {
         this.receiverTel = receiverTel;
     }
 
     /**
-     *    收件人手机
+     * 收件人手机
      *
-     *    数据库字段: ORD_ORDER.RECEIVER_MOBILE
+     * 数据库字段: ORD_ORDER.RECEIVER_MOBILE
      *
-     *    @mbg.generated 自动生成，如需修改，请删除本行
+     * @mbg.generated 自动生成，如需修改，请删除本行
      */
     public String getReceiverMobile() {
         return receiverMobile;
     }
 
     /**
-     *    收件人手机
+     * 收件人手机
      *
-     *    数据库字段: ORD_ORDER.RECEIVER_MOBILE
+     * 数据库字段: ORD_ORDER.RECEIVER_MOBILE
      *
-     *    @mbg.generated 自动生成，如需修改，请删除本行
+     * @mbg.generated 自动生成，如需修改，请删除本行
      */
-    public void setReceiverMobile(String receiverMobile) {
+    public void setReceiverMobile(final String receiverMobile) {
         this.receiverMobile = receiverMobile;
     }
 
     /**
-     *    收件省
+     * 收件省
      *
-     *    数据库字段: ORD_ORDER.RECEIVER_PROVINCE
+     * 数据库字段: ORD_ORDER.RECEIVER_PROVINCE
      *
-     *    @mbg.generated 自动生成，如需修改，请删除本行
+     * @mbg.generated 自动生成，如需修改，请删除本行
      */
     public String getReceiverProvince() {
         return receiverProvince;
     }
 
     /**
-     *    收件省
+     * 收件省
      *
-     *    数据库字段: ORD_ORDER.RECEIVER_PROVINCE
+     * 数据库字段: ORD_ORDER.RECEIVER_PROVINCE
      *
-     *    @mbg.generated 自动生成，如需修改，请删除本行
+     * @mbg.generated 自动生成，如需修改，请删除本行
      */
-    public void setReceiverProvince(String receiverProvince) {
+    public void setReceiverProvince(final String receiverProvince) {
         this.receiverProvince = receiverProvince;
     }
 
     /**
-     *    收件市
+     * 收件市
      *
-     *    数据库字段: ORD_ORDER.RECEIVER_CITY
+     * 数据库字段: ORD_ORDER.RECEIVER_CITY
      *
-     *    @mbg.generated 自动生成，如需修改，请删除本行
+     * @mbg.generated 自动生成，如需修改，请删除本行
      */
     public String getReceiverCity() {
         return receiverCity;
     }
 
     /**
-     *    收件市
+     * 收件市
      *
-     *    数据库字段: ORD_ORDER.RECEIVER_CITY
+     * 数据库字段: ORD_ORDER.RECEIVER_CITY
      *
-     *    @mbg.generated 自动生成，如需修改，请删除本行
+     * @mbg.generated 自动生成，如需修改，请删除本行
      */
-    public void setReceiverCity(String receiverCity) {
+    public void setReceiverCity(final String receiverCity) {
         this.receiverCity = receiverCity;
     }
 
     /**
-     *    收件区
+     * 收件区
      *
-     *    数据库字段: ORD_ORDER.RECEIVER_EXP_AREA
+     * 数据库字段: ORD_ORDER.RECEIVER_EXP_AREA
      *
-     *    @mbg.generated 自动生成，如需修改，请删除本行
+     * @mbg.generated 自动生成，如需修改，请删除本行
      */
     public String getReceiverExpArea() {
         return receiverExpArea;
     }
 
     /**
-     *    收件区
+     * 收件区
      *
-     *    数据库字段: ORD_ORDER.RECEIVER_EXP_AREA
+     * 数据库字段: ORD_ORDER.RECEIVER_EXP_AREA
      *
-     *    @mbg.generated 自动生成，如需修改，请删除本行
+     * @mbg.generated 自动生成，如需修改，请删除本行
      */
-    public void setReceiverExpArea(String receiverExpArea) {
+    public void setReceiverExpArea(final String receiverExpArea) {
         this.receiverExpArea = receiverExpArea;
     }
 
     /**
-     *    收件人详细地址
+     * 收件人详细地址
      *
-     *    数据库字段: ORD_ORDER.RECEIVER_ADDRESS
+     * 数据库字段: ORD_ORDER.RECEIVER_ADDRESS
      *
-     *    @mbg.generated 自动生成，如需修改，请删除本行
+     * @mbg.generated 自动生成，如需修改，请删除本行
      */
     public String getReceiverAddress() {
         return receiverAddress;
     }
 
     /**
-     *    收件人详细地址
+     * 收件人详细地址
      *
-     *    数据库字段: ORD_ORDER.RECEIVER_ADDRESS
+     * 数据库字段: ORD_ORDER.RECEIVER_ADDRESS
      *
-     *    @mbg.generated 自动生成，如需修改，请删除本行
+     * @mbg.generated 自动生成，如需修改，请删除本行
      */
-    public void setReceiverAddress(String receiverAddress) {
+    public void setReceiverAddress(final String receiverAddress) {
         this.receiverAddress = receiverAddress;
     }
 
     /**
-     *    收件地邮编
+     * 收件地邮编
      *
-     *    数据库字段: ORD_ORDER.RECEIVER_POST_CODE
+     * 数据库字段: ORD_ORDER.RECEIVER_POST_CODE
      *
-     *    @mbg.generated 自动生成，如需修改，请删除本行
+     * @mbg.generated 自动生成，如需修改，请删除本行
      */
     public String getReceiverPostCode() {
         return receiverPostCode;
     }
 
     /**
-     *    收件地邮编
+     * 收件地邮编
      *
-     *    数据库字段: ORD_ORDER.RECEIVER_POST_CODE
+     * 数据库字段: ORD_ORDER.RECEIVER_POST_CODE
      *
-     *    @mbg.generated 自动生成，如需修改，请删除本行
+     * @mbg.generated 自动生成，如需修改，请删除本行
      */
-    public void setReceiverPostCode(String receiverPostCode) {
+    public void setReceiverPostCode(final String receiverPostCode) {
         this.receiverPostCode = receiverPostCode;
     }
 
     /**
-     *    订单留言
+     * 订单留言
      *
-     *    数据库字段: ORD_ORDER.ORDER_MESSAGES
+     * 数据库字段: ORD_ORDER.ORDER_MESSAGES
      *
-     *    @mbg.generated 自动生成，如需修改，请删除本行
+     * @mbg.generated 自动生成，如需修改，请删除本行
      */
     public String getOrderMessages() {
         return orderMessages;
     }
 
     /**
-     *    订单留言
+     * 订单留言
      *
-     *    数据库字段: ORD_ORDER.ORDER_MESSAGES
+     * 数据库字段: ORD_ORDER.ORDER_MESSAGES
      *
-     *    @mbg.generated 自动生成，如需修改，请删除本行
+     * @mbg.generated 自动生成，如需修改，请删除本行
      */
-    public void setOrderMessages(String orderMessages) {
+    public void setOrderMessages(final String orderMessages) {
         this.orderMessages = orderMessages;
     }
 
     /**
-     *    修改实际金额操作人ID
+     * 修改实际金额操作人ID
      *
-     *    数据库字段: ORD_ORDER.MODIFY_REALVERY_MONEY_OP_ID
+     * 数据库字段: ORD_ORDER.MODIFY_REALVERY_MONEY_OP_ID
      *
-     *    @mbg.generated 自动生成，如需修改，请删除本行
+     * @mbg.generated 自动生成，如需修改，请删除本行
      */
     public Long getModifyRealveryMoneyOpId() {
         return modifyRealveryMoneyOpId;
     }
 
     /**
-     *    修改实际金额操作人ID
+     * 修改实际金额操作人ID
      *
-     *    数据库字段: ORD_ORDER.MODIFY_REALVERY_MONEY_OP_ID
+     * 数据库字段: ORD_ORDER.MODIFY_REALVERY_MONEY_OP_ID
      *
-     *    @mbg.generated 自动生成，如需修改，请删除本行
+     * @mbg.generated 自动生成，如需修改，请删除本行
      */
-    public void setModifyRealveryMoneyOpId(Long modifyRealveryMoneyOpId) {
+    public void setModifyRealveryMoneyOpId(final Long modifyRealveryMoneyOpId) {
         this.modifyRealveryMoneyOpId = modifyRealveryMoneyOpId;
     }
 
     /**
-     *    取消订单操作人ID
+     * 取消订单操作人ID
      *
-     *    数据库字段: ORD_ORDER.CANCELING_ORDER_OP_ID
+     * 数据库字段: ORD_ORDER.CANCELING_ORDER_OP_ID
      *
-     *    @mbg.generated 自动生成，如需修改，请删除本行
+     * @mbg.generated 自动生成，如需修改，请删除本行
      */
     public Long getCancelingOrderOpId() {
         return cancelingOrderOpId;
     }
 
     /**
-     *    取消订单操作人ID
+     * 取消订单操作人ID
      *
-     *    数据库字段: ORD_ORDER.CANCELING_ORDER_OP_ID
+     * 数据库字段: ORD_ORDER.CANCELING_ORDER_OP_ID
      *
-     *    @mbg.generated 自动生成，如需修改，请删除本行
+     * @mbg.generated 自动生成，如需修改，请删除本行
      */
-    public void setCancelingOrderOpId(Long cancelingOrderOpId) {
+    public void setCancelingOrderOpId(final Long cancelingOrderOpId) {
         this.cancelingOrderOpId = cancelingOrderOpId;
     }
 
     /**
-     *    取消发货的原因
+     * 取消发货的原因
      *
-     *    数据库字段: ORD_ORDER.CANCELDELI_REASON
+     * 数据库字段: ORD_ORDER.CANCELDELI_REASON
      *
-     *    @mbg.generated 自动生成，如需修改，请删除本行
+     * @mbg.generated 自动生成，如需修改，请删除本行
      */
     public String getCanceldeliReason() {
         return canceldeliReason;
     }
 
     /**
-     *    取消发货的原因
+     * 取消发货的原因
      *
-     *    数据库字段: ORD_ORDER.CANCELDELI_REASON
+     * 数据库字段: ORD_ORDER.CANCELDELI_REASON
      *
-     *    @mbg.generated 自动生成，如需修改，请删除本行
+     * @mbg.generated 自动生成，如需修改，请删除本行
      */
-    public void setCanceldeliReason(String canceldeliReason) {
+    public void setCanceldeliReason(final String canceldeliReason) {
         this.canceldeliReason = canceldeliReason;
     }
 
     /**
-     *    发货操作人
+     * 发货操作人
      *
-     *    数据库字段: ORD_ORDER.SEND_OP_ID
+     * 数据库字段: ORD_ORDER.SEND_OP_ID
      *
-     *    @mbg.generated 自动生成，如需修改，请删除本行
+     * @mbg.generated 自动生成，如需修改，请删除本行
      */
     public Long getSendOpId() {
         return sendOpId;
     }
 
     /**
-     *    发货操作人
+     * 发货操作人
      *
-     *    数据库字段: ORD_ORDER.SEND_OP_ID
+     * 数据库字段: ORD_ORDER.SEND_OP_ID
      *
-     *    @mbg.generated 自动生成，如需修改，请删除本行
+     * @mbg.generated 自动生成，如需修改，请删除本行
      */
-    public void setSendOpId(Long sendOpId) {
+    public void setSendOpId(final Long sendOpId) {
         this.sendOpId = sendOpId;
     }
 
     /**
-     *    签收人
+     * 签收人
      *
-     *    数据库字段: ORD_ORDER.RECEIVED_OP_ID
+     * 数据库字段: ORD_ORDER.RECEIVED_OP_ID
      *
-     *    @mbg.generated 自动生成，如需修改，请删除本行
+     * @mbg.generated 自动生成，如需修改，请删除本行
      */
     public Long getReceivedOpId() {
         return receivedOpId;
     }
 
     /**
-     *    签收人
+     * 签收人
      *
-     *    数据库字段: ORD_ORDER.RECEIVED_OP_ID
+     * 数据库字段: ORD_ORDER.RECEIVED_OP_ID
      *
-     *    @mbg.generated 自动生成，如需修改，请删除本行
+     * @mbg.generated 自动生成，如需修改，请删除本行
      */
-    public void setReceivedOpId(Long receivedOpId) {
+    public void setReceivedOpId(final Long receivedOpId) {
         this.receivedOpId = receivedOpId;
     }
 
     /**
-     *    作废原因
+     * 作废原因
      *
-     *    数据库字段: ORD_ORDER.CANCEL_REASON
+     * 数据库字段: ORD_ORDER.CANCEL_REASON
      *
-     *    @mbg.generated 自动生成，如需修改，请删除本行
+     * @mbg.generated 自动生成，如需修改，请删除本行
      */
     public String getCancelReason() {
         return cancelReason;
     }
 
     /**
-     *    作废原因
+     * 作废原因
      *
-     *    数据库字段: ORD_ORDER.CANCEL_REASON
+     * 数据库字段: ORD_ORDER.CANCEL_REASON
      *
-     *    @mbg.generated 自动生成，如需修改，请删除本行
+     * @mbg.generated 自动生成，如需修改，请删除本行
      */
-    public void setCancelReason(String cancelReason) {
+    public void setCancelReason(final String cancelReason) {
         this.cancelReason = cancelReason;
     }
 
     /**
-     *    @mbg.generated 自动生成，如需修改，请删除本行
+     * @mbg.generated 自动生成，如需修改，请删除本行
      */
     @Override
     public String toString() {
-        StringBuilder sb = new StringBuilder();
+        final StringBuilder sb = new StringBuilder();
         sb.append(getClass().getSimpleName());
         sb.append(" [");
         sb.append("Hash = ").append(hashCode());
@@ -1346,10 +1390,10 @@ public class OrdOrderMo implements Serializable {
     }
 
     /**
-     *    @mbg.generated 自动生成，如需修改，请删除本行
+     * @mbg.generated 自动生成，如需修改，请删除本行
      */
     @Override
-    public boolean equals(Object that) {
+    public boolean equals(final Object that) {
         if (this == that) {
             return true;
         }
@@ -1359,12 +1403,12 @@ public class OrdOrderMo implements Serializable {
         if (getClass() != that.getClass()) {
             return false;
         }
-        OrdOrderMo other = (OrdOrderMo) that;
-        return (this.getId() == null ? other.getId() == null : this.getId().equals(other.getId()));
+        final OrdOrderMo other = (OrdOrderMo) that;
+        return (getId() == null ? other.getId() == null : getId().equals(other.getId()));
     }
 
     /**
-     *    @mbg.generated 自动生成，如需修改，请删除本行
+     * @mbg.generated 自动生成，如需修改，请删除本行
      */
     @Override
     public int hashCode() {
