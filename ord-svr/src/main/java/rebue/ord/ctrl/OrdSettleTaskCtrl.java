@@ -6,19 +6,15 @@ import java.util.List;
 
 import javax.annotation.Resource;
 
-import org.dozer.Mapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.dao.DuplicateKeyException;
-import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
-
-import com.github.pagehelper.PageInfo;
 
 import rebue.ord.mo.OrdSettleTaskMo;
 import rebue.ord.svc.OrdSettleTaskSvc;
@@ -138,5 +134,16 @@ public class OrdSettleTaskCtrl {
 	@GetMapping("/ord/settletask/getid")
 	List<Long> getTaskIdsThatShouldExecute() {
 		return svc.getTaskIdsThatShouldExecute();
+	}
+	
+	/**
+	 * 执行结算任务
+	 * @param id
+	 * @return
+	 */
+	@PostMapping("/ord/settletask/execute")
+	Ro executeSettleTask(@RequestParam("id") Long id) {
+		_log.info("执行结算任务的参数为：{}", id);
+		return svc.executeSettleTask(id);
 	}
 }
