@@ -64,43 +64,25 @@ public class OrdReturnMo implements Serializable {
     private Integer returnCount;
 
     /**
-     *    退货总额
+     *    退款总额（退款总额=退款余额+退款返现金+退款补偿金）
      *
-     *    数据库字段: ORD_RETURN.RETURN_RENTAL
-     *
-     *    @mbg.generated 自动生成，如需修改，请删除本行
-     */
-    private BigDecimal returnRental;
-
-    /**
-     *    退货金额（余额）
-     *
-     *    数据库字段: ORD_RETURN.RETURN_AMOUNT1
+     *    数据库字段: ORD_RETURN.REFUND_TOTAL
      *
      *    @mbg.generated 自动生成，如需修改，请删除本行
      */
-    private BigDecimal returnAmount1;
+    private BigDecimal refundTotal;
 
     /**
-     *    退货金额（返现金）
+     *    退款补偿金额(退货退款产生的需补偿给卖家的金额，例如补偿运费)
      *
-     *    数据库字段: ORD_RETURN.RETURN_AMOUNT2
+     *    数据库字段: ORD_RETURN.REFUND_COMPENSATION
      *
      *    @mbg.generated 自动生成，如需修改，请删除本行
      */
-    private BigDecimal returnAmount2;
+    private BigDecimal refundCompensation;
 
     /**
-     *    扣减返现金额
-     *
-     *    数据库字段: ORD_RETURN.SUBTRACT_CASHBACK
-     *
-     *    @mbg.generated 自动生成，如需修改，请删除本行
-     */
-    private BigDecimal subtractCashback;
-
-    /**
-     *    退款类型（1：仅退款  2：退货并退款）
+     *    退货类型（1：仅退款  2：退货并退款）
      *
      *    数据库字段: ORD_RETURN.RETURN_TYPE
      *
@@ -400,95 +382,51 @@ public class OrdReturnMo implements Serializable {
     }
 
     /**
-     *    退货总额
+     *    退款总额（退款总额=退款余额+退款返现金+退款补偿金）
      *
-     *    数据库字段: ORD_RETURN.RETURN_RENTAL
-     *
-     *    @mbg.generated 自动生成，如需修改，请删除本行
-     */
-    public BigDecimal getReturnRental() {
-        return returnRental;
-    }
-
-    /**
-     *    退货总额
-     *
-     *    数据库字段: ORD_RETURN.RETURN_RENTAL
+     *    数据库字段: ORD_RETURN.REFUND_TOTAL
      *
      *    @mbg.generated 自动生成，如需修改，请删除本行
      */
-    public void setReturnRental(BigDecimal returnRental) {
-        this.returnRental = returnRental;
+    public BigDecimal getRefundTotal() {
+        return refundTotal;
     }
 
     /**
-     *    退货金额（余额）
+     *    退款总额（退款总额=退款余额+退款返现金+退款补偿金）
      *
-     *    数据库字段: ORD_RETURN.RETURN_AMOUNT1
+     *    数据库字段: ORD_RETURN.REFUND_TOTAL
      *
      *    @mbg.generated 自动生成，如需修改，请删除本行
      */
-    public BigDecimal getReturnAmount1() {
-        return returnAmount1;
+    public void setRefundTotal(BigDecimal refundTotal) {
+        this.refundTotal = refundTotal;
     }
 
     /**
-     *    退货金额（余额）
+     *    退款补偿金额(退货退款产生的需补偿给卖家的金额，例如补偿运费)
      *
-     *    数据库字段: ORD_RETURN.RETURN_AMOUNT1
+     *    数据库字段: ORD_RETURN.REFUND_COMPENSATION
      *
      *    @mbg.generated 自动生成，如需修改，请删除本行
      */
-    public void setReturnAmount1(BigDecimal returnAmount1) {
-        this.returnAmount1 = returnAmount1;
+    public BigDecimal getRefundCompensation() {
+        return refundCompensation;
     }
 
     /**
-     *    退货金额（返现金）
+     *    退款补偿金额(退货退款产生的需补偿给卖家的金额，例如补偿运费)
      *
-     *    数据库字段: ORD_RETURN.RETURN_AMOUNT2
+     *    数据库字段: ORD_RETURN.REFUND_COMPENSATION
      *
      *    @mbg.generated 自动生成，如需修改，请删除本行
      */
-    public BigDecimal getReturnAmount2() {
-        return returnAmount2;
+    public void setRefundCompensation(BigDecimal refundCompensation) {
+        this.refundCompensation = refundCompensation;
     }
 
     /**
-     *    退货金额（返现金）
-     *
-     *    数据库字段: ORD_RETURN.RETURN_AMOUNT2
-     *
-     *    @mbg.generated 自动生成，如需修改，请删除本行
-     */
-    public void setReturnAmount2(BigDecimal returnAmount2) {
-        this.returnAmount2 = returnAmount2;
-    }
-
-    /**
-     *    扣减返现金额
-     *
-     *    数据库字段: ORD_RETURN.SUBTRACT_CASHBACK
-     *
-     *    @mbg.generated 自动生成，如需修改，请删除本行
-     */
-    public BigDecimal getSubtractCashback() {
-        return subtractCashback;
-    }
-
-    /**
-     *    扣减返现金额
-     *
-     *    数据库字段: ORD_RETURN.SUBTRACT_CASHBACK
-     *
-     *    @mbg.generated 自动生成，如需修改，请删除本行
-     */
-    public void setSubtractCashback(BigDecimal subtractCashback) {
-        this.subtractCashback = subtractCashback;
-    }
-
-    /**
-     *    退款类型（1：仅退款  2：退货并退款）
+     *    退货类型（1：仅退款  2：退货并退款）
      *
      *    数据库字段: ORD_RETURN.RETURN_TYPE
      *
@@ -499,7 +437,7 @@ public class OrdReturnMo implements Serializable {
     }
 
     /**
-     *    退款类型（1：仅退款  2：退货并退款）
+     *    退货类型（1：仅退款  2：退货并退款）
      *
      *    数据库字段: ORD_RETURN.RETURN_TYPE
      *
@@ -919,10 +857,8 @@ public class OrdReturnMo implements Serializable {
         sb.append(", orderId=").append(orderId);
         sb.append(", orderDetailId=").append(orderDetailId);
         sb.append(", returnCount=").append(returnCount);
-        sb.append(", returnRental=").append(returnRental);
-        sb.append(", returnAmount1=").append(returnAmount1);
-        sb.append(", returnAmount2=").append(returnAmount2);
-        sb.append(", subtractCashback=").append(subtractCashback);
+        sb.append(", refundTotal=").append(refundTotal);
+        sb.append(", refundCompensation=").append(refundCompensation);
         sb.append(", returnType=").append(returnType);
         sb.append(", applicationState=").append(applicationState);
         sb.append(", returnReason=").append(returnReason);

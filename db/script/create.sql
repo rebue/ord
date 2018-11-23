@@ -1,6 +1,6 @@
 /*==============================================================*/
 /* DBMS name:      MySQL 5.0                                    */
-/* Created on:     2018/11/20 20:21:30                          */
+/* Created on:     2018/11/23 15:24:28                          */
 /*==============================================================*/
 
 
@@ -90,7 +90,7 @@ create table ORD_ORDER
    ID                   bigint not null comment '订单ID',
    ORDER_CODE           varchar(50) not null comment '订单编号',
    ORDER_TITLE          varchar(200) not null comment '订单标题',
-   ONLINE_ORG_ID        bigint comment '上线组织ID',
+   ONLINE_ORG_ID        bigint comment '上线组织ID(卖家ID)',
    DELIVER_ORG_ID       bigint comment '发货组织ID',
    ORDER_MONEY          decimal(50,4) not null comment '下单金额',
    REAL_MONEY           decimal(50,4) not null comment '实际金额',
@@ -165,17 +165,18 @@ create table ORD_ORDER_DETAIL
    SPEC_NAME            varchar(50) not null comment '规格名称',
    IS_SETTLE_BUYER      bool comment '是否结算给买家',
    ACTUAL_AMOUNT        decimal(18,4) comment '实际成交金额',
-   BUY_COUNT            int not null comment '购买数量',
+   BUY_COUNT            int not null comment '购买数量(实际数量=购买数量-退货数量)',
+   RETURN_COUNT         int not null default 0 comment '退货数量',
    BUY_PRICE            decimal(18,4) not null comment '购买价格（单价）',
    COST_PRICE           decimal(18,4) comment '成本价格（单个）',
    SUPPLIER_ID          bigint comment '供应商ID',
    DELIVER_ORG_ID       bigint not null comment '发货组织ID(默认填入上线组织ID，可变更为供应商的ID)',
    CASHBACK_AMOUNT      decimal(18,4) not null comment '返现金额',
-   RETURN_COUNT         int not null default 0 comment '退货数量',
-   CASHBACK_TOTAL       decimal(18,4) comment '返现总额',
+   CASHBACK_TOTAL       decimal(18,4) not null comment '返现总额(返现总额=返现金额 * (购买数量-退货数量)',
    BUY_UNIT             varchar(10) comment '购买单位',
    RETURN_STATE         tinyint not null comment '退货状态（0：未退货  1：退货中  2：已退货  3：部分已退）',
    USER_ID              bigint not null comment '用户ID',
+   IS_DELIVERED         bool comment '是否已发货',
    primary key (ID)
 );
 
@@ -206,12 +207,10 @@ create table ORD_RETURN
    ORDER_ID             bigint not null comment '订单ID',
    ORDER_DETAIL_ID      bigint not null comment '订单详情ID',
    RETURN_COUNT         int not null comment '退货数量',
-   RETURN_TOTAL         decimal(18,4) not null comment '退款总额（退款总额=退款余额+退款返现金+扣除补偿金）',
-   RETURN_AMOUNT1       decimal(18,4) comment '退款金额（余额）',
-   RETURN_AMOUNT2       decimal(18,4) comment '退款金额（返现金）',
-   DEDUCT_AMOUNT        decimal(18,4) not null default 0 comment '扣除补偿金额(扣除需补偿的金额，例如补偿运费)',
-   RETURN_TYPE          tinyint not null comment '退款类型（1：仅退款  2：退货并退款）',
-   APPLICATION_STATE    tinyint not null comment '申请状态（-1：已取消  1：待审核  2：退货中  3：已完成   4：已拒绝）',
+   REFUND_TOTAL         decimal(18,4) not null comment '退款总额（退款总额=退款余额+退款返现金+退款补偿金）',
+   REFUND_COMPENSATION  decimal(18,4) not null default 0 comment '退款补偿金额(退货退款产生的需补偿给卖家的金额，例如补偿运费)',
+   RETURN_TYPE          tinyint not null comment '退货类型（1：仅退款  2：退货并退款）',
+   APPLICATION_STATE    tinyint not null comment '申请状态（-1：已取消  1：待审核  2：退货中  3：已退货   4：已拒绝）',
    RETURN_REASON        varchar(500) not null comment '退货原因',
    USER_ID              bigint not null comment '用户ID',
    APPLICATION_OP_ID    bigint not null comment '申请操作人',

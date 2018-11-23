@@ -2,6 +2,7 @@ package rebue.ord.svc;
 
 import java.beans.IntrospectionException;
 import java.lang.reflect.InvocationTargetException;
+import java.math.BigDecimal;
 import java.text.ParseException;
 import java.util.Date;
 import java.util.List;
@@ -113,13 +114,19 @@ public interface OrdOrderSvc extends MybatisBaseSvc<OrdOrderMo, java.lang.Long> 
     OrderSignInRo orderSignIn(OrderSignInTo mo);
 
     /**
-     * 根据退货编号修改退货金额 Title: modifyReturnAmountByorderCode Description:
+     * 修改订单退款金额(根据订单ID和已退款总额)
+     * 
+     * @param refundTotal
+     *            退款总额
+     * @param orderState
+     *            订单状态
+     * @param whereOrderId
+     *            where条件-订单ID
+     * @param whereRefundedTotal
+     *            where条件-已退款总额
      *
-     * @param mo
-     * @return
-     * @date 2018年5月7日 上午9:18:51
      */
-    int modifyReturnAmountByorderCode(OrdOrderMo mo);
+    int modifyRefund(BigDecimal refundTotal, Byte orderState, Long whereOrderId, BigDecimal whereRefundedTotal);
 
     /**
      * 根据订单编号修改订单状态 Title: modifyOrderStateByOderCode Description:

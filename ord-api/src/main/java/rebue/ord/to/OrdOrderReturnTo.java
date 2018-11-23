@@ -13,60 +13,63 @@ import lombok.Data;
  */
 @Data
 public class OrdOrderReturnTo {
-	/**
-	 * 订单ID
-	 */
-	private long orderId;
+    /**
+     * 订单ID
+     */
+    private Long       orderId;
 
-	/** 订单编号 **/
-	private long orderCode;
+    /** 上线编号 */
+    private Long       onlineId;
 
-	/** 上线编号 **/
-	private long onlineId;
+    /** 订单详情ID */
+    private Long       orderDetailId;
 
-	/** 订单详情ID **/
-	private long orderDetailId;
+    /** 退货ID */
+    private Long       returnId;
 
-	/** 退货数量 **/
-	private int returnNum;
+    /** 退货数量(退货数量为空，则表示仅退款，不为空，则表示退货退款) */
+    private Integer    returnNum;
 
-	/** 规格名称 **/
-	private String specName;
+    /**
+     * 退款金额(自动计算退款必须填写，而自定义退款不能填写)
+     * 退款金额 = 退款金额1(余额) + 退款金额2(返现金)
+     */
+    private BigDecimal refundAmount;
+    /**
+     * 退款金额1(余额)
+     */
+    private BigDecimal refundAmount1;
+    /**
+     * 退款金额2(返现金)
+     */
+    private BigDecimal refundAmount2;
+    /**
+     * 退款补偿金额(退货退款产生的需补偿给卖家的金额，例如补偿运费)
+     */
+    private BigDecimal refundCompensation;
 
-	/** 退货金额 **/
-	private BigDecimal returnPrice;
+    /** 规格名称 **/
+//    private String     specName;
 
-	/** 退货原因 **/
-	private String returnReason;
+    /** 退货金额 **/
+//    private BigDecimal returnPrice;
 
-	/** 退货图片 **/
-	private String returnImg;
+    /** 退货原因 **/
+//    private String returnReason;
 
-	/** 退货类型 **/
-	private Byte returnType;
+    /** 退货图片 **/
+//    private String returnImg;
 
-	/** 申请操作人编号 **/
-	private long userId;
+    /** 退货类型 **/
+//    private Byte   returnType;
 
-	/** 退货编号 **/
-	private long returnCode;
+    /** 申请操作人编号 **/
+//    private Long   userId;
 
-	/** 操作人编号 **/
-	private long opId;
+    /** 操作人编号 **/
+    private Long   opId;
 
-	/** 退货金额（余额） **/
-	private double returnAmount1;
-
-	/** 退货金额（返现金） **/
-	private double returnAmount2;
-
-	/** 扣减返现金额 **/
-	private double subtractCashback;
-
-	/** ip地址 **/
-	private String ip;
-
-	/** mac地址 **/
-	private String mac;
+    /** ip地址 **/
+    private String ip;
 
 }

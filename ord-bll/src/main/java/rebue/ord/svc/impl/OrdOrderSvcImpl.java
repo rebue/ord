@@ -189,7 +189,7 @@ public class OrdOrderSvcImpl extends MybatisBaseSvcImpl<OrdOrderMo, java.lang.Lo
     /**
      */
     @Resource
-    private OrdOrderSvc       orderSvc;
+    private OrdOrderSvc       thisSvc;
 
     /**
      * 买家返款时间
@@ -251,6 +251,7 @@ public class OrdOrderSvcImpl extends MybatisBaseSvcImpl<OrdOrderMo, java.lang.Lo
                 return ro;
             }
 
+            _log.debug("获取上线信息");
             // 如果已经获取过上线信息，从Map中获取就可避免重复获取，减轻数据库负担
             OnlOnlineMo onlineMo = onlines.get(orderDetailTo.getOnlineId());
             if (onlineMo == null) {
@@ -308,7 +309,6 @@ public class OrdOrderSvcImpl extends MybatisBaseSvcImpl<OrdOrderMo, java.lang.Lo
             orderDetailMo.setOnlineTitle(onlineMo.getOnlineTitle());
             orderDetailMo.setProductId(onlineMo.getProductId());
             orderDetailMo.setProductSpecId(onlineSpecMo.getProductSpecId());
-            orderDetailMo.setOnlineSpecId(onlineSpecMo.getId());
             orderDetailMo.setSpecName(onlineSpecMo.getOnlineSpec());
             orderDetailMo.setBuyPrice(onlineSpecMo.getSalePrice());
             orderDetailMo.setBuyCount(orderDetailTo.getBuyCount());
@@ -368,7 +368,7 @@ public class OrdOrderSvcImpl extends MybatisBaseSvcImpl<OrdOrderMo, java.lang.Lo
             orderMo.setOrderCode(_idWorker.getIdStr());                         // 订单编号 TODO 重写订单编号的生成算法
             orderMo.setOrderState((byte) OrderStateDic.ORDERED.getCode());      // 订单状态已下单
             orderMo.setOrderTime(now);                                          // 下单时间
-            orderMo.setOnlineOrgId(onlineOrg.getKey());                         // 上线组织ID
+            orderMo.setOnlineOrgId(onlineOrg.getKey());                         // 上线组织ID(卖家ID)
             orderMo.setPayOrderId(payOrderId);                                  // 支付订单ID
 
             orderMo.setUserId(to.getUserId());                  // 下单人用户ID
@@ -463,13 +463,7 @@ public class OrdOrderSvcImpl extends MybatisBaseSvcImpl<OrdOrderMo, java.lang.Lo
     }
 
     /**
-     * 查询用户订单信息 2018年4月9日16:49:17
-     *
-     * @throws ParseException
-     * @throws IntrospectionException
-     * @throws InvocationTargetException
-     * @throws IllegalArgumentException
-     * @throws IllegalAccessException
+     * 查询用户订单信息
      */
     @Override
     public List<Map<String, Object>> selectOrderInfo(final Map<String, Object> map)
@@ -588,7 +582,7 @@ public class OrdOrderSvcImpl extends MybatisBaseSvcImpl<OrdOrderMo, java.lang.Lo
     }
 
     /**
-     * 用户取消订单 2018年4月9日18:57:36
+     * 用户取消订单
      */
     @Override
     @Transactional(readOnly = false, propagation = Propagation.REQUIRED)
@@ -681,11 +675,7 @@ public class OrdOrderSvcImpl extends MybatisBaseSvcImpl<OrdOrderMo, java.lang.Lo
     }
 
     /**
-     * 设置快递公司 Title: setTheCourier Description:
-     *
-     * @param mo
-     * @return
-     * @date 2018年4月13日 上午11:12:39
+     * 设置快递公司
      */
     @Override
     @Transactional(readOnly = false, propagation = Propagation.REQUIRED)
@@ -706,7 +696,7 @@ public class OrdOrderSvcImpl extends MybatisBaseSvcImpl<OrdOrderMo, java.lang.Lo
     }
 
     /**
-     * 取消发货 2018年5月16日10:22:40
+     * 取消发货
      */
     @Override
     @Transactional(readOnly = false, propagation = Propagation.REQUIRED)
@@ -774,11 +764,7 @@ public class OrdOrderSvcImpl extends MybatisBaseSvcImpl<OrdOrderMo, java.lang.Lo
     }
 
     /**
-     * 确认发货并修改订单状态 Title: sendAndPrint Description:
-     *
-     * @param mo
-     * @return
-     * @date 2018年4月13日 下午6:18:44
+     * 确认发货并修改订单状态
      */
     @Override
     @Transactional(readOnly = false, propagation = Propagation.REQUIRED)
@@ -939,12 +925,7 @@ public class OrdOrderSvcImpl extends MybatisBaseSvcImpl<OrdOrderMo, java.lang.Lo
     }
 
     /**
-     * 订单签收 Title: orderSignIn Description:
-     *
-     * @param mo
-     * @param to
-     * @return
-     * @date 2018年4月14日 下午2:20:19
+     * 订单签收
      */
     @Override
     @Transactional(readOnly = false, propagation = Propagation.REQUIRED)
@@ -1021,7 +1002,7 @@ public class OrdOrderSvcImpl extends MybatisBaseSvcImpl<OrdOrderMo, java.lang.Lo
                     }
                     // 根据购买关系查找上家定单详情,定单已签收且定单详情存在且不是退货状态才发起返佣任务
                     final OrdOrderDetailMo uplineDetailResult = orderDetailSvc.getById(buyRelationResult.getUplineOrderDetailId());
-                    final OrdOrderMo uplineOrderResult = orderSvc.getById(buyRelationResult.getUplineOrderId());
+                    final OrdOrderMo uplineOrderResult = thisSvc.getById(buyRelationResult.getUplineOrderId());
                     _log.info("订单详情做为下家的购买关系记录：{}", uplineDetailResult);
                     if (uplineDetailResult != null && uplineDetailResult.getReturnState() == 0 && uplineOrderResult.getOrderState() == 4) {
                         // 获取上线买家商品详情的的下家购买关系记录，如果有2个且都已签收则执行返佣任务
@@ -1100,25 +1081,27 @@ public class OrdOrderSvcImpl extends MybatisBaseSvcImpl<OrdOrderMo, java.lang.Lo
     }
 
     /**
-     * 根据订单编号修改退货金额 Title: modifyReturnAmountByorderCode Description:
-     *
-     * @param mo
-     * @return
-     * @date 2018年5月7日 上午9:18:19
+     * 修改订单退款金额(根据订单ID和已退款总额)
+     * 
+     * @param refundTotal
+     *            退款总额
+     * 
+     * @param orderState
+     *            订单状态
+     * @param whereOrderId
+     *            where条件-订单ID
+     * @param whereRefundedTotal
+     *            where条件-已退款总额
      */
     @Override
     @Transactional(readOnly = false, propagation = Propagation.REQUIRED)
-    public int modifyReturnAmountByorderCode(final OrdOrderMo mo) {
-        return _mapper.modifyReturnAmountByorderCode(mo);
+    public int modifyRefund(final BigDecimal refundTotal, final Byte orderState, final Long whereOrderId, final BigDecimal whereRefundedTotal) {
+        _log.info("修改退款金额(根据订单ID和已退款总额): 退款金额-{} 订单状态-{} 订单ID-{} 订单已退总额-{}", refundTotal, orderState, whereOrderId, whereRefundedTotal);
+        return _mapper.updateRefund(refundTotal, orderState, whereOrderId, whereRefundedTotal);
     }
 
     /**
-     * 根据订单编号修改订单状态 Title: modifyOrderStateByOderCode Description:
-     *
-     * @param orderCode
-     * @param orderState
-     * @return
-     * @date 2018年5月8日 上午10:45:12
+     * 根据订单编号修改订单状态
      */
     @Override
     @Transactional(readOnly = false, propagation = Propagation.REQUIRED)
@@ -1128,11 +1111,7 @@ public class OrdOrderSvcImpl extends MybatisBaseSvcImpl<OrdOrderMo, java.lang.Lo
     }
 
     /**
-     * 根据订单编号查询退货金额 Title: selectReturnAmountByOrderCode Description:
-     *
-     * @param orderCode
-     * @return
-     * @date 2018年5月11日 上午11:14:42
+     * 根据订单编号查询退货金额
      */
     @Override
     @Transactional(readOnly = false, propagation = Propagation.REQUIRED)
@@ -1153,12 +1132,7 @@ public class OrdOrderSvcImpl extends MybatisBaseSvcImpl<OrdOrderMo, java.lang.Lo
     }
 
     /**
-     * 结算完成 Title: finishSettlement Description:
-     *
-     * @param closeTime
-     * @param orderCode
-     * @return
-     * @date 2018年5月17日 下午3:18:49
+     * 结算完成
      */
     @Override
     @Transactional(readOnly = false, propagation = Propagation.REQUIRED)
@@ -1169,20 +1143,23 @@ public class OrdOrderSvcImpl extends MybatisBaseSvcImpl<OrdOrderMo, java.lang.Lo
 
     /**
      * 处理订单支付完成的通知
+     * 1. 判断通知回来的支付金额是否和订单中记录的实际交易金额相同(如果不同，退款)
+     * 2. 按不同发货组织拆单，并重新计算拆单后的订单实际交易金额
+     * 3. 匹配购买关系
      */
     @Override
     @Transactional(readOnly = false, propagation = Propagation.REQUIRED)
     public boolean handleOrderPaidNotify(final PayDoneMsg payDoneMsg) {
         _log.info("处理订单支付完成的通知：payDoneMsg-{}", payDoneMsg);
-
         // XXX 在本服务中支付传递的orderId实际上是payOrderId
         final Long payOrderId = Long.parseLong(payDoneMsg.getOrderId());
 
+        // 1. 修改订单状态为已支付
         _log.info("订单支付完成，根据PAY_ORDER_ID修改订单状态为已支付: payOrderId-{}, payTime-{}", payOrderId, payDoneMsg.getPayTime());
         final int result = _mapper.paidOrder(payOrderId, payDoneMsg.getPayTime());
         _log.debug("订单支付完成通知修改订单信息的返回值为：{}", result);
         if (result == 0) {
-            _log.warn("根据支付订单ID找不到正在支付状态的订单: payOrderId-{}", payOrderId);
+            _log.warn("根据支付订单ID找不到待支付状态的订单: payOrderId-{}", payOrderId);
             return true;
         }
 
@@ -1190,8 +1167,44 @@ public class OrdOrderSvcImpl extends MybatisBaseSvcImpl<OrdOrderMo, java.lang.Lo
         final List<OrdOrderMo> orders = _mapper.listByPayOrderId(payOrderId);
         _log.debug("获取到的订单列表为：{}", orders);
 
+        _log.info("遍历订单列表: 根据不同发货组织进行拆单");
+        // 准备要修改的订单列表
+        final Map<Long, OrdOrderMo> modifyOrderMap = new LinkedHashMap<>();
+//        final List<OrdOrderDetailMo> orderDetails = new ArrayList<>();
+        for (final OrdOrderMo order : orders) {
+            // 准备要修改的订单的信息
+            final OrdOrderMo modifyOrder = new OrdOrderMo();
+            modifyOrder.setId(order.getId());
+            // 根据OrderId获取订单详情列表
+            final List<OrdOrderDetailMo> details = orderDetailSvc.listByOrderId(order.getId());
+            _log.debug("遍历订单详情: 根据不同发货组织进行拆单");
+            for (final OrdOrderDetailMo detail : details) {
+                if (detail.getDeliverOrgId() == null) {
+                    _log.warn("订单详情没有发货组织，是旧的数据");
+                    continue;
+                }
+                // 如果订单还没有发货组织，说明是遍历的第一个详情，那么将订单的发货组织设为此详情的发货组织
+                if (modifyOrder.getDeliverOrgId() == null) {
+                    modifyOrder.setDeliverOrgId(detail.getDeliverOrgId());
+                    continue;
+                }
+                // 如果订单的发货组织!=此详情的发货组织，从旧订单中克隆新的订单，将此详情拆到新的订单中
+                if (modifyOrder.getDeliverOrgId() != detail.getDeliverOrgId()) {
+                    final OrdOrderMo newOrder = dozerMapper.map(order, OrdOrderMo.class);
+                    newOrder.setId(null);
+                    thisSvc.add(newOrder);
+                    // 准备要修改的订单详情
+                    final OrdOrderDetailMo modifyOrderDetail = new OrdOrderDetailMo();
+                    modifyOrderDetail.setId(detail.getId());
+                    modifyOrderDetail.setOrderId(newOrder.getId());
+                    orderDetailSvc.modify(modifyOrderDetail);
+                }
+            }
+            // 放入要修改的map中
+            modifyOrderMap.put(modifyOrder.getId(), modifyOrder);
+        }
+
         _log.info("遍历订单详情: 根据不同发货组织进行拆单");
-        final List<OrdOrderDetailMo> orderDetails = new ArrayList<>();
 //        for (final OrdOrderDetailMo orderDetail : orderDetails) {
 //            // 从临时列表中获取订单信息，避免多次获取
 //            OrdOrderMo order = orders.get(orderDetail.getOrderId());
@@ -1205,24 +1218,24 @@ public class OrdOrderSvcImpl extends MybatisBaseSvcImpl<OrdOrderMo, java.lang.Lo
 //
 //        }
 
-        _log.info("遍历订单详情: 添加订单购买关系");
-        for (final OrdOrderDetailMo orderDetail : orderDetails) {
-            try {
-                _log.debug("订单详情商品类型为：{}" + orderDetail.getSubjectType());
-                if (orderDetail.getSubjectType() == 1) {
-                    _log.debug("全返商品添加购买关系");
-                    final long userId = orderDetail.getUserId();
-                    final long onlineId = orderDetail.getOnlineId();
-                    final BigDecimal buyPrice = orderDetail.getBuyPrice();
-                    final long downLineDetailId = orderDetail.getId();
-                    final long downLineOrderId = orderDetail.getOrderId();
-                    final String matchBuyRelationResult = ordBuyRelationSvc.matchBuyRelation(userId, onlineId, buyPrice, downLineDetailId, downLineOrderId);
-                    _log.debug(matchBuyRelationResult);
-                }
-            } catch (final Exception e) {
-                _log.error("匹配购买关系报错：", e);
-            }
-        }
+//        _log.info("遍历订单详情: 添加订单购买关系");
+//        for (final OrdOrderDetailMo orderDetail : orderDetails) {
+//            try {
+//                _log.debug("订单详情商品类型为：{}" + orderDetail.getSubjectType());
+//                if (orderDetail.getSubjectType() == 1) {
+//                    _log.debug("全返商品添加购买关系");
+//                    final long userId = orderDetail.getUserId();
+//                    final long onlineId = orderDetail.getOnlineId();
+//                    final BigDecimal buyPrice = orderDetail.getBuyPrice();
+//                    final long downLineDetailId = orderDetail.getId();
+//                    final long downLineOrderId = orderDetail.getOrderId();
+//                    final String matchBuyRelationResult = ordBuyRelationSvc.matchBuyRelation(userId, onlineId, buyPrice, downLineDetailId, downLineOrderId);
+//                    _log.debug(matchBuyRelationResult);
+//                }
+//            } catch (final Exception e) {
+//                _log.error("匹配购买关系报错：", e);
+//            }
+//        }
 
         return true;
     }
