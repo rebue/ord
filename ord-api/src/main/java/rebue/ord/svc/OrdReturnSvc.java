@@ -9,12 +9,12 @@ import java.util.Map;
 import com.github.pagehelper.PageInfo;
 
 import rebue.ord.mo.OrdReturnMo;
-import rebue.ord.ro.AddReturnRo;
-import rebue.ord.ro.AgreeToReturnRo;
-import rebue.ord.ro.ReceivedAndRefundedRo;
 import rebue.ord.ro.RejectReturnRo;
+import rebue.ord.to.AddReturnTo;
+import rebue.ord.to.AgreeReturnTo;
 import rebue.ord.to.OrdOrderReturnTo;
 import rebue.ord.to.OrdReturnTo;
+import rebue.ord.to.ReceivedAndRefundedTo;
 import rebue.robotech.ro.Ro;
 import rebue.robotech.svc.MybatisBaseSvc;
 
@@ -28,7 +28,7 @@ public interface OrdReturnSvc extends MybatisBaseSvc<OrdReturnMo, java.lang.Long
     /**
      * 添加用户退货信息
      */
-    AddReturnRo addReturn(OrdOrderReturnTo to);
+	Ro addReturn(AddReturnTo to);
 
     /**
      * 查询分页列表信息
@@ -43,7 +43,7 @@ public interface OrdReturnSvc extends MybatisBaseSvc<OrdReturnMo, java.lang.Long
     /**
      * 同意退货
      */
-    AgreeToReturnRo agreeReturn(OrdOrderReturnTo mo);
+    Ro agreeReturn(AgreeReturnTo mo);
 
     /**
      * 同意退款
@@ -53,7 +53,7 @@ public interface OrdReturnSvc extends MybatisBaseSvc<OrdReturnMo, java.lang.Long
     /**
      * 已收到货并退款
      */
-    ReceivedAndRefundedRo receivedAndRefunded(OrdOrderReturnTo to);
+    Ro receivedAndRefunded(ReceivedAndRefundedTo to);
 
     /**
      * 查询用户退货中订单信息

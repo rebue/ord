@@ -719,12 +719,8 @@
 	</select>
 	<!-- 退货通过 -->
 	<update id="returnApprove" parameterType="rebue.ord.mo.OrdReturnMo">
-		UPDATE ORD_RETURN SET REFUND_TOTAL = #{returnRental,jdbcType=DECIMAL},
-		SUBTRACT_CASHBACK = #{subtractCashback,jdbcType=DECIMAL},
-		APPLICATION_STATE=2, REVIEW_OP_ID = #{reviewOpId,jdbcType=BIGINT},
-		REVIEW_TIME = #{reviewTime,jdbcType=TIMESTAMP} WHERE
-		RETURN_CODE=#{returnCode,jdbcType=BIGINT} AND
-		APPLICATION_STATE=1
+		UPDATE ORD_RETURN SET APPLICATION_STATE=2, REVIEW_OP_ID = #{reviewOpId,jdbcType=BIGINT},
+		REVIEW_TIME = #{reviewTime,jdbcType=TIMESTAMP} WHERE ID=#{id,jdbcType=BIGINT} AND APPLICATION_STATE=1
 	</update>
 
 	<!-- 拒绝退货 -->
@@ -750,14 +746,14 @@
 		ID = #{id,jdbcType=BIGINT}
 	</update>
 
-	<!-- 确认收到货之后修改退货单信息 -->
+	<!-- 已收到货修改退货单信息 -->
 	<update id="confirmReceiptOfGoods" parameterType="rebue.ord.mo.OrdReturnMo">
-		UPDATE ORD_RETURN SET APPLICATION_STATE=3, REFUND_STATE = #{refundState,jdbcType=TINYINT},
-		REFUND_OP_ID=#{refundOpId,jdbcType=BIGINT}, REFUND_TIME=#{refundTime,jdbcType=TIMESTAMP},
-		RECEIVE_OP_ID = #{receiveOpId,jdbcType=BIGINT}, RECEIVE_TIME =
-		#{receiveTime,jdbcType=TIMESTAMP}, FINISH_OP_ID = #{finishOpId,jdbcType=BIGINT}, FINISH_TIME =
-		#{finishTime,jdbcType=TIMESTAMP}
-		WHERE RETURN_CODE = #{returnCode,jdbcType=BIGINT}
+		update ORD_RETURN set REFUND_TOTAL= #{refundTotal,jdbcType=DECIMAL},
+		REFUND_COMPENSATION = #{refundCompensation,jdbcType=DECIMAL}, 	APPLICATION_STATE=3,
+		REFUND_OP_ID = #{refundOpId,jdbcType=BIGINT}, 					REFUND_TIME = #{refundTime,jdbcType=TIMESTAMP},
+		FINISH_OP_ID = #{finishOpId,jdbcType=BIGINT},					FINISH_TIME = #{finishTime,jdbcType=TIMESTAMP}, 
+		RECEIVE_OP_ID = #{receiveOpId,jdbcType=BIGINT},					RECEIVE_TIME = #{receiveTime,jdbcType=TIMESTAMP} 
+		where ID = #{id,jdbcType=BIGINT} and APPLICATION_STATE = #{applicationState,jdbcType=TINYINT}
 	</update>
 
 	<!-- 根据用户ID查询用户退货中订单 -->
