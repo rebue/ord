@@ -1,6 +1,6 @@
 /*==============================================================*/
 /* DBMS name:      MySQL 5.0                                    */
-/* Created on:     2018/11/23 16:51:53                          */
+/* Created on:     2018/11/24 13:08:27                          */
 /*==============================================================*/
 
 
@@ -273,7 +273,8 @@ create table ORD_TASK
    EXECUTE_STATE        tinyint not null default 0 comment '执行状态(-1:取消；0:未执行；1:已执行)',
    EXECUTE_PLAN_TIME    datetime not null comment '计划执行时间',
    EXECUTE_FACT_TIME    datetime comment '实际执行时间',
-   TASK_TYPE            tinyint not null comment '任务类型（1：取消订单  2：订单签收）',
+   TASK_TYPE            tinyint not null comment '任务类型（1：订单自动取消的任务  2：订单自动签收的任务 3: 订单开始结算的任务 4: 订单结算的任务）',
+   SUB_TASK_TYPE        tinyint comment '子任务类型',
    ORDER_ID             varchar(150) not null comment '订单ID(销售订单ID)',
    primary key (ID)
 );

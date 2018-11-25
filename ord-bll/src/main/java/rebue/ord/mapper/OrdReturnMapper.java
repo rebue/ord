@@ -7,6 +7,7 @@ import java.util.Map;
 
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
+import org.apache.ibatis.annotations.Select;
 
 import rebue.ord.mo.OrdReturnMo;
 import rebue.ord.to.OrdReturnTo;
@@ -148,4 +149,16 @@ public interface OrdReturnMapper extends MybatisBaseMapper<OrdReturnMo, Long> {
      * 根据用户ID查询用户退货完成订单
      */
     List<OrdReturnMo> selectReturnOrder(Map<String, Object> map);
+
+    /**
+     * 判断订单是否有订单详情在退货中(退货状态在待审核、退货中都算)
+     */
+    @Select("SELECT " //
+            + "    COUNT(*) > 0"//
+            + " FROM" //
+            + "    ORD_RETURN" //
+            + " WHERE"//
+            + "    ORDER_ID = 1" //
+            + "        AND APPLICATION_STATE IN (1 , 2)")
+    Boolean hasReturningInOrder(final Long orderId);
 }

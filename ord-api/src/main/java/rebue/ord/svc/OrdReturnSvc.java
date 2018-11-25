@@ -28,7 +28,7 @@ public interface OrdReturnSvc extends MybatisBaseSvc<OrdReturnMo, java.lang.Long
     /**
      * 添加用户退货信息
      */
-	Ro addReturn(AddReturnTo to);
+    Ro addReturn(AddReturnTo to);
 
     /**
      * 查询分页列表信息
@@ -62,12 +62,17 @@ public interface OrdReturnSvc extends MybatisBaseSvc<OrdReturnMo, java.lang.Long
             throws ParseException, IntrospectionException, IllegalAccessException, IllegalArgumentException, InvocationTargetException;
 
     /**
-     * 查询用户退货完成订单信息 Title: selectOrderInfo Description:
+     * 查询用户退货完成订单信息
      * 
      * @param mo
      */
     List<Map<String, Object>> selectReturnInfo(Map<String, Object> map)
             throws ParseException, IntrospectionException, IllegalAccessException, IllegalArgumentException, InvocationTargetException;
+
+    /**
+     * 判断订单是否有订单详情在退货中(退货状态在待审核、退货中都算)
+     */
+    Boolean hasReturningInOrder(Long orderId);
 
     /**
      * 取消退货

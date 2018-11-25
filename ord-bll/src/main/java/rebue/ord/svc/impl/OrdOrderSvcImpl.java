@@ -22,7 +22,6 @@ import java.util.Map.Entry;
 import javax.annotation.Resource;
 
 import org.apache.commons.lang3.StringUtils;
-import org.apache.ibatis.annotations.Param;
 import org.dozer.Mapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -134,45 +133,27 @@ public class OrdOrderSvcImpl extends MybatisBaseSvcImpl<OrdOrderMo, java.lang.Lo
     }
 
     /**
+     * 开始启动结算延迟时间(单位小时)，默认为7*24+1小时
      */
+    @Value("${ord.settle.startSettleDelay:169}")
+    private Integer           startSettleDelay;
+
     @Resource
     private OrdAddrSvc        ordAddrSvc;
-
-    /**
-     */
     @Resource
     private OrdOrderDetailSvc orderDetailSvc;
-
     @Resource
     private OrdTaskSvc        ordTaskSvc;
-
-    /**
-     */
     @Resource
     private OnlOnlineSvc      onlOnlineSvc;
-
-    /**
-     */
     @Resource
     private OnlOnlineSpecSvc  onlOnlineSpecSvc;
-
-    /**
-     */
     @Resource
     private OnlCartSvc        onlCartSvc;
-
-    /**
-     */
     @Resource
     private KdiSvc            kdiSvc;
-
-    /**
-     */
     @Resource
     private OnlOnlinePicSvc   onlOnlinePicSvc;
-
-    /**
-     */
     @Resource
     private AfcSettleTaskSvc  afcSettleTaskSvc;
 
@@ -214,6 +195,44 @@ public class OrdOrderSvcImpl extends MybatisBaseSvcImpl<OrdOrderMo, java.lang.Lo
 
     @Resource
     private Mapper            dozerMapper;
+
+    /**
+     * 检查订单是否可结算
+     */
+    @Override
+    public Boolean isSettleableOrder(final Long orderId) {
+        final OrdOrderMo order = thisSvc.getById(orderId);
+        if (order == null) {
+            final String msg = "订单不存在";
+            _log.error("{}: orderId-{}", msg, orderId);
+            return false;
+        }
+
+        if (OrderStateDic.SIGNED.getCode() != order.getOrderState()) {
+            final String msg = "订单不处于已签收状态，不能添加结算任务";
+            _log.error("{}: 订单信息-{}", msg, order);
+            return false;
+        }
+
+        if (order.getReceivedTime() == null) {
+            final String msg = "订单没有记录签收时间";
+            _log.error("{}: 订单信息-{}", msg, order);
+            return false;
+        }
+
+        // 计算计划执行时间
+        final Calendar calendar = Calendar.getInstance();
+        calendar.setTime(order.getReceivedTime());
+        calendar.add(Calendar.HOUR_OF_DAY, startSettleDelay);
+        if (calendar.getTimeInMillis() > System.currentTimeMillis()) {
+            final String msg = "还未到订单开始启动结算的时间";
+            _log.error("{}: 订单信息-{}", msg, order);
+            return false;
+        }
+
+        _log.debug("订单信息: {}", order);
+        return true;
+    }
 
     /**
      * 下订单
@@ -1391,15 +1410,16 @@ public class OrdOrderSvcImpl extends MybatisBaseSvcImpl<OrdOrderMo, java.lang.Lo
         ro.setMsg(String.valueOf(payOrderId));
         return ro;
     }
-    
+
     /**
      * 根据订单id查询订单签收时间
+     * 
      * @param orderIds
      * @return
      */
     @Override
-    public List<OrdOrderMo> getOrderSignTime(String orderIds) {
-    	_log.info("查询订单签收时间的参数为：{}", orderIds);
-    	return _mapper.selectOrderSignTime(orderIds);
+    public List<OrdOrderMo> getOrderSignTime(final String orderIds) {
+        _log.info("查询订单签收时间的参数为：{}", orderIds);
+        return _mapper.selectOrderSignTime(orderIds);
     }
 }

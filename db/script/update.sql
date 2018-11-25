@@ -1,3 +1,7 @@
+-- 2018-11-24
+alter table ORD_TASK						add					SUB_TASK_TYPE        										tinyint comment '子任务类型';
+
+
 -- 2018-11-22
 alter table ORD_RETURN           		change          	RETURN_RENTAL      REFUND_TOTAL         	decimal(18,4) not null comment '退款总额（退款总额=退款余额+退款返现金+退款补偿金）';
 alter table ORD_RETURN           		drop column  	RETURN_AMOUNT1;
