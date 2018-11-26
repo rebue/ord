@@ -8,32 +8,45 @@ import com.fasterxml.jackson.annotation.JsonCreator;
 import rebue.wheel.baseintf.EnumBase;
 
 /**
- * 订单任务类型字典
- * 1：订单自动取消的任务
- * 2：订单自动签收的任务
- * 3: 订单开始结算的任务
- * 4: 订单结算的任务
+ * 结算任务类型字典
+ * 1: 结算-结算供应商(将成本打到供应商的余额)
+ * 2: 结算-结算返现金给买家
+ * 3: 结算-释放卖家的已占用保证金
+ * 4: 结算-将利润打到卖家的余额
+ * 5: 结算-结算平台服务费
+ * 6: 结算-结算返佣金
+ * 7: 结算-完成结算
  */
-public enum OrderTaskTypeDic implements EnumBase {
+public enum SettleTaskTypeDic implements EnumBase {
 
     /**
-     * 1：订单自动取消的任务
+     * 1: 结算-结算成本给供应商(余额+)
      */
-    CANCEL(1),
+    SETTLE_COST_TO_SUPPLIER(1),
     /**
-     * 2：订单自动签收的任务
+     * 2: 结算-结算返现金给买家
      */
-    SIGNED(2),
+    SETTLE_CASHBACK_TO_BUYER(2),
     /**
-     * 3：订单开始结算的任务
-     * 用户签收后先添加此任务，在此任务执行的时候再分别添加各订单结算任务
+     * 3: 结算-释放卖家的已占用保证金
      */
-    START_SETTLE(3),
+    FREE_DEPOSIT_USED_OF_SELLER(3),
     /**
-     * 4：订单结算的任务
-     * 具体结算任务类型看子任务类型
+     * 4: 结算-结算利润给卖家(余额+)
      */
-    SETTLE(4);
+    SETTLE_PROFIT_TO_SELLER(4),
+    /**
+     * 5: 结算-结算平台服务费
+     */
+    SETTLE_PLATFORM_SERVICE_FEE(5),
+    /**
+     * 6: 结算-结算返佣金
+     */
+    SETTLE_COMMISSION(6),
+    /**
+     * 7: 结算-完成结算
+     */
+    COMPLETE_SETTLE(7);
 
     /**
      * 枚举的所有项，注意这个变量是静态单例的
@@ -52,12 +65,12 @@ public enum OrderTaskTypeDic implements EnumBase {
      * 否则jackson将调用默认的反序列化方法，而不会调用本方法
      */
     @JsonCreator
-    public static OrderTaskTypeDic getItem(final int code) {
+    public static SettleTaskTypeDic getItem(final int code) {
         final EnumBase result = valueMap.get(code);
         if (result == null) {
             throw new IllegalArgumentException("输入的code" + code + "不在枚举的取值范围内");
         }
-        return (OrderTaskTypeDic) result;
+        return (SettleTaskTypeDic) result;
     }
 
     private int code;
@@ -65,7 +78,7 @@ public enum OrderTaskTypeDic implements EnumBase {
     /**
      * 构造器，传入code
      */
-    OrderTaskTypeDic(final int code) {
+    SettleTaskTypeDic(final int code) {
         this.code = code;
     }
 

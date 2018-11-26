@@ -76,6 +76,15 @@ public class OrdTaskMo implements Serializable {
     private String orderId;
 
     /**
+     *    子任务类型
+     *
+     *    数据库字段: ORD_TASK.SUB_TASK_TYPE
+     *
+     *    @mbg.generated 自动生成，如需修改，请删除本行
+     */
+    private Byte subTaskType;
+
+    /**
      *    @mbg.generated 自动生成，如需修改，请删除本行
      */
     private static final long serialVersionUID = 1L;
@@ -213,6 +222,28 @@ public class OrdTaskMo implements Serializable {
     }
 
     /**
+     *    子任务类型
+     *
+     *    数据库字段: ORD_TASK.SUB_TASK_TYPE
+     *
+     *    @mbg.generated 自动生成，如需修改，请删除本行
+     */
+    public Byte getSubTaskType() {
+        return subTaskType;
+    }
+
+    /**
+     *    子任务类型
+     *
+     *    数据库字段: ORD_TASK.SUB_TASK_TYPE
+     *
+     *    @mbg.generated 自动生成，如需修改，请删除本行
+     */
+    public void setSubTaskType(Byte subTaskType) {
+        this.subTaskType = subTaskType;
+    }
+
+    /**
      *    @mbg.generated 自动生成，如需修改，请删除本行
      */
     @Override
@@ -227,6 +258,7 @@ public class OrdTaskMo implements Serializable {
         sb.append(", executeFactTime=").append(executeFactTime);
         sb.append(", taskType=").append(taskType);
         sb.append(", orderId=").append(orderId);
+        sb.append(", subTaskType=").append(subTaskType);
         sb.append(", serialVersionUID=").append(serialVersionUID);
         sb.append("]");
         return sb.toString();

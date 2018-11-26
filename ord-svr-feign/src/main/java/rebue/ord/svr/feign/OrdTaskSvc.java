@@ -7,46 +7,49 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 
+import rebue.ord.dic.OrderTaskTypeDic;
+import rebue.robotech.dic.TaskExecuteStateDic;
 import rebue.sbs.feign.FeignConfig;
 
 /**
- * 创建时间：2018年5月21日 下午3:21:05 
+ * 创建时间：2018年5月21日 下午3:21:05
  * 项目名称：ord-svr-feign
  * 
  * @author daniel
  * @version 1.0
- * @since JDK 1.8 文件名称：OrdTaskSvc.java 
- * 类说明： 订单任务内部接口
+ * @since JDK 1.8 文件名称：OrdTaskSvc.java
+ *        类说明： 订单任务内部接口
  */
 @FeignClient(name = "ord-svr", configuration = FeignConfig.class)
 public interface OrdTaskSvc {
 
-	/**
-	 * 查询订单任务数量
-	 * Title: getByExecutePlanTimeBeforeNow
-	 * Description: 
-	 * @param executeState
-	 * @param taskType
-	 * @return
-	 * @date 2018年5月28日 上午11:00:40
-	 */
-	@GetMapping(value = "/ord/task")
-	List<Long> getByExecutePlanTimeBeforeNow(@RequestParam("executeState") byte executeState, @RequestParam("taskType") byte taskType);
+    /**
+     * 获取订单任务ID列表(根据订单任务状态和任务类型)
+     */
+    @GetMapping(value = "/ord/tasks")
+    List<Long> getTaskIdsThatShouldExecute(@RequestParam("executeState") TaskExecuteStateDic executeState, @RequestParam("taskType") OrderTaskTypeDic taskType);
 
+    /**
+     * 执行订单自动签收的任务
+     */
+    @PostMapping("/ord/task/signin")
+    void executeSignInOrderTask(@RequestParam("taskId") Long taskId);
 
-	/**
-	 * 执行订单签收任务 Title: executeSignInOrderTask Description:
-	 * 
-	 * @param executeFactTime
-	 * @param id
-	 * @param doneState
-	 * @param noneState
-	 * @return
-	 * @date 2018年5月21日 下午3:30:46
-	 */
-	@PostMapping("/ord/task/signin")
-	void executeSignInOrderTask(@RequestParam("id") long id);
-	
-	@PostMapping("/ord/task/cancleOrder")
-	void executeCancelOrderTask(@RequestParam("id") long id);
+    /**
+     * 执行订单自动取消的任务
+     */
+    @PostMapping("/ord/task/cancleOrder")
+    void executeCancelOrderTask(@RequestParam("taskId") Long taskId);
+
+    /**
+     * 执行订单启动结算的任务
+     */
+    @PostMapping("/ord/task/executeStartSettle")
+    void executeStartSettleTask(@RequestParam("taskId") Long taskId);
+
+    /**
+     * 执行订单结算的任务
+     */
+    @PostMapping("/ord/task/executeSettle")
+    void executeSettleTask(@RequestParam("taskId") final Long taskId);
 }

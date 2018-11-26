@@ -21,6 +21,8 @@ mybatis:
   configuration:
     # 自动将数据库中用下划线分隔单词的风格转换为小驼峰风格
     map-underscore-to-camel-case: true
+    # 自定义枚举类型的转换器
+    default-enum-type-handler: rebue.wheel.mybatis.AutoEnumTypeHandler
 
 pagehelper:
   # 分页合理化参数。

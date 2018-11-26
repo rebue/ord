@@ -1161,13 +1161,13 @@ public class OrdOrderSvcImpl extends MybatisBaseSvcImpl<OrdOrderMo, java.lang.Lo
     }
 
     /**
-     * 结算完成
+     * 设置订单结算完成
      */
     @Override
     @Transactional(readOnly = false, propagation = Propagation.REQUIRED)
-    public int finishSettlement(final Date closeTime, final String orderId) {
-        _log.info("结算完成的参数为：{}，{}", closeTime, orderId);
-        return _mapper.finishSettlement(closeTime, orderId);
+    public int completeSettle(final Date closeTime, final String orderId) {
+        _log.info("结算完成：orderId-{}", orderId);
+        return _mapper.completeSettle(closeTime, orderId);
     }
 
     /**

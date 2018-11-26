@@ -153,9 +153,9 @@ public interface OrdOrderSvc extends MybatisBaseSvc<OrdOrderMo, java.lang.Long> 
     int updateByOrderCode(OrdOrderMo record);
 
     /**
-     * 结算完成
+     * 设置订单结算完成
      */
-    int finishSettlement(Date closeTime, String orderId);
+    int completeSettle(Date closeTime, String orderId);
 
     /**
      * 订单支付
