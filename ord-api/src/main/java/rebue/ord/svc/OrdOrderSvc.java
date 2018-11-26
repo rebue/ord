@@ -209,5 +209,5 @@ public interface OrdOrderSvc extends MybatisBaseSvc<OrdOrderMo, java.lang.Long> 
      * 4. 已经超过订单启动结算的时间
      * 5. 如果订单还有退货中的申请未处理完成，不能结算
      */
-    Boolean isSettleableOrder(Long orderId);
+    Boolean isSettleableOrder(OrdOrderMo order);
 }

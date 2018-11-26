@@ -208,13 +208,7 @@ public class OrdOrderSvcImpl extends MybatisBaseSvcImpl<OrdOrderMo, java.lang.Lo
      * 5. 如果订单还有退货中的申请未处理完成，不能结算
      */
     @Override
-    public Boolean isSettleableOrder(final Long orderId) {
-        final OrdOrderMo order = thisSvc.getById(orderId);
-        if (order == null) {
-            final String msg = "订单不存在";
-            _log.error("{}: orderId-{}", msg, orderId);
-            return false;
-        }
+    public Boolean isSettleableOrder(final OrdOrderMo order) {
         _log.debug("订单信息: {}", order);
 
         if (OrderStateDic.SIGNED.getCode() != order.getOrderState()) {
@@ -240,7 +234,7 @@ public class OrdOrderSvcImpl extends MybatisBaseSvcImpl<OrdOrderMo, java.lang.Lo
         }
 
         // 判断订单是否有订单详情在退货中
-        if (!returnSvc.hasReturningInOrder(orderId)) {
+        if (!returnSvc.hasReturningInOrder(order.getId())) {
             final String msg = "订单还有退货中的申请未处理完成，不能结算";
             _log.error(msg);
             return false;
