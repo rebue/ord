@@ -75,4 +75,9 @@ public interface OrdOrderDetailSvc extends MybatisBaseSvc<OrdOrderDetailMo, java
      */
     int getBuyerOrderedCount(Long userId, Long onlineSpecId);
 
+    /**
+     * 设置订单详情已结算返现金给买家
+     */
+    void settleBuyer(Long orderDetailId);
+
 }

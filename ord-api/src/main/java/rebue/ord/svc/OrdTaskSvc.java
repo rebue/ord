@@ -1,7 +1,10 @@
 package rebue.ord.svc;
 
 import java.util.List;
+
+import rebue.ord.dic.OrderTaskTypeDic;
 import rebue.ord.mo.OrdTaskMo;
+import rebue.robotech.dic.TaskExecuteStateDic;
 import rebue.robotech.svc.MybatisBaseSvc;
 
 /**
@@ -12,29 +15,39 @@ import rebue.robotech.svc.MybatisBaseSvc;
 public interface OrdTaskSvc extends MybatisBaseSvc<OrdTaskMo, java.lang.Long> {
 
     /**
-     *  执行订单签收任务
-     *  Title: executeSignInOrderTask
-     *  Description:
-     *  @param executeFactTime
-     *  @param id
-     *  @param doneState
-     *  @param noneState
-     *  @return
-     *  @date 2018年5月21日 下午3:30:46
+     * 根据订单任务状态和任务类型获取订单任务ID列表
      */
-    void executeSignInOrderTask(long id);
-
-    // 执行取消订单任务
-    void executeCancelOrderTask(long id);
+    List<Long> getTaskIdsThatShouldExecute(TaskExecuteStateDic executeState, OrderTaskTypeDic taskType);
 
     /**
-     *  根据订单任务状态和任务类型查询订单任务数量
-     *  Title: getByExecutePlanTimeBeforeNow
-     *  Description:
-     *  @param executeState
-     *  @param taskType
-     *  @return
-     *  @date 2018年5月28日 上午10:51:47
+     * 判断订单是否存在仍未完成的任务（包括未执行的和暂停执行的）
      */
-    List<Long> getByExecutePlanTimeBeforeNow(byte executeState, byte taskType);
+    Boolean existUnfinished(String orderId);
+
+    /**
+     * 执行订单自动签收的任务
+     * 
+     * @param taskId
+     *            任务ID
+     */
+    void executeSignInOrderTask(Long taskId);
+
+    /**
+     * 执行订单自动取消的任务
+     * 
+     * @param taskId
+     *            任务ID
+     */
+    void executeCancelOrderTask(Long taskId);
+
+    /**
+     * 执行订单启动结算的任务
+     */
+    void executeStartSettleTask(Long taskId);
+
+    /**
+     * 执行订单结算的任务
+     */
+    void executeSettleTask(Long taskId);
+
 }

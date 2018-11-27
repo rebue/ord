@@ -153,9 +153,9 @@ public interface OrdOrderSvc extends MybatisBaseSvc<OrdOrderMo, java.lang.Long> 
     int updateByOrderCode(OrdOrderMo record);
 
     /**
-     * 结算完成
+     * 设置订单结算完成
      */
-    int finishSettlement(Date closeTime, String orderId);
+    int completeSettle(Date closeTime, String orderId);
 
     /**
      * 订单支付
@@ -203,6 +203,11 @@ public interface OrdOrderSvc extends MybatisBaseSvc<OrdOrderMo, java.lang.Long> 
 
     /**
      * 检查订单是否可结算
+     * 1. 订单必须存在
+     * 2. 订单必须处于签收状态
+     * 3. 订单必须已经记录签收时间
+     * 4. 已经超过订单启动结算的时间
+     * 5. 如果订单还有退货中的申请未处理完成，不能结算
      */
-    Boolean isSettleableOrder(Long orderId);
+    Boolean isSettleableOrder(OrdOrderMo order);
 }

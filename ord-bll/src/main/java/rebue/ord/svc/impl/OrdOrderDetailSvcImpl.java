@@ -241,4 +241,16 @@ public class OrdOrderDetailSvcImpl extends MybatisBaseSvcImpl<OrdOrderDetailMo, 
         return _mapper.getBuyerOrderedCount(userId, onlineSpecId);
     }
 
+    /**
+     * 设置订单详情已结算返现金给买家
+     */
+    @Override
+    public void settleBuyer(final Long orderDetailId) {
+        _log.info("设置订单详情已结算返现金给买家: orderDetailId-{}", orderDetailId);
+        final OrdOrderDetailMo mo = new OrdOrderDetailMo();
+        mo.setId(orderDetailId);
+        mo.setIsSettleBuyer(true);
+        _mapper.updateByPrimaryKeySelective(mo);
+    }
+
 }

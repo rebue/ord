@@ -192,13 +192,10 @@ public interface OrdOrderMapper extends MybatisBaseMapper<OrdOrderMo, Long> {
     int updateByOrderCode(OrdOrderMo record);
 
     /**
-     * 完成结算 Title: finishSettlement Description:
-     *
-     * @return
-     * @date 2018年5月17日 下午3:07:55
+     * 设置订单结算完成
      */
     @Update("UPDATE ORD_ORDER SET ORDER_STATE=5, CLOSE_TIME=#{closeTime,jdbcType=TIMESTAMP} WHERE ID=#{orderId,jdbcType=VARCHAR} AND ORDER_STATE=4")
-    int finishSettlement(@Param("closeTime") Date closeTime, @Param("orderId") String orderId);
+    int completeSettle(@Param("closeTime") Date closeTime, @Param("orderId") String orderId);
 
     /**
      * 订单支付完成，根据PAY_ORDER_ID修改订单状态为已支付
@@ -236,9 +233,10 @@ public interface OrdOrderMapper extends MybatisBaseMapper<OrdOrderMo, Long> {
      */
     @Update("update ORD_ORDER set PAY_ORDER_ID = #{payOrderId,jdbcType=BIGINT} where ID = #{id,jdbcType=BIGINT}")
     int updatePayOrderId(@Param("payOrderId") Long payOrderId, @Param("id") Long id);
-    
+
     /**
      * 根据订单id查询订单签收时间
+     * 
      * @param orderIds
      * @return
      */

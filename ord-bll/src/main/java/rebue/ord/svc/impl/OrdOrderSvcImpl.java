@@ -85,6 +85,7 @@ import rebue.ord.svc.OrdAddrSvc;
 import rebue.ord.svc.OrdBuyRelationSvc;
 import rebue.ord.svc.OrdOrderDetailSvc;
 import rebue.ord.svc.OrdOrderSvc;
+import rebue.ord.svc.OrdReturnSvc;
 import rebue.ord.svc.OrdTaskSvc;
 import rebue.ord.to.ListOrderTo;
 import rebue.ord.to.OrderDetailTo;
@@ -133,7 +134,7 @@ public class OrdOrderSvcImpl extends MybatisBaseSvcImpl<OrdOrderMo, java.lang.Lo
     }
 
     /**
-     * 开始启动结算延迟时间(单位小时)，默认为7*24+1小时
+     * 启动结算延迟时间(单位小时)，默认为7*24+1小时
      */
     @Value("${ord.settle.startSettleDelay:169}")
     private Integer           startSettleDelay;
@@ -142,6 +143,8 @@ public class OrdOrderSvcImpl extends MybatisBaseSvcImpl<OrdOrderMo, java.lang.Lo
     private OrdAddrSvc        ordAddrSvc;
     @Resource
     private OrdOrderDetailSvc orderDetailSvc;
+    @Resource
+    private OrdReturnSvc      returnSvc;
     @Resource
     private OrdTaskSvc        ordTaskSvc;
     @Resource
@@ -198,15 +201,15 @@ public class OrdOrderSvcImpl extends MybatisBaseSvcImpl<OrdOrderMo, java.lang.Lo
 
     /**
      * 检查订单是否可结算
+     * 1. 订单必须存在
+     * 2. 订单必须处于签收状态
+     * 3. 订单必须已经记录签收时间
+     * 4. 已经超过订单启动结算的时间
+     * 5. 如果订单还有退货中的申请未处理完成，不能结算
      */
     @Override
-    public Boolean isSettleableOrder(final Long orderId) {
-        final OrdOrderMo order = thisSvc.getById(orderId);
-        if (order == null) {
-            final String msg = "订单不存在";
-            _log.error("{}: orderId-{}", msg, orderId);
-            return false;
-        }
+    public Boolean isSettleableOrder(final OrdOrderMo order) {
+        _log.debug("订单信息: {}", order);
 
         if (OrderStateDic.SIGNED.getCode() != order.getOrderState()) {
             final String msg = "订单不处于已签收状态，不能添加结算任务";
@@ -225,12 +228,19 @@ public class OrdOrderSvcImpl extends MybatisBaseSvcImpl<OrdOrderMo, java.lang.Lo
         calendar.setTime(order.getReceivedTime());
         calendar.add(Calendar.HOUR_OF_DAY, startSettleDelay);
         if (calendar.getTimeInMillis() > System.currentTimeMillis()) {
-            final String msg = "还未到订单开始启动结算的时间";
+            final String msg = "还未到订单启动结算的时间";
             _log.error("{}: 订单信息-{}", msg, order);
             return false;
         }
 
-        _log.debug("订单信息: {}", order);
+        // 判断订单是否有订单详情在退货中
+        if (!returnSvc.hasReturningInOrder(order.getId())) {
+            final String msg = "订单还有退货中的申请未处理完成，不能结算";
+            _log.error(msg);
+            return false;
+        }
+
+        _log.debug("订单信息经过检查，可以启动开始结算的任务: {}", order);
         return true;
     }
 
@@ -1151,13 +1161,13 @@ public class OrdOrderSvcImpl extends MybatisBaseSvcImpl<OrdOrderMo, java.lang.Lo
     }
 
     /**
-     * 结算完成
+     * 设置订单结算完成
      */
     @Override
     @Transactional(readOnly = false, propagation = Propagation.REQUIRED)
-    public int finishSettlement(final Date closeTime, final String orderId) {
-        _log.info("结算完成的参数为：{}，{}", closeTime, orderId);
-        return _mapper.finishSettlement(closeTime, orderId);
+    public int completeSettle(final Date closeTime, final String orderId) {
+        _log.info("结算完成：orderId-{}", orderId);
+        return _mapper.completeSettle(closeTime, orderId);
     }
 
     /**
