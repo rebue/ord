@@ -25,16 +25,15 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.github.pagehelper.PageInfo;
 
-import rebue.ord.dic.RejectReturnDic;
 import rebue.ord.mo.OrdReturnMo;
 import rebue.ord.ro.OrdReturnRo2;
-import rebue.ord.ro.RejectReturnRo;
+import rebue.ord.ro.ReturnPageListRo;
 import rebue.ord.svc.OrdReturnSvc;
 import rebue.ord.to.AddReturnTo;
 import rebue.ord.to.AgreeReturnTo;
 import rebue.ord.to.OrdOrderReturnTo;
-import rebue.ord.to.OrdReturnTo;
 import rebue.ord.to.ReceivedAndRefundedTo;
+import rebue.ord.to.RejectReturnTo;
 import rebue.robotech.dic.ResultDic;
 import rebue.robotech.ro.Ro;
 import rebue.wheel.AgentUtils;
@@ -200,7 +199,7 @@ public class OrdReturnCtrl {
 	 * @date 2018年4月21日 下午3:59:07
 	 */
 	@GetMapping("/ord/return")
-	PageInfo<OrdReturnTo> selectReturnPageList(final OrdReturnTo mo, @RequestParam("pageNum") final int pageNum,
+	PageInfo<ReturnPageListRo> selectReturnPageList(final ReturnPageListRo mo, @RequestParam("pageNum") final int pageNum,
 			@RequestParam("pageSize") final int pageSize) {
 		_log.info("list OrdReturnMo:" + mo + ", pageNum = " + pageNum + ", pageSize = " + pageSize);
 		if (pageSize > 50) {
@@ -208,7 +207,7 @@ public class OrdReturnCtrl {
 			_log.error(msg);
 			throw new IllegalArgumentException(msg);
 		}
-		final PageInfo<OrdReturnTo> result = svc.selectReturnPageList(mo, pageNum, pageSize);
+		final PageInfo<ReturnPageListRo> result = svc.selectReturnPageList(mo, pageNum, pageSize);
 		_log.info("result: " + result);
 		return result;
 	}
@@ -218,18 +217,25 @@ public class OrdReturnCtrl {
 	 *
 	 * @param mo
 	 * @return
+	 * @throws ParseException 
+	 * @throws NumberFormatException 
 	 * @date 2018年4月27日 下午3:31:38
 	 */
 	@PutMapping("/ord/return/reject")
-	RejectReturnRo rejectReturn(@RequestBody final OrdReturnTo mo) {
-		_log.info("拒绝退货的参数为：{}", mo.toString());
-		final RejectReturnRo rejectReturnRo = new RejectReturnRo();
+	Ro rejectReturn(@RequestBody final RejectReturnTo to, HttpServletRequest req) throws NumberFormatException, ParseException {
+		_log.info("拒绝退货的参数为：{}", to);
+		final Ro ro = new Ro();
+		Long loginId = 520469568947224576L;
+		if (!isDebug) {
+			loginId = JwtUtils.getJwtUserIdInCookie(req);
+		}
+		to.setRejectOpId(loginId);
 		try {
-			return svc.rejectReturn(mo);
+			return svc.rejectReturn(to);
 		} catch (final RuntimeException e) {
-			rejectReturnRo.setResult(RejectReturnDic.ERROR);
-			rejectReturnRo.setMsg("操作失败");
-			return rejectReturnRo;
+			ro.setResult(ResultDic.FAIL);
+			ro.setMsg(e.getMessage());
+			return ro;
 		}
 	}
 
@@ -241,8 +247,11 @@ public class OrdReturnCtrl {
 			throws NumberFormatException, ParseException {
 		Ro ro = new Ro();
 
-		if (!isDebug || to.getOpId() == null) {
+		if (!isDebug) {
 			to.setOpId(JwtUtils.getJwtUserIdInCookie(req));
+			to.setIp(AgentUtils.getIpAddr(req, passProxy));
+		} else {
+			to.setOpId(520469568947224576L);
 			to.setIp(AgentUtils.getIpAddr(req, passProxy));
 		}
 		_log.debug("获取当前用户ID: {}", to.getOpId());
@@ -264,11 +273,18 @@ public class OrdReturnCtrl {
 	 * 同意退货 Title: agreeToReturn Description:
 	 *
 	 * @return
+	 * @throws ParseException 
+	 * @throws NumberFormatException 
 	 * @date 2018年5月11日 下午3:29:33
 	 */
-	@PostMapping("/ord/return/agreetoreturn")
-	Ro agreeToReturn(@RequestBody AgreeReturnTo to) {
+	@PostMapping("/ord/return/agreereturn")
+	Ro agreeReturn(@RequestBody AgreeReturnTo to, HttpServletRequest req) throws NumberFormatException, ParseException {
 		Ro ro = new Ro();
+		Long loginId = 520469568947224576L;
+		if (!isDebug) {
+			loginId = JwtUtils.getJwtUserIdInCookie(req);
+		}
+		to.setReviewOpId(loginId);
 		try {
 			_log.info("同意退货的请求参数为：{}", to.toString());
 			return svc.agreeReturn(to);
@@ -290,12 +306,19 @@ public class OrdReturnCtrl {
 	 *
 	 * @param to
 	 * @return
+	 * @throws ParseException 
+	 * @throws NumberFormatException 
 	 * @date 2018年5月11日 下午3:01:21
 	 */
 	@PostMapping("/ord/return/receivedandrefunded")
-	Ro receivedAndRefunded(@RequestBody final ReceivedAndRefundedTo to) {
+	Ro receivedAndRefunded(@RequestBody final ReceivedAndRefundedTo to, HttpServletRequest req) throws NumberFormatException, ParseException {
 		_log.info("已收到货并退款的请求参数为：{}", to);
 		Ro ro = new Ro();
+		Long loginId = 520469568947224576L;
+		if (!isDebug) {
+			loginId = JwtUtils.getJwtUserIdInCookie(req);
+		}
+		to.setOpId(loginId);
 		try {
 			return svc.receivedAndRefunded(to);
 		} catch (final RuntimeException e) {

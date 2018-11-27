@@ -75,43 +75,43 @@ public class OrdSettleTaskSvcImpl extends MybatisBaseSvcImpl<OrdSettleTaskMo, ja
 	/**
 	 * 供应商结算计划执行时间
 	 */
-	@Value("ord.supplier-settle-execute-plan-time")
+	@Value("${ord.supplier-settle-execute-plan-time}")
 	private int supplierSettleExecutePlanTime;
 
 	/**
 	 * 已占用保证金结算计划执行时间
 	 */
-	@Value("ord.occupied-deposit-settle-execute-plan-time")
+	@Value("${ord.occupied-deposit-settle-execute-plan-time}")
 	private int occupiedDepositSettleExecutePlanTime;
 
 	/**
 	 * 已占用保证金结算计划执行时间
 	 */
-	@Value("ord.seller-settle-execute-plan-time")
+	@Value("${ord.seller-settle-execute-plan-time}")
 	private int sellerSettleExecutePlanTime;
 
 	/**
 	 * 用户返现结算计划执行时间
 	 */
-	@Value("ord.user-cashback-settle-execute-plan-time")
+	@Value("${ord.user-cashback-settle-execute-plan-time}")
 	private int userCashbackSettleExecutePlanTime;
 
 	/**
 	 * 用户返佣结算计划执行时间
 	 */
-	@Value("ord.user-commission-settle-execute-plan-time")
+	@Value("${ord.user-commission-settle-execute-plan-time}")
 	private int userCommissionSettleExecutePlanTime;
 
 	/**
 	 * 平台服务费结算计划执行时间
 	 */
-	@Value("ord.platform-service-fee-settle-execute-plan-time")
+	@Value("${ord.platform-service-fee-settle-execute-plan-time}")
 	private int platformServiceFeeExecutePlanTime;
 
 	/**
 	 * 平台服务费比例
 	 */
-	@Value("ord.platform-service-fee-ratio")
+	@Value("${ord.platform-service-fee-ratio}")
 	private BigDecimal platformServiceFeeRatio;
 
 	/**

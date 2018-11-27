@@ -10,7 +10,7 @@ import org.apache.ibatis.annotations.Param;
 import org.apache.ibatis.annotations.Select;
 
 import rebue.ord.mo.OrdReturnMo;
-import rebue.ord.to.OrdReturnTo;
+import rebue.ord.ro.ReturnPageListRo;
 import rebue.robotech.mapper.MybatisBaseMapper;
 
 @Mapper
@@ -88,7 +88,7 @@ public interface OrdReturnMapper extends MybatisBaseMapper<OrdReturnMo, Long> {
      * @return
      * @date 2018年4月21日 下午3:35:27
      */
-    List<OrdReturnTo> selectReturnPageList(OrdReturnTo record);
+    List<ReturnPageListRo> selectReturnPageList(ReturnPageListRo record);
 
     /**
      * 退货审核通过 Title: updateReturnApprove Description:
@@ -106,7 +106,7 @@ public interface OrdReturnMapper extends MybatisBaseMapper<OrdReturnMo, Long> {
      * @return
      * @date 2018年5月7日 上午11:22:50
      */
-    int refusedReturn(OrdReturnTo record);
+    int refusedReturn(OrdReturnMo record);
 
     /**
      * 确认退款

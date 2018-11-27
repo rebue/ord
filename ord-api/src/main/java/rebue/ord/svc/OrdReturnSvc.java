@@ -9,12 +9,12 @@ import java.util.Map;
 import com.github.pagehelper.PageInfo;
 
 import rebue.ord.mo.OrdReturnMo;
-import rebue.ord.ro.RejectReturnRo;
+import rebue.ord.ro.ReturnPageListRo;
 import rebue.ord.to.AddReturnTo;
 import rebue.ord.to.AgreeReturnTo;
 import rebue.ord.to.OrdOrderReturnTo;
-import rebue.ord.to.OrdReturnTo;
 import rebue.ord.to.ReceivedAndRefundedTo;
+import rebue.ord.to.RejectReturnTo;
 import rebue.robotech.ro.Ro;
 import rebue.robotech.svc.MybatisBaseSvc;
 
@@ -33,12 +33,12 @@ public interface OrdReturnSvc extends MybatisBaseSvc<OrdReturnMo, java.lang.Long
     /**
      * 查询分页列表信息
      */
-    PageInfo<OrdReturnTo> selectReturnPageList(OrdReturnTo record, int pageNum, int pageSize);
+    PageInfo<ReturnPageListRo> selectReturnPageList(ReturnPageListRo record, int pageNum, int pageSize);
 
     /**
      * 拒绝退货
      */
-    RejectReturnRo rejectReturn(OrdReturnTo record);
+    Ro rejectReturn(RejectReturnTo record);
 
     /**
      * 同意退货

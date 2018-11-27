@@ -1057,7 +1057,7 @@
 	</update>
 
 	<!-- 修改退款金额(根据订单ID和已退款总额) -->
-	<update id="modifyRefund">
+	<update id="updateRefund">
 		UPDATE ORD_ORDER
 		SET RETURN_TOTAL=#{returnTotal,jdbcType=DECIMAL}
 		<if test="orderState != null">

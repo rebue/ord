@@ -652,47 +652,60 @@
     </where>
   </select>
 
-	<resultMap id="ReturnInfoMap" type="rebue.ord.ro.OrdReturnRo">
+	<resultMap id="ReturnInfoMap" type="rebue.ord.ro.ReturnPageListRo">
 		<id column="ID" jdbcType="BIGINT" property="id" />
-		<result column="RETURN_CODE" jdbcType="BIGINT" property="returnCode" />
-		<result column="ORDER_ID" jdbcType="BIGINT" property="orderId" />
-		<result column="ORDER_DETAIL_ID" jdbcType="BIGINT" property="orderDetailId" />
-		<result column="RETURN_COUNT" jdbcType="INTEGER" property="returnCount" />
-		<result column="REFUND_TOTAL" jdbcType="DECIMAL" property="returnRental" />
-		<result column="RETURN_TYPE" jdbcType="TINYINT" property="returnType" />
-		<result column="APPLICATION_STATE" jdbcType="TINYINT" property="applicationState" />
-		<result column="REFUND_STATE" jdbcType="TINYINT" property="refundState" />
-		<result column="RETURN_REASON" jdbcType="VARCHAR" property="returnReason" />
-		<result column="APPLICATION_OP_ID" jdbcType="BIGINT" property="applicationOpId" />
-		<result column="APPLICATION_TIME" jdbcType="TIMESTAMP" property="applicationTime" />
-		<result column="CANCEL_OP_ID" jdbcType="BIGINT" property="cancelOpId" />
-		<result column="CANCEL_TIME" jdbcType="TIMESTAMP" property="cancelTime" />
-		<result column="REVIEW_OP_ID" jdbcType="BIGINT" property="reviewOpId" />
-		<result column="REVIEW_TIME" jdbcType="TIMESTAMP" property="reviewTime" />
-		<result column="REFUND_OP_ID" jdbcType="BIGINT" property="refundOpId" />
-		<result column="REFUND_TIME" jdbcType="TIMESTAMP" property="refundTime" />
-		<result column="REJECT_OP_ID" jdbcType="BIGINT" property="rejectOpId" />
-		<result column="REJECT_REASON" jdbcType="VARCHAR" property="rejectReason" />
-		<result column="REJECT_TIME" jdbcType="TIMESTAMP" property="rejectTime" />
-		<result column="FINISH_OP_ID" jdbcType="BIGINT" property="finishOpId" />
-		<result column="FINISH_TIME" jdbcType="TIMESTAMP" property="finishTime" />
-		<result column="ONLINE_ID" jdbcType="BIGINT" property="onlineId" />
-		<result column="PRODUCT_ID" jdbcType="BIGINT" property="productId" />
-		<result column="ONLINE_TITLE" jdbcType="VARCHAR" property="onlineTitle" />
-		<result column="SPEC_NAME" jdbcType="VARCHAR" property="specName" />
-		<result column="BUY_COUNT" jdbcType="INTEGER" property="buyCount" />
-		<result column="BUY_PRICE" jdbcType="DECIMAL" property="buyPrice" />
-		<result column="CASHBACK_AMOUNT" jdbcType="DECIMAL" property="cashbackAmount" />
-		<result column="BUY_UNIT" jdbcType="VARCHAR" property="buyUnit" />
-		<result column="RETURN_STATE" jdbcType="TINYINT" property="returnState" />
+	    <result column="RETURN_CODE" jdbcType="BIGINT" property="returnCode" />
+	    <result column="ORDER_ID" jdbcType="BIGINT" property="orderId" />
+	    <result column="ORDER_DETAIL_ID" jdbcType="BIGINT" property="orderDetailId" />
+	    <result column="RETURN_COUNT" jdbcType="INTEGER" property="returnCount" />
+	    <result column="REFUND_TOTAL" jdbcType="DECIMAL" property="refundTotal" />
+	    <result column="REFUND_COMPENSATION" jdbcType="DECIMAL" property="refundCompensation" />
+	    <result column="RETURN_TYPE" jdbcType="TINYINT" property="returnType" />
+	    <result column="APPLICATION_STATE" jdbcType="TINYINT" property="applicationState" />
+	    <result column="RETURN_REASON" jdbcType="VARCHAR" property="returnReason" />
+	    <result column="USER_ID" jdbcType="BIGINT" property="userId" />
+	    <result column="APPLICATION_OP_ID" jdbcType="BIGINT" property="applicationOpId" />
+	    <result column="APPLICATION_TIME" jdbcType="TIMESTAMP" property="applicationTime" />
+	    <result column="CANCEL_OP_ID" jdbcType="BIGINT" property="cancelOpId" />
+	    <result column="CANCEL_TIME" jdbcType="TIMESTAMP" property="cancelTime" />
+	    <result column="REVIEW_OP_ID" jdbcType="BIGINT" property="reviewOpId" />
+	    <result column="REVIEW_TIME" jdbcType="TIMESTAMP" property="reviewTime" />
+	    <result column="REFUND_OP_ID" jdbcType="BIGINT" property="refundOpId" />
+	    <result column="REFUND_TIME" jdbcType="TIMESTAMP" property="refundTime" />
+	    <result column="REJECT_OP_ID" jdbcType="BIGINT" property="rejectOpId" />
+	    <result column="REJECT_REASON" jdbcType="VARCHAR" property="rejectReason" />
+	    <result column="REJECT_TIME" jdbcType="TIMESTAMP" property="rejectTime" />
+	    <result column="FINISH_OP_ID" jdbcType="BIGINT" property="finishOpId" />
+	    <result column="FINISH_TIME" jdbcType="TIMESTAMP" property="finishTime" />
+	    <result column="RECEIVE_OP_ID" jdbcType="BIGINT" property="receiveOpId" />
+	    <result column="RECEIVE_TIME" jdbcType="TIMESTAMP" property="receiveTime" />
+	    <result column="ONLINE_ID" jdbcType="BIGINT" property="onlineId" />
+	    <result column="PRODUCT_ID" jdbcType="BIGINT" property="productId" />	
+	    <result column="ONLINE_TITLE" jdbcType="VARCHAR" property="onlineTitle" />
+	    <result column="SPEC_NAME" jdbcType="VARCHAR" property="specName" />
+	    <result column="BUY_COUNT" jdbcType="INTEGER" property="buyCount" />
+    	<result column="BUY_PRICE" jdbcType="DECIMAL" property="buyPrice" />
+    	<result column="CASHBACK_AMOUNT" jdbcType="DECIMAL" property="cashbackAmount" />
+    	<result column="RETURN_STATE" jdbcType="TINYINT" property="returnState" />
+    	<result column="BUY_UNIT" jdbcType="VARCHAR" property="buyUnit" />
+    	<result column="SUBJECT_TYPE" jdbcType="TINYINT" property="subjectType" />
+    	<result column="COMMISSION_SLOT" jdbcType="TINYINT" property="commissionSlot" />
+    	<result column="COMMISSION_STATE" jdbcType="TINYINT" property="commissionState" />
+    	<result column="ORDER_CODE" jdbcType="VARCHAR" property="orderCode" />
+    	<result column="RECEIVED_TIME" jdbcType="TIMESTAMP" property="receivedTime" />
+    	<result column="ORDER_STATE" jdbcType="TINYINT" property="orderState" />
+    	<result column="RECEIVER_NAME" jdbcType="VARCHAR" property="userName" />
+    	<result column="RETURN_RENTAL" jdbcType="DECIMAL" property="returnRental" />
 	</resultMap>
 
 	<!-- 查询退货分页列表信息 -->
-	<select id="selectReturnPageList" parameterType="rebue.ord.ro.OrdReturnRo" resultMap="ReturnInfoMap">
-		SELECT a.*, c.USER_NAME, b.ONLINE_ID, b.PRODUCT_ID, b.ONLINE_TITLE, b.SPEC_NAME, b.BUY_COUNT, b.BUY_PRICE, b.CASHBACK_AMOUNT, b.RETURN_STATE, b.BUY_UNIT,c.ORDER_CODE
-		,c.RECEIVED_TIME ,c.ORDER_STATE,b.BUY_COUNT,b.SUBJECT_TYPE,b.COMMISSION_SLOT,b.COMMISSION_STATE FROM ORD_RETURN a
-		LEFT JOIN ORD_ORDER_DETAIL b ON a.ORDER_DETAIL_ID=b.ID AND
-		a.ORDER_ID=b.ORDER_ID,ORD_ORDER c
+	<select id="selectReturnPageList" parameterType="rebue.ord.ro.ReturnPageListRo" resultMap="ReturnInfoMap">
+		SELECT a.*, c.RECEIVER_NAME, b.ONLINE_ID, b.PRODUCT_ID, b.ONLINE_TITLE, b.SPEC_NAME, a.RETURN_COUNT * b.BUY_PRICE as RETURN_RENTAL,
+		b.BUY_COUNT, b.BUY_PRICE, b.CASHBACK_AMOUNT, b.RETURN_STATE, b.BUY_UNIT,c.ORDER_CODE,
+		c.RECEIVED_TIME, c.ORDER_STATE, b.SUBJECT_TYPE, b.COMMISSION_SLOT, b.COMMISSION_STATE 
+		FROM ORD_RETURN a
+		LEFT JOIN ORD_ORDER_DETAIL b ON a.ORDER_DETAIL_ID=b.ID AND a.ORDER_ID=b.ORDER_ID
+		left join ORD_ORDER c on a.ORDER_ID=c.ID
 		WHERE 1=1 and c.ID=a.ORDER_ID
 		<if test="returnCode != null and returnCode != ''">
 			and a.RETURN_CODE = #{returnCode,jdbcType=BIGINT}
@@ -724,11 +737,10 @@
 	</update>
 
 	<!-- 拒绝退货 -->
-	<update id="refusedReturn" parameterType="rebue.ord.ro.OrdReturnRo">
-		UPDATE ORD_RETURN SET APPLICATION_STATE=4, REFUND_STATE=1, REJECT_OP_ID = #{rejectOpId,jdbcType=BIGINT}, REJECT_REASON =
-		#{rejectReason,jdbcType=VARCHAR},
+	<update id="refusedReturn" parameterType="rebue.ord.mo.OrdReturnMo">
+		UPDATE ORD_RETURN SET APPLICATION_STATE=4, REJECT_OP_ID = #{rejectOpId,jdbcType=BIGINT}, REJECT_REASON = #{rejectReason,jdbcType=VARCHAR},
 		REJECT_TIME = #{rejectTime,jdbcType=TIMESTAMP}, FINISH_OP_ID = #{finishOpId,jdbcType=BIGINT}, FINISH_TIME = #{finishTime,jdbcType=TIMESTAMP}
-		WHERE RETURN_CODE = #{returnCode,jdbcType=BIGINT}
+		WHERE ID = #{id,jdbcType=BIGINT}
 	</update>
 
 	<!-- 确认退款 -->
