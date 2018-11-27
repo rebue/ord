@@ -200,7 +200,7 @@ public interface OrdOrderMapper extends MybatisBaseMapper<OrdOrderMo, Long> {
     /**
      * 设置订单状态为已支付，根据PAY_ORDER_ID修改订单状态为已支付
      */
-    @Update("UPDATE ORD_ORDER SET ORDER_STATE=2, PAY_TIME=#{payTime,jdbcType=TIMESTAMP}  WHERE PAY_ORDER_ID=#{payOrderId} AND ORDER_STATE=1")
+    @Update("UPDATE ORD_ORDER SET ORDER_STATE=2, PAY_TIME=#{payTime,jdbcType=TIMESTAMP} WHERE PAY_ORDER_ID=#{payOrderId} AND ORDER_STATE=1")
     int paidOrder(@Param("payOrderId") Long payOrderId, @Param("payTime") Date payTime);
 
     /**

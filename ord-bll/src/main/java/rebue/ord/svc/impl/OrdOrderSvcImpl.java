@@ -35,10 +35,11 @@ import com.github.pagehelper.PageInfo;
 
 import rebue.afc.msg.PayDoneMsg;
 import rebue.afc.ro.AddSettleTasksRo;
-import rebue.afc.svc.AfcRefundSvc;
+import rebue.afc.svr.feign.AfcRefundSvc;
 import rebue.afc.svr.feign.AfcSettleTaskSvc;
 import rebue.afc.to.AddSettleTasksDetailTo;
 import rebue.afc.to.AddSettleTasksTo;
+import rebue.afc.to.RefundGoBackTo;
 import rebue.kdi.mo.KdiCompanyMo;
 import rebue.kdi.ro.EOrderRo;
 import rebue.kdi.ro.KdiLogisticRo;
@@ -89,7 +90,6 @@ import rebue.ord.svc.OrdOrderSvc;
 import rebue.ord.svc.OrdReturnSvc;
 import rebue.ord.svc.OrdTaskSvc;
 import rebue.ord.to.ListOrderTo;
-import rebue.ord.to.OrdOrderReturnTo;
 import rebue.ord.to.OrderDetailTo;
 import rebue.ord.to.OrderSignInTo;
 import rebue.ord.to.OrderTo;
@@ -1154,10 +1154,11 @@ public class OrdOrderSvcImpl extends MybatisBaseSvcImpl<OrdOrderMo, java.lang.Lo
 
     /**
      * 处理订单支付完成的通知
-     * 1. 判断通知回来的支付金额是否和订单中记录的实际交易金额相同(如果不同，退款)
-     * 2. 根据支付订单ID修改订单状态为已支付
-     * 3. 按不同发货组织拆单，并重新计算拆单后的订单实际交易金额
-     * 4. 匹配购买关系
+     * 1. 根据支付订单ID获取所有订单(如果没有找到，退款)
+     * 2. 判断通知回来的支付金额是否和订单中记录的实际交易金额相同(如果不同，退款)
+     * 3. 根据支付订单ID修改订单状态为已支付
+     * 4. 按不同发货组织拆单，并重新计算拆单后的订单实际交易金额
+     * 5. 匹配购买关系
      */
     @Override
     @Transactional(readOnly = false, propagation = Propagation.REQUIRED)
@@ -1166,16 +1167,17 @@ public class OrdOrderSvcImpl extends MybatisBaseSvcImpl<OrdOrderMo, java.lang.Lo
         // XXX 在本服务中支付传递的orderId实际上是payOrderId
         final Long payOrderId = Long.parseLong(payDoneMsg.getOrderId());
 
-        _log.debug("根据支付订单ID获取所有订单");
+        _log.info("1. 根据支付订单ID获取所有订单(如果没有找到，退款)");
         final OrdOrderMo conditions = new OrdOrderMo();
         conditions.setPayOrderId(payOrderId);
         final List<OrdOrderMo> orders = _mapper.selectSelective(conditions);
         if (orders.isEmpty()) {
-            _log.warn("根据支付订单ID找不到任何订单，只能退款: payOrderId-{}\n可能订单支付后未收到通知时再次支付", payOrderId);
-            final OrdOrderReturnTo returnTo = new OrdOrderReturnTo();
-//            returnTo.setOnlineId(onlineId);
-//            returnSvc.agreeRefund(returnTo);
-//            AfcRefundSvc
+            final String msg = "根据支付订单ID找不到任何订单，只能退款";
+            _log.warn("{}: payOrderId-{}\n可能订单支付后未收到通知时再次支付", msg, payOrderId);
+            final RefundGoBackTo refundGoBackTo = new RefundGoBackTo();
+            refundGoBackTo.setOrderId(payDoneMsg.getOrderId());
+            refundGoBackTo.setTradeTitle(msg);
+            refundSvc.refundGoBack(refundGoBackTo);
             return true;
         }
         _log.debug("根据支付订单ID获取所有订单的结果: {}", orders);
@@ -1187,21 +1189,27 @@ public class OrdOrderSvcImpl extends MybatisBaseSvcImpl<OrdOrderMo, java.lang.Lo
         }
         _log.debug("计算订单总额的结果是: {}", orderTotal);
 
-        // 1. 判断通知回来的支付金额是否和订单中记录的实际交易金额相同(如果不同，退款)
+        _log.info("2. 判断通知回来的支付金额是否和订单中记录的实际交易金额相同(如果不同，退款)");
         if (!payDoneMsg.getPayAmount().equals(orderTotal)) {
-            _log.warn("支付金额与订单中记录的实际金额不一致，可能是在去支付后修改了订单的实际金额，只能退款重新支付");
-
+            final String msg = "支付金额与订单中记录的实际金额不一致(" + payDoneMsg.getPayAmount() + ":" + orderTotal + ")，只能退款";
+            _log.warn("{}: payOrderId-{}\n可能是在去支付订单后未收到通知时修改了订单的实际金额", msg, payOrderId);
+            final RefundGoBackTo refundGoBackTo = new RefundGoBackTo();
+            refundGoBackTo.setOrderId(payDoneMsg.getOrderId());
+            refundGoBackTo.setTradeTitle(msg);
+            refundSvc.refundGoBack(refundGoBackTo);
             return true;
         }
 
-        // 2. 根据支付订单ID修改订单状态为已支付
+        _log.info("3. 根据支付订单ID修改订单状态为已支付");
         _log.info("订单支付完成，根据PAY_ORDER_ID修改订单状态为已支付: payOrderId-{}, payTime-{}", payOrderId, payDoneMsg.getPayTime());
         final int result = _mapper.paidOrder(payOrderId, payDoneMsg.getPayTime());
         _log.debug("订单支付完成通知修改订单信息的返回值为：{}", result);
         if (result == 0) {
-            _log.warn("根据支付订单ID找不到待支付状态的订单: payOrderId-{}", payOrderId);
+            _log.warn("根据支付订单ID修改订单状态为已支付不成功，可能碰到并发的问题: payOrderId-{}", payOrderId);
             return true;
         }
+
+        _log.info("4. 按不同发货组织拆单，并重新计算拆单后的订单实际交易金额");
 
         _log.info("根据支付订单ID获取用户订单列表");
 //        final List<OrdOrderMo> orders = _mapper.listByPayOrderId(payOrderId);
@@ -1244,7 +1252,7 @@ public class OrdOrderSvcImpl extends MybatisBaseSvcImpl<OrdOrderMo, java.lang.Lo
             modifyOrderMap.put(modifyOrder.getId(), modifyOrder);
         }
 
-        _log.info("遍历订单详情: 根据不同发货组织进行拆单");
+//        _log.info("遍历订单详情: 根据不同发货组织进行拆单");
 //        for (final OrdOrderDetailMo orderDetail : orderDetails) {
 //            // 从临时列表中获取订单信息，避免多次获取
 //            OrdOrderMo order = orders.get(orderDetail.getOrderId());
