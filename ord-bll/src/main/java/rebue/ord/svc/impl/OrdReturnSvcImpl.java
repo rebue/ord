@@ -625,7 +625,6 @@ public class OrdReturnSvcImpl extends MybatisBaseSvcImpl<OrdReturnMo, java.lang.
 		// 退款
 		final RefundTo refundTo = new RefundTo();
 		refundTo.setOrderId(String.valueOf(order.getPayOrderId()));
-		refundTo.setOrderDetailId(String.valueOf(to.getReturnId()));
 		refundTo.setRefundId(to.getReturnId());
 		refundTo.setBuyerAccountId(order.getUserId());
 		refundTo.setSellerAccountId(order.getOnlineOrgId());
@@ -830,7 +829,6 @@ public class OrdReturnSvcImpl extends MybatisBaseSvcImpl<OrdReturnMo, java.lang.
 
 		final RefundTo refundTo = new RefundTo();
 		refundTo.setOrderId(ordReturnMo.getOrderId().toString());
-		refundTo.setOrderDetailId(ordReturnMo.getOrderDetailId().toString());
 		refundTo.setBuyerAccountId(ordReturnMo.getUserId());
 		refundTo.setSellerAccountId(ordOrderMo.getOnlineOrgId());
 		refundTo.setSupplierAccountId(ordOrderDetailMo.getSupplierId());
