@@ -38,7 +38,6 @@ import rebue.onl.svr.feign.OnlOnlinePicSvc;
 import rebue.ord.dic.OrderStateDic;
 import rebue.ord.dic.ReturnApplicationStateDic;
 import rebue.ord.dic.ReturnStateDic;
-import rebue.ord.dic.ReturnTypeDic;
 import rebue.ord.mapper.OrdReturnMapper;
 import rebue.ord.mo.OrdBuyRelationMo;
 import rebue.ord.mo.OrdOrderDetailMo;
@@ -519,7 +518,7 @@ public class OrdReturnSvcImpl extends MybatisBaseSvcImpl<OrdReturnMo, java.lang.
 		}
 
 		// 退货数量为空，则表示仅退款，不为空，则表示退货退款
-//		if (returnInfo.getReturnType().intValue() == ReturnTypeDic.RETURN_AND_REFUND.getCode()) {
+		if (to.getReturnNum() != null && to.getReturnNum() > 0) {
 			// 订单详情已退货数量
 			final Integer returnedCount = detail.getReturnCount();
 			// 订单详情退货总数 = 已退货数量 + 本次退货数量
@@ -565,8 +564,7 @@ public class OrdReturnSvcImpl extends MybatisBaseSvcImpl<OrdReturnMo, java.lang.
 					to.getRefundCompensation(), (byte) ReturnApplicationStateDic.TURNED.getCode(), to.getOpId(), now,
 					to.getReturnId());
 			_log.info("同意退款修改退货信息的返回值为：{}", confirmRefundRowCount);
-
-//		}
+		}
 
 		_log.info("获取该定单详情做为下家的购买关系记录");
 		final OrdBuyRelationMo buyRelationParamMo = new OrdBuyRelationMo();
@@ -708,6 +706,7 @@ public class OrdReturnSvcImpl extends MybatisBaseSvcImpl<OrdReturnMo, java.lang.
 	/**
 	 * 已收到货并退款 1、判断请求参数 2、查询退货信息并判断是否存在和申请状态是否处于退货中 3、查询订单信息并判断订单状态是否处于作废、已下单（待支付）状态
 	 * 4、查询订单详情并判断
+	 * @deprecated
 	 */
 	@Override
 	@Transactional(readOnly = false, propagation = Propagation.REQUIRED)
