@@ -218,10 +218,10 @@ public interface OrdOrderMapper extends MybatisBaseMapper<OrdOrderMo, Long> {
      */
     List<OrdOrderMo> listOrder(ListOrderTo to);
 
-    /**
-     * 根据支付订单ID获取订单详情列表
-     */
-    List<OrdOrderMo> listByPayOrderId(Long payOrderId);
+//    /**
+//     * 根据支付订单ID获取订单详情列表
+//     */
+//    List<OrdOrderMo> listByPayOrderId(Long payOrderId);
 
     /**
      * 修改收件人信息
@@ -242,4 +242,23 @@ public interface OrdOrderMapper extends MybatisBaseMapper<OrdOrderMo, Long> {
      */
     @Select("select RECEIVED_TIME from ORD_ORDER where ID in (${orderIds}) order by RECEIVED_TIME desc")
     List<OrdOrderMo> selectOrderSignTime(@Param("orderIds") String orderIds);
+
+    @Update("UPDATE ORD_ORDER a " //
+            + "SET " //
+            + "    a.ORDER_MONEY = (SELECT " //
+            + "            SUM(b.BUY_COUNT * b.BUY_PRICE)" //
+            + "        FROM" //
+            + "            ORD_ORDER_DETAIL b" //
+            + "        WHERE" //
+            + "            b.ORDER_ID = #{orderId})," //
+            + "    a.REAL_MONEY = (SELECT " //
+            + "            SUM(c.ACTUAL_AMOUNT)" //
+            + "        FROM" //
+            + "            ORD_ORDER_DETAIL c" //
+            + "        WHERE" //
+            + "            c.ORDER_ID = #{orderId})" //
+            + " WHERE" //
+            + "    a.ID = #{orderId}")
+    void updateAmountAfterSplitOrder(@Param("orderId") Long orderId);
+
 }

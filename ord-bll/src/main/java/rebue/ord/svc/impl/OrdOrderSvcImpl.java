@@ -333,6 +333,7 @@ public class OrdOrderSvcImpl extends MybatisBaseSvcImpl<OrdOrderMo, java.lang.Lo
             orderDetailMo.setOnlineTitle(onlineMo.getOnlineTitle());
             orderDetailMo.setProductId(onlineMo.getProductId());
             orderDetailMo.setProductSpecId(onlineSpecMo.getProductSpecId());
+            orderDetailMo.setIsDelivered(false);
             orderDetailMo.setSpecName(onlineSpecMo.getOnlineSpec());
             orderDetailMo.setBuyPrice(onlineSpecMo.getSalePrice());
             orderDetailMo.setBuyCount(orderDetailTo.getBuyCount());
@@ -1156,9 +1157,9 @@ public class OrdOrderSvcImpl extends MybatisBaseSvcImpl<OrdOrderMo, java.lang.Lo
      * 处理订单支付完成的通知
      * 1. 根据支付订单ID获取所有订单(如果没有找到，退款)
      * 2. 判断通知回来的支付金额是否和订单中记录的实际交易金额相同(如果不同，退款)
-     * 3. 根据支付订单ID修改订单状态为已支付
-     * 4. 按不同发货组织拆单，并重新计算拆单后的订单实际交易金额
-     * 5. 匹配购买关系
+     * 3. 按不同发货组织拆单，并重新计算拆单后的订单实际交易金额
+     * 4. 匹配购买关系
+     * 5. 根据支付订单ID修改订单状态为已支付
      */
     @Override
     @Transactional(readOnly = false, propagation = Propagation.REQUIRED)
@@ -1200,90 +1201,100 @@ public class OrdOrderSvcImpl extends MybatisBaseSvcImpl<OrdOrderMo, java.lang.Lo
             return true;
         }
 
-        _log.info("3. 根据支付订单ID修改订单状态为已支付");
+        final List<OrdOrderDetailMo> orderDetailAlls = new LinkedList<>();
+        _log.info("3. 按不同发货组织拆单，并重新计算拆单后的订单实际交易金额");
+        _log.debug("遍历订单，一个订单一个订单的处理拆单问题");
+        for (final OrdOrderMo order : orders) {
+            _log.debug("目前遍历到的订单信息-{}", order);
+            // 排除取消状态的订单
+            if (OrderStateDic.CANCEL.getCode() == order.getOrderState()) {
+                _log.debug("被取消的订单: payOrderId-{}", payOrderId);
+                continue;
+            }
+            if (OrderStateDic.ORDERED.getCode() != order.getOrderState()) {
+                _log.error("订单不在下单状态，可能碰到并发的问题: payOrderId-{}", payOrderId);
+                return true;
+            }
+
+            _log.debug("根据orderId获取订单详情列表");
+            final List<OrdOrderDetailMo> orderDetails = orderDetailSvc.listByOrderId(order.getId());
+            if (orderDetails == null || orderDetails.isEmpty()) {
+                _log.error("没有找到订单详情，错误的数据: orderId-{}", order.getId());
+                return false;
+            }
+            _log.debug("根据orderId获取订单详情列表的结果: {}", orderDetails);
+            _log.debug("遍历订单详情: 按不同发货组织添加订单到订单Map中");
+            // 订单Map，不同发货组织添加一个entry
+            final Map<Long, OrdOrderMo> orderMap = new LinkedHashMap<>();
+            for (final OrdOrderDetailMo orderDetail : orderDetails) {
+                _log.debug("目前遍历到的订单详情信息-{}", orderDetail);
+                // 添加到orderDetailAlls，给后面的添加订单购买关系用
+                orderDetailAlls.add(orderDetail);
+                // 如果订单Map为空，说明是第一个详情，将当前订单加入到map中，并修改订单的发货组织为此详情的发货组织
+                if (orderMap.isEmpty()) {
+                    orderMap.put(orderDetail.getDeliverOrgId(), order);
+                    _log.debug("修改订单的发货组织为此详情的发货组织");
+                    final OrdOrderMo modifyMo = new OrdOrderMo();
+                    modifyMo.setId(order.getId());
+                    modifyMo.setDeliverOrgId(orderDetail.getDeliverOrgId());
+                    thisSvc.modify(modifyMo);
+                    continue;
+                }
+                OrdOrderMo tempOrder = orderMap.get(orderDetail.getDeliverOrgId());
+                if (tempOrder == null) {
+                    _log.debug("发现不同发货组织的订单详情，需要添加新订单");
+                    tempOrder = dozerMapper.map(order, OrdOrderMo.class);
+                    tempOrder.setId(null);
+                    tempOrder.setDeliverOrgId(orderDetail.getDeliverOrgId());
+                    thisSvc.add(tempOrder);
+                }
+                if (tempOrder.getId() != orderDetail.getOrderId()) {
+                    _log.debug("找到的订单不是原来详情的订单，替换详情的父订单为找到的订单");
+                    final OrdOrderDetailMo modifyMo = new OrdOrderDetailMo();
+                    modifyMo.setId(orderDetail.getId());
+                    modifyMo.setOrderId(tempOrder.getId());
+                    orderDetailSvc.modify(modifyMo);
+                }
+            }
+            if (orderMap.size() == 1) {
+                _log.debug("此订单没有不同组织的订单详情，不用拆单: {}", order);
+                continue;
+            }
+            _log.debug("重新计算拆单后的金额");
+            for (final Entry<Long, OrdOrderMo> orderEntry : orderMap.entrySet()) {
+                final OrdOrderMo tempMo = orderEntry.getValue();
+                _log.debug("遍历到的订单: {}", tempMo);
+                _mapper.updateAmountAfterSplitOrder(tempMo.getId());
+            }
+        }
+
+        _log.info("遍历订单详情: 添加订单购买关系");
+        for (final OrdOrderDetailMo orderDetail : orderDetailAlls) {
+            try {
+                _log.debug("订单详情商品类型为：{}" + orderDetail.getSubjectType());
+                if (orderDetail.getSubjectType() == 1) {
+                    _log.debug("全返商品添加购买关系");
+                    final long userId = orderDetail.getUserId();
+                    final long onlineId = orderDetail.getOnlineId();
+                    final BigDecimal buyPrice = orderDetail.getBuyPrice();
+                    final long downLineDetailId = orderDetail.getId();
+                    final long downLineOrderId = orderDetail.getOrderId();
+                    final String matchBuyRelationResult = ordBuyRelationSvc.matchBuyRelation(userId, onlineId, buyPrice, downLineDetailId, downLineOrderId);
+                    _log.debug(matchBuyRelationResult);
+                }
+            } catch (final Exception e) {
+                _log.error("匹配购买关系报错：", e);
+            }
+        }
+
+        _log.info("5. 根据支付订单ID修改订单状态为已支付");
         _log.info("订单支付完成，根据PAY_ORDER_ID修改订单状态为已支付: payOrderId-{}, payTime-{}", payOrderId, payDoneMsg.getPayTime());
         final int result = _mapper.paidOrder(payOrderId, payDoneMsg.getPayTime());
         _log.debug("订单支付完成通知修改订单信息的返回值为：{}", result);
         if (result == 0) {
             _log.warn("根据支付订单ID修改订单状态为已支付不成功，可能碰到并发的问题: payOrderId-{}", payOrderId);
-            return true;
+            return false;
         }
-
-        _log.info("4. 按不同发货组织拆单，并重新计算拆单后的订单实际交易金额");
-
-        _log.info("根据支付订单ID获取用户订单列表");
-//        final List<OrdOrderMo> orders = _mapper.listByPayOrderId(payOrderId);
-        _log.debug("获取到的订单列表为：{}", orders);
-
-        _log.info("遍历订单列表: 根据不同发货组织进行拆单");
-        // 准备要修改的订单列表
-        final Map<Long, OrdOrderMo> modifyOrderMap = new LinkedHashMap<>();
-//        final List<OrdOrderDetailMo> orderDetails = new ArrayList<>();
-        for (final OrdOrderMo order : orders) {
-            // 准备要修改的订单的信息
-            final OrdOrderMo modifyOrder = new OrdOrderMo();
-            modifyOrder.setId(order.getId());
-            // 根据OrderId获取订单详情列表
-            final List<OrdOrderDetailMo> details = orderDetailSvc.listByOrderId(order.getId());
-            _log.debug("遍历订单详情: 根据不同发货组织进行拆单");
-            for (final OrdOrderDetailMo detail : details) {
-                if (detail.getDeliverOrgId() == null) {
-                    _log.warn("订单详情没有发货组织，是旧的数据");
-                    continue;
-                }
-                // 如果订单还没有发货组织，说明是遍历的第一个详情，那么将订单的发货组织设为此详情的发货组织
-                if (modifyOrder.getDeliverOrgId() == null) {
-                    modifyOrder.setDeliverOrgId(detail.getDeliverOrgId());
-                    continue;
-                }
-                // 如果订单的发货组织!=此详情的发货组织，从旧订单中克隆新的订单，将此详情拆到新的订单中
-                if (modifyOrder.getDeliverOrgId() != detail.getDeliverOrgId()) {
-                    final OrdOrderMo newOrder = dozerMapper.map(order, OrdOrderMo.class);
-                    newOrder.setId(null);
-                    thisSvc.add(newOrder);
-                    // 准备要修改的订单详情
-                    final OrdOrderDetailMo modifyOrderDetail = new OrdOrderDetailMo();
-                    modifyOrderDetail.setId(detail.getId());
-                    modifyOrderDetail.setOrderId(newOrder.getId());
-                    orderDetailSvc.modify(modifyOrderDetail);
-                }
-            }
-            // 放入要修改的map中
-            modifyOrderMap.put(modifyOrder.getId(), modifyOrder);
-        }
-
-//        _log.info("遍历订单详情: 根据不同发货组织进行拆单");
-//        for (final OrdOrderDetailMo orderDetail : orderDetails) {
-//            // 从临时列表中获取订单信息，避免多次获取
-//            OrdOrderMo order = orders.get(orderDetail.getOrderId());
-//            if (order == null) {
-//                // 临时列表中没有，才从数据库中获取，并放入临时列表中
-//                order = orderSvc.getById(orderDetail.getOrderId());
-//                orders.put(order.getId(), order);
-//            }
-//
-//            // 判断订单详情中的发货组织与订单的发货组织相同，如果不相同，拆到新的订单
-//
-//        }
-
-//        _log.info("遍历订单详情: 添加订单购买关系");
-//        for (final OrdOrderDetailMo orderDetail : orderDetails) {
-//            try {
-//                _log.debug("订单详情商品类型为：{}" + orderDetail.getSubjectType());
-//                if (orderDetail.getSubjectType() == 1) {
-//                    _log.debug("全返商品添加购买关系");
-//                    final long userId = orderDetail.getUserId();
-//                    final long onlineId = orderDetail.getOnlineId();
-//                    final BigDecimal buyPrice = orderDetail.getBuyPrice();
-//                    final long downLineDetailId = orderDetail.getId();
-//                    final long downLineOrderId = orderDetail.getOrderId();
-//                    final String matchBuyRelationResult = ordBuyRelationSvc.matchBuyRelation(userId, onlineId, buyPrice, downLineDetailId, downLineOrderId);
-//                    _log.debug(matchBuyRelationResult);
-//                }
-//            } catch (final Exception e) {
-//                _log.error("匹配购买关系报错：", e);
-//            }
-//        }
 
         return true;
     }

@@ -1201,16 +1201,16 @@
 		ORDER BY ORDER_TIME DESC
 	</select>
 
-	<select id="listByPayOrderId" parameterType="java.lang.Long" resultMap="BaseResultMap">
-		<!-- 根据支付订单ID获取订单详情列表 -->
-		select
-		<include refid="Base_Column_List" />
-		from ORD_ORDER
-		<where>
-			PAY_ORDER_ID = #{payOrderId,jdbcType=BIGINT}
-			and ORDER_STATE >= 0
-		</where>
-	</select>
+	<!-- <select id="listByPayOrderId" parameterType="java.lang.Long" resultMap="BaseResultMap"> -->
+	<!-- 根据支付订单ID获取订单详情列表 -->
+	<!-- select -->
+	<!-- <include refid="Base_Column_List" /> -->
+	<!-- from ORD_ORDER -->
+	<!-- <where> -->
+	<!-- PAY_ORDER_ID = #{payOrderId,jdbcType=BIGINT} -->
+	<!-- and ORDER_STATE >= 0 -->
+	<!-- </where> -->
+	<!-- </select> -->
 
 	<update id="updateOrderReceiverInfo" parameterType="rebue.ord.mo.OrdOrderMo">
 		<!-- 修改收件人信息 -->
