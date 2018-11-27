@@ -35,6 +35,7 @@ import com.github.pagehelper.PageInfo;
 
 import rebue.afc.msg.PayDoneMsg;
 import rebue.afc.ro.AddSettleTasksRo;
+import rebue.afc.svc.AfcRefundSvc;
 import rebue.afc.svr.feign.AfcSettleTaskSvc;
 import rebue.afc.to.AddSettleTasksDetailTo;
 import rebue.afc.to.AddSettleTasksTo;
@@ -88,6 +89,7 @@ import rebue.ord.svc.OrdOrderSvc;
 import rebue.ord.svc.OrdReturnSvc;
 import rebue.ord.svc.OrdTaskSvc;
 import rebue.ord.to.ListOrderTo;
+import rebue.ord.to.OrdOrderReturnTo;
 import rebue.ord.to.OrderDetailTo;
 import rebue.ord.to.OrderSignInTo;
 import rebue.ord.to.OrderTo;
@@ -148,7 +150,7 @@ public class OrdOrderSvcImpl extends MybatisBaseSvcImpl<OrdOrderMo, java.lang.Lo
     @Resource
     private OrdTaskSvc        ordTaskSvc;
     @Resource
-    private OnlOnlineSvc      onlOnlineSvc;
+    private OnlOnlineSvc      onlineSvc;
     @Resource
     private OnlOnlineSpecSvc  onlOnlineSpecSvc;
     @Resource
@@ -159,19 +161,12 @@ public class OrdOrderSvcImpl extends MybatisBaseSvcImpl<OrdOrderMo, java.lang.Lo
     private OnlOnlinePicSvc   onlOnlinePicSvc;
     @Resource
     private AfcSettleTaskSvc  afcSettleTaskSvc;
-
-    /**
-     */
+    @Resource
+    private AfcRefundSvc      refundSvc;
     @Resource
     private SucUserSvc        sucUserSvc;
-
-    /**
-     */
     @Resource
     private OrdBuyRelationSvc ordBuyRelationSvc;
-
-    /**
-     */
     @Resource
     private OrdOrderSvc       thisSvc;
 
@@ -284,7 +279,7 @@ public class OrdOrderSvcImpl extends MybatisBaseSvcImpl<OrdOrderMo, java.lang.Lo
             // 如果已经获取过上线信息，从Map中获取就可避免重复获取，减轻数据库负担
             OnlOnlineMo onlineMo = onlines.get(orderDetailTo.getOnlineId());
             if (onlineMo == null) {
-                onlineMo = onlOnlineSvc.getById(orderDetailTo.getOnlineId());
+                onlineMo = onlineSvc.getById(orderDetailTo.getOnlineId());
                 if (onlineMo == null) {
                     final String msg = "找不到上线的信息";
                     _log.error("{}: onlineId-{}", msg, orderDetailTo.getOnlineId());
@@ -402,28 +397,16 @@ public class OrdOrderSvcImpl extends MybatisBaseSvcImpl<OrdOrderMo, java.lang.Lo
 
             orderMo.setUserId(to.getUserId());                  // 下单人用户ID
 
-            _log.debug("遍历订单详情计算订单的下单金额和生成订单标题");
-            // 订单标题
-            String orderTitle = "";
+            _log.debug("遍历订单详情计算订单的下单金额");
+            // 下单金额
             BigDecimal orderAmount = BigDecimal.ZERO;
             for (final OrdOrderDetailMo orderDetailMo : onlineOrg.getValue()) {
                 // 计算订单的下单金额
                 orderAmount = orderAmount.add(orderDetailMo.getBuyPrice().multiply(BigDecimal.valueOf(orderDetailMo.getBuyCount())));
-
-                // 根据订单详情生成订单标题
-                final String remark = orderDetailMo.getOnlineTitle() + "(" + orderDetailMo.getSpecName() //
-                        + " " + orderDetailMo.getBuyCount() + orderDetailMo.getBuyUnit() + ");";
-                orderTitle += remark;
             }
             _log.debug("订单的下单金额为: {}", orderAmount);
             orderMo.setOrderMoney(orderAmount);          // 下单金额
             orderMo.setRealMoney(orderAmount);           // 实际金额=下单金额
-            // 生成订单标题，长的截取
-            orderTitle = orderTitle.trim();
-            if (orderTitle.length() > 200) {
-                _log.debug("订单标题太长，需进行截取: {}", orderTitle);
-                orderTitle = orderTitle.substring(0, 195) + "…………等";
-            }
 
             // 用户留言
             final String orderMessages = to.getOrderMessages();
@@ -441,7 +424,7 @@ public class OrdOrderSvcImpl extends MybatisBaseSvcImpl<OrdOrderMo, java.lang.Lo
             orderMo.setReceiverPostCode(addrMo.getReceiverPostCode());
             orderMo.setReceiverTel(addrMo.getReceiverTel());
 
-            orderMo.setOrderTitle(orderTitle);
+            orderMo.setOrderTitle("购买大卖网商品");
 
             _log.info("添加订单信息的参数为：{}", orderMo);
             // 添加订单信息
@@ -462,7 +445,6 @@ public class OrdOrderSvcImpl extends MybatisBaseSvcImpl<OrdOrderMo, java.lang.Lo
             calendar.add(Calendar.MINUTE, cancelOrderTime);
             final Date executePlanTime = calendar.getTime();
             _log.debug("取消订单的执行时间为: {}", executePlanTime);
-
             _log.debug("准备添加自动取消订单的任务");
             final OrdTaskMo ordTaskMo = new OrdTaskMo();
             ordTaskMo.setExecuteState((byte) TaskExecuteStateDic.NONE.getCode());
@@ -477,7 +459,7 @@ public class OrdOrderSvcImpl extends MybatisBaseSvcImpl<OrdOrderMo, java.lang.Lo
             updateOnlineTo.setUserId(to.getUserId());
             updateOnlineTo.setSpecList(specList);
             _log.debug("更新上线信息(下单后)：{}", updateOnlineTo);
-            final Ro updateOnlineRo = onlOnlineSvc.updateOnlineAfterOrder(updateOnlineTo);
+            final Ro updateOnlineRo = onlineSvc.updateOnlineAfterOrder(updateOnlineTo);
             _log.info("更新上线信息(下单后)的返回值为：{}", updateOnlineRo);
             if (updateOnlineRo.getResult() != ResultDic.SUCCESS) {
                 _log.error("更新上线信息(下单后)失败: {}", updateOnlineRo);
@@ -556,7 +538,7 @@ public class OrdOrderSvcImpl extends MybatisBaseSvcImpl<OrdOrderMo, java.lang.Lo
                     _log.info("获取商品主图的返回值为{}", String.valueOf(onlinePicList));
                     _log.info("根据上线ID查找上线商品信息");
                     _log.info("参数 " + orderDetailMo.getOnlineId());
-                    final OnlOnlineMo onlineMo = onlOnlineSvc.getById(orderDetailMo.getOnlineId());
+                    final OnlOnlineMo onlineMo = onlineSvc.getById(orderDetailMo.getOnlineId());
                     _log.info("返回值{}", onlineMo);
                     _log.info("获取订单下家购买关系");
                     final OrdBuyRelationMo buyRelationMo = new OrdBuyRelationMo();
@@ -1173,8 +1155,9 @@ public class OrdOrderSvcImpl extends MybatisBaseSvcImpl<OrdOrderMo, java.lang.Lo
     /**
      * 处理订单支付完成的通知
      * 1. 判断通知回来的支付金额是否和订单中记录的实际交易金额相同(如果不同，退款)
-     * 2. 按不同发货组织拆单，并重新计算拆单后的订单实际交易金额
-     * 3. 匹配购买关系
+     * 2. 根据支付订单ID修改订单状态为已支付
+     * 3. 按不同发货组织拆单，并重新计算拆单后的订单实际交易金额
+     * 4. 匹配购买关系
      */
     @Override
     @Transactional(readOnly = false, propagation = Propagation.REQUIRED)
@@ -1183,7 +1166,35 @@ public class OrdOrderSvcImpl extends MybatisBaseSvcImpl<OrdOrderMo, java.lang.Lo
         // XXX 在本服务中支付传递的orderId实际上是payOrderId
         final Long payOrderId = Long.parseLong(payDoneMsg.getOrderId());
 
-        // 1. 修改订单状态为已支付
+        _log.debug("根据支付订单ID获取所有订单");
+        final OrdOrderMo conditions = new OrdOrderMo();
+        conditions.setPayOrderId(payOrderId);
+        final List<OrdOrderMo> orders = _mapper.selectSelective(conditions);
+        if (orders.isEmpty()) {
+            _log.warn("根据支付订单ID找不到任何订单，只能退款: payOrderId-{}\n可能订单支付后未收到通知时再次支付", payOrderId);
+            final OrdOrderReturnTo returnTo = new OrdOrderReturnTo();
+//            returnTo.setOnlineId(onlineId);
+//            returnSvc.agreeRefund(returnTo);
+//            AfcRefundSvc
+            return true;
+        }
+        _log.debug("根据支付订单ID获取所有订单的结果: {}", orders);
+
+        // 计算订单总额(所有订单中记录的实际交易金额之和)
+        BigDecimal orderTotal = BigDecimal.ZERO;
+        for (final OrdOrderMo order : orders) {
+            orderTotal = orderTotal.add(order.getRealMoney());
+        }
+        _log.debug("计算订单总额的结果是: {}", orderTotal);
+
+        // 1. 判断通知回来的支付金额是否和订单中记录的实际交易金额相同(如果不同，退款)
+        if (!payDoneMsg.getPayAmount().equals(orderTotal)) {
+            _log.warn("支付金额与订单中记录的实际金额不一致，可能是在去支付后修改了订单的实际金额，只能退款重新支付");
+
+            return true;
+        }
+
+        // 2. 根据支付订单ID修改订单状态为已支付
         _log.info("订单支付完成，根据PAY_ORDER_ID修改订单状态为已支付: payOrderId-{}, payTime-{}", payOrderId, payDoneMsg.getPayTime());
         final int result = _mapper.paidOrder(payOrderId, payDoneMsg.getPayTime());
         _log.debug("订单支付完成通知修改订单信息的返回值为：{}", result);
@@ -1193,7 +1204,7 @@ public class OrdOrderSvcImpl extends MybatisBaseSvcImpl<OrdOrderMo, java.lang.Lo
         }
 
         _log.info("根据支付订单ID获取用户订单列表");
-        final List<OrdOrderMo> orders = _mapper.listByPayOrderId(payOrderId);
+//        final List<OrdOrderMo> orders = _mapper.listByPayOrderId(payOrderId);
         _log.debug("获取到的订单列表为：{}", orders);
 
         _log.info("遍历订单列表: 根据不同发货组织进行拆单");
