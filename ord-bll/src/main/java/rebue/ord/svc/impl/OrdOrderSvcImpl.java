@@ -34,13 +34,9 @@ import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
 
 import rebue.afc.msg.PayDoneMsg;
-import rebue.afc.ro.AddSettleTasksRo;
 import rebue.afc.svr.feign.AfcRefundSvc;
 import rebue.afc.svr.feign.AfcSettleTaskSvc;
-import rebue.afc.to.AddSettleTasksDetailTo;
-import rebue.afc.to.AddSettleTasksTo;
 import rebue.afc.to.RefundGoBackTo;
-import rebue.kdi.mo.KdiCompanyMo;
 import rebue.kdi.ro.EOrderRo;
 import rebue.kdi.ro.KdiLogisticRo;
 import rebue.kdi.svr.feign.KdiSvc;
@@ -171,15 +167,6 @@ public class OrdOrderSvcImpl extends MybatisBaseSvcImpl<OrdOrderMo, java.lang.Lo
     
     @Resource
   	 private OrdOrderDetailDeliverSvc ordOrderDetailDeliverSvc;
-
-    /**
-     * 买家返款时间
-     */
-    @Value("${ord.settle-buyer-cashback-time}")
-    private int               settleBuyerCashbackTime;
-
-    @Value("${ord.settle-upline-commission-time}")
-    private int               settleUplineCommissionTime;
 
     /**
      * 执行取消用户订单时间
@@ -987,14 +974,6 @@ public class OrdOrderSvcImpl extends MybatisBaseSvcImpl<OrdOrderMo, java.lang.Lo
         }
         final Date date = new Date();
         _log.info("订单签收的时间为：{}", date);
-        Calendar calendar = Calendar.getInstance();
-        calendar.setTime(date);
-        calendar.add(Calendar.MINUTE, settleBuyerCashbackTime);
-        final Date buyerCashbackDate = calendar.getTime();
-        _log.info("订单签收的执行买家返款的时间为：{}", buyerCashbackDate);
-        calendar = Calendar.getInstance();
-        calendar.setTime(date);
-        calendar.add(Calendar.MINUTE, settleUplineCommissionTime);
         for (final OrdOrderDetailMo ordOrderDetailMo : detailList) {
             if (ordOrderDetailMo.getSubjectType() == 1) {
                 final OrdBuyRelationMo mo = new OrdBuyRelationMo();
