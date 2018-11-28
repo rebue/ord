@@ -165,6 +165,7 @@ public class OrdOrderDetailSvcImpl extends MybatisBaseSvcImpl<OrdOrderDetailMo, 
         for (int i = 0; i < detailList.size(); i++) {
             // 映射当前详情的所有字段
             final DetailandBuyRelationRo item = new DetailandBuyRelationRo();
+            item.setIsDeliver(detailList.get(i).getIsDelivered());
             item.setId(detailList.get(i).getId());
             item.setOrderId(detailList.get(i).getOrderId());
             item.setProductId(detailList.get(i).getProductId());

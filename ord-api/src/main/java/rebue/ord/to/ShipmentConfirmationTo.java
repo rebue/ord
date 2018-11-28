@@ -2,15 +2,19 @@ package rebue.ord.to;
 
 import java.math.BigDecimal;
 import java.util.Date;
+import java.util.List;
 
 import org.springframework.format.annotation.DateTimeFormat;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
+import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.annotation.JsonInclude.Include;
 
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
 
 @Data
+@JsonInclude(Include.NON_NULL)
 public class ShipmentConfirmationTo {
 
 	/**
@@ -171,5 +175,20 @@ public class ShipmentConfirmationTo {
 	 */
     @ApiModelProperty(value = "物流单号")
 	private Long logisticCode;
+    
+    /**
+     * 订单详情
+     */
+    private String orderDetail;
+    /**
+     * 当前订单被选择发货的订单详情Id
+     */
+    private List<Long> selectDetailId;
+    
+    /**
+     * 当前订单的所有未发货的订单详情Id
+     */
+    private List<Long> allDetaileId;
+
 
 }

@@ -1026,15 +1026,12 @@
 		ID=${id,jdbcType=BIGINT} AND ORDER_STATE=2
 	</update>
 
+			
 	<!-- 确认发货并修改订单状态 -->
 	<update id="shipmentConfirmation" parameterType="rebue.ord.mo.OrdOrderMo">
-		UPDATE ORD_ORDER SET ORDER_STATE = 3, LOGISTIC_CODE =
-		#{logisticCode,jdbcType=VARCHAR}, LOGISTIC_ID =
-		#{logisticId,jdbcType=BIGINT},
-		SEND_OP_ID =
+		UPDATE ORD_ORDER SET ORDER_STATE = 3,SEND_OP_ID =
 		#{sendOpId,jdbcType=BIGINT}, SEND_TIME =
-		#{sendTime,jdbcType=TIMESTAMP} WHERE ID=${id} AND
-		ORDER_STATE=#{orderState,jdbcType=TINYINT}
+		#{sendTime,jdbcType=TIMESTAMP} WHERE ID=#{id,jdbcType=BIGINT}
 	</update>
 
 	<!-- 确认发货并设置快递公司 -->

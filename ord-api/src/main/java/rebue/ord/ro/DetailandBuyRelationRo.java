@@ -123,5 +123,7 @@ public class DetailandBuyRelationRo {
 
 	/** 第二个下家订单上线标题 **/
 	private String downOnlineTitle2;
+	
+	private Boolean isDeliver;
 
 }
