@@ -1,6 +1,6 @@
 /*==============================================================*/
 /* DBMS name:      MySQL 5.0                                    */
-/* Created on:     2018/11/28 11:03:25                          */
+/* Created on:     2018/11/28 17:44:13                          */
 /*==============================================================*/
 
 
@@ -141,7 +141,7 @@ create table ORD_ORDER
    RECEIVED_OP_ID       bigint comment '签收人',
    CANCEL_REASON        varchar(300) comment '作废原因',
    primary key (ID),
-   key AK_SHIPPER_LOGISTIC_CODE (SHIPPER_CODE, LOGISTIC_CODE)
+   unique key AK_ORDER_CODE (ORDER_CODE)
 );
 
 alter table ORD_ORDER comment '订单信息';
@@ -254,7 +254,7 @@ create table ORD_TASK
    EXECUTE_PLAN_TIME    datetime not null comment '计划执行时间',
    EXECUTE_FACT_TIME    datetime comment '实际执行时间',
    TASK_TYPE            tinyint not null comment '任务类型（1：订单自动取消的任务  2：订单自动签收的任务 3: 订单开始结算的任务 4: 订单结算的任务）',
-   SUB_TASK_TYPE        tinyint comment '子任务类型',
+   SUB_TASK_TYPE        tinyint default -1 comment '子任务类型',
    ORDER_ID             varchar(150) not null comment '订单ID(销售订单ID)',
    primary key (ID),
    unique key AK_TASK_TYPE_AND_SUB_TASK_TYPE_AND_ORDER (TASK_TYPE, SUB_TASK_TYPE, ORDER_ID)
