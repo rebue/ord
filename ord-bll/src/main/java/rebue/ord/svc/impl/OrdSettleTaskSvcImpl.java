@@ -228,7 +228,7 @@ public class OrdSettleTaskSvcImpl implements OrdSettleTaskSvc {
 		subTaskMo.setSubTaskType((byte) taskType.getCode());
 		// 计算计划执行时间
 		calendar.setTime(now);
-		calendar.add(Calendar.MINUTE, delay.multiply(BigDecimal.valueOf(60)).setScale(0, BigDecimal.ROUND_HALF_UP).intValue());
+		calendar.add(Calendar.MINUTE, delay.multiply(BigDecimal.valueOf(60)).setScale(4, BigDecimal.ROUND_HALF_UP).intValue());
 
 		subTaskMo.setExecutePlanTime(calendar.getTime());
 		taskSvc.add(subTaskMo);

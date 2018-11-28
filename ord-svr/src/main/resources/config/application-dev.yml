@@ -4,17 +4,18 @@ ord:
   # 执行用户订单签收时间（按小时计算）
   signin-order-time: 2
   return-limit-time: 20
-  # 供应商结算计划执行时间（按小时计算）
-  supplier-settle-execute-plan-time: 0.05
-  # 已占用保证金结算计划执行时间（按小时计算）
-  occupied-deposit-settle-execute-plan-time: 0.05
-  # 卖家结算计划执行时间（按小时计算）
-  seller-settle-execute-plan-time: 0.05
-  # 用户返现结算计划执行时间（按小时计算）
-  user-cashback-settle-execute-plan-time: 0.05
-  # 用户返佣结算计划执行时间（按小时计算）
-  user-commission-settle-execute-plan-time: 0.05
-  # 平台服务费结算计划执行时间（按小时计算）
-  platform-service-fee-settle-execute-plan-time: 0.05
-  # 平台服务费比例
-  platform-service-fee-ratio: 0
+  settle:
+    # 供应商结算计划执行时间（按小时计算）
+    supplier-settle-execute-plan-time: 0.05
+    # 已占用保证金结算计划执行时间（按小时计算）
+    occupied-deposit-settle-execute-plan-time: 0.05
+    # 卖家结算计划执行时间（按小时计算）
+    seller-settle-execute-plan-time: 0.05
+    # 用户返现结算计划执行时间（按小时计算）
+    user-cashback-settle-execute-plan-time: 0.05
+    # 用户返佣结算计划执行时间（按小时计算）
+    user-commission-settle-execute-plan-time: 0.05
+    # 平台服务费结算计划执行时间（按小时计算）
+    platform-service-fee-settle-execute-plan-time: 0.05
+    # 平台服务费比例
+    platform-service-fee-ratio: 0

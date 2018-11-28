@@ -1127,7 +1127,7 @@ public class OrdOrderSvcImpl extends MybatisBaseSvcImpl<OrdOrderMo, java.lang.Lo
         _log.debug("计算订单总额的结果是: {}", orderTotal);
 
         _log.info("2. 判断通知回来的支付金额是否和订单中记录的实际交易金额相同(如果不同，退款)");
-        if (!payDoneMsg.getPayAmount().equals(orderTotal)) {
+        if (payDoneMsg.getPayAmount().compareTo(orderTotal) != 0) {
             final String msg = "支付金额与订单中记录的实际金额不一致(" + payDoneMsg.getPayAmount() + ":" + orderTotal + ")，只能退款";
             _log.warn("{}: payOrderId-{}\n可能是在去支付订单后未收到通知时修改了订单的实际金额", msg, payOrderId);
             final RefundGoBackTo refundGoBackTo = new RefundGoBackTo();
@@ -1180,11 +1180,13 @@ public class OrdOrderSvcImpl extends MybatisBaseSvcImpl<OrdOrderMo, java.lang.Lo
                 // 如果订单Map为空，说明是第一个详情，将当前订单加入到map中，并修改订单的发货组织为此详情的发货组织
                 if (orderMap.isEmpty()) {
                     orderMap.put(orderDetail.getDeliverOrgId(), order);
-                    _log.debug("修改订单的发货组织为此详情的发货组织");
-                    final OrdOrderMo modifyMo = new OrdOrderMo();
-                    modifyMo.setId(order.getId());
-                    modifyMo.setDeliverOrgId(orderDetail.getDeliverOrgId());
-                    thisSvc.modify(modifyMo);
+                    if (orderDetail.getDeliverOrgId() != null) {
+                    	_log.debug("修改订单的发货组织为此详情的发货组织");
+                    	final OrdOrderMo modifyMo = new OrdOrderMo();
+                    	modifyMo.setId(order.getId());
+                    	modifyMo.setDeliverOrgId(orderDetail.getDeliverOrgId());
+                    	thisSvc.modify(modifyMo);
+                    }
                     continue;
                 }
                 OrdOrderMo tempOrder = orderMap.get(orderDetail.getDeliverOrgId());
