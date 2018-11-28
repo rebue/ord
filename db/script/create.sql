@@ -1,6 +1,6 @@
 /*==============================================================*/
 /* DBMS name:      MySQL 5.0                                    */
-/* Created on:     2018/11/24 13:08:27                          */
+/* Created on:     2018/11/28 11:03:25                          */
 /*==============================================================*/
 
 
@@ -19,8 +19,6 @@ drop table if exists ORD_ORDER_DETAIL_DELIVER;
 drop table if exists ORD_RETURN;
 
 drop table if exists ORD_RETURN_PIC;
-
-drop table if exists ORD_SETTLE_TASK;
 
 drop table if exists ORD_TASK;
 
@@ -247,24 +245,6 @@ create table ORD_RETURN_PIC
 alter table ORD_RETURN_PIC comment '退货图片';
 
 /*==============================================================*/
-/* Table: ORD_SETTLE_TASK                                       */
-/*==============================================================*/
-create table ORD_SETTLE_TASK
-(
-   ID                   bigint not null comment '任务ID',
-   EXECUTE_STATE        tinyint not null default 0 comment '执行状态(-1:取消；0:未执行；1:已执行；暂停)',
-   EXECUTE_PLAN_TIME    datetime not null comment '计划执行时间',
-   EXECUTE_FACT_TIME    datetime comment '实际执行时间',
-   TRADE_TYPE           tinyint not null comment '结算类型(交易类型中的几种结算类型)',
-   ORDER_ID             varchar(150) not null comment '订单ID(销售订单ID)',
-   IP                   varchar(150) not null comment 'IP地址',
-   primary key (ID),
-   unique key AK_TRADE_TYPE_AND_ORDER_ID (TRADE_TYPE, ORDER_ID)
-);
-
-alter table ORD_SETTLE_TASK comment '结算任务';
-
-/*==============================================================*/
 /* Table: ORD_TASK                                              */
 /*==============================================================*/
 create table ORD_TASK
@@ -276,7 +256,8 @@ create table ORD_TASK
    TASK_TYPE            tinyint not null comment '任务类型（1：订单自动取消的任务  2：订单自动签收的任务 3: 订单开始结算的任务 4: 订单结算的任务）',
    SUB_TASK_TYPE        tinyint comment '子任务类型',
    ORDER_ID             varchar(150) not null comment '订单ID(销售订单ID)',
-   primary key (ID)
+   primary key (ID),
+   unique key AK_TASK_TYPE_AND_SUB_TASK_TYPE_AND_ORDER (TASK_TYPE, SUB_TASK_TYPE, ORDER_ID)
 );
 
 alter table ORD_TASK comment '订单任务';

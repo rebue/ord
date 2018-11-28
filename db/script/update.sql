@@ -1,5 +1,6 @@
--- 2018-11-24
+-- 2018-11-28
 alter table ORD_TASK						add					SUB_TASK_TYPE        										tinyint comment '子任务类型';
+alter table ORD_TASK						add					unique key AK_TASK_TYPE_AND_SUB_TASK_TYPE_AND_ORDER (TASK_TYPE, SUB_TASK_TYPE, ORDER_ID);
 
 
 -- 2018-11-22
