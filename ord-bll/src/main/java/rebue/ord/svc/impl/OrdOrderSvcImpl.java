@@ -135,53 +135,53 @@ public class OrdOrderSvcImpl extends MybatisBaseSvcImpl<OrdOrderMo, java.lang.Lo
     }
 
     @Resource
-    private OrdAddrSvc        ordAddrSvc;
+    private OrdAddrSvc               ordAddrSvc;
     @Resource
-    private OrdOrderDetailSvc orderDetailSvc;
+    private OrdOrderDetailSvc        orderDetailSvc;
     @Resource
-    private OrdReturnSvc      returnSvc;
+    private OrdReturnSvc             returnSvc;
     @Resource
-    private OrdTaskSvc        ordTaskSvc;
+    private OrdTaskSvc               ordTaskSvc;
     @Resource
-    private OnlOnlineSvc      onlineSvc;
+    private OnlOnlineSvc             onlineSvc;
     @Resource
-    private OnlOnlineSpecSvc  onlOnlineSpecSvc;
+    private OnlOnlineSpecSvc         onlOnlineSpecSvc;
     @Resource
-    private OnlCartSvc        onlCartSvc;
+    private OnlCartSvc               onlCartSvc;
     @Resource
-    private KdiSvc            kdiSvc;
+    private KdiSvc                   kdiSvc;
     @Resource
-    private OnlOnlinePicSvc   onlOnlinePicSvc;
+    private OnlOnlinePicSvc          onlOnlinePicSvc;
     @Resource
-    private AfcSettleTaskSvc  afcSettleTaskSvc;
+    private AfcSettleTaskSvc         afcSettleTaskSvc;
     @Resource
-    private AfcRefundSvc      refundSvc;
+    private AfcRefundSvc             refundSvc;
     @Resource
-    private SucUserSvc        sucUserSvc;
+    private SucUserSvc               sucUserSvc;
     @Resource
-    private OrdBuyRelationSvc ordBuyRelationSvc;
+    private OrdBuyRelationSvc        ordBuyRelationSvc;
     @Resource
-    private OrdOrderSvc       thisSvc;
+    private OrdOrderSvc              thisSvc;
     @Resource
-    private OrdSettleTaskSvc ordSettleTaskSvc;
-    
+    private OrdSettleTaskSvc         ordSettleTaskSvc;
+
     @Resource
-  	 private OrdOrderDetailDeliverSvc ordOrderDetailDeliverSvc;
+    private OrdOrderDetailDeliverSvc ordOrderDetailDeliverSvc;
 
     /**
      * 执行取消用户订单时间
      */
     @Value("${ord.cancel-order-time}")
-    private int               cancelOrderTime;
+    private int                      cancelOrderTime;
 
     /**
      * 执行用户订单签收时间
      */
     @Value("${ord.signin-order-time}")
-    private int               signinOrderTime;
+    private int                      signinOrderTime;
 
     @Resource
-    private Mapper            dozerMapper;
+    private Mapper                   dozerMapper;
 
     /**
      * 检查订单是否可结算
@@ -753,136 +753,135 @@ public class OrdOrderSvcImpl extends MybatisBaseSvcImpl<OrdOrderMo, java.lang.Lo
         return cancelDeliveryRo;
     }
 
-	/**
-	 * 确认发货并修改订单状态
-	 */
-	@Override
-	@Transactional(readOnly = false, propagation = Propagation.REQUIRED)
-	public ShipmentConfirmationRo shipmentConfirmation(final ShipmentConfirmationTo to) {
-		final ShipmentConfirmationRo confirmationRo = new ShipmentConfirmationRo();
-		// 判断是否是已经支付状态
-		if (to.getOrderState() != 2) {
-			confirmationRo.setResult(ShipmentConfirmationDic.ERROR);
-			confirmationRo.setMsg("订单不是已支付状态，不能发货");
-			_log.info("订单的状态为：{}", to.getOrderState());
-			return confirmationRo;
-		}
-		// 添加签收任务
-		final OrdOrderMo mo = dozerMapper.map(to, OrdOrderMo.class);
-		final Date date = new Date();
-		mo.setSendTime(date);
-		final Calendar calendar = Calendar.getInstance();
-		calendar.setTime(date);
-		calendar.add(Calendar.HOUR, signinOrderTime);
-		final Date executePlanTime = calendar.getTime();
-		final OrdTaskMo ordTaskMo = new OrdTaskMo();
-		ordTaskMo.setExecutePlanTime(executePlanTime);
-		ordTaskMo.setExecuteState((byte) 0);
-		ordTaskMo.setTaskType((byte) 2);
-		ordTaskMo.setOrderId(String.valueOf(mo.getId()));
-		_log.info("确认发货添加签收任务的参数为：{}", ordTaskMo);
-		final int taskAddResult = ordTaskSvc.add(ordTaskMo);
-		_log.info("确认发货添加签收任务的返回值为：{}", taskAddResult);
-		if (taskAddResult != 1) {
-			_log.error("确认发货添加签收任务时出错，订单编号为：{}", mo.getOrderCode());
-			throw new RuntimeException("添加签收任务出错");
-		}
-		// 调用快递鸟打印电子面单
-		final EOrderTo eoderTo = new EOrderTo();
-		eoderTo.setShipperId(to.getShipperId());
-		eoderTo.setShipperCode(to.getShipperCode());
-		eoderTo.setOrderId(mo.getId());
-		eoderTo.setOrderDetail(to.getOrderDetail());
-		eoderTo.setOrderTitle(mo.getOrderTitle());
-		eoderTo.setReceiverName(mo.getReceiverName());
-		eoderTo.setReceiverProvince(mo.getReceiverProvince());
-		eoderTo.setReceiverCity(mo.getReceiverCity());
-		eoderTo.setReceiverExpArea(mo.getReceiverExpArea());
-		eoderTo.setReceiverAddress(mo.getReceiverAddress());
-		eoderTo.setReceiverPostCode(mo.getReceiverPostCode());
-		eoderTo.setReceiverTel(mo.getReceiverTel());
-		eoderTo.setReceiverMobile(mo.getReceiverMobile());
-		eoderTo.setSenderName(to.getSenderName());
-		eoderTo.setSenderMobile(to.getSenderMobile());
-		eoderTo.setSenderTel(to.getSenderTel());
-		eoderTo.setSenderProvince(to.getSenderProvince());
-		eoderTo.setSenderCity(to.getSenderCity());
-		eoderTo.setSenderAddress(to.getSenderAddress());
-		eoderTo.setSenderExpArea(to.getSenderExpArea());
-		eoderTo.setSenderPostCode(to.getSenderPostCode());
-		eoderTo.setOrgId(to.getOrgId());
-		_log.info("调用快递电子面单的参数为：{}", eoderTo);
-		final EOrderRo eOrderRo = kdiSvc.eorder(eoderTo);
-		_log.info("调用快递电子面单的返回值为：{}", eOrderRo);
-		if (eOrderRo.getResult().getCode() == -1) {
-			_log.error("调用快递电子面单出现参数错误");
-			throw new RuntimeException("调用快递电子面单参数错误");
-		}
-		if (eOrderRo.getResult().getCode() == -2) {
-			_log.error("重复调用快递电子面单");
-			throw new RuntimeException("该订单已发货");
-		}
-		if (eOrderRo.getResult().getCode() == -3) {
-			_log.error("调用快递电子面单失败");
-			throw new RuntimeException("调用快递电子面单失败");
-		}
-		_log.info("调用快递电子面单成功，返回值为：{}", eOrderRo);
+    /**
+     * 确认发货并修改订单状态
+     */
+    @Override
+    @Transactional(readOnly = false, propagation = Propagation.REQUIRED)
+    public ShipmentConfirmationRo shipmentConfirmation(final ShipmentConfirmationTo to) {
+        final ShipmentConfirmationRo confirmationRo = new ShipmentConfirmationRo();
+        // 判断是否是已经支付状态
+        if (to.getOrderState() != 2) {
+            confirmationRo.setResult(ShipmentConfirmationDic.ERROR);
+            confirmationRo.setMsg("订单不是已支付状态，不能发货");
+            _log.info("订单的状态为：{}", to.getOrderState());
+            return confirmationRo;
+        }
+        // 添加签收任务
+        final OrdOrderMo mo = dozerMapper.map(to, OrdOrderMo.class);
+        final Date date = new Date();
+        mo.setSendTime(date);
+        final Calendar calendar = Calendar.getInstance();
+        calendar.setTime(date);
+        calendar.add(Calendar.HOUR, signinOrderTime);
+        final Date executePlanTime = calendar.getTime();
+        final OrdTaskMo ordTaskMo = new OrdTaskMo();
+        ordTaskMo.setExecutePlanTime(executePlanTime);
+        ordTaskMo.setExecuteState((byte) 0);
+        ordTaskMo.setTaskType((byte) 2);
+        ordTaskMo.setOrderId(String.valueOf(mo.getId()));
+        _log.info("确认发货添加签收任务的参数为：{}", ordTaskMo);
+        final int taskAddResult = ordTaskSvc.add(ordTaskMo);
+        _log.info("确认发货添加签收任务的返回值为：{}", taskAddResult);
+        if (taskAddResult != 1) {
+            _log.error("确认发货添加签收任务时出错，订单编号为：{}", mo.getOrderCode());
+            throw new RuntimeException("添加签收任务出错");
+        }
+        // 调用快递鸟打印电子面单
+        final EOrderTo eoderTo = new EOrderTo();
+        eoderTo.setShipperId(to.getShipperId());
+        eoderTo.setShipperCode(to.getShipperCode());
+        eoderTo.setOrderId(mo.getId());
+        eoderTo.setOrderDetail(to.getOrderDetail());
+        eoderTo.setOrderTitle(mo.getOrderTitle());
+        eoderTo.setReceiverName(mo.getReceiverName());
+        eoderTo.setReceiverProvince(mo.getReceiverProvince());
+        eoderTo.setReceiverCity(mo.getReceiverCity());
+        eoderTo.setReceiverExpArea(mo.getReceiverExpArea());
+        eoderTo.setReceiverAddress(mo.getReceiverAddress());
+        eoderTo.setReceiverPostCode(mo.getReceiverPostCode());
+        eoderTo.setReceiverTel(mo.getReceiverTel());
+        eoderTo.setReceiverMobile(mo.getReceiverMobile());
+        eoderTo.setSenderName(to.getSenderName());
+        eoderTo.setSenderMobile(to.getSenderMobile());
+        eoderTo.setSenderTel(to.getSenderTel());
+        eoderTo.setSenderProvince(to.getSenderProvince());
+        eoderTo.setSenderCity(to.getSenderCity());
+        eoderTo.setSenderAddress(to.getSenderAddress());
+        eoderTo.setSenderExpArea(to.getSenderExpArea());
+        eoderTo.setSenderPostCode(to.getSenderPostCode());
+        eoderTo.setOrgId(to.getOrgId());
+        _log.info("调用快递电子面单的参数为：{}", eoderTo);
+        final EOrderRo eOrderRo = kdiSvc.eorder(eoderTo);
+        _log.info("调用快递电子面单的返回值为：{}", eOrderRo);
+        if (eOrderRo.getResult().getCode() == -1) {
+            _log.error("调用快递电子面单出现参数错误");
+            throw new RuntimeException("调用快递电子面单参数错误");
+        }
+        if (eOrderRo.getResult().getCode() == -2) {
+            _log.error("重复调用快递电子面单");
+            throw new RuntimeException("该订单已发货");
+        }
+        if (eOrderRo.getResult().getCode() == -3) {
+            _log.error("调用快递电子面单失败");
+            throw new RuntimeException("调用快递电子面单失败");
+        }
+        _log.info("调用快递电子面单成功，返回值为：{}", eOrderRo);
 
-		// 根据快递电子面单返回的logisticId和selectDtailId和orderId来添加物流发货表和修改每条详情的发货状态
-		for (Long detailId : to.getSelectDetailId()) {
-			_log.info("根据当前订单详情循环插入发货表和修改订单详情发货状态开始-------------------------------");
-			OrdOrderDetailDeliverMo ooddmo = new OrdOrderDetailDeliverMo();
-			ooddmo.setLogisticId(eOrderRo.getLogisticId());
-			ooddmo.setOrderId(to.getId());
-			ooddmo.setOrderDetailId(detailId);
-			_log.info("添加发货表的参数：{}", ooddmo);
-			int result = ordOrderDetailDeliverSvc.add(ooddmo);
-			_log.info("添加发货表的结果为：{}", result);
-			if (result != 1) {
-				_log.error("添加发货表失败");
-				throw new RuntimeException("添加发货表失败");
-			}
-			// 修改每条详情的发货状态
-			result = 0;
-			OrdOrderDetailMo oodMo = new OrdOrderDetailMo();
-			oodMo.setId(detailId);
-			oodMo.setIsDelivered(true);
-			_log.info("修改订单详情发货状态的参数为：{}", oodMo);
-			result = orderDetailSvc.modify(oodMo);
-			_log.info("修改订单详情发货状态结果为：{}", result);
-			if (result != 1) {
-				_log.error("添加订单详情发货状态失败");
-				throw new RuntimeException("修改订单详情发货状态失败");
-			}
-			_log.info("根据当前订单详情循环插入发货表和修改订单详情发货状态结束++++++++++++++++++++++++++++++++");
-		}
+        // 根据快递电子面单返回的logisticId和selectDtailId和orderId来添加物流发货表和修改每条详情的发货状态
+        for (final Long detailId : to.getSelectDetailId()) {
+            _log.info("根据当前订单详情循环插入发货表和修改订单详情发货状态开始-------------------------------");
+            final OrdOrderDetailDeliverMo ooddmo = new OrdOrderDetailDeliverMo();
+            ooddmo.setLogisticId(eOrderRo.getLogisticId());
+            ooddmo.setOrderId(to.getId());
+            ooddmo.setOrderDetailId(detailId);
+            _log.info("添加发货表的参数：{}", ooddmo);
+            int result = ordOrderDetailDeliverSvc.add(ooddmo);
+            _log.info("添加发货表的结果为：{}", result);
+            if (result != 1) {
+                _log.error("添加发货表失败");
+                throw new RuntimeException("添加发货表失败");
+            }
+            // 修改每条详情的发货状态
+            result = 0;
+            final OrdOrderDetailMo oodMo = new OrdOrderDetailMo();
+            oodMo.setId(detailId);
+            oodMo.setIsDelivered(true);
+            _log.info("修改订单详情发货状态的参数为：{}", oodMo);
+            result = orderDetailSvc.modify(oodMo);
+            _log.info("修改订单详情发货状态结果为：{}", result);
+            if (result != 1) {
+                _log.error("添加订单详情发货状态失败");
+                throw new RuntimeException("修改订单详情发货状态失败");
+            }
+            _log.info("根据当前订单详情循环插入发货表和修改订单详情发货状态结束++++++++++++++++++++++++++++++++");
+        }
 
-		// 根据没有当前订单详情的所有未详情Id和当前被选择的详情Id长度是否相等来决定是否修改订单状态为已发货。
-		if (to.getAllDetaileId().size() == to.getSelectDetailId().size()) {
-			_log.debug("需要修改订单状态，订单所有未发货详情等于被选择的详情：AllDetaileId长度-{}, SelectDetailId长度-{}", to.getAllDetaileId().size(),
-					to.getSelectDetailId().size());
-			_log.info("确认发货并修改订单状态，参数为：{}", mo);
-			final int result = _mapper.shipmentConfirmation(mo);
-			if (result != 1) {
-				_log.info("确认发货并修改订单状态失败，返回值为：{}", result);
-				throw new RuntimeException("添加发货表失败");
-			}
-			_log.info("确认发货并修改订单状态成功，返回值为：{}", result);
-		} else {
-			_log.info("不需要要修改订单状态，订单所有未发货详情不等于被选择的详情：AllDetaileId长度-{}, SelectDetailId长度-{}",
-					to.getAllDetaileId().size(), to.getSelectDetailId().size());
-			_log.info("确认发货成功");
-		}
+        // 根据没有当前订单详情的所有未详情Id和当前被选择的详情Id长度是否相等来决定是否修改订单状态为已发货。
+        if (to.getAllDetaileId().size() == to.getSelectDetailId().size()) {
+            _log.debug("需要修改订单状态，订单所有未发货详情等于被选择的详情：AllDetaileId长度-{}, SelectDetailId长度-{}", to.getAllDetaileId().size(), to.getSelectDetailId().size());
+            _log.info("确认发货并修改订单状态，参数为：{}", mo);
+            final int result = _mapper.shipmentConfirmation(mo);
+            if (result != 1) {
+                _log.info("确认发货并修改订单状态失败，返回值为：{}", result);
+                throw new RuntimeException("添加发货表失败");
+            }
+            _log.info("确认发货并修改订单状态成功，返回值为：{}", result);
+        } else {
+            _log.info("不需要要修改订单状态，订单所有未发货详情不等于被选择的详情：AllDetaileId长度-{}, SelectDetailId长度-{}", to.getAllDetaileId().size(), to.getSelectDetailId().size());
+            _log.info("确认发货成功");
+        }
 
-		confirmationRo.setResult(ShipmentConfirmationDic.SUCCESS);
-		confirmationRo.setMsg("确认发货成功");
-		confirmationRo.setLogisticId(eOrderRo.getLogisticId());
-		confirmationRo.setLogisticCode(eOrderRo.getLogisticCode());
-		confirmationRo.setPrintPage(eOrderRo.getPrintPage());
-		confirmationRo.setFailReason(eOrderRo.getFailReason());
-		return confirmationRo;
+        confirmationRo.setResult(ShipmentConfirmationDic.SUCCESS);
+        confirmationRo.setMsg("确认发货成功");
+        confirmationRo.setLogisticId(eOrderRo.getLogisticId());
+        confirmationRo.setLogisticCode(eOrderRo.getLogisticCode());
+        confirmationRo.setPrintPage(eOrderRo.getPrintPage());
+        confirmationRo.setFailReason(eOrderRo.getFailReason());
+        return confirmationRo;
 
-	}
+    }
+
     /**
      * 供应商发货
      */
@@ -995,7 +994,7 @@ public class OrdOrderSvcImpl extends MybatisBaseSvcImpl<OrdOrderMo, java.lang.Lo
                 }
             }
         }
-        
+
         final OrdOrderMo orderMo = new OrdOrderMo();
         orderMo.setId(Long.parseLong(orderCode));
         orderMo.setUserId(userId);
@@ -1010,19 +1009,19 @@ public class OrdOrderSvcImpl extends MybatisBaseSvcImpl<OrdOrderMo, java.lang.Lo
             final String msg = "签收失败";
             throw new RuntimeException(msg);
         }
-        
+
         _log.info("订单签收取消自动签收任务的参数为：{}", orderId);
-        Ro cancelTaskRo = ordTaskSvc.cancelTask(orderId, OrderTaskTypeDic.SIGNED);
+        final Ro cancelTaskRo = ordTaskSvc.cancelTask(orderId, OrderTaskTypeDic.SIGNED);
         _log.info("订单签收取消自动签收任务的返回值为：{}", cancelTaskRo);
         if (cancelTaskRo.getResult() != ResultDic.SUCCESS) {
-			_log.error("签收订单取消签收任务失败，订单id为：{}", orderId);
-			throw new RuntimeException("签收错误");
-		}
-        
+            _log.error("签收订单取消签收任务失败，订单id为：{}", orderId);
+            throw new RuntimeException("签收错误");
+        }
+
         _log.info("订单签收添加结算任务的参数为：{}", orderId);
         ordSettleTaskSvc.addStartSettleTask(orderId);
         _log.info("订单签收成功，订单id为：{}", orderId);
-        
+
         orderSignInRo.setResult(OrderSignInDic.SUCCESS);
         orderSignInRo.setMsg("签收成功");
         return orderSignInRo;
@@ -1134,20 +1133,20 @@ public class OrdOrderSvcImpl extends MybatisBaseSvcImpl<OrdOrderMo, java.lang.Lo
             final RefundGoBackTo refundGoBackTo = new RefundGoBackTo();
             refundGoBackTo.setOrderId(payDoneMsg.getOrderId());
             refundGoBackTo.setTradeTitle(msg);
-            Ro refundGoBackRo = refundSvc.refundGoBack(refundGoBackTo);
+            final Ro refundGoBackRo = refundSvc.refundGoBack(refundGoBackTo);
             return refundGoBackRo.getResult().equals(ResultDic.SUCCESS);
         }
-        
+
         _log.info("3. 取消订单自动取消任务");
-        for (OrdOrderMo ordOrderMo : orders) {
-        	_log.info("处理订单支付完成的通知取消订单自动取消任务的参数为：{}", ordOrderMo.getId());
-			Ro cancelTaskRo = ordTaskSvc.cancelTask(ordOrderMo.getId(), OrderTaskTypeDic.CANCEL);
-			_log.info("处理订单支付完成的通知取消订单自动取消任务的返回值为：{}", cancelTaskRo);
-			if (cancelTaskRo.getResult() != ResultDic.SUCCESS) {
-				_log.error("处理订单支付完成的通知取消订单自动取消任务时出现错误，结算id为：{}, 订单id为：{}", payOrderId, ordOrderMo.getId());
-				return false;
-			}
-		}
+        for (final OrdOrderMo ordOrderMo : orders) {
+            _log.info("处理订单支付完成的通知取消订单自动取消任务的参数为：{}", ordOrderMo.getId());
+            final Ro cancelTaskRo = ordTaskSvc.cancelTask(ordOrderMo.getId(), OrderTaskTypeDic.CANCEL);
+            _log.info("处理订单支付完成的通知取消订单自动取消任务的返回值为：{}", cancelTaskRo);
+            if (cancelTaskRo.getResult() != ResultDic.SUCCESS) {
+                _log.error("处理订单支付完成的通知取消订单自动取消任务时出现错误，结算id为：{}, 订单id为：{}", payOrderId, ordOrderMo.getId());
+                return false;
+            }
+        }
 
         final List<OrdOrderDetailMo> orderDetailAlls = new LinkedList<>();
         _log.info("4. 按不同发货组织拆单，并重新计算拆单后的订单实际交易金额");
@@ -1194,6 +1193,7 @@ public class OrdOrderSvcImpl extends MybatisBaseSvcImpl<OrdOrderMo, java.lang.Lo
                     tempOrder = dozerMapper.map(order, OrdOrderMo.class);
                     tempOrder.setId(null);
                     tempOrder.setDeliverOrgId(orderDetail.getDeliverOrgId());
+                    tempOrder.setOrderCode(_idWorker.getIdStr());
                     thisSvc.add(tempOrder);
                 }
                 if (tempOrder.getId() != orderDetail.getOrderId()) {
