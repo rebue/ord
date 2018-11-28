@@ -116,12 +116,14 @@ public class OrdOrderCtrl {
             throw new IllegalArgumentException(msg);
         }
 
-        if (!isDebug || to.getOrgId() == null) {
+        if (!isDebug) {
             final Long orgId = (Long) JwtUtils.getJwtAdditionItemInCookie(req, "orgId");
             if (orgId == null) {
                 return new PageInfo<>();
             }
             to.setOrgId(orgId);
+        } else {
+        	to.setOrgId(520874560590053376L);
         }
         _log.info("获取当前用户的组织ID: {}", to.getOrgId());
 

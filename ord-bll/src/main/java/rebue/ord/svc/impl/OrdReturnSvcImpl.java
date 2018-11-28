@@ -344,7 +344,7 @@ public class OrdReturnSvcImpl extends MybatisBaseSvcImpl<OrdReturnMo, java.lang.
 			ro.setMsg("当前订单未支付或已取消，拒绝退货失败。。。");
 			return ro;
 		}
-		
+
 		_log.info("拒绝退货查询订单详情信息的参数为：{}", ordReturnMo.getOrderDetailId());
 		OrdOrderDetailMo orderDetailMo = orderDetailSvc.getById(ordReturnMo.getOrderDetailId());
 		_log.info("拒绝退货查询订单详情信息的返回值为：{}", orderDetailMo);
@@ -354,16 +354,16 @@ public class OrdReturnSvcImpl extends MybatisBaseSvcImpl<OrdReturnMo, java.lang.
 			ro.setMsg("没有找到该订单详情");
 			return ro;
 		}
-		
+
 		if (orderDetailMo.getReturnState().intValue() != ReturnStateDic.RETURNING.getCode()) {
 			_log.error("拒绝退货查询订单详情时发现该详情并未申请退货，退货id为：{}", to.getId());
 			ro.setResult(ResultDic.FAIL);
 			ro.setMsg("该订单详情并未申请退货");
 			return ro;
 		}
-		
+
 		Date now = new Date();
-		
+
 		OrdReturnMo returnMo = new OrdReturnMo();
 		returnMo.setId(to.getId());
 		returnMo.setRejectOpId(to.getRejectOpId());
@@ -380,7 +380,7 @@ public class OrdReturnSvcImpl extends MybatisBaseSvcImpl<OrdReturnMo, java.lang.
 			ro.setMsg("操作出错");
 			return ro;
 		}
-		
+
 		_log.info("拒绝退货修改订单详情退货状态的参数为：{}", orderDetailMo.getId());
 		final int modifyReturnStateByIdResult = orderDetailSvc.modifyReturnStateById(orderDetailMo.getId(),
 				(byte) ReturnStateDic.NONE.getCode());
@@ -389,7 +389,7 @@ public class OrdReturnSvcImpl extends MybatisBaseSvcImpl<OrdReturnMo, java.lang.
 			_log.error("添加用户退货信息修改订单详情状态出现错误，订单详情id为：{}", orderDetailMo.getId());
 			throw new RuntimeException("操作错误");
 		}
-		
+
 		_log.info("拒绝退货成功，退货id为：{}", to.getId());
 		ro.setResult(ResultDic.SUCCESS);
 		ro.setMsg("操作成功");
@@ -406,7 +406,7 @@ public class OrdReturnSvcImpl extends MybatisBaseSvcImpl<OrdReturnMo, java.lang.
 		final Ro ro = new Ro();
 
 		// 退款补偿金参数为空设置默认值
-		if (to.getRefundCompensation() != null) {
+		if (to.getRefundCompensation() == null) {
 			to.setRefundCompensation(BigDecimal.ZERO);
 		}
 
@@ -476,7 +476,8 @@ public class OrdReturnSvcImpl extends MybatisBaseSvcImpl<OrdReturnMo, java.lang.
 			return ro;
 		}
 
-		if (ReturnApplicationStateDic.PENDING_REVIEW.getCode() != returnInfo.getApplicationState()) {
+		if (ReturnApplicationStateDic.PENDING_REVIEW.getCode() != returnInfo.getApplicationState()
+				&& ReturnApplicationStateDic.RETURNING.getCode() != returnInfo.getApplicationState()) {
 			final String msg = "退货单不处于待审核状态，不能审核";
 			_log.error("{}：{}", msg, to);
 			ro.setResult(ResultDic.FAIL);
@@ -505,7 +506,7 @@ public class OrdReturnSvcImpl extends MybatisBaseSvcImpl<OrdReturnMo, java.lang.
 		if (refundTotal.compareTo(order.getRealMoney()) == 0) {
 			_log.debug("订单退货总额==订单实际支付金额，修改订单状态为取消");
 			orderState = (byte) OrderStateDic.CANCEL.getCode();
-		} 
+		}
 		// 修改订单退款金额
 		final int modifyRefundRowCount = orderSvc.modifyRefund(refundTotal, orderState, order.getId(), refundedTotal);
 		if (modifyRefundRowCount != 1) {
@@ -705,6 +706,7 @@ public class OrdReturnSvcImpl extends MybatisBaseSvcImpl<OrdReturnMo, java.lang.
 	/**
 	 * 已收到货并退款 1、判断请求参数 2、查询退货信息并判断是否存在和申请状态是否处于退货中 3、查询订单信息并判断订单状态是否处于作废、已下单（待支付）状态
 	 * 4、查询订单详情并判断
+	 * 
 	 * @deprecated
 	 */
 	@Override

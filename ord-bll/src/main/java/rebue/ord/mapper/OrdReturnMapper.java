@@ -158,7 +158,7 @@ public interface OrdReturnMapper extends MybatisBaseMapper<OrdReturnMo, Long> {
             + " FROM" //
             + "    ORD_RETURN" //
             + " WHERE"//
-            + "    ORDER_ID = 1" //
+            + "    ORDER_ID = #{orderId,jdbcType=BIGINT}" //
             + "        AND APPLICATION_STATE IN (1 , 2)")
     Boolean hasReturningInOrder(final Long orderId);
 }

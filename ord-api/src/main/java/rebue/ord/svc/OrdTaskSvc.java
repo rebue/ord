@@ -5,6 +5,7 @@ import java.util.List;
 import rebue.ord.dic.OrderTaskTypeDic;
 import rebue.ord.mo.OrdTaskMo;
 import rebue.robotech.dic.TaskExecuteStateDic;
+import rebue.robotech.ro.Ro;
 import rebue.robotech.svc.MybatisBaseSvc;
 
 /**
@@ -49,5 +50,13 @@ public interface OrdTaskSvc extends MybatisBaseSvc<OrdTaskMo, java.lang.Long> {
      * 执行订单结算的任务
      */
     void executeSettleTask(Long taskId);
+
+    /**
+     * 执行取消订单任务
+     * @param orderId
+     * @param taskType
+     * @return
+     */
+	Ro cancelTask(Long orderId, OrderTaskTypeDic taskType);
 
 }

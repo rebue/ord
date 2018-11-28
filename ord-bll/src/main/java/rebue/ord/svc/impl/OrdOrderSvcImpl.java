@@ -88,6 +88,7 @@ import rebue.ord.svc.OrdBuyRelationSvc;
 import rebue.ord.svc.OrdOrderDetailSvc;
 import rebue.ord.svc.OrdOrderSvc;
 import rebue.ord.svc.OrdReturnSvc;
+import rebue.ord.svc.OrdSettleTaskSvc;
 import rebue.ord.svc.OrdTaskSvc;
 import rebue.ord.to.ListOrderTo;
 import rebue.ord.to.OrderDetailTo;
@@ -169,6 +170,8 @@ public class OrdOrderSvcImpl extends MybatisBaseSvcImpl<OrdOrderMo, java.lang.Lo
     private OrdBuyRelationSvc ordBuyRelationSvc;
     @Resource
     private OrdOrderSvc       thisSvc;
+    @Resource
+    private OrdSettleTaskSvc ordSettleTaskSvc;
 
     /**
      * 买家返款时间
@@ -218,18 +221,8 @@ public class OrdOrderSvcImpl extends MybatisBaseSvcImpl<OrdOrderMo, java.lang.Lo
             return false;
         }
 
-        // 计算计划执行时间
-        final Calendar calendar = Calendar.getInstance();
-        calendar.setTime(order.getReceivedTime());
-        calendar.add(Calendar.HOUR_OF_DAY, startSettleDelay);
-        if (calendar.getTimeInMillis() > System.currentTimeMillis()) {
-            final String msg = "还未到订单启动结算的时间";
-            _log.error("{}: 订单信息-{}", msg, order);
-            return false;
-        }
-
         // 判断订单是否有订单详情在退货中
-        if (!returnSvc.hasReturningInOrder(order.getId())) {
+        if (returnSvc.hasReturningInOrder(order.getId())) {
             final String msg = "订单还有退货中的申请未处理完成，不能结算";
             _log.error(msg);
             return false;
@@ -424,8 +417,7 @@ public class OrdOrderSvcImpl extends MybatisBaseSvcImpl<OrdOrderMo, java.lang.Lo
             orderMo.setReceiverAddress(addrMo.getReceiverAddress());
             orderMo.setReceiverPostCode(addrMo.getReceiverPostCode());
             orderMo.setReceiverTel(addrMo.getReceiverTel());
-
-            orderMo.setOrderTitle("购买大卖网商品");
+            orderMo.setOrderTitle("大卖网络-购买商品");
 
             _log.info("添加订单信息的参数为：{}", orderMo);
             // 添加订单信息
@@ -984,17 +976,7 @@ public class OrdOrderSvcImpl extends MybatisBaseSvcImpl<OrdOrderMo, java.lang.Lo
         calendar = Calendar.getInstance();
         calendar.setTime(date);
         calendar.add(Calendar.MINUTE, settleUplineCommissionTime);
-        final Date uplineCommissionTime = calendar.getTime();
-        final AddSettleTasksTo settleTasksTo = new AddSettleTasksTo();
-        settleTasksTo.setOrderId(String.valueOf(orderId));
-        settleTasksTo.setBuyerAccountId(userId);
-        settleTasksTo.setSettleBuyerCashbackTime(buyerCashbackDate);
-        settleTasksTo.setSettleUplineCommissionTime(uplineCommissionTime);
-        settleTasksTo.setIp(to.getIp());
-        settleTasksTo.setMac(to.getMac());
-        final List<AddSettleTasksDetailTo> addSettleTasksDetailList = new ArrayList<>();
         for (final OrdOrderDetailMo ordOrderDetailMo : detailList) {
-            final AddSettleTasksDetailTo settleTasksDetailTo = new AddSettleTasksDetailTo();
             if (ordOrderDetailMo.getSubjectType() == 1) {
                 final OrdBuyRelationMo mo = new OrdBuyRelationMo();
                 mo.setDownlineOrderDetailId(ordOrderDetailMo.getId());
@@ -1012,67 +994,10 @@ public class OrdOrderSvcImpl extends MybatisBaseSvcImpl<OrdOrderMo, java.lang.Lo
                         orderSignInRo.setMsg("更新购买关系失败");
                         return orderSignInRo;
                     }
-                    // 根据购买关系查找上家定单详情,定单已签收且定单详情存在且不是退货状态才发起返佣任务
-                    final OrdOrderDetailMo uplineDetailResult = orderDetailSvc.getById(buyRelationResult.getUplineOrderDetailId());
-                    final OrdOrderMo uplineOrderResult = thisSvc.getById(buyRelationResult.getUplineOrderId());
-                    _log.info("订单详情做为下家的购买关系记录：{}", uplineDetailResult);
-                    if (uplineDetailResult != null && uplineDetailResult.getReturnState() == 0 && uplineOrderResult.getOrderState() == 4) {
-                        // 获取上线买家商品详情的的下家购买关系记录，如果有2个且都已签收则执行返佣任务
-                        final OrdBuyRelationMo uplineBuyRelationMo = new OrdBuyRelationMo();
-                        uplineBuyRelationMo.setUplineOrderDetailId(buyRelationResult.getUplineOrderDetailId());
-                        uplineBuyRelationMo.setIsSignIn(true);
-                        final List<OrdBuyRelationMo> uplineBuyRelationList = ordBuyRelationSvc.list(uplineBuyRelationMo);
-                        if (uplineBuyRelationList.size() == 2) {
-                            settleTasksDetailTo.setUplineAccountId(buyRelationResult.getUplineUserId());
-                            settleTasksDetailTo.setUplineOrderId(buyRelationResult.getUplineOrderId());
-                            settleTasksDetailTo.setUplineOrderDetailId(buyRelationResult.getUplineOrderDetailId());
-                            settleTasksDetailTo.setSettleUplineCommissionAmount(ordOrderDetailMo.getBuyPrice());
-                            settleTasksDetailTo.setSettleUplineCommissionTitle("大卖网络-结算订单上家佣金");
-                            settleTasksDetailTo.setSettleUplineCommissionDetail(uplineDetailResult.getOnlineTitle() + "&&" + uplineDetailResult.getSpecName());
-                        }
-                        if (ordOrderDetailMo.getSupplierId() != null) {
-                            settleTasksDetailTo.setSupplierAccountId(ordOrderDetailMo.getSupplierId());
-                            final BigDecimal settleSupplierAmount = ordOrderDetailMo.getCostPrice().add(new BigDecimal(ordOrderDetailMo.getBuyCount())).setScale(4,
-                                    BigDecimal.ROUND_HALF_UP);
-                            settleTasksDetailTo.setSettleSupplierAmount(settleSupplierAmount);
-                            settleTasksDetailTo.setSettleSupplierTitle("大卖网络-结算订单供应商成本");
-                            settleTasksDetailTo.setSettleSupplierDetail("订单编号为：" + ordOrderDetailMo.getOrderId() + "商品规格为: " + ordOrderDetailMo.getSpecName());
-
-                        }
-                    }
-                }
-                _log.info("查询定单详情做为上家的购买关系");
-                // 获取该详情下家购买关系，如有2个下家且已签收，并且没有退货则发起结算本家返佣任务
-                final OrdBuyRelationMo downLineRelationParam = new OrdBuyRelationMo();
-                downLineRelationParam.setUplineOrderDetailId(ordOrderDetailMo.getId());
-                downLineRelationParam.setIsSignIn(true);
-                final List<OrdBuyRelationMo> downLineBuyRelationList = ordBuyRelationSvc.list(downLineRelationParam);
-                if (downLineBuyRelationList.size() == 2) {
-                    final OrdOrderDetailMo downLineDetailResult1 = orderDetailSvc.getById(downLineBuyRelationList.get(0).getDownlineOrderDetailId());
-                    final OrdOrderDetailMo downLineDetailResult2 = orderDetailSvc.getById(downLineBuyRelationList.get(1).getDownlineOrderDetailId());
-                    if (downLineDetailResult1 != null && downLineDetailResult2 != null && downLineDetailResult1.getReturnState() == 0
-                            && downLineDetailResult2.getReturnState() == 0) {
-                        settleTasksDetailTo.setSettleSelfCommissionAmount(ordOrderDetailMo.getBuyPrice());
-                        settleTasksDetailTo.setSettleSelfCommissionTitle("大卖网络-结算订单本家佣金");
-                        settleTasksDetailTo.setSettleSelfCommissionDetail(ordOrderDetailMo.getOnlineTitle() + "&&" + ordOrderDetailMo.getSpecName());
-                    }
                 }
             }
-            settleTasksDetailTo.setOrderDetailId(ordOrderDetailMo.getId().toString());
-            settleTasksDetailTo.setSettleBuyerCashbackAmount(ordOrderDetailMo.getCashbackTotal());
-            settleTasksDetailTo.setSettleBuyerCashbackTitle("大卖网络-用户返款");
-            settleTasksDetailTo.setSettleBuyerCashbackDetail(ordOrderDetailMo.getOnlineTitle());
-            addSettleTasksDetailList.add(settleTasksDetailTo);
         }
-        settleTasksTo.setDetails(addSettleTasksDetailList);
-        _log.info("订单签收添加结算的参数为：{}", settleTasksTo.toString());
-        final AddSettleTasksRo addSettleTasksRo = afcSettleTaskSvc.addSettleTasks(settleTasksTo);
-        _log.info("订单签收添加结算的返回值为：{}", addSettleTasksRo);
-        if (addSettleTasksRo.getResult().getCode() != 1) {
-            _log.error("订单签收添加结算时出现错误，订单编号为：{}", orderCode);
-            final String msg = "添加结算出错";
-            throw new RuntimeException(msg);
-        }
+        
         final OrdOrderMo orderMo = new OrdOrderMo();
         orderMo.setId(Long.parseLong(orderCode));
         orderMo.setUserId(userId);
@@ -1087,6 +1012,19 @@ public class OrdOrderSvcImpl extends MybatisBaseSvcImpl<OrdOrderMo, java.lang.Lo
             final String msg = "签收失败";
             throw new RuntimeException(msg);
         }
+        
+        _log.info("订单签收取消自动签收任务的参数为：{}", orderId);
+        Ro cancelTaskRo = ordTaskSvc.cancelTask(orderId, OrderTaskTypeDic.SIGNED);
+        _log.info("订单签收取消自动签收任务的返回值为：{}", cancelTaskRo);
+        if (cancelTaskRo.getResult() != ResultDic.SUCCESS) {
+			_log.error("签收订单取消签收任务失败，订单id为：{}", orderId);
+			throw new RuntimeException("签收错误");
+		}
+        
+        _log.info("订单签收添加结算任务的参数为：{}", orderId);
+        ordSettleTaskSvc.addStartSettleTask(orderId);
+        _log.info("订单签收成功，订单id为：{}", orderId);
+        
         orderSignInRo.setResult(OrderSignInDic.SUCCESS);
         orderSignInRo.setMsg("签收成功");
         return orderSignInRo;
@@ -1157,9 +1095,10 @@ public class OrdOrderSvcImpl extends MybatisBaseSvcImpl<OrdOrderMo, java.lang.Lo
      * 处理订单支付完成的通知
      * 1. 根据支付订单ID获取所有订单(如果没有找到，退款)
      * 2. 判断通知回来的支付金额是否和订单中记录的实际交易金额相同(如果不同，退款)
-     * 3. 按不同发货组织拆单，并重新计算拆单后的订单实际交易金额
-     * 4. 匹配购买关系
-     * 5. 根据支付订单ID修改订单状态为已支付
+     * 3. 取消订单自动取消任务
+     * 4. 按不同发货组织拆单，并重新计算拆单后的订单实际交易金额
+     * 5. 匹配购买关系
+     * 6. 根据支付订单ID修改订单状态为已支付
      */
     @Override
     @Transactional(readOnly = false, propagation = Propagation.REQUIRED)
@@ -1197,12 +1136,23 @@ public class OrdOrderSvcImpl extends MybatisBaseSvcImpl<OrdOrderMo, java.lang.Lo
             final RefundGoBackTo refundGoBackTo = new RefundGoBackTo();
             refundGoBackTo.setOrderId(payDoneMsg.getOrderId());
             refundGoBackTo.setTradeTitle(msg);
-            refundSvc.refundGoBack(refundGoBackTo);
-            return true;
+            Ro refundGoBackRo = refundSvc.refundGoBack(refundGoBackTo);
+            return refundGoBackRo.getResult().equals(ResultDic.SUCCESS);
         }
+        
+        _log.info("3. 取消订单自动取消任务");
+        for (OrdOrderMo ordOrderMo : orders) {
+        	_log.info("处理订单支付完成的通知取消订单自动取消任务的参数为：{}", ordOrderMo.getId());
+			Ro cancelTaskRo = ordTaskSvc.cancelTask(ordOrderMo.getId(), OrderTaskTypeDic.CANCEL);
+			_log.info("处理订单支付完成的通知取消订单自动取消任务的返回值为：{}", cancelTaskRo);
+			if (cancelTaskRo.getResult() != ResultDic.SUCCESS) {
+				_log.error("处理订单支付完成的通知取消订单自动取消任务时出现错误，结算id为：{}, 订单id为：{}", payOrderId, ordOrderMo.getId());
+				return false;
+			}
+		}
 
         final List<OrdOrderDetailMo> orderDetailAlls = new LinkedList<>();
-        _log.info("3. 按不同发货组织拆单，并重新计算拆单后的订单实际交易金额");
+        _log.info("4. 按不同发货组织拆单，并重新计算拆单后的订单实际交易金额");
         _log.debug("遍历订单，一个订单一个订单的处理拆单问题");
         for (final OrdOrderMo order : orders) {
             _log.debug("目前遍历到的订单信息-{}", order);
@@ -1268,6 +1218,7 @@ public class OrdOrderSvcImpl extends MybatisBaseSvcImpl<OrdOrderMo, java.lang.Lo
             }
         }
 
+        _log.info("5. 匹配购买关系");
         _log.info("遍历订单详情: 添加订单购买关系");
         for (final OrdOrderDetailMo orderDetail : orderDetailAlls) {
             try {
@@ -1287,7 +1238,7 @@ public class OrdOrderSvcImpl extends MybatisBaseSvcImpl<OrdOrderMo, java.lang.Lo
             }
         }
 
-        _log.info("5. 根据支付订单ID修改订单状态为已支付");
+        _log.info("6. 根据支付订单ID修改订单状态为已支付");
         _log.info("订单支付完成，根据PAY_ORDER_ID修改订单状态为已支付: payOrderId-{}, payTime-{}", payOrderId, payDoneMsg.getPayTime());
         final int result = _mapper.paidOrder(payOrderId, payDoneMsg.getPayTime());
         _log.debug("订单支付完成通知修改订单信息的返回值为：{}", result);
