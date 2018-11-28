@@ -138,12 +138,6 @@ public class OrdOrderSvcImpl extends MybatisBaseSvcImpl<OrdOrderMo, java.lang.Lo
         return super.add(mo);
     }
 
-    /**
-     * 启动结算延迟时间(单位小时)，默认为7*24+1小时
-     */
-    @Value("${ord.settle.startSettleDelay:169}")
-    private Integer           startSettleDelay;
-
     @Resource
     private OrdAddrSvc        ordAddrSvc;
     @Resource
@@ -387,7 +381,7 @@ public class OrdOrderSvcImpl extends MybatisBaseSvcImpl<OrdOrderMo, java.lang.Lo
         // 根据上线组织拆单
         for (final Entry<Long, List<OrdOrderDetailMo>> onlineOrg : onlineOrgs.entrySet()) {
             final OrdOrderMo orderMo = new OrdOrderMo();
-            orderMo.setId(_idWorker.getId());
+//            orderMo.setId(_idWorker.getId());
             orderMo.setOrderCode(_idWorker.getIdStr());                         // 订单编号 TODO 重写订单编号的生成算法
             orderMo.setOrderState((byte) OrderStateDic.ORDERED.getCode());      // 订单状态已下单
             orderMo.setOrderTime(now);                                          // 下单时间

@@ -11,8 +11,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
-import rebue.afc.mo.AfcSettleTaskMo;
-import rebue.afc.to.TaskTo;
 import rebue.ord.dic.OrderStateDic;
 import rebue.ord.dic.OrderTaskTypeDic;
 import rebue.ord.mapper.OrdTaskMapper;

@@ -1,28 +1,28 @@
 ord:
   # 执行用户返款时间（按小时计算）
-  settle-buyer-cashback-time: 2
+  settle-buyer-cashback-time: 0.05
   # 执行取消用户订单时间（按分钟计算）
   cancel-order-time: 60
   # 执行用户订单签收时间（按小时计算）
   signin-order-time: 2
    # 上家返佣时间（按小时计算）
-  settle-upline-commission-time: 2
+  settle-upline-commission-time: 0.05
   return-limit-time: 20
   # 供应商结算计划执行时间（按小时计算）
-  supplier-settle-execute-plan-time: 1
+  supplier-settle-execute-plan-time: 0.05
   # 已占用保证金结算计划执行时间（按小时计算）
-  occupied-deposit-settle-execute-plan-time: 1
+  occupied-deposit-settle-execute-plan-time: 0.05
   # 卖家结算计划执行时间（按小时计算）
-  seller-settle-execute-plan-time: 1
+  seller-settle-execute-plan-time: 0.05
   # 用户返现中结算计划执行时间（按小时计算）
-  user-cashbacking-settle-execute-plan-time: 1
+  user-cashbacking-settle-execute-plan-time: 0.05
   # 用户返现结算计划执行时间（按小时计算）
-  user-cashback-settle-execute-plan-time: 1
+  user-cashback-settle-execute-plan-time: 0.05
   # 用户返佣中结算计划执行时间（按小时计算）
-  user-commissioning-settle-execute-plan-time: 1
+  user-commissioning-settle-execute-plan-time: 0.05
   # 用户返佣结算计划执行时间（按小时计算）
-  user-commission-settle-execute-plan-time: 1
+  user-commission-settle-execute-plan-time: 0.05
   # 平台服务费结算计划执行时间（按小时计算）
-  platform-service-fee-settle-execute-plan-time: 1
+  platform-service-fee-settle-execute-plan-time: 0.05
   # 平台服务费比例
   platform-service-fee-ratio: 0

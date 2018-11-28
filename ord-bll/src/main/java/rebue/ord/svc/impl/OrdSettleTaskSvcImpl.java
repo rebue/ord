@@ -47,49 +47,49 @@ public class OrdSettleTaskSvcImpl implements OrdSettleTaskSvc {
 	 * 启动结算任务执行的延迟时间(单位小时)，默认为7*24+1小时
 	 */
 	@Value("${ord.settle.startSettleDelay:169}")
-	private Integer startSettleDelay;
+	private BigDecimal startSettleDelay;
 
 	/**
 	 * 供应商结算任务执行的延迟时间(单位小时)
 	 */
 	@Value("${ord.settle.settleSupplierDelay:1}")
-	private Integer settleSupplierDelay;
+	private BigDecimal settleSupplierDelay;
 
 	/**
 	 * 结算返现金给用户任务执行的延迟时间(单位小时)
 	 */
 	@Value("${ord.settle.settleCashbackToBuyerDelay:1}")
-	private Integer settleCashbackToBuyerDelay;
+	private BigDecimal settleCashbackToBuyerDelay;
 
 	/**
 	 * 释放卖家的已占用保证金任务执行的延迟时间(单位小时)
 	 */
 	@Value("${ord.settle.freeDepositUsedOfSellerDelay:1}")
-	private Integer freeDepositUsedOfSellerDelay;
+	private BigDecimal freeDepositUsedOfSellerDelay;
 
 	/**
 	 * 结算利润给卖家任务执行的延迟时间(单位小时)
 	 */
 	@Value("${ord.settle.settleProfitToSellerDelay:1}")
-	private Integer settleProfitToSellerDelay;
+	private BigDecimal settleProfitToSellerDelay;
 
 	/**
 	 * 结算平台服务费任务执行的延迟时间(单位小时)
 	 */
 	@Value("${ord.settle.settlePlatformServiceFeeDelay:1}")
-	private Integer settlePlatformServiceFeeDelay;
+	private BigDecimal settlePlatformServiceFeeDelay;
 
 	/**
 	 * 结算返佣任务执行的延迟时间(单位小时)
 	 */
 	@Value("${ord.settle.settleCommissionDelay:1}")
-	private Integer settleCommissionDelay;
+	private BigDecimal settleCommissionDelay;
 
 	/**
 	 * 完成结算任务执行的延迟时间(单位小时)，须设置在所有结算任务之后
 	 */
 	@Value("${ord.settle.completeSettleDelay:2}")
-	private Integer completeSettleDelay;
+	private BigDecimal completeSettleDelay;
 
 	/**
 	 * 平台服务费比例(例如6%则设置0.06，默认为0)
@@ -150,7 +150,7 @@ public class OrdSettleTaskSvcImpl implements OrdSettleTaskSvc {
 		// 计算计划执行时间
 		final Calendar calendar = Calendar.getInstance();
 		calendar.setTime(now);
-		calendar.add(Calendar.HOUR_OF_DAY, startSettleDelay);
+		calendar.add(Calendar.HOUR_OF_DAY, startSettleDelay.intValue());
 		taskMo.setExecutePlanTime(calendar.getTime());
 		taskSvc.add(taskMo);
 
@@ -219,7 +219,7 @@ public class OrdSettleTaskSvcImpl implements OrdSettleTaskSvc {
 	 * @param delay   延迟时间
 	 */
 	private void addSettleSubTask(final Long orderId, final Date now, final SettleTaskTypeDic taskType,
-			final Integer delay) {
+			final BigDecimal delay) {
 		final Calendar calendar = Calendar.getInstance();
 		final OrdTaskMo subTaskMo = new OrdTaskMo();
 		subTaskMo.setOrderId(orderId.toString());
@@ -228,7 +228,8 @@ public class OrdSettleTaskSvcImpl implements OrdSettleTaskSvc {
 		subTaskMo.setSubTaskType((byte) taskType.getCode());
 		// 计算计划执行时间
 		calendar.setTime(now);
-		calendar.add(Calendar.HOUR_OF_DAY, delay);
+		calendar.add(Calendar.MINUTE, delay.multiply(BigDecimal.valueOf(60)).setScale(0, BigDecimal.ROUND_HALF_UP).intValue());
+
 		subTaskMo.setExecutePlanTime(calendar.getTime());
 		taskSvc.add(subTaskMo);
 	}
@@ -266,7 +267,8 @@ public class OrdSettleTaskSvcImpl implements OrdSettleTaskSvc {
 		// 计算计划执行时间
 		final Calendar calendar = Calendar.getInstance();
 		calendar.setTime(order.getReceivedTime());
-		calendar.add(Calendar.HOUR_OF_DAY, startSettleDelay);
+		calendar.add(Calendar.HOUR_OF_DAY,
+				startSettleDelay.multiply(BigDecimal.valueOf(60)).setScale(0, BigDecimal.ROUND_HALF_UP).intValue());
 		if (calendar.getTimeInMillis() > System.currentTimeMillis()) {
 			final String msg = "还未到订单启动结算的时间";
 			_log.error("{}: 订单信息-{}", msg, order);
