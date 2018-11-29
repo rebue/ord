@@ -1,6 +1,7 @@
 -- 2018-11-28
 alter table ORD_TASK						add					SUB_TASK_TYPE        										tinyint 				default -1 comment '子任务类型';
 alter table ORD_TASK						add					unique key AK_TASK_TYPE_AND_SUB_TASK_TYPE_AND_ORDER (TASK_TYPE, SUB_TASK_TYPE, ORDER_ID);
+alter table ORD_TASK						modify				TASK_TYPE            											tinyint 				not null 	comment '任务类型（1：订单自动取消的任务  2：订单自动签收的任务 3: 订单开始结算的任务 4: 订单结算的任务 5: 订单完成结算的任务）';
 alter table ORD_ORDER					add					unique key AK_ORDER_CODE (ORDER_CODE);
 alter table ORD_ORDER					drop					key AK_SHIPPER_LOGISTIC_CODE;
 
