@@ -1178,8 +1178,8 @@
 		from ORD_ORDER
 		<where>
 			ONLINE_ORG_ID=#{orgId}
-			<if test="userName != null">
-				and USER_NAME = #{userName,jdbcType=VARCHAR} OR ORDER_TITLE LIKE '%${userName}%'
+			<if test="receiverName != null">
+				and RECEIVER_NAME LIKE '%${receiverName}%'  or ORDER_TITLE LIKE '%${receiverName}%'
 			</if>
 			<if test="orderCode != null and orderCode != ''">
 				and ORDER_CODE = #{orderCode,jdbcType=VARCHAR}

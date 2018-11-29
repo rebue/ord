@@ -253,5 +253,12 @@ public class OrdOrderDetailSvcImpl extends MybatisBaseSvcImpl<OrdOrderDetailMo, 
         mo.setIsSettleBuyer(true);
         _mapper.updateByPrimaryKeySelective(mo);
     }
+    /**
+     * 根据订单修改订单发货状态
+     */
+	@Override
+	public int modifyIsDeliverByOrderId(long orderId) {
+		return _mapper.modifyIsDeliverByOrderId(orderId);
+	}
 
 }

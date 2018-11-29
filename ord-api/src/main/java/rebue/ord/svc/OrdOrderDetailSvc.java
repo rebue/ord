@@ -44,6 +44,11 @@ public interface OrdOrderDetailSvc extends MybatisBaseSvc<OrdOrderDetailMo, java
      * 根据详情ID修改退货状态 Title: modifyReturnStateById Description:
      */
     int modifyReturnStateById(long id, byte returnState);
+    
+    /**
+     * 根据订单ID修改发货状态 Title: modifyReturnStateById Description:
+     */
+    int modifyIsDeliverByOrderId(long orderId);
 
     /**
      * 更新订单详情的返佣名额字段

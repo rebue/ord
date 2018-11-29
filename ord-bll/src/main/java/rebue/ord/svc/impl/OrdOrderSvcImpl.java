@@ -776,17 +776,26 @@ public class OrdOrderSvcImpl extends MybatisBaseSvcImpl<OrdOrderMo, java.lang.Lo
 		calendar.add(Calendar.HOUR, signinOrderTime);
 		final Date executePlanTime = calendar.getTime();
 		final OrdTaskMo ordTaskMo = new OrdTaskMo();
-		ordTaskMo.setExecutePlanTime(executePlanTime);
-		ordTaskMo.setExecuteState((byte) 0);
-		ordTaskMo.setTaskType((byte) 2);
 		ordTaskMo.setOrderId(String.valueOf(mo.getId()));
-		_log.info("确认发货添加签收任务的参数为：{}", ordTaskMo);
-		final int taskAddResult = ordTaskSvc.add(ordTaskMo);
-		_log.info("确认发货添加签收任务的返回值为：{}", taskAddResult);
-		if (taskAddResult != 1) {
-			_log.error("确认发货添加签收任务时出错，订单编号为：{}", mo.getOrderCode());
-			throw new RuntimeException("添加签收任务出错");
+		//先查询任务是否已经存在
+		_log.info("查看签收任务是否存在的参数为：{}", ordTaskMo);
+		List<OrdTaskMo> ordTaskList=ordTaskSvc.list(ordTaskMo);
+		_log.info("查看签收任务是否存在的结果为：{}", ordTaskList);
+		if(ordTaskList.size()==0) {
+			ordTaskMo.setExecutePlanTime(executePlanTime);
+			ordTaskMo.setExecuteState((byte) 0);
+			ordTaskMo.setTaskType((byte) 2);
+			_log.info("确认发货添加签收任务的参数为：{}", ordTaskMo);
+			final int taskAddResult = ordTaskSvc.add(ordTaskMo);
+			_log.info("确认发货添加签收任务的返回值为：{}", taskAddResult);
+			if (taskAddResult != 1) {
+				_log.error("确认发货添加签收任务时出错，订单编号为：{}", mo.getOrderCode());
+				throw new RuntimeException("添加签收任务出错");
+			}
+		}else {
+			_log.info("确认发货添加签收任务已经存在，orderId为：{}", ordTaskMo.getOrderId());
 		}
+		
 		// 调用快递鸟打印电子面单
 		final EOrderTo eoderTo = new EOrderTo();
 		eoderTo.setShipperId(to.getShipperId());
@@ -883,56 +892,94 @@ public class OrdOrderSvcImpl extends MybatisBaseSvcImpl<OrdOrderMo, java.lang.Lo
 		return confirmationRo;
 
 	}
-    /**
-     * 供应商发货
-     */
-    @Override
-    public ShipmentConfirmationRo sendBySupplier(final ShipmentConfirmationTo to) {
-        final ShipmentConfirmationRo confirmationRo = new ShipmentConfirmationRo();
-        final OrdOrderMo mo = dozerMapper.map(to, OrdOrderMo.class);
-        final Date date = new Date();
-        mo.setSendTime(date);
-        final Calendar calendar = Calendar.getInstance();
-        calendar.setTime(date);
-        calendar.add(Calendar.HOUR, signinOrderTime);
-        // 取消订单的时间
-        final Date executePlanTime = calendar.getTime();
-        final OrdTaskMo ordTaskMo = new OrdTaskMo();
-        ordTaskMo.setExecutePlanTime(executePlanTime);
-        ordTaskMo.setExecuteState((byte) 0);
-        ordTaskMo.setTaskType((byte) 2);
-        ordTaskMo.setOrderId(String.valueOf(mo.getId()));
-        _log.info("确认发货添加签收任务的参数为：{}", ordTaskMo);
-        // 添加签收任务
-        final int taskAddResult = ordTaskSvc.add(ordTaskMo);
-        _log.info("确认发货添加签收任务的返回值为：{}", taskAddResult);
-        if (taskAddResult != 1) {
-            _log.error("确认发货添加签收任务时出错，订单编号为：{}", mo.getOrderCode());
-            throw new RuntimeException("添加签收任务出错");
-        }
-        final AddKdiLogisticTo addKdiLogisticTo = dozerMapper.map(to, AddKdiLogisticTo.class);
-        addKdiLogisticTo.setEntryType((byte) 2);
-        addKdiLogisticTo.setOrderId(to.getId());
-        final KdiLogisticRo entryResult = kdiSvc.entryLogistics(addKdiLogisticTo);
-        if (entryResult.getResult() != 1) {
-            _log.error("添加物流信息出错，订单编号为：{}", mo.getOrderCode());
-            throw new RuntimeException("添加物流信息出错");
-        }
-        mo.setOrderState((byte) OrderStateDic.PAID.getCode());
-        mo.setLogisticCode(to.getLogisticCode().toString());
-        _log.info("确认发货并修改订单状态的参数为：{}", mo);
-        final int result = _mapper.shipmentConfirmation(mo);
-        _log.info("确认发货并修改订单状态的返回值为：{}", result);
-        if (result != 1) {
-            _log.error("确认发货出现异常，返回值为：{}", result);
-            confirmationRo.setResult(ShipmentConfirmationDic.ERROR);
-            confirmationRo.setMsg("确认发货失败");
-            return confirmationRo;
-        }
-        confirmationRo.setResult(ShipmentConfirmationDic.SUCCESS);
-        confirmationRo.setMsg("确认发货成功");
-        return confirmationRo;
-    }
+	
+	/**
+	 * 获取物流轨迹
+	 */
+	@Override
+	public ShipmentConfirmationRo sendBySupplier(final ShipmentConfirmationTo to) {
+		final ShipmentConfirmationRo confirmationRo = new ShipmentConfirmationRo();
+		final OrdOrderMo mo = dozerMapper.map(to, OrdOrderMo.class);
+		// 添加签收任务
+		final Date date = new Date();
+		mo.setSendTime(date);
+		final Calendar calendar = Calendar.getInstance();
+		calendar.setTime(date);
+		calendar.add(Calendar.HOUR, signinOrderTime);
+		final Date executePlanTime = calendar.getTime();
+		final OrdTaskMo ordTaskMo = new OrdTaskMo();
+		ordTaskMo.setOrderId(String.valueOf(mo.getId()));
+		//先查询任务是否已经存在
+		_log.info("查看签收任务是否存在的参数为：{}", ordTaskMo);
+		List<OrdTaskMo> ordTaskList=ordTaskSvc.list(ordTaskMo);
+		_log.info("查看签收任务是否存在的结果为：{}", ordTaskList);
+		if(ordTaskList.size()==0) {
+			ordTaskMo.setExecutePlanTime(executePlanTime);
+			ordTaskMo.setExecuteState((byte) 0);
+			ordTaskMo.setTaskType((byte) 2);
+			_log.info("确认发货添加签收任务的参数为：{}", ordTaskMo);
+			final int taskAddResult = ordTaskSvc.add(ordTaskMo);
+			_log.info("确认发货添加签收任务的返回值为：{}", taskAddResult);
+			if (taskAddResult != 1) {
+				_log.error("确认发货添加签收任务时出错，订单编号为：{}", mo.getOrderCode());
+				throw new RuntimeException("添加签收任务出错");
+			}
+		}else {
+			_log.info("确认发货添加签收任务已经存在，orderId为：{}", ordTaskMo.getOrderId());
+		}
+
+		// 添加物流信息
+		final AddKdiLogisticTo addKdiLogisticTo = dozerMapper.map(to, AddKdiLogisticTo.class);
+		addKdiLogisticTo.setEntryType((byte) 2);
+		addKdiLogisticTo.setOrderId(to.getId());
+		_log.info("添加物流信息参数为：{}", addKdiLogisticTo);
+		final KdiLogisticRo entryResult = kdiSvc.entryLogistics(addKdiLogisticTo);
+		_log.info("添加物流信息结果为：{}", entryResult);
+		if (entryResult.getResult() != 1) {
+			_log.error("添加物流信息出错，订单编号为：{}", mo.getOrderCode());
+			throw new RuntimeException("添加物流信息出错");
+		}
+		// 根据订单id查询订单详情并插入到发货表
+		OrdOrderDetailMo detailMo = new OrdOrderDetailMo();
+		detailMo.setOrderId(mo.getId());
+		_log.info("根据订单id查询订单详情的参数为：{}", detailMo);
+		List<OrdOrderDetailMo> detailList = orderDetailSvc.list(detailMo);
+		_log.info("根据订单id查询订单详情的结果为：{}", detailList);
+		for (OrdOrderDetailMo ordOrderDetailMo : detailList) {
+			_log.info("根据当前订单详情循环插入发货表开始-------------------------------");
+			OrdOrderDetailDeliverMo ooddmo = new OrdOrderDetailDeliverMo();
+			ooddmo.setLogisticId(addKdiLogisticTo.getId());
+			ooddmo.setOrderId(mo.getId());
+			ooddmo.setOrderDetailId(ordOrderDetailMo.getId());
+			_log.info("添加发货表的参数：{}", ooddmo);
+			int result = ordOrderDetailDeliverSvc.add(ooddmo);
+			if (result != 1) {
+				throw new RuntimeException("添加发货表出错");
+			}
+			_log.info("根据当前订单详情循环插入发货表结束+++++++++++++++++++++++++++++++");
+		}
+
+		// 根据订单id来修改订单详情发货状态
+		_log.info("根据订单id修改订单详情发货状态的参数为：{}", mo.getId());
+		int result = orderDetailSvc.modifyIsDeliverByOrderId(mo.getId());
+		_log.info("根据订单id修改订单详情发货状态的结果为：{}", result);
+		if (result < 1) {
+			_log.error("修改订单详情发货状态失败，订单id为：{}", mo.getId());
+			throw new RuntimeException("修改订单详情发货状态失败");
+		}
+		// 修改订单状态
+		_log.info("获取物流轨迹并修改订单状态的参数为：{}", mo);
+		result = 0;
+		result = _mapper.shipmentConfirmation(mo);
+		_log.info("确认发货并修改订单状态的返回值为：{}", result);
+		if (result != 1) {
+			_log.error("修改订单发货状态失败，订单id为：{}", mo.getId());
+			throw new RuntimeException("修改订单发货状态失败");
+		}
+		confirmationRo.setResult(ShipmentConfirmationDic.SUCCESS);
+		confirmationRo.setMsg("确认发货成功");
+		return confirmationRo;
+	}
 
     /**
      * 订单签收

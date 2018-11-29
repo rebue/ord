@@ -29,9 +29,9 @@ public class ListOrderTo {
     private String orderCode;
 
     /**
-     * 用户名
+     * 收件人姓名
      */
-    private String userName;
+    private String receiverName;
 
     /**
      * 订单状态

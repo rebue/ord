@@ -301,7 +301,7 @@ public class OrdOrderCtrl {
         ShipmentConfirmationRo confirmationRo = new ShipmentConfirmationRo();
         try {
             confirmationRo = svc.sendBySupplier(qo);
-            _log.info("本店发货的返回值为：{}", confirmationRo);
+            _log.info("订阅的返回值为：{}", confirmationRo);
         } catch (final RuntimeException e) {
             final String msg = e.getMessage();
             if (msg.equals("参数错误")) {
