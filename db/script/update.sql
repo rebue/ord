@@ -22,22 +22,6 @@ alter table ORD_RETURN           		drop column  	SUBTRACT_CASHBACK;
 alter table ORD_RETURN			 		add                	REFUND_COMPENSATION  							decimal(18,4) default 0 comment '退款补偿金额(退货退款产生的需补偿给卖家的金额，例如补偿运费)';
 
 
--- 新增结算任务表（ORD_SETTLE_TASK）
-create table ORD_SETTLE_TASK
-(
-   ID                   bigint not null comment '任务ID',
-   EXECUTE_STATE        tinyint not null default 0 comment '执行状态(-1:取消；0:未执行；1:已执行；暂停)',
-   EXECUTE_PLAN_TIME    datetime not null comment '计划执行时间',
-   EXECUTE_FACT_TIME    datetime comment '实际执行时间',
-   TRADE_TYPE           tinyint not null comment '结算类型(交易类型中的几种结算类型)',
-   ORDER_ID             varchar(150) not null comment '订单ID(销售订单ID)',
-   IP                   varchar(150) not null comment 'IP地址',
-   primary key (ID),
-   unique key AK_TRADE_TYPE_AND_ORDER_ID (TRADE_TYPE, ORDER_ID)
-);
-alter table ORD_SETTLE_TASK comment '结算任务';
-
-
 -- 2018-11-16
 alter table ORD_ORDER_DETAIL						  add            IS_SETTLE_BUYER      bool comment '是否结算给买家';
 alter table ORD_ORDER_DETAIL						  add            ACTUAL_AMOUNT        decimal(18,4) comment '实际成交金额';
@@ -57,6 +41,24 @@ alter table ORD_ORDER                                       add         PAY_ORDE
 update ORD_ORDER set PAY_ORDER_ID=ID;
 update ORD_ORDER_DETAIL set RETURN_COUNT=0 where RETURN_COUNT is null;
 alter table ORD_ORDER_DETAIL                         modify    RETURN_COUNT         int not null default 0         comment '退货数量';
+
+
+
+
+
+
+
+
+
+
+
+
+-- --------------------------------------------------------下面的已更新到线上------------------------------------------------------------
+
+
+
+
+
 
 -- 2018-11-12
 alter table ORD_ORDER_DETAIL                         add         PRODUCT_SPEC_ID      bigint             null          comment '产品规格ID';
@@ -99,19 +101,6 @@ alter table ORD_ORDER_DETAIL add COST_PRICE           decimal(18,4) comment '成
 -- 2018年11月3日16:27:51
 	-- ORD_ORDER_DETAIL 添加供应商id和供应商结算类型
 alter table ORD_ORDER_DETAIL add SUPPLIER_ID          bigint comment '供应商ID';
-
-
-
-
-
-
-
-
--- --------------------------------------------------------下面的已更新到线上------------------------------------------------------------
-
-
-
-
 
 
 -- 2018年10月8日15:17:14
