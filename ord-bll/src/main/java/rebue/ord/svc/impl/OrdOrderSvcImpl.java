@@ -779,17 +779,26 @@ public class OrdOrderSvcImpl extends MybatisBaseSvcImpl<OrdOrderMo, java.lang.Lo
         calendar.add(Calendar.HOUR, signinOrderTime);
         final Date executePlanTime = calendar.getTime();
         final OrdTaskMo ordTaskMo = new OrdTaskMo();
-        ordTaskMo.setExecutePlanTime(executePlanTime);
-        ordTaskMo.setExecuteState((byte) 0);
-        ordTaskMo.setTaskType((byte) 2);
         ordTaskMo.setOrderId(String.valueOf(mo.getId()));
-        _log.info("确认发货添加签收任务的参数为：{}", ordTaskMo);
-        final int taskAddResult = ordTaskSvc.add(ordTaskMo);
-        _log.info("确认发货添加签收任务的返回值为：{}", taskAddResult);
-        if (taskAddResult != 1) {
-            _log.error("确认发货添加签收任务时出错，订单编号为：{}", mo.getOrderCode());
-            throw new RuntimeException("添加签收任务出错");
-        }
+		//先查询任务是否已经存在
+		_log.info("查看签收任务是否存在的参数为：{}", ordTaskMo);
+		List<OrdTaskMo> ordTaskList=ordTaskSvc.list(ordTaskMo);
+		_log.info("查看签收任务是否存在的结果为：{}", ordTaskList);
+		if(ordTaskList.size()==0) {
+			ordTaskMo.setExecutePlanTime(executePlanTime);
+			ordTaskMo.setExecuteState((byte) 0);
+			ordTaskMo.setTaskType((byte) 2);
+			_log.info("确认发货添加签收任务的参数为：{}", ordTaskMo);
+			final int taskAddResult = ordTaskSvc.add(ordTaskMo);
+			_log.info("确认发货添加签收任务的返回值为：{}", taskAddResult);
+			if (taskAddResult != 1) {
+				_log.error("确认发货添加签收任务时出错，订单编号为：{}", mo.getOrderCode());
+				throw new RuntimeException("添加签收任务出错");
+			}
+		}else {
+			_log.info("确认发货添加签收任务已经存在，orderId为：{}", ordTaskMo.getOrderId());
+		}
+        
         // 调用快递鸟打印电子面单
         final EOrderTo eoderTo = new EOrderTo();
         eoderTo.setShipperId(to.getShipperId());

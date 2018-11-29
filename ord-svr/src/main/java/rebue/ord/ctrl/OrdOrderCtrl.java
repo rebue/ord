@@ -292,12 +292,12 @@ public class OrdOrderCtrl {
     }
 
     /**
-     * 供应商发货
+     * 订阅轨迹（原先是供应商发货）
      */
     @SuppressWarnings("finally")
     @PutMapping("/ord/order/sendBySupplier")
     ShipmentConfirmationRo sendBySupplier(@RequestBody final ShipmentConfirmationTo qo) {
-        _log.info("本店发货的参数为：{}", qo);
+        _log.info("订阅轨迹的参数为：{}", qo);
         ShipmentConfirmationRo confirmationRo = new ShipmentConfirmationRo();
         try {
             confirmationRo = svc.sendBySupplier(qo);
