@@ -209,4 +209,12 @@ public class OrdTaskCtrl {
     void executeSettleTask(@RequestParam("taskId") final Long taskId) {
         taskSvc.executeSettleTask(taskId);
     }
+    
+    /**
+     * 执行订单结算完成的任务
+     */
+    @PostMapping("/ord/task/executeCompleteSettle")
+    void executeCompleteSettleTask(@RequestParam("taskId") final Long taskId) {
+    	taskSvc.executeCompleteSettleTask(taskId);
+    }
 }

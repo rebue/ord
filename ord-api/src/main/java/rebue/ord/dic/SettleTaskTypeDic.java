@@ -42,11 +42,7 @@ public enum SettleTaskTypeDic implements EnumBase {
     /**
      * 6: 结算-结算返佣金
      */
-    SETTLE_COMMISSION(6),
-    /**
-     * 7: 结算-完成结算
-     */
-    COMPLETE_SETTLE(7);
+    SETTLE_COMMISSION(6);
 
     /**
      * 枚举的所有项，注意这个变量是静态单例的

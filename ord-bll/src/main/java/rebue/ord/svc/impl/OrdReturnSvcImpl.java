@@ -484,11 +484,12 @@ public class OrdReturnSvcImpl extends MybatisBaseSvcImpl<OrdReturnMo, java.lang.
 			ro.setMsg(msg);
 			return ro;
 		}
-
+		// 本次退款总额 = 本次退款金额 + 扣除补偿金
+		BigDecimal currentRefundTotal = to.getRefundAmount().add(to.getRefundCompensation());
 		// 订单已经退款总额
 		final BigDecimal refundedTotal = order.getReturnTotal();
-		// 订单退款总额 = 订单已经退款总额 + 本次退款金额 + 扣除补偿金
-		final BigDecimal refundTotal = refundedTotal.add(to.getRefundAmount()).add(to.getRefundCompensation());
+		// 订单退款总额 = 订单已经退款总额 + 本次退款总额
+		final BigDecimal refundTotal = refundedTotal.add(currentRefundTotal);
 		_log.debug("订单已经退款总额：{}, 本次退款金额: {}", refundedTotal, to.getRefundAmount());
 		_log.debug("订单退款总额 = 订单已经退款总额 + 本次退款金额 + 扣除补偿金：{}", refundTotal);
 		_log.debug("订单实际支付金额：{}", order.getRealMoney());
@@ -516,6 +517,16 @@ public class OrdReturnSvcImpl extends MybatisBaseSvcImpl<OrdReturnMo, java.lang.
 			ro.setResult(ResultDic.FAIL);
 			ro.setMsg(msg);
 			return ro;
+		}
+
+		_log.info("同意退款修改订单详情实际金额的参数为：订单详情id-{}，新的实际金额-{}，旧的实际金额-{}", to.getOrderDetailId(),
+				detail.getActualAmount().subtract(currentRefundTotal), detail.getActualAmount());
+		int modifyActualAmountResult = orderDetailSvc.modifyActualAmount(to.getOrderDetailId(),
+				detail.getActualAmount().subtract(currentRefundTotal), detail.getActualAmount());
+		_log.info("同意退款修改订单详情实际金额的返回值为：{}", modifyActualAmountResult);
+		if (modifyActualAmountResult != 1) {
+			_log.info("同意退款修改订单详情实际金额的出现错误，退货id为：{}", to.getReturnId());
+			throw new RuntimeException("修改订单详情实际金额出错");
 		}
 
 		// 退货数量为空，则表示仅退款，不为空，则表示退货退款
@@ -557,8 +568,6 @@ public class OrdReturnSvcImpl extends MybatisBaseSvcImpl<OrdReturnMo, java.lang.
 
 			// 修改退货单
 			final Date now = new Date();
-			// 本次退款总额 = 本次退款金额 + 本次扣除补偿金额
-			final BigDecimal currentRefundTotal = to.getRefundAmount().add(to.getRefundCompensation());
 			_log.info("确认退款修改退货单的参数为：本次退款总额-{} 扣除补偿金额-{} 操作人ID-{} 操作时间-{} 退货ID-{}", currentRefundTotal, //
 					to.getRefundCompensation(), to.getOpId(), now, to.getReturnId());
 			final int confirmRefundRowCount = _mapper.confirmRefund(currentRefundTotal, //

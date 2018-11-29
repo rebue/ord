@@ -80,7 +80,7 @@ public class OrdTaskSvcImpl extends MybatisBaseSvcImpl<OrdTaskMo, java.lang.Long
 	@Override
 	public Boolean existUnfinished(final String orderId) {
 		_log.info("判断订单是否存在仍未完成的任务（包括未执行的和暂停执行的）");
-		return _mapper.existUnfinished(orderId);
+		return _mapper.existUnfinished(orderId, OrderTaskTypeDic.SETTLE);
 	}
 
 	/**
@@ -329,4 +329,50 @@ public class OrdTaskSvcImpl extends MybatisBaseSvcImpl<OrdTaskMo, java.lang.Long
 		}
 	}
 
+	/**
+	 * 执行订单完成结算的任务
+	 */
+	@Override
+	public void executeCompleteSettleTask(final Long taskId) {
+		_log.info("准备执行订单完成结算的任务: {}", taskId);
+		if (taskId == null) {
+			final String msg = "参数不正确";
+			_log.error(msg);
+			throw new RuntimeException(msg);
+		}
+
+		// 获取任务信息
+		final OrdTaskMo taskMo = getById(taskId);
+		if (taskMo == null) {
+			final String msg = "执行订单完成结算的任务时发现任务不存在";
+			_log.error("{}: taskId-{}", msg, taskId);
+			throw new RuntimeException(msg);
+		}
+		_log.info("任务信息: {}", taskMo);
+		if (TaskExecuteStateDic.NONE.getCode() != taskMo.getExecuteState().intValue()) {
+			final String msg = "任务不是未执行状态，不能执行";
+			_log.error("{}: {}", msg, taskMo);
+			throw new RuntimeException(msg);
+		}
+
+		_log.info("开始执行任务");
+		// 计算当前时间
+		final Date now = new Date();
+		try {
+			settleTaskSvc.executeCompleteSettleTask(Long.parseLong(taskMo.getOrderId()));
+		} catch (final RuntimeException e) {
+			final String msg = "执行任务出现运行时异常";
+			_log.error(msg, e);
+			throw new RuntimeException(msg);
+		}
+		_log.info("将任务状态改为已经执行");
+		final int rowCount = _mapper.done(now, taskMo.getId(), (byte) TaskExecuteStateDic.DONE.getCode(),
+				(byte) TaskExecuteStateDic.NONE.getCode());
+		if (rowCount != 1) {
+			_log.info("影响行数为: {}", rowCount);
+			final String msg = "执行任务不成功: 可能出现并发问题";
+			_log.error("{}-{}", msg, taskMo);
+			throw new RuntimeException(msg);
+		}
+	}
 }

@@ -7,6 +7,7 @@ import java.util.Map;
 
 import javax.annotation.Resource;
 
+import org.apache.ibatis.annotations.Param;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
@@ -91,6 +92,20 @@ public class OrdOrderDetailSvcImpl extends MybatisBaseSvcImpl<OrdOrderDetailMo, 
         _log.info("修改订单详情的退货情况: 退货总数-{}, 新的返现金总额-{}, 退货状态-{}, where-订单详情ID-{}, where-之前的已退货数量-{}, where-退货之前的返现金总额-{}", returnTotal, newCashbackTotal, returnState, whereDetailId,
                 whereReturnedCount, whereOldCashbackTotal);
         return _mapper.updateReturn(returnTotal, newCashbackTotal, returnState, whereDetailId, whereReturnedCount, whereOldCashbackTotal);
+    }
+    
+    /**
+     * 修改订单详情实际金额
+     * @param id 详情id
+     * @param newActualAmount 新实际金额
+     * @param oldActualAmount 旧实际金额
+     * @return
+     */
+    @Override
+    @Transactional(readOnly = false, propagation = Propagation.REQUIRED)
+    public int modifyActualAmount(Long id, BigDecimal newActualAmount, BigDecimal oldActualAmount) {
+    	_log.info("修改订单详情实际金额的参数为：详情id-{}，新的实际金额-{}，旧的实际金额-{}", id, newActualAmount, oldActualAmount);
+    	return _mapper.updateActualAmount(id, newActualAmount, oldActualAmount);
     }
 
     /**

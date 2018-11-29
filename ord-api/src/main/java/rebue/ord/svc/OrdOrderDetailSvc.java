@@ -85,4 +85,13 @@ public interface OrdOrderDetailSvc extends MybatisBaseSvc<OrdOrderDetailMo, java
      */
     void settleBuyer(Long orderDetailId);
 
+    /**
+     * 修改订单详情实际金额
+     * @param id 详情id
+     * @param newActualAmount 新实际金额
+     * @param oldActualAmount 旧实际金额
+     * @return
+     */
+	int modifyActualAmount(Long id, BigDecimal newActualAmount, BigDecimal oldActualAmount);
+
 }

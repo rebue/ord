@@ -53,10 +53,12 @@ public interface OrdTaskSvc extends MybatisBaseSvc<OrdTaskMo, java.lang.Long> {
 
     /**
      * 执行取消订单任务
-     * @param orderId
-     * @param taskType
-     * @return
      */
 	Ro cancelTask(Long orderId, OrderTaskTypeDic taskType);
+
+	/**
+	 *  执行订单完成结算的任务
+	 */
+	void executeCompleteSettleTask(Long taskId);
 
 }
