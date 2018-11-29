@@ -1197,6 +1197,7 @@ public class OrdOrderSvcImpl extends MybatisBaseSvcImpl<OrdOrderMo, java.lang.Lo
                     tempOrder.setDeliverOrgId(orderDetail.getDeliverOrgId());
                     tempOrder.setOrderCode(_idWorker.getIdStr());
                     thisSvc.add(tempOrder);
+                    orderMap.put(orderDetail.getDeliverOrgId(), tempOrder);
                 }
                 if (tempOrder.getId() != orderDetail.getOrderId()) {
                     _log.debug("找到的订单不是原来详情的订单，替换详情的父订单为找到的订单");

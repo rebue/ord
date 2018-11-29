@@ -7,6 +7,7 @@ import javax.annotation.Resource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.scheduling.annotation.Scheduled;
+import org.springframework.stereotype.Component;
 
 import rebue.ord.dic.OrderTaskTypeDic;
 import rebue.ord.svr.feign.OrdTaskSvc;
@@ -15,7 +16,8 @@ import rebue.robotech.dic.TaskExecuteStateDic;
 /**
  * 订单结算的任务
  */
-public class OrdSettleTasks {
+@Component
+public class OrderSettleTasks {
 
     private final static Logger _log = LoggerFactory.getLogger(OrderAutoCancelTasks.class);
 
@@ -32,7 +34,7 @@ public class OrdSettleTasks {
             _log.info("获取到所有需要执行订单结算的任务的列表为：{}", taskIds);
             for (final Long taskId : taskIds) {
                 try {
-                    taskSvc.executeStartSettleTask(taskId);
+                    taskSvc.executeSettleTask(taskId);
                 } catch (final RuntimeException e) {
                     _log.error("执行订单结算的任务失败", e);
                 }

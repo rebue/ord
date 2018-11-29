@@ -24,4 +24,9 @@ public interface OrdSettleTaskSvc {
      */
     void executeSettleTask(OrdTaskMo taskMo);
 
+    /**
+     * 执行订单结算完成的任务(根据订单ID)
+     */
+	void executeCompleteSettleTask(Long orderId);
+
 }

@@ -3,19 +3,26 @@ ord:
   cancel-order-time: 60
   # 执行用户订单签收时间（按小时计算）
   signin-order-time: 2
+  # 退货限制时间（单位：小时）
   return-limit-time: 20
   settle:
-    # 供应商结算计划执行时间（按小时计算）
-    supplier-settle-execute-plan-time: 0.05
-    # 已占用保证金结算计划执行时间（按小时计算）
-    occupied-deposit-settle-execute-plan-time: 0.05
-    # 卖家结算计划执行时间（按小时计算）
-    seller-settle-execute-plan-time: 0.05
-    # 用户返现结算计划执行时间（按小时计算）
-    user-cashback-settle-execute-plan-time: 0.05
-    # 用户返佣结算计划执行时间（按小时计算）
-    user-commission-settle-execute-plan-time: 0.05
-    # 平台服务费结算计划执行时间（按小时计算）
-    platform-service-fee-settle-execute-plan-time: 0.05
-    # 平台服务费比例
-    platform-service-fee-ratio: 0
+    # 启动结算任务执行的延迟时间(单位小时)，默认为7*24+1小时
+    startSettleDelay: 0.05
+    # 供应商结算任务执行的延迟时间(单位小时)
+    settleSupplierDelay: 0.05
+    # 结算返现金给用户任务执行的延迟时间(单位小时)
+    settleCashbackToBuyerDelay: 0.05
+    # 释放卖家的已占用保证金任务执行的延迟时间(单位小时)
+    freeDepositUsedOfSellerDelay: 0.05
+    # 结算利润给卖家任务执行的延迟时间(单位小时)
+    settleProfitToSellerDelay: 0.05
+    # 结算平台服务费任务执行的延迟时间(单位小时)
+    settlePlatformServiceFeeDelay: 0.05
+    # 结算返佣任务执行的延迟时间(单位小时)
+    settleCommissionDelay: 0.05
+    # 平台服务费比例(例如6%则设置0.06，默认为0)
+    platformServiceFeeRatio: 0
+    # 完成结算任务执行的延迟时间(单位小时)，须设置在所有结算任务之后
+    completeSettleDelay: 0.06
+    
+    

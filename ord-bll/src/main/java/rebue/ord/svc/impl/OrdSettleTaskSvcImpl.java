@@ -150,7 +150,8 @@ public class OrdSettleTaskSvcImpl implements OrdSettleTaskSvc {
 		// 计算计划执行时间
 		final Calendar calendar = Calendar.getInstance();
 		calendar.setTime(now);
-		calendar.add(Calendar.HOUR_OF_DAY, startSettleDelay.intValue());
+		calendar.add(Calendar.MINUTE,
+				startSettleDelay.multiply(BigDecimal.valueOf(60)).setScale(0, BigDecimal.ROUND_HALF_UP).intValue());
 		taskMo.setExecutePlanTime(calendar.getTime());
 		taskSvc.add(taskMo);
 
@@ -207,8 +208,21 @@ public class OrdSettleTaskSvcImpl implements OrdSettleTaskSvc {
 		_log.info("添加结算返佣金的任务");
 		addSettleSubTask(orderId, now, SettleTaskTypeDic.SETTLE_COMMISSION, settleCommissionDelay);
 
-		_log.info("添加完成结算的任务");
-		addSettleSubTask(orderId, now, SettleTaskTypeDic.COMPLETE_SETTLE, completeSettleDelay);
+		// 添加启动结算的任务
+		final OrdTaskMo taskMo = new OrdTaskMo();
+		taskMo.setOrderId(orderId.toString());
+		taskMo.setTaskType((byte) OrderTaskTypeDic.COMPLETE_SETTLE.getCode());
+		taskMo.setExecuteState((byte) TaskExecuteStateDic.NONE.getCode());
+		// 计算计划执行时间
+		final Calendar calendar = Calendar.getInstance();
+		calendar.setTime(now);
+		calendar.add(Calendar.MINUTE,
+				completeSettleDelay.multiply(BigDecimal.valueOf(60)).setScale(0, BigDecimal.ROUND_HALF_UP).intValue());
+		taskMo.setExecutePlanTime(calendar.getTime());
+		_log.info("添加订单结算完成任务的参数为:{}", taskMo);
+		taskSvc.add(taskMo);
+
+		_log.info("添加启动结算订单的任务成功：orderId-{}", orderId);
 	}
 
 	/**
@@ -228,7 +242,8 @@ public class OrdSettleTaskSvcImpl implements OrdSettleTaskSvc {
 		subTaskMo.setSubTaskType((byte) taskType.getCode());
 		// 计算计划执行时间
 		calendar.setTime(now);
-		calendar.add(Calendar.MINUTE, delay.multiply(BigDecimal.valueOf(60)).setScale(4, BigDecimal.ROUND_HALF_UP).intValue());
+		calendar.add(Calendar.MINUTE,
+				delay.multiply(BigDecimal.valueOf(60)).setScale(0, BigDecimal.ROUND_HALF_UP).intValue());
 
 		subTaskMo.setExecutePlanTime(calendar.getTime());
 		taskSvc.add(subTaskMo);
@@ -267,8 +282,10 @@ public class OrdSettleTaskSvcImpl implements OrdSettleTaskSvc {
 		// 计算计划执行时间
 		final Calendar calendar = Calendar.getInstance();
 		calendar.setTime(order.getReceivedTime());
-		calendar.add(Calendar.HOUR_OF_DAY,
+		calendar.add(Calendar.MINUTE,
 				startSettleDelay.multiply(BigDecimal.valueOf(60)).setScale(0, BigDecimal.ROUND_HALF_UP).intValue());
+		_log.info("计算计划执行时间为:{}", calendar.getTimeInMillis());
+		_log.info("当前时间戳为:{}", System.currentTimeMillis());
 		if (calendar.getTimeInMillis() > System.currentTimeMillis()) {
 			final String msg = "还未到订单启动结算的时间";
 			_log.error("{}: 订单信息-{}", msg, order);
@@ -285,31 +302,14 @@ public class OrdSettleTaskSvcImpl implements OrdSettleTaskSvc {
 		}
 		_log.info("订单详情列表：{}", orderDetailList);
 
-		// 计算当前时间
-		final Date now = new Date();
 		// 结算任务类型
 		final SettleTaskTypeDic settleTaskType = SettleTaskTypeDic.getItem(taskMo.getSubTaskType());
 
-		// 如果是完成结算的任务
-		if (SettleTaskTypeDic.COMPLETE_SETTLE == settleTaskType) {
-			if (taskSvc.existUnfinished(taskMo.getOrderId())) {
-				final String msg = "订单仍然存在着尚未执行完成的结算任务，请稍后再试";
-				_log.warn("{}: orderId-{}", msg, taskMo.getOrderId());
-				throw new RuntimeException(msg);
-			}
-
-			// 设置订单结算完成
-			final int rowCount = orderSvc.completeSettle(now, taskMo.getOrderId());
-			if (rowCount != 1) {
-				final String msg = "设置结算完成失败，可能出现并发问题：orderId-{}";
-				_log.error(msg, orderId);
-				throw new RuntimeException(msg);
-			}
-			return;
-		}
-
 		_log.debug("遍历订单详情列表");
 		for (final OrdOrderDetailMo orderDetail : orderDetailList) {
+			// 计算当前时间
+			final Date now = new Date();
+
 			if (ReturnStateDic.RETURNING.getCode() == orderDetail.getReturnState()) {
 				final String msg = "订单详情正处于退货中，不能结算";
 				_log.error("{}: {}", msg, orderDetail);
@@ -377,10 +377,24 @@ public class OrdSettleTaskSvcImpl implements OrdSettleTaskSvc {
 				final int realBuyCount = orderDetail.getBuyCount() - orderDetail.getReturnCount();
 				// 总成本 = 真实购买数量 * 成本价格
 				final BigDecimal costPriceTotal = orderDetail.getCostPrice().multiply(BigDecimal.valueOf(realBuyCount));
-				// 平台服务费 = 实际成交金额 * 平台服务费比例
-				final BigDecimal platformServiceFee = orderDetail.getActualAmount().multiply(platformServiceFeeRatio);
+				// 平台服务费
+				BigDecimal platformServiceFee = null;
+				// 实际成交金额
+				BigDecimal actualAmount = null;
+				// 旧数据实际成交金额为null
+				if (orderDetail.getActualAmount() == null) {
+					// 实际成交金额 = 购买金额(单价) * (购买数量 - 退货数量)
+					actualAmount = orderDetail.getBuyPrice()
+							.multiply(BigDecimal.valueOf(orderDetail.getBuyCount() - orderDetail.getReturnCount()));
+					// 平台服务费 = 实际成交金额 * 平台服务费比例
+					platformServiceFee = actualAmount.multiply(platformServiceFeeRatio);
+				} else {
+					actualAmount = orderDetail.getActualAmount();
+					// 平台服务费 = 实际成交金额 * 平台服务费比例
+					platformServiceFee = actualAmount.multiply(platformServiceFeeRatio);
+				}
 				// 卖家利润 = 实际成交金额 - 总成本 - 总返现金额 - 平台服务费
-				final BigDecimal profitAmount = orderDetail.getActualAmount().subtract(costPriceTotal)
+				final BigDecimal profitAmount = actualAmount.subtract(costPriceTotal)
 						.subtract(orderDetail.getCashbackTotal()).subtract(platformServiceFee)
 						.setScale(4, BigDecimal.ROUND_HALF_UP);
 				tradeMo.setTradeAmount(profitAmount);
@@ -392,9 +406,21 @@ public class OrdSettleTaskSvcImpl implements OrdSettleTaskSvc {
 			case SETTLE_PLATFORM_SERVICE_FEE: {
 				final AfcPlatformTradeMo tradeMo = new AfcPlatformTradeMo();
 				tradeMo.setPlatformTradeType((byte) PlatformTradeTypeDic.CHARGE_SEVICE_FEE.getCode());
-				// 平台服务费 = 实际成交金额 * 平台服务费比例
-				final BigDecimal platformServiceFee = orderDetail.getActualAmount().multiply(platformServiceFeeRatio)
-						.setScale(4, BigDecimal.ROUND_HALF_UP);
+				BigDecimal platformServiceFee = null;
+				if (orderDetail.getActualAmount() == null) {
+					// 真实购买数量 = 购买数量 - 退货数量
+					Integer realBuyCount = orderDetail.getBuyCount() - orderDetail.getReturnCount();
+					// 实际成交金额 = 真实购买数量 * 购买金额（单价）
+					BigDecimal actualAmount = orderDetail.getBuyPrice().multiply(BigDecimal.valueOf(realBuyCount));
+					// 平台服务费 = 实际成交金额 * 平台服务费比例
+					platformServiceFee = actualAmount.multiply(platformServiceFeeRatio).setScale(4,
+							BigDecimal.ROUND_HALF_UP);
+				} else {
+					// 平台服务费 = 实际成交金额 * 平台服务费比例
+					platformServiceFee = orderDetail.getActualAmount().multiply(platformServiceFeeRatio).setScale(4,
+							BigDecimal.ROUND_HALF_UP);
+				}
+
 				tradeMo.setTradeAmount(platformServiceFee);
 
 				tradeMo.setOrderId(taskMo.getOrderId());
@@ -415,6 +441,53 @@ public class OrdSettleTaskSvcImpl implements OrdSettleTaskSvc {
 			}
 		}
 
+	}
+
+	/**
+	 * 执行订单结算完成的任务(根据订单ID)
+	 */
+	@Override
+	@Transactional(readOnly = false, propagation = Propagation.REQUIRED)
+	public void executeCompleteSettleTask(final Long orderId) {
+		_log.info("执行订单结算完成的任务：orderId-{}", orderId);
+		if (orderId == null) {
+			final String msg = "参数不正确";
+			_log.error(msg);
+			throw new RuntimeException(msg);
+		}
+
+		final OrdOrderMo order = orderSvc.getById(orderId);
+		if (order == null) {
+			final String msg = "订单不存在";
+			_log.error("{}: orderId-{}", msg, orderId);
+			throw new RuntimeException(msg);
+		}
+
+		// 检查订单是否可结算
+		if (!orderSvc.isSettleableOrder(order)) {
+			final String msg = "订单不能结算";
+			_log.error("{}: {}", msg, order);
+			throw new RuntimeException(msg);
+		}
+
+		// 计算当前时间
+		final Date now = new Date();
+
+		if (taskSvc.existUnfinished(orderId.toString())) {
+			final String msg = "订单仍然存在着尚未执行完成的结算任务，请稍后再试";
+			_log.warn("{}: orderId-{}", msg, orderId);
+			throw new RuntimeException(msg);
+		}
+
+		// 设置订单结算完成
+		final int rowCount = orderSvc.completeSettle(now, orderId.toString());
+		if (rowCount != 1) {
+			final String msg = "设置结算完成失败，可能出现并发问题：orderId-{}";
+			_log.error(msg, orderId);
+			throw new RuntimeException(msg);
+		}
+
+		_log.info("执行订单结算完成的任务成功：orderId-{}", orderId);
 	}
 
 	/**
