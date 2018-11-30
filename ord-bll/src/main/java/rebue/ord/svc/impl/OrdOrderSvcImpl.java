@@ -760,12 +760,19 @@ public class OrdOrderSvcImpl extends MybatisBaseSvcImpl<OrdOrderMo, java.lang.Lo
     @Transactional(readOnly = false, propagation = Propagation.REQUIRED)
     public ShipmentConfirmationRo shipmentConfirmation(final ShipmentConfirmationTo to) {
         final ShipmentConfirmationRo confirmationRo = new ShipmentConfirmationRo();
-        // 判断是否是已经支付状态
-        if (to.getOrderState() != 2) {
-            confirmationRo.setResult(ShipmentConfirmationDic.ERROR);
-            confirmationRo.setMsg("订单不是已支付状态，不能发货");
-            _log.info("订单的状态为：{}", to.getOrderState());
-            return confirmationRo;
+        _log.info("本店发货的参数为：{}", to);
+        //判断是否是首次发货还是添加物流单号
+        if(to.isFirst()) {
+            _log.info("是首次发货：isFirst()-{}", to.isFirst());
+            // 判断是否是已经支付状态
+            if (to.getOrderState() != 2) {
+                confirmationRo.setResult(ShipmentConfirmationDic.ERROR);
+                confirmationRo.setMsg("订单不是已支付状态，不能发货");
+                _log.info("订单的状态为：{}", to.getOrderState());
+                return confirmationRo;
+            }
+        }else {
+            _log.info("是添加物流单号：isFirst()-{}", to.isFirst());
         }
         // 添加签收任务
         final OrdOrderMo mo = dozerMapper.map(to, OrdOrderMo.class);
@@ -851,36 +858,43 @@ public class OrdOrderSvcImpl extends MybatisBaseSvcImpl<OrdOrderMo, java.lang.Lo
                 _log.error("添加发货表失败");
                 throw new RuntimeException("添加发货表失败");
             }
-            // 修改每条详情的发货状态
-            result = 0;
-            final OrdOrderDetailMo oodMo = new OrdOrderDetailMo();
-            oodMo.setId(detailId);
-            oodMo.setIsDelivered(true);
-            _log.info("修改订单详情发货状态的参数为：{}", oodMo);
-            result = orderDetailSvc.modify(oodMo);
-            _log.info("修改订单详情发货状态结果为：{}", result);
-            if (result != 1) {
-                _log.error("添加订单详情发货状态失败");
-                throw new RuntimeException("修改订单详情发货状态失败");
+            //判断是否是首次发货还是添加物流单号,不是首次不用修改状态
+            if(to.isFirst()) {
+                // 修改每条详情的发货状态
+                result = 0;
+                final OrdOrderDetailMo oodMo = new OrdOrderDetailMo();
+                oodMo.setId(detailId);
+                oodMo.setIsDelivered(true);
+                _log.info("修改订单详情发货状态的参数为：{}", oodMo);
+                result = orderDetailSvc.modify(oodMo);
+                _log.info("修改订单详情发货状态结果为：{}", result);
+                if (result != 1) {
+                    _log.error("添加订单详情发货状态失败");
+                    throw new RuntimeException("修改订单详情发货状态失败");
+                }
             }
+
             _log.info("根据当前订单详情循环插入发货表和修改订单详情发货状态结束++++++++++++++++++++++++++++++++");
         }
-
-        // 根据没有当前订单详情的所有未详情Id和当前被选择的详情Id长度是否相等来决定是否修改订单状态为已发货。
-        if (to.getAllDetaileId().size() == to.getSelectDetailId().size()) {
-            _log.debug("需要修改订单状态，订单所有未发货详情等于被选择的详情：AllDetaileId长度-{}, SelectDetailId长度-{}", to.getAllDetaileId().size(), to.getSelectDetailId().size());
-            _log.info("确认发货并修改订单状态，参数为：{}", mo);
-            final int result = _mapper.shipmentConfirmation(mo);
-            if (result != 1) {
-                _log.info("确认发货并修改订单状态失败，返回值为：{}", result);
-                throw new RuntimeException("添加发货表失败");
+        //判断是否是首次发货还是添加物流单号,不是首次不用修改状态
+        if(to.isFirst()) {
+            // 根据没有当前订单详情的所有未详情Id和当前被选择的详情Id长度是否相等来决定是否修改订单状态为已发货。
+            if (to.getAllDetaileId().size() == to.getSelectDetailId().size()) {
+                _log.debug("需要修改订单状态，订单所有未发货详情等于被选择的详情：AllDetaileId长度-{}, SelectDetailId长度-{}", to.getAllDetaileId().size(), to.getSelectDetailId().size());
+                _log.info("确认发货并修改订单状态，参数为：{}", mo);
+                final int result = _mapper.shipmentConfirmation(mo);
+                if (result != 1) {
+                    _log.info("确认发货并修改订单状态失败，返回值为：{}", result);
+                    throw new RuntimeException("添加发货表失败");
+                }
+                _log.info("确认发货并修改订单状态成功，返回值为：{}", result);
+            } else {
+                _log.info("不需要要修改订单状态，订单所有未发货详情不等于被选择的详情：AllDetaileId长度-{}, SelectDetailId长度-{}", to.getAllDetaileId().size(), to.getSelectDetailId().size());
+                _log.info("确认发货成功");
             }
-            _log.info("确认发货并修改订单状态成功，返回值为：{}", result);
-        } else {
-            _log.info("不需要要修改订单状态，订单所有未发货详情不等于被选择的详情：AllDetaileId长度-{}, SelectDetailId长度-{}", to.getAllDetaileId().size(), to.getSelectDetailId().size());
+        }else {
             _log.info("确认发货成功");
         }
-
         confirmationRo.setResult(ShipmentConfirmationDic.SUCCESS);
         confirmationRo.setMsg("确认发货成功");
         confirmationRo.setLogisticId(eOrderRo.getLogisticId());
