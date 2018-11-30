@@ -777,6 +777,7 @@ public class OrdOrderSvcImpl extends MybatisBaseSvcImpl<OrdOrderMo, java.lang.Lo
         final Date executePlanTime = calendar.getTime();
         final OrdTaskMo ordTaskMo = new OrdTaskMo();
         ordTaskMo.setOrderId(String.valueOf(mo.getId()));
+        ordTaskMo.setTaskType((byte) 2);
         // 先查询任务是否已经存在
         _log.info("查看签收任务是否存在的参数为：{}", ordTaskMo);
         final List<OrdTaskMo> ordTaskList = ordTaskSvc.list(ordTaskMo);
@@ -784,7 +785,6 @@ public class OrdOrderSvcImpl extends MybatisBaseSvcImpl<OrdOrderMo, java.lang.Lo
         if (ordTaskList.size() == 0) {
             ordTaskMo.setExecutePlanTime(executePlanTime);
             ordTaskMo.setExecuteState((byte) 0);
-            ordTaskMo.setTaskType((byte) 2);
             _log.info("确认发货添加签收任务的参数为：{}", ordTaskMo);
             final int taskAddResult = ordTaskSvc.add(ordTaskMo);
             _log.info("确认发货添加签收任务的返回值为：{}", taskAddResult);
@@ -907,6 +907,7 @@ public class OrdOrderSvcImpl extends MybatisBaseSvcImpl<OrdOrderMo, java.lang.Lo
         final Date executePlanTime = calendar.getTime();
         final OrdTaskMo ordTaskMo = new OrdTaskMo();
         ordTaskMo.setOrderId(String.valueOf(mo.getId()));
+        ordTaskMo.setTaskType((byte) 2);
         // 先查询任务是否已经存在
         _log.info("查看签收任务是否存在的参数为：{}", ordTaskMo);
         final List<OrdTaskMo> ordTaskList = ordTaskSvc.list(ordTaskMo);
@@ -914,7 +915,6 @@ public class OrdOrderSvcImpl extends MybatisBaseSvcImpl<OrdOrderMo, java.lang.Lo
         if (ordTaskList.size() == 0) {
             ordTaskMo.setExecutePlanTime(executePlanTime);
             ordTaskMo.setExecuteState((byte) 0);
-            ordTaskMo.setTaskType((byte) 2);
             _log.info("确认发货添加签收任务的参数为：{}", ordTaskMo);
             final int taskAddResult = ordTaskSvc.add(ordTaskMo);
             _log.info("确认发货添加签收任务的返回值为：{}", taskAddResult);
