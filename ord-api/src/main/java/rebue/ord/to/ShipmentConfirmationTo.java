@@ -190,5 +190,8 @@ public class ShipmentConfirmationTo {
      */
     private List<Long> allDetaileId;
 
-
+    /**
+     * 判断是首次发货还是添加新物流单号
+     */
+    private boolean first;
 }

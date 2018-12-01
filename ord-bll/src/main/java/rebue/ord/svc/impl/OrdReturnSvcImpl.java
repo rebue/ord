@@ -412,7 +412,7 @@ public class OrdReturnSvcImpl extends MybatisBaseSvcImpl<OrdReturnMo, java.lang.
         }
 
         // 是否自动计算退款: 传入退款金额参数则为自动计算退款，否则为自定义退款
-        final boolean isAutoCalcRefund = to.getRefundAmount() != null;
+        final boolean isAutoCalcRefund = to.getIsAutoCalcRefund();
         _log.debug(isAutoCalcRefund ? "自动计算退款: 根据用户输入退款金额自动计算退回的返现金和余额" : "自定义退款: 用户具体指定退回返现金和余额的数字");
         // 如果是自定义退款，退款金额 = 退款金额1(余额) + 退款金额2(返现金)
         if (!isAutoCalcRefund) {
@@ -627,6 +627,7 @@ public class OrdReturnSvcImpl extends MybatisBaseSvcImpl<OrdReturnMo, java.lang.
         refundTo.setReturnBalanceToBuyer(to.getRefundAmount1());
         refundTo.setReturnCashbackToBuyer(to.getRefundAmount2());
         refundTo.setReturnCompensationToSeller(to.getRefundCompensation());
+        refundTo.setIsAutoCalcRefund(to.getIsAutoCalcRefund());
         refundTo.setOpId(to.getOpId());
         refundTo.setMac("不在获取MAC地址");
         refundTo.setIp(to.getIp());

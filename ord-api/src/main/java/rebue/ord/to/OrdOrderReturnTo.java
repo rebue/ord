@@ -14,6 +14,11 @@ import lombok.Data;
 @Data
 public class OrdOrderReturnTo {
 	/**
+	 * 是否自动计算退款(true:自动计算退款 false:自定义退款)
+	 */
+	private Boolean isAutoCalcRefund;
+	
+	/**
 	 * 订单ID
 	 */
 	private Long orderId;

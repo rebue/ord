@@ -80,7 +80,7 @@ public class OrdTaskSvcImpl extends MybatisBaseSvcImpl<OrdTaskMo, java.lang.Long
 	@Override
 	public Boolean existUnfinished(final String orderId) {
 		_log.info("判断订单是否存在仍未完成的任务（包括未执行的和暂停执行的）");
-		return _mapper.existUnfinished(orderId, OrderTaskTypeDic.SETTLE);
+		return _mapper.existUnfinished(orderId, (byte) OrderTaskTypeDic.SETTLE.getCode());
 	}
 
 	/**
