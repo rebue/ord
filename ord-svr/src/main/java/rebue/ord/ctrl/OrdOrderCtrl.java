@@ -123,7 +123,7 @@ public class OrdOrderCtrl {
             }
             to.setOrgId(orgId);
         } else {
-        	to.setOrgId(520874560590053376L);
+            to.setOrgId(520874560590053376L);
         }
         _log.info("获取当前用户的组织ID: {}", to.getOrgId());
 
@@ -172,10 +172,11 @@ public class OrdOrderCtrl {
     OrderRo order(@RequestBody final OrderTo to, final HttpServletRequest req) throws NumberFormatException, ParseException {
         OrderRo ro = new OrderRo();
         _log.info("用户下订单的参数为：{}", to);
-        _log.info("设置下单的用户为当前用户");
-        if (!isDebug || to.getUserId() == null) {
-            to.setUserId(JwtUtils.getJwtUserIdInCookie(req));
-        }
+        // FIXME 为兼容旧的微信公众号网站，暂时由传过来的参数中指定当前用户
+//        _log.info("设置下单的用户为当前用户");
+//        if (!isDebug || to.getUserId() == null) {
+//            to.setUserId(JwtUtils.getJwtUserIdInCookie(req));
+//        }
         try {
             ro = svc.order(to);
         } catch (final RuntimeException e) {

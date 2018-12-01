@@ -1,13 +1,3 @@
-
-
-
-
-
--- --------------------------------------------------------下面的已更新到线上------------------------------------------------------------
-
-
-
-
 -- 2018-11-28
 alter table ORD_TASK						add					SUB_TASK_TYPE        										tinyint 				default -1 comment '子任务类型';
 alter table ORD_TASK						add					unique key AK_TASK_TYPE_AND_SUB_TASK_TYPE_AND_ORDER (TASK_TYPE, SUB_TASK_TYPE, ORDER_ID);
@@ -140,3 +130,14 @@ alter table ORD_ORDER_DETAIL add SUPPLIER_ID          bigint comment '供应商I
 	-- 在订单详情表（ORD_ORDER_DETAIL）新增表字段：返现佣金名额（CASHBACK_COMMISSION_SLOT）、返现佣金状态（CASHBACK_COMMISSION_STATE）
 	alter table ORD_ORDER_DETAIL add CASHBACK_COMMISSION_SLOT tinyint comment '返现佣金名额';
 	alter table ORD_ORDER_DETAIL add CASHBACK_COMMISSION_STATE tinyint comment '返现佣金状态（0：匹配中，1：待返，2：已返）';
+    
+    
+-- 2018-12-01
+alter table ORD_ORDER_DETAIL add ONLINE_SPEC_ID       bigint not null comment '上线规格ID';
+
+
+
+
+
+-- --------------------------------------------------------上面的已更新到线上------------------------------------------------------------
+
