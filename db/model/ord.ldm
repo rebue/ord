@@ -1700,7 +1700,7 @@ DESTINATION 0 新宋体,8,N</a:FontList>
 <o:RelationshipSymbol Id="o35">
 <a:CreationDate>1536310761</a:CreationDate>
 <a:ModificationDate>1536310761</a:ModificationDate>
-<a:Rect>((-38785,18080), (-26699,19857))</a:Rect>
+<a:Rect>((-38785,18257), (-26699,20026))</a:Rect>
 <a:ListOfPoints>((-26699,19057),(-38785,19057))</a:ListOfPoints>
 <a:CornerStyle>1</a:CornerStyle>
 <a:ArrowStyle>4627</a:ArrowStyle>
@@ -2379,9 +2379,9 @@ LABL 0 Arial,8,N</a:FontList>
 <a:Code>ONLINE_SPEC_ID</a:Code>
 <a:CreationDate>1543635782</a:CreationDate>
 <a:Creator>zbz</a:Creator>
-<a:ModificationDate>1543635816</a:ModificationDate>
+<a:ModificationDate>1543646570</a:ModificationDate>
 <a:Modifier>zbz</a:Modifier>
-<a:Comment>上线规格ID</a:Comment>
+<a:Comment>上线规格ID(限购时获取用户购买数量时使用)</a:Comment>
 <a:DataType>LI</a:DataType>
 <a:LogicalAttribute.Mandatory>1</a:LogicalAttribute.Mandatory>
 </o:EntityAttribute>
@@ -4779,12 +4779,12 @@ LABL 0 Arial,8,N</a:FontList>
 <a:Code>ord-mysql</a:Code>
 <a:CreationDate>1542701309</a:CreationDate>
 <a:Creator>admin</a:Creator>
-<a:ModificationDate>1543635847</a:ModificationDate>
+<a:ModificationDate>1543646577</a:ModificationDate>
 <a:Modifier>zbz</a:Modifier>
 <a:TargetModelURL>file://Vboxsvr/02/ord/db/model/ord-mysql.pdm</a:TargetModelURL>
 <a:TargetModelID>2E4A3071-C496-45CB-91CC-27216E4E4AA2</a:TargetModelID>
 <a:TargetModelClassID>CDE44E21-9669-11D1-9914-006097355D9B</a:TargetModelClassID>
-<a:TargetModelLastModificationDate>1543635847</a:TargetModelLastModificationDate>
+<a:TargetModelLastModificationDate>1543646577</a:TargetModelLastModificationDate>
 <c:SessionShortcuts>
 <o:Shortcut Ref="o21"/>
 </c:SessionShortcuts>

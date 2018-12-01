@@ -134,6 +134,7 @@ alter table ORD_ORDER_DETAIL add SUPPLIER_ID          bigint comment '供应商I
     
 -- 2018-12-01
 alter table ORD_ORDER_DETAIL add ONLINE_SPEC_ID       bigint not null comment '上线规格ID';
+alter table ORD_ORDER_DETAIL modify ONLINE_SPEC_ID       bigint not null comment '上线规格ID(限购时获取用户购买数量时使用)';
 
 
 

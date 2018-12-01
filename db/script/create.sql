@@ -1,6 +1,6 @@
 /*==============================================================*/
 /* DBMS name:      MySQL 5.0                                    */
-/* Created on:     2018/12/1 11:44:17                           */
+/* Created on:     2018/12/1 14:43:01                           */
 /*==============================================================*/
 
 
@@ -153,7 +153,7 @@ create table ORD_ORDER_DETAIL
 (
    ID                   bigint not null comment '订单详情ID',
    ORDER_ID             bigint not null comment '订单ID',
-   ONLINE_SPEC_ID       bigint not null comment '上线规格ID',
+   ONLINE_SPEC_ID       bigint not null comment '上线规格ID(限购时获取用户购买数量时使用)',
    ONLINE_ID            bigint not null comment '上线ID',
    PRODUCT_ID           bigint not null comment '产品ID',
    PRODUCT_SPEC_ID      bigint comment '产品规格ID',
