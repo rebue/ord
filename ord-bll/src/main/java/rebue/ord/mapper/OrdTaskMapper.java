@@ -91,7 +91,7 @@ public interface OrdTaskMapper extends MybatisBaseMapper<OrdTaskMo, Long> {
 	 */
 	@Select("select count(*)>0 from ORD_TASK where ORDER_ID=#{orderId} and TASK_TYPE=#{orderSettleTaskType} and (EXECUTE_STATE=0 or EXECUTE_STATE=2)")
 	Boolean existUnfinished(@Param("orderId") String orderId,
-			@Param("orderSettleTaskType") OrderTaskTypeDic orderSettleTaskType);
+			@Param("orderSettleTaskType") Byte orderSettleTaskType);
 
 	/**
 	 * 执行任务完成
