@@ -601,8 +601,8 @@ public class OrdReturnSvcImpl extends MybatisBaseSvcImpl<OrdReturnMo, java.lang.
                 final long userId = buyRelationResult1.get(i).getDownlineUserId();
                 final long onlineId = detail.getOnlineId();
                 final BigDecimal buyPrice = detail.getBuyPrice();
-                final long downLineDetailId = detail.getId();
-                final long downLineOrderId = detail.getOrderId();
+                final long downLineDetailId = buyRelationResult1.get(i).getDownlineOrderDetailId();
+                final long downLineOrderId = buyRelationResult1.get(i).getDownlineOrderId();
                 final String matchBuyRelationResult = ordBuyRelationSvc.matchBuyRelation(userId, onlineId, buyPrice, downLineDetailId, downLineOrderId);
                 _log.info(matchBuyRelationResult);
                 _log.info("删除购买关系：" + buyRelationResult1.get(i).getId());
