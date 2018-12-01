@@ -1,3 +1,13 @@
+
+
+
+
+
+-- --------------------------------------------------------下面的已更新到线上------------------------------------------------------------
+
+
+
+
 -- 2018-11-28
 alter table ORD_TASK						add					SUB_TASK_TYPE        										tinyint 				default -1 comment '子任务类型';
 alter table ORD_TASK						add					unique key AK_TASK_TYPE_AND_SUB_TASK_TYPE_AND_ORDER (TASK_TYPE, SUB_TASK_TYPE, ORDER_ID);
@@ -41,23 +51,6 @@ alter table ORD_ORDER                                       add         PAY_ORDE
 update ORD_ORDER set PAY_ORDER_ID=ID;
 update ORD_ORDER_DETAIL set RETURN_COUNT=0 where RETURN_COUNT is null;
 alter table ORD_ORDER_DETAIL                         modify    RETURN_COUNT         int not null default 0         comment '退货数量';
-
-
-
-
-
-
-
-
-
-
-
-
--- --------------------------------------------------------下面的已更新到线上------------------------------------------------------------
-
-
-
-
 
 
 -- 2018-11-12
