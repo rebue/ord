@@ -1173,29 +1173,33 @@
 
 	<select id="listOrder" parameterType="rebue.ord.to.ListOrderTo" resultType="rebue.ord.ro.OrdOrderRo">
 		<!-- 查询订单 -->
-		select
-		<include refid="Base_Column_List" />
-		from ORD_ORDER
+		select a.ID as  id, a.ORDER_CODE as orderCode, 
+    a.RECEIVER_NAME as receiverName , GROUP_CONCAT(CONCAT(b.ONLINE_TITLE, b.SPEC_NAME)) as orderTitle,
+    a.REAL_MONEY as realMoney, a.ORDER_MONEY as orderMoney , a.ORDER_STATE  as orderState ,a.ORDER_TIME as orderTime,
+    a.RECEIVER_PROVINCE as  receiverProvince, a.RECEIVER_CITY as receiverCity, a.RECEIVER_EXP_AREA receiverExpArea,
+    a.RECEIVER_ADDRESS as receiverAddress ,a.RECEIVER_MOBILE as receiverMobile,a.PAY_TIME as payTime,
+    a.SEND_TIME as sendTime, a.RECEIVED_TIME as  receivedTime,  a.CANCEL_TIME  as cancelTime ,a.CLOSE_TIME   as closeTime
+		FROM
+    ORD_ORDER a
+        INNER JOIN
+    ORD_ORDER_DETAIL b ON a.ID = b.ORDER_ID  
 		<where>
-			ONLINE_ORG_ID=#{orgId}
+			 and	a.ONLINE_ORG_ID=#{orgId}
 			<if test="receiverName != null">
-				and RECEIVER_NAME LIKE '%${receiverName}%'  or ORDER_TITLE LIKE '%${receiverName}%'
-			</if>
-			<if test="orderCode != null and orderCode != ''">
-				and ORDER_CODE = #{orderCode,jdbcType=VARCHAR}
+				and (a.RECEIVER_NAME LIKE '%${receiverName}%'  or  a.ORDER_CODE LIKE '%${receiverName}%')
 			</if>
 			<if test="orderTimeStart != null  ">
-				and ORDER_TIME &gt;= #{orderTimeStart,jdbcType=TIMESTAMP}
+				and a.ORDER_TIME &gt;= #{orderTimeStart,jdbcType=TIMESTAMP}
 			</if>
 			<if test="orderTimeEnd != null ">
-				and ORDER_TIME &lt;= #{orderTimeEnd,jdbcType=TIMESTAMP}
+				and a.ORDER_TIME &lt;= #{orderTimeEnd,jdbcType=TIMESTAMP}
 			</if>
 			<if test="orderState != null">
-				and ORDER_STATE = #{orderState,jdbcType=TINYINT}
+				and a.ORDER_STATE = #{orderState,jdbcType=TINYINT}
 			</if>
 
 		</where>
-		ORDER BY ORDER_TIME DESC
+		 GROUP BY b.ORDER_ID ORDER BY a.ORDER_TIME DESC
 	</select>
 
 	<!-- <select id="listByPayOrderId" parameterType="java.lang.Long" resultMap="BaseResultMap"> -->
