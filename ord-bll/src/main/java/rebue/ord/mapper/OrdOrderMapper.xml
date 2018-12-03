@@ -1177,7 +1177,7 @@
     a.RECEIVER_NAME as receiverName , GROUP_CONCAT(CONCAT(b.ONLINE_TITLE, b.SPEC_NAME)) as orderTitle,
     a.REAL_MONEY as realMoney, a.ORDER_MONEY as orderMoney , a.ORDER_STATE  as orderState ,a.ORDER_TIME as orderTime,
     a.RECEIVER_PROVINCE as  receiverProvince, a.RECEIVER_CITY as receiverCity, a.RECEIVER_EXP_AREA receiverExpArea,
-    a.RECEIVER_ADDRESS as receiverAddress ,a.RECEIVER_MOBILE as receiverMobile,a.PAY_TIME as payTime,
+    a.RECEIVER_ADDRESS as receiverAddress ,a.RECEIVER_MOBILE as receiverMobile,a.RECEIVER_POST_CODE receiverPostCode,a.PAY_TIME as payTime,
     a.SEND_TIME as sendTime, a.RECEIVED_TIME as  receivedTime,  a.CANCEL_TIME  as cancelTime ,a.CLOSE_TIME   as closeTime
 		FROM
     ORD_ORDER a

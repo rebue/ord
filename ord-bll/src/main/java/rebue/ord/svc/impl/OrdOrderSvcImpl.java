@@ -945,6 +945,7 @@ public class OrdOrderSvcImpl extends MybatisBaseSvcImpl<OrdOrderMo, java.lang.Lo
         final AddKdiLogisticTo addKdiLogisticTo = dozerMapper.map(to, AddKdiLogisticTo.class);
         addKdiLogisticTo.setEntryType((byte) 2);
         addKdiLogisticTo.setOrderId(to.getId());
+        addKdiLogisticTo.setLogisticId(_idWorker.getId());
         _log.info("添加物流信息参数为：{}", addKdiLogisticTo);
         final KdiLogisticRo entryResult = kdiSvc.entryLogistics(addKdiLogisticTo);
         _log.info("添加物流信息结果为：{}", entryResult);
@@ -961,7 +962,7 @@ public class OrdOrderSvcImpl extends MybatisBaseSvcImpl<OrdOrderMo, java.lang.Lo
         for (final OrdOrderDetailMo ordOrderDetailMo : detailList) {
             _log.info("根据当前订单详情循环插入发货表开始-------------------------------");
             final OrdOrderDetailDeliverMo ooddmo = new OrdOrderDetailDeliverMo();
-            ooddmo.setLogisticId(addKdiLogisticTo.getId());
+            ooddmo.setLogisticId(addKdiLogisticTo.getLogisticId());
             ooddmo.setOrderId(mo.getId());
             ooddmo.setOrderDetailId(ordOrderDetailMo.getId());
             _log.info("添加发货表的参数：{}", ooddmo);
