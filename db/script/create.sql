@@ -1,6 +1,6 @@
 /*==============================================================*/
 /* DBMS name:      MySQL 5.0                                    */
-/* Created on:     2018/12/1 14:43:01                           */
+/* Created on:     2018/12/4 16:15:37                           */
 /*==============================================================*/
 
 
@@ -173,9 +173,10 @@ create table ORD_ORDER_DETAIL
    CASHBACK_AMOUNT      decimal(18,4) not null comment '返现金额',
    CASHBACK_TOTAL       decimal(18,4) not null comment '返现总额(返现总额=返现金额 * (购买数量-退货数量)',
    BUY_UNIT             varchar(10) comment '购买单位',
-   RETURN_STATE         tinyint not null comment '退货状态（0：未退货  1：退货中  2：已退货  3：部分已退）',
+   RETURN_STATE         tinyint not null comment '退款退货状态（0：未退款退货  1：退款退货中  2：已款退货  3：作废-部分已退）',
    USER_ID              bigint not null comment '用户ID',
    IS_DELIVERED         bool comment '是否已发货',
+   ORDER_TIMESTAMP      bigint not null default 0 comment '下单时间戳(用于排序)',
    primary key (ID)
 );
 

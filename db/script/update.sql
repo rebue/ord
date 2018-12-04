@@ -142,3 +142,5 @@ alter table ORD_ORDER_DETAIL modify ONLINE_SPEC_ID       bigint not null comment
 
 -- --------------------------------------------------------上面的已更新到线上------------------------------------------------------------
 
+alter table ORD_ORDER_DETAIL  		add 						ORDER_TIMESTAMP      bigint not null default 0 comment '下单时间戳(用于排序)';
+
