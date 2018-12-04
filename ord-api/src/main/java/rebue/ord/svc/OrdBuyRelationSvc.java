@@ -14,18 +14,32 @@ public interface OrdBuyRelationSvc extends MybatisBaseSvc<OrdBuyRelationMo, java
 	int updateByUplineOrderDetailId(OrdBuyRelationMo mo);
 
 	List<DetailandBuyRelationRo> getBuyRelationByOrderId(long orderId);
-
-	boolean getAndUpdateBuyRelationByOwn(long id, long onlineId, BigDecimal buyPrice, long downLineDetailId,long downLineOrderId);
-
+	/**
+	 * 根据匹配自己匹配购买关系
+	 */
+	boolean getAndUpdateBuyRelationByOwn(long id, long onlineId, BigDecimal buyPrice, long downLineDetailId,long downLineOrderId,long orderTimestamp);
+	/**
+	 * 根据购买规则匹配购买关系
+	 */
 	boolean getAndUpdateBuyRelationByPromote(long id, long onlineId, BigDecimal buyPrice, long downLineDetailId,long downLineOrderId);
-
+	/**
+	 * 根据邀请规则匹配购买关系
+	 */
 	boolean getAndUpdateBuyRelationByInvite(long id, long onlineId, BigDecimal buyPrice, long downLineDetailId,long downLineOrderId);
-
+	/**
+	 * 根据匹配差一人，且邀请一人（关系来源是购买关系的）规则匹配购买关系
+	 */
 	boolean getAndUpdateBuyRelationByFour(long id, long onlineId, BigDecimal buyPrice, long downLineDetailId,long downLineOrderId);
-
+	/**
+	 * 根据匹配差两人的规则匹配购买关系
+	 */
 	boolean getAndUpdateBuyRelationByFive(long id, long onlineId, BigDecimal buyPrice, long downLineDetailId,long downLineOrderId);
-
+	/**
+	 * 根据匹配差一人的规则匹配购买关系
+	 */
 	boolean getAndUpdateBuyRelationBySix(long id, long onlineId, BigDecimal buyPrice, long downLineDetailId,long downLineOrderId);
-	
-	String matchBuyRelation(long id, long onlineId, BigDecimal buyPrice, long downLineDetailId,long downLineOrderId);
+	/**
+	 * 匹配购买关系
+	 */
+	String matchBuyRelation(long id, long onlineId, BigDecimal buyPrice, long downLineDetailId,long downLineOrderId,long orderTimestamp);
 }

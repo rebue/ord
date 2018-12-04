@@ -86,9 +86,9 @@ public class OrdBuyRelationSvcImpl extends MybatisBaseSvcImpl<OrdBuyRelationMo, 
 
     @Override
     @Transactional(readOnly = false, propagation = Propagation.REQUIRED)
-    public String matchBuyRelation(final long userId, final long onlineId, final BigDecimal buyPrice, final long downLineDetailId, final long downLineOrderId) {
+    public String matchBuyRelation(final long userId, final long onlineId, final BigDecimal buyPrice, final long downLineDetailId, final long downLineOrderId,final long orderTimestamp) {
         _log.info("按匹配自己匹配购买关系");
-        final boolean getBuyRelationResultByOwn = selfSvc.getAndUpdateBuyRelationByOwn(userId, onlineId, buyPrice, downLineDetailId, downLineOrderId);
+        final boolean getBuyRelationResultByOwn = selfSvc.getAndUpdateBuyRelationByOwn(userId, onlineId, buyPrice, downLineDetailId, downLineOrderId,orderTimestamp);
         _log.info(downLineDetailId + "按匹配自己匹配购买关系的返回值为：{}", getBuyRelationResultByOwn);
         if (getBuyRelationResultByOwn == false) {
             _log.info("根据购买规则匹配购买关系");
@@ -140,7 +140,7 @@ public class OrdBuyRelationSvcImpl extends MybatisBaseSvcImpl<OrdBuyRelationMo, 
      */
     @Override
     @Transactional(readOnly = false, propagation = Propagation.REQUIRED)
-    public boolean getAndUpdateBuyRelationByOwn(final long id, final long onlineId, final BigDecimal buyPrice, final long downLineDetailId, final long downLineOrderId) {
+    public boolean getAndUpdateBuyRelationByOwn(final long id, final long onlineId, final BigDecimal buyPrice, final long downLineDetailId, final long downLineOrderId,final long orderTimestamp) {
         // 获取用户购买关系
         _log.info("获取用户购买关系的id:" + id + " onlineId:" + onlineId + " buyPricce:" + buyPrice + " downLineDetailId:" + downLineDetailId + " downLineOrderId" + downLineOrderId);
         long downLineRelationId1 = 0;
@@ -166,6 +166,8 @@ public class OrdBuyRelationSvcImpl extends MybatisBaseSvcImpl<OrdBuyRelationMo, 
         map.put("commissionSlot", (byte) 1);
         map.put("downLineRelationId1", downLineRelationId1);
         map.put("downLineRelationId2", downLineRelationId2);
+        //用于标志是否匹配自己的购买关系，如果是匹配自己的购买关系，只匹配该订单详情时间往前的订单详情，不匹配该订单详情往后的订单详情
+        map.put("orderTimestamp", orderTimestamp);
         _log.info("获取用户自己购买剩余1个购买名额的订单详情的参数为：{}" + map);
         final OrdOrderDetailMo orderDetailOfOneCommissionSlot = ordOrderDetailSvc.getOrderDetailForOneCommissonSlot(map);
         _log.info("查找订单详情的购买关系记录");

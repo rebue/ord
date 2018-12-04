@@ -1300,7 +1300,8 @@ public class OrdOrderSvcImpl extends MybatisBaseSvcImpl<OrdOrderMo, java.lang.Lo
                     final BigDecimal buyPrice = orderDetail.getBuyPrice();
                     final long downLineDetailId = orderDetail.getId();
                     final long downLineOrderId = orderDetail.getOrderId();
-                    final String matchBuyRelationResult = ordBuyRelationSvc.matchBuyRelation(userId, onlineId, buyPrice, downLineDetailId, downLineOrderId);
+                    final long orderTimestamp = orderDetail.getOrderTimestamp();
+                    final String matchBuyRelationResult = ordBuyRelationSvc.matchBuyRelation(userId, onlineId, buyPrice, downLineDetailId, downLineOrderId,orderTimestamp);
                     _log.debug(matchBuyRelationResult);
                 }
             } catch (final Exception e) {
