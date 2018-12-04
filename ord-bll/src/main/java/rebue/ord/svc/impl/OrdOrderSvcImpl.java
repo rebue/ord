@@ -241,6 +241,8 @@ public class OrdOrderSvcImpl extends MybatisBaseSvcImpl<OrdOrderMo, java.lang.Lo
         final Map<Long, OnlOnlineMo> onlines = new LinkedHashMap<>();
         // 上线组织列表(不同上线组织的订单详情需要拆单)
         final Map<Long, List<OrdOrderDetailMo>> onlineOrgs = new LinkedHashMap<>();
+        // 当前订单详情的下单时间戳(购买关系匹配自己的详情需要用来过滤，只匹配小于当前订单详情的下单时间戳的详情)
+        Long orderTimestamp = System.currentTimeMillis();
         // 要更新的上线规格列表
         final List<UpdateOnlineSpecAfterOrderTo> specList = new ArrayList<>();
         _log.debug("遍历订单详情");
@@ -306,8 +308,12 @@ public class OrdOrderSvcImpl extends MybatisBaseSvcImpl<OrdOrderMo, java.lang.Lo
                 }
             }
 
+            // 计算当前详情的下单时间戳
+            orderTimestamp++;
+
             // 开始添加订单详情
             final OrdOrderDetailMo orderDetailMo = new OrdOrderDetailMo();
+            orderDetailMo.setOrderTimestamp(orderTimestamp);
             orderDetailMo.setOnlineId(orderDetailTo.getOnlineId());
             orderDetailMo.setOnlineSpecId(orderDetailTo.getOnlineSpecId());
             orderDetailMo.setOnlineTitle(onlineMo.getOnlineTitle());

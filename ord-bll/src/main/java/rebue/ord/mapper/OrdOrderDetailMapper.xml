@@ -31,6 +31,7 @@
     <result column="ACTUAL_AMOUNT" jdbcType="DECIMAL" property="actualAmount" />
     <result column="IS_DELIVERED" jdbcType="TINYINT" property="isDelivered" />
     <result column="ONLINE_SPEC_ID" jdbcType="BIGINT" property="onlineSpecId" />
+    <result column="ORDER_TIMESTAMP" jdbcType="BIGINT" property="orderTimestamp" />
   </resultMap>
   <sql id="Base_Column_List">
     <!--
@@ -40,7 +41,7 @@
     ID, ORDER_ID, ONLINE_ID, PRODUCT_ID, PRODUCT_SPEC_ID, SUBJECT_TYPE, COMMISSION_SLOT, 
     COMMISSION_STATE, ONLINE_TITLE, SPEC_NAME, BUY_COUNT, BUY_PRICE, COST_PRICE, SUPPLIER_ID, 
     DELIVER_ORG_ID, CASHBACK_AMOUNT, RETURN_COUNT, CASHBACK_TOTAL, BUY_UNIT, RETURN_STATE, 
-    USER_ID, IS_SETTLE_BUYER, ACTUAL_AMOUNT, IS_DELIVERED, ONLINE_SPEC_ID
+    USER_ID, IS_SETTLE_BUYER, ACTUAL_AMOUNT, IS_DELIVERED, ONLINE_SPEC_ID, ORDER_TIMESTAMP
   </sql>
   <select id="selectByPrimaryKey" parameterType="java.lang.Long" resultMap="BaseResultMap">
     <!--
@@ -73,7 +74,7 @@
       CASHBACK_AMOUNT, RETURN_COUNT, CASHBACK_TOTAL, 
       BUY_UNIT, RETURN_STATE, USER_ID, 
       IS_SETTLE_BUYER, ACTUAL_AMOUNT, IS_DELIVERED, 
-      ONLINE_SPEC_ID)
+      ONLINE_SPEC_ID, ORDER_TIMESTAMP)
     values (#{id,jdbcType=BIGINT}, #{orderId,jdbcType=BIGINT}, #{onlineId,jdbcType=BIGINT}, 
       #{productId,jdbcType=BIGINT}, #{productSpecId,jdbcType=BIGINT}, #{subjectType,jdbcType=TINYINT}, 
       #{commissionSlot,jdbcType=TINYINT}, #{commissionState,jdbcType=TINYINT}, #{onlineTitle,jdbcType=VARCHAR}, 
@@ -82,7 +83,7 @@
       #{cashbackAmount,jdbcType=DECIMAL}, #{returnCount,jdbcType=INTEGER}, #{cashbackTotal,jdbcType=DECIMAL}, 
       #{buyUnit,jdbcType=VARCHAR}, #{returnState,jdbcType=TINYINT}, #{userId,jdbcType=BIGINT}, 
       #{isSettleBuyer,jdbcType=TINYINT}, #{actualAmount,jdbcType=DECIMAL}, #{isDelivered,jdbcType=TINYINT}, 
-      #{onlineSpecId,jdbcType=BIGINT})
+      #{onlineSpecId,jdbcType=BIGINT}, #{orderTimestamp,jdbcType=BIGINT})
   </insert>
   <insert id="insertSelective" parameterType="rebue.ord.mo.OrdOrderDetailMo">
     <!--
@@ -166,6 +167,9 @@
       <if test="onlineSpecId != null">
         ONLINE_SPEC_ID,
       </if>
+      <if test="orderTimestamp != null">
+        ORDER_TIMESTAMP,
+      </if>
     </trim>
     <trim prefix="values (" suffix=")" suffixOverrides=",">
       <if test="id != null">
@@ -242,6 +246,9 @@
       </if>
       <if test="onlineSpecId != null">
         #{onlineSpecId,jdbcType=BIGINT},
+      </if>
+      <if test="orderTimestamp != null">
+        #{orderTimestamp,jdbcType=BIGINT},
       </if>
     </trim>
   </insert>
@@ -324,6 +331,9 @@
       <if test="onlineSpecId != null">
         ONLINE_SPEC_ID = #{onlineSpecId,jdbcType=BIGINT},
       </if>
+      <if test="orderTimestamp != null">
+        ORDER_TIMESTAMP = #{orderTimestamp,jdbcType=BIGINT},
+      </if>
     </set>
     where ID = #{id,jdbcType=BIGINT}
   </update>
@@ -356,7 +366,8 @@
       IS_SETTLE_BUYER = #{isSettleBuyer,jdbcType=TINYINT},
       ACTUAL_AMOUNT = #{actualAmount,jdbcType=DECIMAL},
       IS_DELIVERED = #{isDelivered,jdbcType=TINYINT},
-      ONLINE_SPEC_ID = #{onlineSpecId,jdbcType=BIGINT}
+      ONLINE_SPEC_ID = #{onlineSpecId,jdbcType=BIGINT},
+      ORDER_TIMESTAMP = #{orderTimestamp,jdbcType=BIGINT}
     where ID = #{id,jdbcType=BIGINT}
   </update>
   <select id="selectAll" resultMap="BaseResultMap">
@@ -367,7 +378,7 @@
     select ID, ORDER_ID, ONLINE_ID, PRODUCT_ID, PRODUCT_SPEC_ID, SUBJECT_TYPE, COMMISSION_SLOT, 
     COMMISSION_STATE, ONLINE_TITLE, SPEC_NAME, BUY_COUNT, BUY_PRICE, COST_PRICE, SUPPLIER_ID, 
     DELIVER_ORG_ID, CASHBACK_AMOUNT, RETURN_COUNT, CASHBACK_TOTAL, BUY_UNIT, RETURN_STATE, 
-    USER_ID, IS_SETTLE_BUYER, ACTUAL_AMOUNT, IS_DELIVERED, ONLINE_SPEC_ID
+    USER_ID, IS_SETTLE_BUYER, ACTUAL_AMOUNT, IS_DELIVERED, ONLINE_SPEC_ID, ORDER_TIMESTAMP
     from ORD_ORDER_DETAIL
   </select>
   <select id="selectSelective" parameterType="rebue.ord.mo.OrdOrderDetailMo" resultMap="BaseResultMap">
@@ -450,6 +461,9 @@
       </if>
       <if test="onlineSpecId != null">
         and ONLINE_SPEC_ID = #{onlineSpecId,jdbcType=BIGINT}
+      </if>
+      <if test="orderTimestamp != null">
+        and ORDER_TIMESTAMP = #{orderTimestamp,jdbcType=BIGINT}
       </if>
     </where>
   </select>
@@ -545,6 +559,9 @@
       <if test="onlineSpecId != null and onlineSpecId != ''">
         and ONLINE_SPEC_ID = #{onlineSpecId,jdbcType=BIGINT}
       </if>
+      <if test="orderTimestamp != null and orderTimestamp != ''">
+        and ORDER_TIMESTAMP = #{orderTimestamp,jdbcType=BIGINT}
+      </if>
     </where>
   </select>
   <select id="countSelective" parameterType="rebue.ord.mo.OrdOrderDetailMo" resultType="int">
@@ -626,6 +643,9 @@
       </if>
       <if test="onlineSpecId != null">
         and ONLINE_SPEC_ID = #{onlineSpecId,jdbcType=BIGINT}
+      </if>
+      <if test="orderTimestamp != null">
+        and ORDER_TIMESTAMP = #{orderTimestamp,jdbcType=BIGINT}
       </if>
     </where>
   </select>
