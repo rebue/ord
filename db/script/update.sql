@@ -1,3 +1,5 @@
+
+
 -- 2018-11-28
 alter table ORD_TASK						add					SUB_TASK_TYPE        										tinyint 				default -1 comment '子任务类型';
 alter table ORD_TASK						add					unique key AK_TASK_TYPE_AND_SUB_TASK_TYPE_AND_ORDER (TASK_TYPE, SUB_TASK_TYPE, ORDER_ID);
@@ -140,7 +142,10 @@ alter table ORD_ORDER_DETAIL modify ONLINE_SPEC_ID       bigint not null comment
 
 
 
--- --------------------------------------------------------上面的已更新到线上------------------------------------------------------------
+-- --------------------------------------------------------------------------------------------------------------------
 
 alter table ORD_ORDER_DETAIL  		add 						ORDER_TIMESTAMP      bigint not null default 0 comment '下单时间戳(用于排序)';
+
+---------------------------------------------------------上面的已更新到线上----------------------------------------------------
+
 
