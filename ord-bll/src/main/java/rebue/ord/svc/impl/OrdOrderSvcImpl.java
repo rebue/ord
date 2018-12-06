@@ -46,7 +46,6 @@ import rebue.onl.dic.OnlineSubjectTypeDic;
 import rebue.onl.mo.OnlOnlineMo;
 import rebue.onl.mo.OnlOnlinePicMo;
 import rebue.onl.mo.OnlOnlineSpecMo;
-import rebue.onl.ro.ModifyOnlineSpecInfoRo;
 import rebue.onl.svr.feign.OnlCartSvc;
 import rebue.onl.svr.feign.OnlOnlinePicSvc;
 import rebue.onl.svr.feign.OnlOnlineSpecSvc;
@@ -330,17 +329,27 @@ public class OrdOrderSvcImpl extends MybatisBaseSvcImpl<OrdOrderMo, java.lang.Lo
 			orderDetailMo.setSupplierId(onlineMo.getSupplierId());
 			orderDetailMo.setDeliverOrgId(onlineMo.getDeliverOrgId());
 			orderDetailMo.setSubjectType(onlineMo.getSubjectType());
+			// 添加订单详情到上线组织列表中(根据上线组织拆分订单详情)
+			List<OrdOrderDetailMo> orderDetails = onlineOrgs.get(onlineMo.getOnlineOrgId());
+			if (orderDetails == null) {
+				orderDetails = new LinkedList<>();
+				onlineOrgs.put(onlineMo.getOnlineOrgId(), orderDetails);
+			}
 			if (OnlineSubjectTypeDic.NORMAL.getCode() == orderDetailMo.getSubjectType()) {
 				orderDetailMo.setCashbackAmount(onlineSpecMo.getCashbackAmount());
 				orderDetailMo.setCashbackTotal(new BigDecimal(String.valueOf(orderDetailTo.getBuyCount()))
 						.multiply(onlineSpecMo.getCashbackAmount()));
+				orderDetails.add(orderDetailMo);
 			} else if (OnlineSubjectTypeDic.BACK_COMMISSION.getCode() == orderDetailMo.getSubjectType()) {
+				orderDetailMo.setBuyCount(1);
 				orderDetailMo.setCommissionSlot((byte) 2);
 				orderDetailMo.setCommissionState((byte) CommissionStateDic.MATCHING.getCode());
 				orderDetailMo.setCashbackAmount(BigDecimal.ZERO);
 				orderDetailMo.setCashbackTotal(BigDecimal.ZERO);
+				for (int i = 0; i < orderDetailTo.getBuyCount(); i++) {
+					orderDetails.add(orderDetailMo);
+				}
 			}
-
 			// 添加要更新的上线规格信息
 			final UpdateOnlineSpecAfterOrderTo specTo = new UpdateOnlineSpecAfterOrderTo();
 			specTo.setOnlineId(orderDetailTo.getOnlineId());
@@ -348,15 +357,6 @@ public class OrdOrderSvcImpl extends MybatisBaseSvcImpl<OrdOrderMo, java.lang.Lo
 			specTo.setBuyCount(orderDetailTo.getBuyCount());
 			specTo.setCartId(orderDetailTo.getCartId());
 			specList.add(specTo);
-
-			// 添加订单详情到上线组织列表中(根据上线组织拆分订单详情)
-			List<OrdOrderDetailMo> orderDetails = onlineOrgs.get(onlineMo.getOnlineOrgId());
-			if (orderDetails == null) {
-				orderDetails = new LinkedList<>();
-				onlineOrgs.put(onlineMo.getOnlineOrgId(), orderDetails);
-			}
-			orderDetails.add(orderDetailMo);
-
 		}
 
 		_log.debug("通过地址ID获取地址详细信息");
@@ -376,7 +376,7 @@ public class OrdOrderSvcImpl extends MybatisBaseSvcImpl<OrdOrderMo, java.lang.Lo
 		// 根据上线组织拆单
 		for (final Entry<Long, List<OrdOrderDetailMo>> onlineOrg : onlineOrgs.entrySet()) {
 			final OrdOrderMo orderMo = new OrdOrderMo();
-//            orderMo.setId(_idWorker.getId());
+			// orderMo.setId(_idWorker.getId());
 			orderMo.setOrderCode(_idWorker.getIdStr()); // 订单编号 TODO 重写订单编号的生成算法
 			orderMo.setOrderState((byte) OrderStateDic.ORDERED.getCode()); // 订单状态已下单
 			orderMo.setOrderTime(now); // 下单时间
@@ -459,6 +459,13 @@ public class OrdOrderSvcImpl extends MybatisBaseSvcImpl<OrdOrderMo, java.lang.Lo
 		ro.setResult(ResultDic.SUCCESS);
 		ro.setMsg("下单成功");
 		return ro;
+	}
+
+	/**
+	 * 下单添加订单详情
+	 */
+	public void addOrderDetail(OrdOrderDetailMo orderDetailMo, Map<Long, List<OrdOrderDetailMo>> onlineOrgs) {
+
 	}
 
 	/**
@@ -630,8 +637,10 @@ public class OrdOrderSvcImpl extends MybatisBaseSvcImpl<OrdOrderMo, java.lang.Lo
 		}
 
 		for (OrdOrderDetailMo ordOrderDetailMo : orderDetailList) {
-			_log.info("取消订单根据上线规格id修改销售数量的参数为：onlineSpecId-{}, buyCount-{}", ordOrderDetailMo.getOnlineSpecId(), ordOrderDetailMo.getBuyCount());
-			Ro modifySaleCountByIdResult = onlOnlineSpecSvc.modifySaleCountById(ordOrderDetailMo.getOnlineSpecId(), ordOrderDetailMo.getBuyCount());
+			_log.info("取消订单根据上线规格id修改销售数量的参数为：onlineSpecId-{}, buyCount-{}", ordOrderDetailMo.getOnlineSpecId(),
+					ordOrderDetailMo.getBuyCount());
+			Ro modifySaleCountByIdResult = onlOnlineSpecSvc.modifySaleCountById(ordOrderDetailMo.getOnlineSpecId(),
+					ordOrderDetailMo.getBuyCount());
 			_log.info("取消订单根据上线规格id修改销售数量的返回值为：{}", modifySaleCountByIdResult);
 			if (modifySaleCountByIdResult.getResult() != ResultDic.SUCCESS) {
 				throw new RuntimeException("修改规格数量失败");
@@ -735,8 +744,10 @@ public class OrdOrderSvcImpl extends MybatisBaseSvcImpl<OrdOrderMo, java.lang.Lo
 		}
 
 		for (OrdOrderDetailMo ordOrderDetailMo : orderDetailList) {
-			_log.info("取消订单根据上线规格id修改销售数量的参数为：onlineSpecId-{}, buyCount-{}", ordOrderDetailMo.getOnlineSpecId(), ordOrderDetailMo.getBuyCount());
-			Ro modifySaleCountByIdResult = onlOnlineSpecSvc.modifySaleCountById(ordOrderDetailMo.getOnlineSpecId(), ordOrderDetailMo.getBuyCount());
+			_log.info("取消订单根据上线规格id修改销售数量的参数为：onlineSpecId-{}, buyCount-{}", ordOrderDetailMo.getOnlineSpecId(),
+					ordOrderDetailMo.getBuyCount());
+			Ro modifySaleCountByIdResult = onlOnlineSpecSvc.modifySaleCountById(ordOrderDetailMo.getOnlineSpecId(),
+					ordOrderDetailMo.getBuyCount());
 			_log.info("取消订单根据上线规格id修改销售数量的返回值为：{}", modifySaleCountByIdResult);
 			if (modifySaleCountByIdResult.getResult() != ResultDic.SUCCESS) {
 				throw new RuntimeException("修改规格数量失败");
@@ -1089,11 +1100,15 @@ public class OrdOrderSvcImpl extends MybatisBaseSvcImpl<OrdOrderMo, java.lang.Lo
 	/**
 	 * 修改订单退款金额(根据订单ID和已退款总额)
 	 * 
-	 * @param refundTotal        退款总额
+	 * @param refundTotal
+	 *            退款总额
 	 * 
-	 * @param orderState         订单状态
-	 * @param whereOrderId       where条件-订单ID
-	 * @param whereRefundedTotal where条件-已退款总额
+	 * @param orderState
+	 *            订单状态
+	 * @param whereOrderId
+	 *            where条件-订单ID
+	 * @param whereRefundedTotal
+	 *            where条件-已退款总额
 	 */
 	@Override
 	@Transactional(readOnly = false, propagation = Propagation.REQUIRED)
