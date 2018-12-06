@@ -442,7 +442,7 @@ public class OrdBuyRelationSvcImpl extends MybatisBaseSvcImpl<OrdBuyRelationMo, 
         relationMo.setUplineOrderDetailId(orderDetailResult.getId());
         final List<OrdBuyRelationMo> relationResult = selfSvc.list(relationMo);
         _log.info("获取到的购买关系结果为:{}", relationResult);
-        if (relationResult.size() != 0 && relationResult.get(0).getRelationSource() != null && relationResult.get(0).getRelationSource() == 2) {
+        if (relationResult.size() != 0 && relationResult.get(0).getRelationSource() != null) {
             // 添加购买关系记录
             _log.info("在购买关系表中添加记录");
             final OrdBuyRelationMo ordBuyRelationMo = new OrdBuyRelationMo();
