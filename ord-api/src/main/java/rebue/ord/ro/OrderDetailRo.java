@@ -59,19 +59,28 @@ public class OrderDetailRo {
 	 */
 	private Byte cashbackCommissionSlot;
 
-	 /**
-     *    返现佣金状态（0：匹配中，1：待返，2：已返)
-     */
+	/**
+	 * 返现佣金状态（0：匹配中，1：待返，2：已返)
+	 */
 	private Byte cashbackCommissionState;
-	
+
 	/** 商品主图 **/
 	private String goodsQsmm;
 
 	/** 商品类型 **/
 	private Byte subjectType;
-	
+
 	/**
-	 * 购买关系 
+	 * 实际成交金额
+	 *
+	 * 数据库字段: ORD_ORDER_DETAIL.ACTUAL_AMOUNT
+	 *
+	 * @mbg.generated 自动生成，如需修改，请删除本行
 	 */
-	private List<OrdBuyRelationRo> ordBuyRelation ;
+	private BigDecimal actualAmount;
+
+	/**
+	 * 购买关系
+	 */
+	private List<OrdBuyRelationRo> ordBuyRelation;
 }

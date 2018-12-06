@@ -85,13 +85,28 @@ public interface OrdOrderDetailSvc extends MybatisBaseSvc<OrdOrderDetailMo, java
      */
     void settleBuyer(Long orderDetailId);
 
-    /**
-     * 修改订单详情实际金额
-     * @param id 详情id
-     * @param newActualAmount 新实际金额
-     * @param oldActualAmount 旧实际金额
-     * @return
-     */
-	int modifyActualAmount(Long id, BigDecimal newActualAmount, BigDecimal oldActualAmount);
+	/**
+	 * 修改返现总额、退货数量
+	 * @param id
+	 * @param oldCashbackTotal
+	 * @param newCashbackTotal
+	 * @param returnedCount
+	 * @param returnTotal
+	 * @return
+	 */
+	int modifyReturnNumAndCashbackTotal(Long id, BigDecimal oldCashbackTotal, BigDecimal newCashbackTotal,
+			Integer returnedCount, Integer returnTotal);
+
+	/**
+	 * 修改订单详情实际金额和退货状态
+	 * @param id
+	 * @param newActualAmount
+	 * @param oldActualAmount
+	 * @param returnState
+	 * @param returnedState
+	 * @return
+	 */
+	int modifyActualAmountANDReturnState(Long id, BigDecimal newActualAmount, BigDecimal oldActualAmount,
+			Byte returnState, Byte returnedState);
 
 }
