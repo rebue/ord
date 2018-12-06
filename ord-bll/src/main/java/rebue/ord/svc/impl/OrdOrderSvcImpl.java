@@ -36,7 +36,7 @@ import com.github.pagehelper.PageInfo;
 import rebue.afc.msg.PayDoneMsg;
 import rebue.afc.svr.feign.AfcRefundSvc;
 import rebue.afc.svr.feign.AfcSettleTaskSvc;
-import rebue.afc.to.RefundGoBackTo;
+import rebue.afc.to.RefundImmediateTo;
 import rebue.kdi.ro.EOrderRo;
 import rebue.kdi.ro.KdiLogisticRo;
 import rebue.kdi.svr.feign.KdiSvc;
@@ -1164,10 +1164,10 @@ public class OrdOrderSvcImpl extends MybatisBaseSvcImpl<OrdOrderMo, java.lang.Lo
 		if (orders.isEmpty()) {
 			final String msg = "根据支付订单ID找不到任何订单，只能退款";
 			_log.warn("{}: payOrderId-{}\n可能订单支付后未收到通知时再次支付", msg, payOrderId);
-			final RefundGoBackTo refundGoBackTo = new RefundGoBackTo();
+			final RefundImmediateTo refundGoBackTo = new RefundImmediateTo();
 			refundGoBackTo.setOrderId(payDoneMsg.getOrderId());
 			refundGoBackTo.setTradeTitle(msg);
-			refundSvc.refundGoBack(refundGoBackTo);
+			refundSvc.refundImmediate(refundGoBackTo);
 			return true;
 		}
 		_log.debug("根据支付订单ID获取所有订单的结果: {}", orders);
@@ -1183,10 +1183,10 @@ public class OrdOrderSvcImpl extends MybatisBaseSvcImpl<OrdOrderMo, java.lang.Lo
 		if (payDoneMsg.getPayAmount().compareTo(orderTotal) != 0) {
 			final String msg = "支付金额与订单中记录的实际金额不一致(" + payDoneMsg.getPayAmount() + ":" + orderTotal + ")，只能退款";
 			_log.warn("{}: payOrderId-{}\n可能是在去支付订单后未收到通知时修改了订单的实际金额", msg, payOrderId);
-			final RefundGoBackTo refundGoBackTo = new RefundGoBackTo();
+			final RefundImmediateTo refundGoBackTo = new RefundImmediateTo();
 			refundGoBackTo.setOrderId(payDoneMsg.getOrderId());
 			refundGoBackTo.setTradeTitle(msg);
-			final Ro refundGoBackRo = refundSvc.refundGoBack(refundGoBackTo);
+			final Ro refundGoBackRo = refundSvc.refundImmediate(refundGoBackTo);
 			return refundGoBackRo.getResult().equals(ResultDic.SUCCESS);
 		}
 

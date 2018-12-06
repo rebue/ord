@@ -31,7 +31,7 @@ import com.github.pagehelper.PageInfo;
 import rebue.afc.dic.TradeTypeDic;
 import rebue.afc.svr.feign.AfcRefundSvc;
 import rebue.afc.svr.feign.AfcSettleTaskSvc;
-import rebue.afc.to.RefundTo;
+import rebue.afc.to.RefundApprovedTo;
 import rebue.afc.to.TaskTo;
 import rebue.onl.mo.OnlOnlinePicMo;
 import rebue.onl.svr.feign.OnlOnlinePicSvc;
@@ -675,7 +675,7 @@ public class OrdReturnSvcImpl extends MybatisBaseSvcImpl<OrdReturnMo, java.lang.
 		}
 
 		// 退款
-		final RefundTo refundTo = new RefundTo();
+		final RefundApprovedTo refundTo = new RefundApprovedTo();
 		refundTo.setOrderId(String.valueOf(order.getPayOrderId()));
 		refundTo.setRefundId(to.getReturnId());
 		refundTo.setBuyerAccountId(order.getUserId());
@@ -692,7 +692,7 @@ public class OrdReturnSvcImpl extends MybatisBaseSvcImpl<OrdReturnMo, java.lang.
 		refundTo.setMac("不在获取MAC地址");
 		refundTo.setIp(to.getIp());
 		_log.info("退款的参数为：{}", refundTo);
-		final Ro refundRo = refundSvc.refund(refundTo);
+		final Ro refundRo = refundSvc.refundApproved(refundTo);
 		_log.info("退款返回值为：{}", refundRo);
 		if (ResultDic.SUCCESS != refundRo.getResult()) {
 			_log.error("退款出错，收到错误信息：{}", refundRo);
@@ -882,7 +882,7 @@ public class OrdReturnSvcImpl extends MybatisBaseSvcImpl<OrdReturnMo, java.lang.
 			throw new RuntimeException("修改出错");
 		}
 
-		final RefundTo refundTo = new RefundTo();
+		final RefundApprovedTo refundTo = new RefundApprovedTo();
 		refundTo.setOrderId(ordReturnMo.getOrderId().toString());
 		refundTo.setBuyerAccountId(ordReturnMo.getUserId());
 		refundTo.setSellerAccountId(ordOrderMo.getOnlineOrgId());
@@ -900,7 +900,7 @@ public class OrdReturnSvcImpl extends MybatisBaseSvcImpl<OrdReturnMo, java.lang.
 		}
 		refundTo.setReturnCompensationToSeller(to.getReturnCompensationToSeller());
 		_log.info("已收到货并退款执行退款的参数为：{}", refundTo);
-		final Ro refundRo = refundSvc.refund(refundTo);
+		final Ro refundRo = refundSvc.refundApproved(refundTo);
 		_log.info("已收到货并退款执行退款的返回值为：{}", refundRo);
 		if (refundRo.getResult() != ResultDic.SUCCESS) {
 			_log.error("已收到货并退款执行退款出现错误，退货编号为：{}", to.getId());
