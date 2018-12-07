@@ -1209,9 +1209,13 @@ public class OrdOrderSvcImpl extends MybatisBaseSvcImpl<OrdOrderMo, java.lang.Lo
 	}
 
 	/**
-	 * 处理订单支付完成的通知 1. 根据支付订单ID获取所有订单(如果没有找到，退款) 2.
-	 * 判断通知回来的支付金额是否和订单中记录的实际交易金额相同(如果不同，退款) 3. 取消订单自动取消任务 4.
-	 * 按不同发货组织拆单，并重新计算拆单后的订单实际交易金额 5. 匹配购买关系 6. 根据支付订单ID修改订单状态为已支付
+	 * 处理订单支付完成的通知 
+	 * 1. 根据支付订单ID获取所有订单(如果没有找到，退款) 
+	 * 2. 判断通知回来的支付金额是否和订单中记录的实际交易金额相同(如果不同，退款) 
+	 * 3. 取消订单自动取消任务 
+	 * 4. 按不同发货组织拆单，并重新计算拆单后的订单实际交易金额 
+	 * 5. 根据支付订单ID修改订单状态为已支付
+	 * 6. 匹配购买关系 
 	 */
 	@Override
 	@Transactional(readOnly = false, propagation = Propagation.REQUIRED)
@@ -1336,7 +1340,16 @@ public class OrdOrderSvcImpl extends MybatisBaseSvcImpl<OrdOrderMo, java.lang.Lo
 			}
 		}
 
-		_log.info("5. 匹配购买关系");
+		_log.info("5. 根据支付订单ID修改订单状态为已支付");
+		_log.info("订单支付完成，根据PAY_ORDER_ID修改订单状态为已支付: payOrderId-{}, payTime-{}", payOrderId, payDoneMsg.getPayTime());
+		final int result = _mapper.paidOrder(payOrderId, payDoneMsg.getPayTime());
+		_log.debug("订单支付完成通知修改订单信息的返回值为：{}", result);
+		if (result == 0) {
+			_log.warn("根据支付订单ID修改订单状态为已支付不成功，可能碰到并发的问题: payOrderId-{}", payOrderId);
+			return false;
+		}
+		
+		_log.info("6. 匹配购买关系");
 		_log.info("遍历订单详情: 添加订单购买关系");
 		for (final OrdOrderDetailMo orderDetail : orderDetailAlls) {
 			try {
@@ -1356,15 +1369,6 @@ public class OrdOrderSvcImpl extends MybatisBaseSvcImpl<OrdOrderMo, java.lang.Lo
 			} catch (final Exception e) {
 				_log.error("匹配购买关系报错：", e);
 			}
-		}
-
-		_log.info("6. 根据支付订单ID修改订单状态为已支付");
-		_log.info("订单支付完成，根据PAY_ORDER_ID修改订单状态为已支付: payOrderId-{}, payTime-{}", payOrderId, payDoneMsg.getPayTime());
-		final int result = _mapper.paidOrder(payOrderId, payDoneMsg.getPayTime());
-		_log.debug("订单支付完成通知修改订单信息的返回值为：{}", result);
-		if (result == 0) {
-			_log.warn("根据支付订单ID修改订单状态为已支付不成功，可能碰到并发的问题: payOrderId-{}", payOrderId);
-			return false;
 		}
 
 		return true;
