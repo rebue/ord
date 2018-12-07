@@ -90,10 +90,12 @@ public interface OrdOrderSvc extends MybatisBaseSvc<OrdOrderMo, java.lang.Long> 
     ShipmentConfirmationRo shipmentConfirmation(ShipmentConfirmationTo mo);
 
     /**
-     * 供应商发货
+     *  发货并获取物流轨迹
      */
 
-    ShipmentConfirmationRo sendBySupplier(ShipmentConfirmationTo to);
+    ShipmentConfirmationRo shipmentAndGetTrace(ShipmentConfirmationTo to);
+    
+    
 
     /**
      * 订单签收 Title: orderSignIn Description:
