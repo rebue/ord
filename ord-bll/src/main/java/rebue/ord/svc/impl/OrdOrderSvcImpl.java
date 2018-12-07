@@ -768,6 +768,7 @@ public class OrdOrderSvcImpl extends MybatisBaseSvcImpl<OrdOrderMo, java.lang.Lo
 		approvedTo.setIsAutoCalcRefund(true);
 		approvedTo.setRefundId(ordOrderMo.getId());
 		approvedTo.setBuyerAccountId(ordOrderMo.getUserId());
+		approvedTo.setSellerAccountId(ordOrderMo.getOnlineOrgId());
 		approvedTo.setTradeTitle("大卖网络-取消发货退款");
 		approvedTo.setTradeDetail(to.getCanceldeliReason());
 		approvedTo.setRefundAmount(realMoney);
