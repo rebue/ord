@@ -12,7 +12,6 @@ import com.github.pagehelper.PageInfo;
 
 import rebue.afc.msg.PayDoneMsg;
 import rebue.ord.mo.OrdOrderMo;
-import rebue.ord.ro.CancelDeliveryRo;
 import rebue.ord.ro.CancellationOfOrderRo;
 import rebue.ord.ro.ModifyOrderRealMoneyRo;
 import rebue.ord.ro.OrdOrderRo;
@@ -20,6 +19,7 @@ import rebue.ord.ro.OrderRo;
 import rebue.ord.ro.OrderSignInRo;
 import rebue.ord.ro.SetUpExpressCompanyRo;
 import rebue.ord.ro.ShipmentConfirmationRo;
+import rebue.ord.to.CancelDeliveryTo;
 import rebue.ord.to.ListOrderTo;
 import rebue.ord.to.OrderSignInTo;
 import rebue.ord.to.OrderTo;
@@ -79,15 +79,6 @@ public interface OrdOrderSvc extends MybatisBaseSvc<OrdOrderMo, java.lang.Long> 
      * @date 2018年4月13日 上午11:23:14
      */
     SetUpExpressCompanyRo setUpExpressCompany(OrdOrderMo mo);
-
-    /**
-     * 取消发货 Title: cancelDeliveryUpdateOrderState Description:
-     *
-     * @param mo
-     * @return
-     * @date 2018年4月13日 下午2:59:19
-     */
-    CancelDeliveryRo cancelDelivery(OrdOrderMo mo);
 
     /**
      * 本店发货 Title: sendAndPrint Description:
@@ -210,4 +201,11 @@ public interface OrdOrderSvc extends MybatisBaseSvc<OrdOrderMo, java.lang.Long> 
      * 5. 如果订单还有退货中的申请未处理完成，不能结算
      */
     Boolean isSettleableOrder(OrdOrderMo order);
+
+    /**
+     * 取消发货
+     * @param to
+     * @return
+     */
+	Ro cancelDelivery(CancelDeliveryTo to);
 }

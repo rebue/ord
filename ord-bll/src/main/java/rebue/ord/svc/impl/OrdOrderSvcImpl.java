@@ -87,6 +87,7 @@ import rebue.ord.svc.OrdOrderSvc;
 import rebue.ord.svc.OrdReturnSvc;
 import rebue.ord.svc.OrdSettleTaskSvc;
 import rebue.ord.svc.OrdTaskSvc;
+import rebue.ord.to.CancelDeliveryTo;
 import rebue.ord.to.ListOrderTo;
 import rebue.ord.to.OrderDetailTo;
 import rebue.ord.to.OrderSignInTo;
@@ -418,8 +419,9 @@ public class OrdOrderSvcImpl extends MybatisBaseSvcImpl<OrdOrderMo, java.lang.Lo
 			// 添加订单信息
 			add(orderMo);
 			// 添加订单详情
-			for (final OrdOrderDetailMo orderDetailMo : onlineOrg.getValue()) {
+			for (OrdOrderDetailMo orderDetailMo : onlineOrg.getValue()) {
 				_log.info("添加订单详情的参数为：{}", orderDetailMo);
+				orderDetailMo.setId(_idWorker.getId());
 				orderDetailMo.setOrderId(orderMo.getId());
 				orderDetailMo.setUserId(to.getUserId());
 				orderDetailMo.setReturnState((byte) ReturnStateDic.NONE.getCode());
@@ -459,13 +461,6 @@ public class OrdOrderSvcImpl extends MybatisBaseSvcImpl<OrdOrderMo, java.lang.Lo
 		ro.setResult(ResultDic.SUCCESS);
 		ro.setMsg("下单成功");
 		return ro;
-	}
-
-	/**
-	 * 下单添加订单详情
-	 */
-	public void addOrderDetail(OrdOrderDetailMo orderDetailMo, Map<Long, List<OrdOrderDetailMo>> onlineOrgs) {
-
 	}
 
 	/**
@@ -703,44 +698,56 @@ public class OrdOrderSvcImpl extends MybatisBaseSvcImpl<OrdOrderMo, java.lang.Lo
 	 */
 	@Override
 	@Transactional(readOnly = false, propagation = Propagation.REQUIRED)
-	public CancelDeliveryRo cancelDelivery(final OrdOrderMo mo) {
-		final CancelDeliveryRo cancelDeliveryRo = new CancelDeliveryRo();
-		final Map<String, Object> map = new HashMap<>();
-		final long userId = mo.getUserId();
-		final long id = mo.getId();
-		map.put("userId", userId);
-		map.put("orderCode", id);
-		_log.info("用户查询订单的参数为：{}", String.valueOf(map));
-		final List<OrdOrderMo> orderList = _mapper.selectOrderInfo(map);
-		_log.info("用户查询订单信息的返回值为：{}", String.valueOf(orderList));
-		if (orderList.size() == 0) {
-			_log.error("由于订单：{}不存在，{}取消发货失败", id, userId);
-			cancelDeliveryRo.setResult(CancelDeliveryDic.ORDER_NOT_EXIST);
-			cancelDeliveryRo.setMsg("订单不存在");
-			return cancelDeliveryRo;
+	public Ro cancelDelivery(CancelDeliveryTo to) {
+		_log.info("取消发货的请求参数为：{}", to);
+		Ro ro = new Ro();
+		if (to.getId() == null || to.getCancelingOrderOpId() == null || to.getCanceldeliReason() == null
+				|| to.getOpIp() == null) {
+			ro.setResult(ResultDic.PARAM_ERROR);
+			ro.setMsg("参数错误");
+			return ro;
 		}
-		if (orderList.get(0).getOrderState() != OrderStateDic.PAID.getCode()) {
-			_log.error("由于订单：{}处于非待发货状态，{}取消发货失败", id, userId);
-			cancelDeliveryRo.setResult(CancelDeliveryDic.CURRENT_STATE_NOT_EXIST_CANCEL);
-			cancelDeliveryRo.setMsg("当前状态不允许取消");
-			return cancelDeliveryRo;
+
+		_log.info("取消发货查询订单的参数为：{}", to.getId());
+		OrdOrderMo ordOrderMo = thisSvc.getById(to.getId());
+		_log.info("取消发货查询订单的返回值为：{}", ordOrderMo);
+		if (ordOrderMo == null) {
+			_log.error("取消订单时发现没有该订单，订单id为：{}", to.getId());
+			ro.setResult(ResultDic.FAIL);
+			ro.setMsg("没有该订单");
+			return ro;
 		}
+
+		if (ordOrderMo.getOrderState() != OrderStateDic.PAID.getCode()) {
+			_log.error("取消发货时发现该订单状态不处于已支付（待发货）状态，订单id为：{}", to.getId());
+			ro.setResult(ResultDic.FAIL);
+			ro.setMsg("当前状态不允许取消");
+			return ro;
+		}
+
 		final OrdOrderDetailMo detailMo = new OrdOrderDetailMo();
-		detailMo.setOrderId(id);
+		detailMo.setOrderId(to.getId());
 		final List<OrdOrderDetailMo> orderDetailList = orderDetailSvc.list(detailMo);
 		_log.info("查询订单详情的返回值为：{}", String.valueOf(orderDetailList));
 		if (orderDetailList.size() == 0) {
-			_log.error("由于订单：{}不存在，{}取消发货失败", id, userId);
-			cancelDeliveryRo.setResult(CancelDeliveryDic.ORDER_NOT_EXIST);
-			cancelDeliveryRo.setMsg("订单不存在");
-			return cancelDeliveryRo;
+			_log.error("由于订单：{}不存在，{}取消发货失败", to.getId(), to.getCancelingOrderOpId());
+			ro.setResult(ResultDic.FAIL);
+			ro.setMsg("订单不存在");
+			return ro;
 		}
-		final Date date = new Date();
-		mo.setCancelTime(date);
-		final int updateResult = _mapper.cancelDeliveryUpdateOrderState(mo);
-		if (updateResult != 1) {
-			_log.error("{}取消发货：{}失败", userId, id);
-			throw new RuntimeException("修改订单状态失败");
+
+		OrdOrderMo orderMo = new OrdOrderMo();
+		orderMo.setId(to.getId());
+		orderMo.setCancelingOrderOpId(to.getCancelingOrderOpId());
+		orderMo.setCanceldeliReason(to.getCanceldeliReason());
+		_log.info("取消发货修改订单状态的参数为：{}", orderMo);
+		int cancelDeliveryUpdateOrderStateResult = _mapper.cancelDeliveryUpdateOrderState(orderMo);
+		_log.info("取消发货修改订单状态的返回值为：{}", cancelDeliveryUpdateOrderStateResult);
+		if (cancelDeliveryUpdateOrderStateResult != 1) {
+			_log.error("取消发货修改订单状态出错，订单id为：{}", to.getId());
+			ro.setResult(ResultDic.FAIL);
+			ro.setMsg("修改订单状态失败");
+			return ro;
 		}
 
 		for (OrdOrderDetailMo ordOrderDetailMo : orderDetailList) {
@@ -749,15 +756,12 @@ public class OrdOrderSvcImpl extends MybatisBaseSvcImpl<OrdOrderMo, java.lang.Lo
 			Ro modifySaleCountByIdResult = onlOnlineSpecSvc.modifySaleCountById(ordOrderDetailMo.getOnlineSpecId(),
 					ordOrderDetailMo.getBuyCount());
 			_log.info("取消订单根据上线规格id修改销售数量的返回值为：{}", modifySaleCountByIdResult);
-			if (modifySaleCountByIdResult.getResult() != ResultDic.SUCCESS) {
-				throw new RuntimeException("修改规格数量失败");
-			}
 		}
 
-		_log.info("{}发货订单：{}成功", userId, id);
-		cancelDeliveryRo.setResult(CancelDeliveryDic.SUCCESS);
-		cancelDeliveryRo.setMsg("取消发货成功");
-		return cancelDeliveryRo;
+		_log.info("{}取消发货订单：{}成功", to.getCancelingOrderOpId(), to.getId());
+		ro.setResult(ResultDic.SUCCESS);
+		ro.setMsg("取消发货成功");
+		return ro;
 	}
 
 	/**
@@ -1100,15 +1104,11 @@ public class OrdOrderSvcImpl extends MybatisBaseSvcImpl<OrdOrderMo, java.lang.Lo
 	/**
 	 * 修改订单退款金额(根据订单ID和已退款总额)
 	 * 
-	 * @param refundTotal
-	 *            退款总额
+	 * @param refundTotal        退款总额
 	 * 
-	 * @param orderState
-	 *            订单状态
-	 * @param whereOrderId
-	 *            where条件-订单ID
-	 * @param whereRefundedTotal
-	 *            where条件-已退款总额
+	 * @param orderState         订单状态
+	 * @param whereOrderId       where条件-订单ID
+	 * @param whereRefundedTotal where条件-已退款总额
 	 */
 	@Override
 	@Transactional(readOnly = false, propagation = Propagation.REQUIRED)

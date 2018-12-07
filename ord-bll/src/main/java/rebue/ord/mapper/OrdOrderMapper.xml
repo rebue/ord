@@ -1020,8 +1020,7 @@
 		UPDATE ORD_ORDER SET ORDER_STATE = -1,
 		CANCELING_ORDER_OP_ID =
 		#{cancelingOrderOpId,jdbcType=BIGINT},
-		CANCEL_REASON =
-		#{cancelReason,jdbcType=VARCHAR}
+		CANCELDELI_REASON = #{canceldeliReason,jdbcType=VARCHAR}
 		WHERE
 		ID=${id,jdbcType=BIGINT} AND ORDER_STATE=2
 	</update>
