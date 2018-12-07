@@ -349,6 +349,8 @@ public class OrdOrderSvcImpl extends MybatisBaseSvcImpl<OrdOrderMo, java.lang.Lo
 				orderDetailMo.setCashbackTotal(BigDecimal.ZERO);
 				for (int i = 0; i < orderDetailTo.getBuyCount(); i++) {
 					orderDetails.add(orderDetailMo);
+					orderDetailMo.setOrderTimestamp(orderTimestamp);
+					orderTimestamp++;
 				}
 			}
 			// 添加要更新的上线规格信息
