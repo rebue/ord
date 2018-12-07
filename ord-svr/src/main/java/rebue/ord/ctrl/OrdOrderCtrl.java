@@ -42,6 +42,7 @@ import rebue.ord.to.OrderTo;
 import rebue.ord.to.ShipmentConfirmationTo;
 import rebue.robotech.dic.ResultDic;
 import rebue.robotech.ro.Ro;
+import rebue.wheel.AgentUtils;
 import rebue.wheel.turing.JwtUtils;
 
 /**
@@ -68,6 +69,12 @@ public class OrdOrderCtrl {
 	 */
 	@Resource
 	private OrdOrderSvc svc;
+	
+	/**
+	 * 前面经过的代理
+	 */
+	@Value("${afc.passProxy:noproxy}")
+	private String passProxy;
 
 	/**
 	 * 删除订单信息
@@ -218,16 +225,30 @@ public class OrdOrderCtrl {
 	 *
 	 * @param qo
 	 * @return
+	 * @throws ParseException 
+	 * @throws NumberFormatException 
 	 * @date 2018年4月9日 下午7:37:13
 	 */
 	@PutMapping("/ord/order/canceldelivery")
-	Ro cancelDelivery(CancelDeliveryTo to) {
+	Ro cancelDelivery(@RequestBody CancelDeliveryTo to, HttpServletRequest req) throws NumberFormatException, ParseException {
 		_log.info("用户取消发货的参数为：{}", to);
+		Long loginId = 520469568947224576L;
+		if (!isDebug) {
+			loginId = JwtUtils.getJwtUserIdInCookie(req);
+		}
+		Ro ro = new Ro();
+		if (loginId == null) {
+			ro.setResult(ResultDic.FAIL);
+			ro.setMsg("您未登录，请登录后再试。。。");
+			return ro;
+		}
+		to.setCancelingOrderOpId(loginId);
+		to.setOpIp(AgentUtils.getIpAddr(req, passProxy));
 		try {
 			return svc.cancelDelivery(to);
 		} catch (final RuntimeException e) {
 			_log.error("用户取消发货出现异常，{}", e);
-			Ro ro = new Ro();
+			
 			ro.setResult(ResultDic.FAIL);
 			ro.setMsg("取消失败");
 			return ro;

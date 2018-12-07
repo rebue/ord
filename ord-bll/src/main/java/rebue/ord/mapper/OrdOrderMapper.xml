@@ -1014,7 +1014,6 @@
 		AND ORDER_STATE=1
 	</update>
 
-
 	<!-- 取消发货修改订单状态 -->
 	<update id="cancelDeliveryUpdateOrderState" parameterType="rebue.ord.mo.OrdOrderMo">
 		UPDATE ORD_ORDER SET ORDER_STATE = -1,
@@ -1022,10 +1021,9 @@
 		#{cancelingOrderOpId,jdbcType=BIGINT},
 		CANCELDELI_REASON = #{canceldeliReason,jdbcType=VARCHAR}
 		WHERE
-		ID=${id,jdbcType=BIGINT} AND ORDER_STATE=2
+		ID=#{id,jdbcType=BIGINT} AND ORDER_STATE=2
 	</update>
 
-			
 	<!-- 确认发货并修改订单状态 -->
 	<update id="shipmentConfirmation" parameterType="rebue.ord.mo.OrdOrderMo">
 		UPDATE ORD_ORDER SET ORDER_STATE = 3,SEND_OP_ID =
