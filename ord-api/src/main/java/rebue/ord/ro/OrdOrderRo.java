@@ -346,5 +346,15 @@ public class OrdOrderRo {
      * 签收人
      */
     private Long       receivedOpId;
+    
+    /**
+     * 上线组织
+     */
+    private Long              onlineOrgId;
 
+    /**
+     * 发货组织ID(默认填入上线组织ID，可变更为供应商的ID)
+     *
+     */
+    private Long              deliverOrgId;
 }
