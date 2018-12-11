@@ -11,6 +11,7 @@ import org.apache.ibatis.annotations.Select;
 import org.apache.ibatis.annotations.Update;
 
 import rebue.ord.mo.OrdOrderMo;
+import rebue.ord.ro.OrdSettleRo;
 import rebue.ord.to.ListOrderTo;
 import rebue.robotech.mapper.MybatisBaseMapper;
 
@@ -217,6 +218,12 @@ public interface OrdOrderMapper extends MybatisBaseMapper<OrdOrderMo, Long> {
      * 分页查询订单信息
      */
     List<OrdOrderMo> listOrder(ListOrderTo to);
+    
+
+    /**
+     * 供应商分页查询订单信息
+     */
+    List<OrdOrderMo> listOrderSupplier(ListOrderTo to);
 
 //    /**
 //     * 根据支付订单ID获取订单详情列表
@@ -260,5 +267,15 @@ public interface OrdOrderMapper extends MybatisBaseMapper<OrdOrderMo, Long> {
             + " WHERE" //
             + "    a.ID = #{orderId}")
     void updateAmountAfterSplitOrder(@Param("orderId") Long orderId);
+    
 
+    /**
+     * 根据组织Id获取结算的详情总额
+     * @param orgId
+     * @param orderState
+     * @return
+     */
+    @Select("SELECT  SUM(COST_PRICE * BUY_COUNT) AS notSettle FROM  ORD_ORDER_DETAIL WHERE ORDER_ID IN (SELECT DISTINCT Id FROM ORD_ORDER WHERE DELIVER_ORG_ID = ${deliverOrgId} AND ORDER_STATE = ${orderState})")
+    OrdSettleRo getSettleTotalForOrgId(@Param("deliverOrgId") Long orgId,@Param("orderState") byte orderState);
+    
 }

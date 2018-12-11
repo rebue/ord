@@ -15,6 +15,7 @@ import rebue.ord.mo.OrdOrderMo;
 import rebue.ord.ro.CancellationOfOrderRo;
 import rebue.ord.ro.ModifyOrderRealMoneyRo;
 import rebue.ord.ro.OrdOrderRo;
+import rebue.ord.ro.OrdSettleRo;
 import rebue.ord.ro.OrderRo;
 import rebue.ord.ro.OrderSignInRo;
 import rebue.ord.ro.SetUpExpressCompanyRo;
@@ -169,6 +170,11 @@ public interface OrdOrderSvc extends MybatisBaseSvc<OrdOrderMo, java.lang.Long> 
      * 分页查询订单
      */
     PageInfo<OrdOrderRo> listOrder(ListOrderTo to, int pageNum, int pageSize);
+    
+    /**
+     * 供应商分页查询订单
+     */
+    PageInfo<OrdOrderRo> SupplierlistOrder(ListOrderTo to, int pageNum, int pageSize);
 
     /**
      * 修改收件人信息
@@ -210,4 +216,11 @@ public interface OrdOrderSvc extends MybatisBaseSvc<OrdOrderMo, java.lang.Long> 
      * @return
      */
 	Ro cancelDelivery(CancelDeliveryTo to);
+	
+	/**
+	 * 获取订单已经结算或者是未结算的详情总成本价
+	 * @param order
+	 * @return
+	 */
+	OrdSettleRo getSettleTotalForOrgId(OrdOrderMo order);
 }

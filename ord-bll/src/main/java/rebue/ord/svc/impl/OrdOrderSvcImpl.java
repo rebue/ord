@@ -73,6 +73,7 @@ import rebue.ord.ro.CancellationOfOrderRo;
 import rebue.ord.ro.ModifyOrderRealMoneyRo;
 import rebue.ord.ro.OrdBuyRelationRo;
 import rebue.ord.ro.OrdOrderRo;
+import rebue.ord.ro.OrdSettleRo;
 import rebue.ord.ro.OrderDetailRo;
 import rebue.ord.ro.OrderRo;
 import rebue.ord.ro.OrderSignInRo;
@@ -1537,5 +1538,36 @@ public class OrdOrderSvcImpl extends MybatisBaseSvcImpl<OrdOrderMo, java.lang.Lo
 	public List<OrdOrderMo> getOrderSignTime(final String orderIds) {
 		_log.info("查询订单签收时间的参数为：{}", orderIds);
 		return _mapper.selectOrderSignTime(orderIds);
+	}
+	
+	@Override
+	public PageInfo<OrdOrderRo> SupplierlistOrder(ListOrderTo to, int pageNum, int pageSize) {
+		_log.info("供应商获取订单的参数为: {}", to);
+		_log.info("orderList: ro-{}; pageNum-{}; pageSize-{}", to, pageNum, pageSize);
+		return PageHelper.startPage(pageNum, pageSize).doSelectPageInfo(() -> _mapper.listOrderSupplier(to));
+	}
+	
+	/**
+	 * 根据组织Id获取未结算或者已经结算的详情的总额
+	 */
+	@Override
+	public OrdSettleRo getSettleTotalForOrgId(OrdOrderMo mo) {
+		_log.info("根据组织Id获取未结算或者已经结算的详情的总额: {}", mo);
+		OrdSettleRo result=new OrdSettleRo();
+		OrdSettleRo  temp=new OrdSettleRo();
+		mo.setOrderState((byte)3);
+		temp=_mapper.getSettleTotalForOrgId(mo.getDeliverOrgId(),mo.getOrderState());
+		_log.info("根据组织Id获取等待详情的结果: {}", temp);
+		if(temp !=null) {
+			result.setNotSettle(temp.getNotSettle());
+		}
+		mo.setOrderState((byte)5);
+		temp=_mapper.getSettleTotalForOrgId(mo.getDeliverOrgId(), mo.getOrderState());
+		_log.info("根据组织Id获取已经详情的结果: {}", temp);
+		if(temp !=null) {
+			result.setAlreadySettle(temp.getNotSettle());
+		}
+		return result;
+		
 	}
 }

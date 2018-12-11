@@ -30,6 +30,7 @@ import rebue.ord.mo.OrdOrderMo;
 import rebue.ord.ro.CancellationOfOrderRo;
 import rebue.ord.ro.ModifyOrderRealMoneyRo;
 import rebue.ord.ro.OrdOrderRo;
+import rebue.ord.ro.OrdSettleRo;
 import rebue.ord.ro.OrderRo;
 import rebue.ord.ro.OrderSignInRo;
 import rebue.ord.ro.SetUpExpressCompanyRo;
@@ -139,6 +140,46 @@ public class OrdOrderCtrl {
 		_log.info("result: " + result);
 		return result;
 	}
+	
+	/**
+	 * 供应商查询订单信息
+	 * 
+	 * @mbg.overrideByMethodName
+	 */
+	@GetMapping("/ord/order/Supplier")
+	PageInfo<OrdOrderRo> listSupplier(final ListOrderTo to, @RequestParam(value = "pageNum", required = false) Integer pageNum,
+			@RequestParam(value = "pageSize", required = false) Integer pageSize, final HttpServletRequest req)
+			throws ParseException {
+		if (pageNum == null) {
+			pageNum = 1;
+		}
+		if (pageSize == null) {
+			pageSize = 5;
+		}
+		_log.info("list OrdOrderMo:" + to + ", pageNum = " + pageNum + ", pageSize = " + pageSize);
+		if (pageSize > 50) {
+			final String msg = "pageSize不能大于50";
+			_log.error(msg);
+			throw new IllegalArgumentException(msg);
+		}
+
+		if (!isDebug) {
+			final Long orgId = (Long) JwtUtils.getJwtAdditionItemInCookie(req, "orgId");
+			if (orgId == null) {
+				return new PageInfo<>();
+			}
+			to.setOrgId(orgId);
+		} else {
+			to.setOrgId(520874560590053376L);
+		}
+		_log.info("获取当前用户的组织ID: {}", to.getOrgId());
+
+		// 查询订单
+		final PageInfo<OrdOrderRo> result = svc.SupplierlistOrder(to, pageNum, pageSize);
+		_log.info("result: " + result);
+		return result;
+	}
+
 
 	/**
 	 * 获取单个订单信息
@@ -453,5 +494,16 @@ public class OrdOrderCtrl {
 	Ro modifyPayOrderId(@RequestParam("id") final java.lang.Long id) {
 		_log.info("modifyPayOrderId OrdOrderMo by id: {}", id);
 		return svc.modifyPayOrderId(id);
+	}
+	
+	/**
+	 * 根据组织Id获取未发货的订单详情的总成本价
+	 * @param mo
+	 * @return
+	 */
+	@GetMapping("/ord/order/getSettleTotal")
+	OrdSettleRo getSettleTotal(final OrdOrderMo mo ) {
+		_log.info("根据组织Id获取未发货的订单详情的总成本价参数为：{}", mo);
+		return svc.getSettleTotalForOrgId(mo);
 	}
 }
