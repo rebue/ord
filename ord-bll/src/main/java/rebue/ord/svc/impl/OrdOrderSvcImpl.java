@@ -1555,7 +1555,7 @@ public class OrdOrderSvcImpl extends MybatisBaseSvcImpl<OrdOrderMo, java.lang.Lo
 		_log.info("根据组织Id获取未结算或者已经结算的详情的总额: {}", mo);
 		OrdSettleRo result=new OrdSettleRo();
 		OrdSettleRo  temp=new OrdSettleRo();
-		mo.setOrderState((byte)3);
+		mo.setOrderState((byte)4);
 		temp=_mapper.getSettleTotalForOrgId(mo.getDeliverOrgId(),mo.getOrderState());
 		_log.info("根据组织Id获取等待详情的结果: {}", temp);
 		if(temp !=null) {
