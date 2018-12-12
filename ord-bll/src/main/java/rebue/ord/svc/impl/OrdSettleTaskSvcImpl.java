@@ -228,9 +228,12 @@ public class OrdSettleTaskSvcImpl implements OrdSettleTaskSvc {
 	/**
 	 * 添加结算子任务
 	 * 
-	 * @param orderId 订单ID
-	 * @param now     当前时间
-	 * @param delay   延迟时间
+	 * @param orderId
+	 *            订单ID
+	 * @param now
+	 *            当前时间
+	 * @param delay
+	 *            延迟时间
 	 */
 	private void addSettleSubTask(final Long orderId, final Date now, final SettleTaskTypeDic taskType,
 			final BigDecimal delay) {
@@ -307,6 +310,8 @@ public class OrdSettleTaskSvcImpl implements OrdSettleTaskSvc {
 
 		_log.debug("遍历订单详情列表");
 		for (final OrdOrderDetailMo orderDetail : orderDetailList) {
+			_log.debug("遍历订单详情列表: orderDetail-{}", orderDetail);
+
 			// 计算当前时间
 			final Date now = new Date();
 
@@ -325,6 +330,7 @@ public class OrdSettleTaskSvcImpl implements OrdSettleTaskSvc {
 			switch (settleTaskType) {
 			// 结算成本给供应商(余额+)
 			case SETTLE_COST_TO_SUPPLIER: {
+				_log.info("结算成本给供应商(余额+)");
 				final AfcTradeMo tradeMo = new AfcTradeMo();
 				tradeMo.setTradeType((byte) TradeTypeDic.SETTLE_SUPPLIER.getCode());
 				tradeMo.setAccountId(orderDetail.getSupplierId());
@@ -340,6 +346,7 @@ public class OrdSettleTaskSvcImpl implements OrdSettleTaskSvc {
 			}
 			// 结算返现金给买家
 			case SETTLE_CASHBACK_TO_BUYER: {
+				_log.info("结算返现金给买家");
 				// 设置订单详情已结算返现金给买家
 				orderDetailSvc.settleBuyer(orderDetail.getId());
 
@@ -353,6 +360,7 @@ public class OrdSettleTaskSvcImpl implements OrdSettleTaskSvc {
 			}
 			// 释放卖家的已占用保证金
 			case FREE_DEPOSIT_USED_OF_SELLER: {
+				_log.info("释放卖家的已占用保证金");
 				final AfcTradeMo tradeMo = new AfcTradeMo();
 				tradeMo.setTradeType((byte) TradeTypeDic.SETTLE_DEPOSIT_USED.getCode());
 				tradeMo.setAccountId(order.getOnlineOrgId());
@@ -370,6 +378,7 @@ public class OrdSettleTaskSvcImpl implements OrdSettleTaskSvc {
 			}
 			// 结算利润给卖家(余额+)
 			case SETTLE_PROFIT_TO_SELLER: {
+				_log.info("结算利润给卖家(余额+)");
 				final AfcTradeMo tradeMo = new AfcTradeMo();
 				tradeMo.setTradeType((byte) TradeTypeDic.SETTLE_SELLER.getCode());
 				tradeMo.setAccountId(order.getOnlineOrgId());
@@ -404,6 +413,7 @@ public class OrdSettleTaskSvcImpl implements OrdSettleTaskSvc {
 			}
 			// 结算平台服务费
 			case SETTLE_PLATFORM_SERVICE_FEE: {
+				_log.info("结算平台服务费");
 				final AfcPlatformTradeMo tradeMo = new AfcPlatformTradeMo();
 				tradeMo.setPlatformTradeType((byte) PlatformTradeTypeDic.CHARGE_SEVICE_FEE.getCode());
 				BigDecimal platformServiceFee = null;
@@ -431,6 +441,7 @@ public class OrdSettleTaskSvcImpl implements OrdSettleTaskSvc {
 			}
 			// 结算返佣金
 			case SETTLE_COMMISSION: {
+				_log.info("结算返佣金");
 				settleCommission(taskMo, order, orderDetail, now);
 				break;
 			}
@@ -495,6 +506,7 @@ public class OrdSettleTaskSvcImpl implements OrdSettleTaskSvc {
 	 */
 	private void addAccountTrade(final OrdTaskMo taskMo, final OrdOrderDetailMo orderDetail, final AfcTradeMo tradeMo,
 			final Date now) {
+		_log.info("addAccountTrade: taskMo-{} orderDetail-{} tradeMo-{}", taskMo, orderDetail, tradeMo);
 		tradeMo.setTradeTime(now);
 		if (tradeMo.getOrderId() == null) {
 			tradeMo.setOrderId(taskMo.getOrderId());

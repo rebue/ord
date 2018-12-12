@@ -40,6 +40,9 @@ public class DetailandBuyRelationRo {
 
 	/** 返现总额 **/
 	private BigDecimal cashbackTotal;
+	
+	/** 成本价 **/
+    private BigDecimal costPrice;
 
 	/** 购买单位 **/
 	private String buyUnit;
