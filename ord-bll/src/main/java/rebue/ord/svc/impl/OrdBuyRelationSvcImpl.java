@@ -351,6 +351,7 @@ public class OrdBuyRelationSvcImpl extends MybatisBaseSvcImpl<OrdBuyRelationMo, 
         }
         // 获取用户购买该产品还有两个名额的详情记录
         final Map<String, Object> map = new HashMap<>();
+        map.put("id", downLineDetailId);
         map.put("onlineId", onlineId);
         map.put("buyPrice", buyPrice);
         map.put("returnState", (byte) 0);
@@ -427,6 +428,7 @@ public class OrdBuyRelationSvcImpl extends MybatisBaseSvcImpl<OrdBuyRelationMo, 
         }
         // 获取用户购买该产品还有两个名额的详情记录
         final Map<String, Object> map = new HashMap<>();
+        map.put("id", downLineDetailId);
         map.put("onlineId", onlineId);
         map.put("buyPrice", buyPrice);
         map.put("returnState", (byte) 0);
