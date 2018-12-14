@@ -20,6 +20,7 @@ import rebue.afc.mo.AfcTradeMo;
 import rebue.afc.platform.dic.PlatformTradeTypeDic;
 import rebue.afc.svr.feign.AfcPlatformTradeTradeSvc;
 import rebue.afc.svr.feign.AfcTradeSvc;
+import rebue.ord.dic.OrderStateDic;
 import rebue.ord.dic.OrderTaskTypeDic;
 import rebue.ord.dic.ReturnStateDic;
 import rebue.ord.dic.SettleTaskTypeDic;
@@ -179,12 +180,34 @@ public class OrdSettleTaskSvcImpl implements OrdSettleTaskSvc {
 			throw new RuntimeException(msg);
 		}
 
+		if (order.getOrderState() == OrderStateDic.CANCEL.getCode()) {
+			_log.error("添加订单结算任务查询订单信息时发现订单处于作废状态，订单id为：{}", orderId);
+			return;
+		}
+
 		// 检查订单是否可结算
 		// XXX 按理说在添加订单结算任务时就已经做过校验了，这里重复做一些校验更安全些，每个环节都要如此严谨
 		if (!orderSvc.isSettleableOrder(order)) {
 			final String msg = "订单不能结算";
 			_log.error("{}: {}", msg, order);
 			throw new RuntimeException(msg);
+		}
+
+		OrdOrderDetailMo orderDetailMo = new OrdOrderDetailMo();
+		orderDetailMo.setOrderId(orderId);
+		_log.info("添加订单结算任务查询订单详情信息的参数为：{}", orderDetailMo);
+		List<OrdOrderDetailMo> detailList = orderDetailSvc.list(orderDetailMo);
+		_log.info("添加订单结算任务查询订单详情信息的参数为：{}", String.valueOf(detailList));
+		if (detailList.size() == 0) {
+			_log.error("添加订单结算任务查询订单详情信息时发现没有订单详情，订单id为：{}", orderId);
+			throw new RuntimeException("订单详情不存在");
+		}
+
+		for (OrdOrderDetailMo ordOrderDetailMo : detailList) {
+			if (ordOrderDetailMo.getReturnState() == ReturnStateDic.RETURNING.getCode()) {
+				_log.error("添加订单结算任务任务时发现有订单详情处于退货状态，暂时不添加结算任务，订单id为：{}", orderId);
+				throw new RuntimeException("订单详情处于退货中");
+			}
 		}
 
 		// 计算当前时间
@@ -228,12 +251,9 @@ public class OrdSettleTaskSvcImpl implements OrdSettleTaskSvc {
 	/**
 	 * 添加结算子任务
 	 * 
-	 * @param orderId
-	 *            订单ID
-	 * @param now
-	 *            当前时间
-	 * @param delay
-	 *            延迟时间
+	 * @param orderId 订单ID
+	 * @param now     当前时间
+	 * @param delay   延迟时间
 	 */
 	private void addSettleSubTask(final Long orderId, final Date now, final SettleTaskTypeDic taskType,
 			final BigDecimal delay) {

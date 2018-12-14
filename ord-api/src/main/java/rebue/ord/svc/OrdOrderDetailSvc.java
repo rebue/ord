@@ -109,4 +109,13 @@ public interface OrdOrderDetailSvc extends MybatisBaseSvc<OrdOrderDetailMo, java
 	int modifyActualAmountANDReturnState(Long id, BigDecimal newActualAmount, BigDecimal oldActualAmount,
 			Byte returnState, Byte returnedState);
 
+	/**
+	 * 根据id修改供应商id
+	 * @param id 订单详情id
+	 * @param newSupplierId 新供应商id
+	 * @param oldSupplierId 旧供应商id
+	 * @return
+	 */
+	int updateSupplierIdById(Long id, Long newSupplierId, Long oldSupplierId);
+
 }

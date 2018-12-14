@@ -146,4 +146,14 @@ public interface OrdOrderDetailMapper extends MybatisBaseMapper<OrdOrderDetailMo
 	int updateReturnNumAndCashbackTotal(@Param("id") Long id, @Param("oldCashbackTotal") BigDecimal oldCashbackTotal,
 			@Param("newCashbackTotal") BigDecimal newCashbackTotal, @Param("returnedCount") Integer returnedCount,
 			@Param("returnTotal") Integer returnTotal);
+	
+	/**
+	 * 根据id修改供应商id
+	 * @param id 订单详情id
+	 * @param newSupplierId 新供应商id
+	 * @param oldSupplierId 旧供应商id
+	 * @return
+	 */
+	@Update("update ORD_ORDER_DETAIL set SUPPLIER_ID=#{newSupplierId,jdbcType=BIGINT} where ID=#{id,jdbcType=BIGINT} and SUPPLIER_ID=#{oldSupplierId,jdbcType=BIGINT}")
+	int updateSupplierIdById(@Param("id") Long id, @Param("newSupplierId") Long newSupplierId, @Param("oldSupplierId") Long oldSupplierId);
 }

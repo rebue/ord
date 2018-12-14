@@ -290,4 +290,18 @@ public class OrdOrderDetailSvcImpl extends MybatisBaseSvcImpl<OrdOrderDetailMo, 
 		return _mapper.updateReturnNumAndCashbackTotal(id, oldCashbackTotal, newCashbackTotal, returnedCount,
 				returnTotal);
 	}
+	
+	/**
+	 * 根据id修改供应商id
+	 * @param id 订单详情id
+	 * @param newSupplierId 新供应商id
+	 * @param oldSupplierId 旧供应商id
+	 * @return
+	 */
+	@Override
+	@Transactional(readOnly = false, propagation = Propagation.REQUIRED)
+	public int updateSupplierIdById(Long id, Long newSupplierId, Long oldSupplierId) {
+		_log.info("根据订单详情id修改供应商id的参数为：id={}, newSupplierId={}, oldSupplierId={}", id, newSupplierId, oldSupplierId);
+		return _mapper.updateSupplierIdById(id, newSupplierId, oldSupplierId);
+	}
 }
