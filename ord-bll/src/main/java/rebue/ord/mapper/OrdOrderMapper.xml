@@ -1170,7 +1170,8 @@
 
 	<select id="listOrder" parameterType="rebue.ord.to.ListOrderTo" resultType="rebue.ord.ro.OrdOrderRo">
 		<!-- 查询订单 -->
-		select a.ID as  id, a.ORDER_CODE as orderCode, 
+		select * from 
+		(select a.ID as  id, a.ORDER_CODE as orderCode, 
     a.RECEIVER_NAME as receiverName , GROUP_CONCAT(CONCAT(b.ONLINE_TITLE, b.SPEC_NAME)) as orderTitle,
     a.REAL_MONEY as realMoney, a.ORDER_MONEY as orderMoney , a.ORDER_STATE  as orderState ,a.ORDER_TIME as orderTime,
     a.RECEIVER_PROVINCE as  receiverProvince, a.RECEIVER_CITY as receiverCity, a.RECEIVER_EXP_AREA receiverExpArea,
@@ -1182,9 +1183,6 @@
     ORD_ORDER_DETAIL b ON a.ID = b.ORDER_ID  
 		<where>
 			 and	a.ONLINE_ORG_ID=#{orgId}
-			<if test="receiverName != null">
-				and (a.RECEIVER_NAME LIKE '%${receiverName}%'  or  a.ORDER_CODE LIKE '%${receiverName}%')
-			</if>
 			<if test="orderTimeStart != null  ">
 				and a.ORDER_TIME &gt;= #{orderTimeStart,jdbcType=TIMESTAMP}
 			</if>
@@ -1196,13 +1194,19 @@
 			</if>
 
 		</where>
-		 GROUP BY b.ORDER_ID ORDER BY a.ORDER_TIME DESC
+		 GROUP BY b.ORDER_ID ORDER BY a.ORDER_TIME DESC) ORDER1
+ 		<where>
+ 			<if test="receiverName != null">
+				ORDER1.orderTitle LIKE '%${receiverName}%'  or  ORDER1.orderCode LIKE '%${receiverName}%' or ORDER1.receiverName LIKE '%${receiverName}%'
+			</if>
+ 		</where>
 	</select>
 	
 	
 	<select id="listOrderSupplier" parameterType="rebue.ord.to.ListOrderTo" resultType="rebue.ord.ro.OrdOrderRo">
 		<!-- 供应商查询订单，和上面买家最大区别就是根据发货组织id来查询，还有一些返回值 -->
-		select a.ID as  id, a.ORDER_CODE as orderCode, 
+		select * from 
+		(select a.ID as  id, a.ORDER_CODE as orderCode, 
 	   a.RECEIVER_NAME as receiverName , GROUP_CONCAT(CONCAT(b.ONLINE_TITLE, b.SPEC_NAME)) as orderTitle,
 	    a.ORDER_STATE  as orderState ,a.ORDER_TIME as orderTime, a.RECEIVER_PROVINCE as  receiverProvince, a.RECEIVER_CITY as receiverCity, a.RECEIVER_EXP_AREA receiverExpArea,
 	   a.RECEIVER_ADDRESS as receiverAddress ,a.RECEIVER_MOBILE as receiverMobile,a.RECEIVER_POST_CODE receiverPostCode,a.PAY_TIME as payTime,
@@ -1213,9 +1217,6 @@
 	   ORD_ORDER_DETAIL b ON a.ID = b.ORDER_ID  
 		<where>
 			 and	a.DELIVER_ORG_ID=#{orgId}
-			<if test="receiverName != null">
-				and (a.RECEIVER_NAME LIKE '%${receiverName}%'  or  a.ORDER_CODE LIKE '%${receiverName}%')
-			</if>
 			<if test="orderTimeStart != null  ">
 				and a.ORDER_TIME &gt;= #{orderTimeStart,jdbcType=TIMESTAMP}
 			</if>
@@ -1227,7 +1228,12 @@
 			</if>
 	
 		</where>
-		 GROUP BY b.ORDER_ID ORDER BY a.ORDER_TIME DESC
+		 GROUP BY b.ORDER_ID ORDER BY a.ORDER_TIME DESC) ORDER1
+ 		<where>
+ 			<if test="receiverName != null">
+				ORDER1.orderTitle LIKE '%${receiverName}%'  or  ORDER1.orderCode LIKE '%${receiverName}%' or ORDER1.receiverName LIKE '%${receiverName}%'
+			</if>
+ 		</where>
 	</select>
 
 	<!-- <select id="listByPayOrderId" parameterType="java.lang.Long" resultMap="BaseResultMap"> -->

@@ -169,10 +169,8 @@ public class OrdOrderCtrl {
 				return new PageInfo<>();
 			}
 			to.setOrgId(orgId);
-		} else {
-			to.setOrgId(520874560590053376L);
 		}
-		_log.info("获取当前用户的组织ID: {}", to.getOrgId());
+		_log.info("当前用户的组织ID: {}", to.getOrgId());
 
 		// 查询订单
 		final PageInfo<OrdOrderRo> result = svc.SupplierlistOrder(to, pageNum, pageSize);
