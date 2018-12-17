@@ -1063,21 +1063,24 @@ public class OrdOrderSvcImpl extends MybatisBaseSvcImpl<OrdOrderMo, java.lang.Lo
     public OrderSignInRo orderSignIn(final OrderSignInTo to) {
         final OrderSignInRo orderSignInRo = new OrderSignInRo();
         final Map<String, Object> map = new HashMap<>();
-        final String orderCode = to.getOrderCode();
-        map.put("id", orderCode);
-        _log.info("用户查询订单的参数为：{}", String.valueOf(map));
-        final List<OrdOrderMo> orderList = _mapper.selectOrderInfo(map);
-        _log.info("用户查询订单信息的返回值为：{}", String.valueOf(orderList));
-        if (orderList.size() == 0) {
-            _log.error("由于订单：{}不存在，取消订单失败", orderCode);
+        final Long orderId = to.getOrderId();
+//        map.put("id", orderId);
+//        _log.info("用户查询订单的参数为：{}", String.valueOf(map));
+//        final List<OrdOrderMo> orderList = _mapper.selectOrderInfo(map);
+
+        final OrdOrderMo order = thisSvc.getById(orderId);
+
+        _log.info("用户查询订单信息的返回值为：{}", order);
+        if (order == null) {
+            _log.error("由于订单：{}不存在，取消订单失败", orderId);
             orderSignInRo.setResult(OrderSignInDic.ORDER_NOT_EXIST);
             orderSignInRo.setMsg("订单不存在");
             return orderSignInRo;
         }
-        final long userId = orderList.get(0).getUserId();
-        final long orderId = orderList.get(0).getId();
-        if (orderList.get(0).getOrderState() != OrderStateDic.DELIVERED.getCode()) {
-            _log.error("由于订单：{}处于非待签收状态，{}签收订单失败", orderCode, userId);
+        final Long userId = order.getUserId();
+//        final Long orderId = orderList.get(0).getId();
+        if (order.getOrderState() != OrderStateDic.DELIVERED.getCode()) {
+            _log.error("由于订单：{}处于非待签收状态，{}签收订单失败", orderId, userId);
             orderSignInRo.setResult(OrderSignInDic.CURRENT_STATE_NOT_EXIST_CANCEL);
             orderSignInRo.setMsg("当前状态不允许签收");
             return orderSignInRo;
@@ -1088,7 +1091,7 @@ public class OrdOrderSvcImpl extends MybatisBaseSvcImpl<OrdOrderMo, java.lang.Lo
         final List<OrdOrderDetailMo> detailList = orderDetailSvc.list(detailMo);
         _log.info("订单签收查询订单详情的返回值为：{}", String.valueOf(detailList));
         if (detailList.size() == 0) {
-            _log.error("订单签收查询订单详情时发现没有该订单的订单详情，订单编号为：{}", orderCode);
+            _log.error("订单签收查询订单详情时发现没有该订单的订单详情，订单编号为：{}", orderId);
             orderSignInRo.setResult(OrderSignInDic.ORDER_NOT_EXIST);
             orderSignInRo.setMsg("订单不存在");
             return orderSignInRo;
@@ -1118,7 +1121,7 @@ public class OrdOrderSvcImpl extends MybatisBaseSvcImpl<OrdOrderMo, java.lang.Lo
         }
 
         final OrdOrderMo orderMo = new OrdOrderMo();
-        orderMo.setId(Long.parseLong(orderCode));
+        orderMo.setId(orderId);
         orderMo.setUserId(userId);
         orderMo.setReceivedTime(date);
         orderMo.setReceivedOpId(userId);
