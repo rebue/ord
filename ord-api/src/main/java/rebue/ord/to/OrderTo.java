@@ -23,6 +23,11 @@ public class OrderTo {
     private Long                userId;
 
     /**
+     * 是否是测试用户
+     */
+    private Boolean             isTester;
+
+    /**
      * 订单留言
      *
      */
