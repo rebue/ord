@@ -350,7 +350,13 @@ public class OrdSettleTaskSvcImpl implements OrdSettleTaskSvc {
 			switch (settleTaskType) {
 			// 结算成本给供应商(余额+)
 			case SETTLE_COST_TO_SUPPLIER: {
-				_log.info("结算成本给供应商(余额+)");
+				_log.info("结算成本给供应商(余额+), 订单id为：{}, 订单详情id为：{}", orderDetail.getOrderId(), orderDetail.getId());
+				if (orderDetail.getSupplierId() == null || orderDetail.getSupplierId() == 0
+						|| orderDetail.getCostPrice() == null
+						|| orderDetail.getCostPrice().compareTo(BigDecimal.ZERO) <= 0) {
+					_log.error("结算成本给供应商时出现供应商或成本为空或0的情况，订单详情为：{}", orderDetail);
+					continue;
+				}
 				final AfcTradeMo tradeMo = new AfcTradeMo();
 				tradeMo.setTradeType((byte) TradeTypeDic.SETTLE_SUPPLIER.getCode());
 				tradeMo.setAccountId(orderDetail.getSupplierId());
@@ -366,7 +372,12 @@ public class OrdSettleTaskSvcImpl implements OrdSettleTaskSvc {
 			}
 			// 结算返现金给买家
 			case SETTLE_CASHBACK_TO_BUYER: {
-				_log.info("结算返现金给买家");
+				_log.info("结算返现金给买家, 订单id为：{}, 订单详情id为：{}", orderDetail.getOrderId(), orderDetail.getId());
+				if (orderDetail.getCashbackTotal() == null
+						|| orderDetail.getCashbackTotal().compareTo(BigDecimal.ZERO) <= 0) {
+					_log.warn("结算返现金给买家时发现返现总额为null或为0，订单详情为：{}", orderDetail);
+					continue;
+				}
 				// 设置订单详情已结算返现金给买家
 				orderDetailSvc.settleBuyer(orderDetail.getId());
 
@@ -434,6 +445,10 @@ public class OrdSettleTaskSvcImpl implements OrdSettleTaskSvc {
 			// 结算平台服务费
 			case SETTLE_PLATFORM_SERVICE_FEE: {
 				_log.info("结算平台服务费");
+				if (platformServiceFeeRatio.compareTo(BigDecimal.ZERO) == 0) {
+					_log.warn("结算平台服务费时发现平台服务费费比例为0，订单详情为：{}", orderDetail);
+					continue;
+				}
 				final AfcPlatformTradeMo tradeMo = new AfcPlatformTradeMo();
 				tradeMo.setPlatformTradeType((byte) PlatformTradeTypeDic.CHARGE_SEVICE_FEE.getCode());
 				BigDecimal platformServiceFee = null;
@@ -461,7 +476,11 @@ public class OrdSettleTaskSvcImpl implements OrdSettleTaskSvc {
 			}
 			// 结算返佣金
 			case SETTLE_COMMISSION: {
-				_log.info("结算返佣金");
+				_log.info("结算返佣金, 订单id为：{}, 订单详情id为: {}", orderDetail.getOrderId(), orderDetail.getId());
+				if (orderDetail.getCashbackTotal() != null && orderDetail.getCashbackTotal().compareTo(BigDecimal.ZERO) > 0) {
+					_log.warn("结算反佣金时发现反现总额大于0，说明不是全返商品，订单详情为：{}", orderDetail);
+					continue;
+				}
 				settleCommission(taskMo, order, orderDetail, now);
 				break;
 			}
