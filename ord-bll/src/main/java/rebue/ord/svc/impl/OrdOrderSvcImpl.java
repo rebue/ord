@@ -97,7 +97,9 @@ import rebue.robotech.dic.ResultDic;
 import rebue.robotech.dic.TaskExecuteStateDic;
 import rebue.robotech.ro.Ro;
 import rebue.robotech.svc.impl.MybatisBaseSvcImpl;
+import rebue.suc.mo.SucOrgMo;
 import rebue.suc.mo.SucUserMo;
+import rebue.suc.svr.feign.SucOrgSvc;
 import rebue.suc.svr.feign.SucUserSvc;
 
 /**
@@ -176,6 +178,8 @@ public class OrdOrderSvcImpl extends MybatisBaseSvcImpl<OrdOrderMo, java.lang.Lo
     private AfcRefundSvc             refundSvc;
     @Resource
     private SucUserSvc               sucUserSvc;
+    @Resource
+    private SucOrgSvc               sucOrgSvc;
     @Resource
     private OrdBuyRelationSvc        ordBuyRelationSvc;
     @Resource
@@ -1476,7 +1480,24 @@ public class OrdOrderSvcImpl extends MybatisBaseSvcImpl<OrdOrderMo, java.lang.Lo
     public PageInfo<OrdOrderRo> listOrder(final ListOrderTo to, final int pageNum, final int pageSize) {
         _log.info("获取订单的参数为: {}", to);
         _log.info("orderList: ro-{}; pageNum-{}; pageSize-{}", to, pageNum, pageSize);
-        return PageHelper.startPage(pageNum, pageSize).doSelectPageInfo(() -> _mapper.listOrder(to));
+        PageInfo<OrdOrderRo>  result=PageHelper.startPage(pageNum, pageSize).doSelectPageInfo(() -> _mapper.listOrder(to));
+        _log.info("获取订单的结果为: {}", result.getList());
+         List<SucOrgMo> sucOrgResult =sucOrgSvc.listAll();
+         _log.info("获取所有组织的结果为: {}", sucOrgResult);
+         	for (OrdOrderRo ordOrderRo : result.getList()) {
+				for (SucOrgMo sucOrgMo : sucOrgResult) {
+					if(ordOrderRo.getOnlineOrgId().equals(sucOrgMo.getId())) {
+				         _log.info("设置上线组织ordOrderRo-{},sucOrgMo-{}", sucOrgResult,sucOrgMo);
+				         ordOrderRo.setOnlineOrgName(sucOrgMo.getName());
+					}
+					if(ordOrderRo.getDeliverOrgId().equals(sucOrgMo.getId())) {
+				         _log.info("设置发货组织ordOrderRo-{},sucOrgMo-{}", sucOrgResult,sucOrgMo);
+						ordOrderRo.setDeliverOrgName(sucOrgMo.getName());
+					}
+				}
+			}
+          
+        return result;
     }
 
     /**

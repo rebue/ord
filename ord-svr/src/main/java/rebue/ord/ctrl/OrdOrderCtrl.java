@@ -176,7 +176,7 @@ public class OrdOrderCtrl {
 
         // 查询订单
         final PageInfo<OrdOrderRo> result = svc.SupplierlistOrder(to, pageNum, pageSize);
-        _log.info("result: " + result);
+        _log.info("result: " + result.getList());
         return result;
     }
 

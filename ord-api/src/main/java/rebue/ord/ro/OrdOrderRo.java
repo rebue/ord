@@ -348,13 +348,27 @@ public class OrdOrderRo {
     private Long       receivedOpId;
     
     /**
-     * 上线组织
+     * 上线组织id
      */
     private Long              onlineOrgId;
-
+    
+    /**
+     * 上线组织名字
+     */
+    private String  onlineOrgName;
+    
     /**
      * 发货组织ID(默认填入上线组织ID，可变更为供应商的ID)
      *
      */
     private Long              deliverOrgId;
+    
+    /**
+     * 发货组织名字
+     */
+    private String deliverOrgName;
+    
+
+    
+    
 }
