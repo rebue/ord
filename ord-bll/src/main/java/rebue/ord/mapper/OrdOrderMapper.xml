@@ -1197,7 +1197,7 @@
 		 GROUP BY b.ORDER_ID ORDER BY a.ORDER_TIME DESC) ORDER1
  		<where>
  			<if test="receiverName != null">
-				ORDER1.orderTitle LIKE '%${receiverName}%'  or  ORDER1.orderCode LIKE '%${receiverName}%' or ORDER1.receiverName LIKE '%${receiverName}%'
+				ORDER1.orderTitle LIKE '%${receiverName}%'  or  ORDER1.orderCode LIKE '%${receiverName}%' or ORDER1.receiverName LIKE '%${receiverName}%' or ORDER1.id  LIKE '%${receiverName}%'
 			</if>
  		</where>
 	</select>
@@ -1231,7 +1231,7 @@
 		 GROUP BY b.ORDER_ID ORDER BY a.ORDER_TIME DESC) ORDER1
  		<where>
  			<if test="receiverName != null">
-				ORDER1.orderTitle LIKE '%${receiverName}%'  or  ORDER1.orderCode LIKE '%${receiverName}%' or ORDER1.receiverName LIKE '%${receiverName}%'
+				ORDER1.orderTitle LIKE '%${receiverName}%'  or  ORDER1.orderCode LIKE '%${receiverName}%' or ORDER1.receiverName LIKE '%${receiverName}%' or ORDER1.id  LIKE '%${receiverName}%'
 			</if>
  		</where>
 	</select>
