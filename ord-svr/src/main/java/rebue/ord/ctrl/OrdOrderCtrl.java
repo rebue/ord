@@ -3,6 +3,8 @@ package rebue.ord.ctrl;
 import java.beans.IntrospectionException;
 import java.lang.reflect.InvocationTargetException;
 import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.List;
 import java.util.Map;
 
@@ -12,6 +14,7 @@ import javax.servlet.http.HttpServletRequest;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.dao.DuplicateKeyException;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -26,6 +29,7 @@ import com.github.pagehelper.PageInfo;
 import rebue.ord.dic.CancellationOfOrderDic;
 import rebue.ord.dic.OrderSignInDic;
 import rebue.ord.dic.ShipmentConfirmationDic;
+import rebue.ord.mo.OrdOrderDetailMo;
 import rebue.ord.mo.OrdOrderMo;
 import rebue.ord.ro.CancellationOfOrderRo;
 import rebue.ord.ro.ModifyOrderRealMoneyRo;
@@ -507,4 +511,37 @@ public class OrdOrderCtrl {
         _log.info("根据组织Id获取未发货的订单详情的总成本价参数为：{}", mo);
         return svc.getSettleTotalForOrgId(mo);
     }
+    
+    /**
+     * 修改订单
+     *
+     */
+    @PutMapping("/ord/order/update")
+    Ro modify(@RequestBody final OrdOrderMo mo) throws Exception {
+        _log.info("modify OrdOrderMo: {}", mo);
+        final Ro ro = new Ro();
+        try {
+            if (svc.modify(mo) == 1) {
+                final String msg = "修改成功";
+                _log.info("{}: mo-{}", msg, mo);
+                ro.setMsg(msg);
+                ro.setResult(ResultDic.SUCCESS);
+                return ro;
+            } else {
+                final String msg = "修改失败";
+                _log.error("{}: mo-{}", msg, mo);
+                ro.setMsg(msg);
+                ro.setResult(ResultDic.FAIL);
+                return ro;
+            }
+        }catch (final RuntimeException e) {
+            final SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+            final String msg = "修改失败，出现运行时异常(" + sdf.format(new Date()) + ")";
+            _log.error("{}: mo-{}", msg, mo);
+            ro.setMsg(msg);
+            ro.setResult(ResultDic.FAIL);
+            return ro;
+        }
+    }
+
 }
