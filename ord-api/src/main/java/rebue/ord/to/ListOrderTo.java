@@ -53,5 +53,10 @@ public class ListOrderTo {
     @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss")
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd HH:mm:ss", timezone = "GMT+8")
     private Date   orderTimeEnd;
+    
+    /**
+     * 订单详情的退款状态
+     */
+    private Byte returnState;
 
 }

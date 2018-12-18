@@ -14,7 +14,6 @@ import javax.servlet.http.HttpServletRequest;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.dao.DuplicateKeyException;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -29,7 +28,6 @@ import com.github.pagehelper.PageInfo;
 import rebue.ord.dic.CancellationOfOrderDic;
 import rebue.ord.dic.OrderSignInDic;
 import rebue.ord.dic.ShipmentConfirmationDic;
-import rebue.ord.mo.OrdOrderDetailMo;
 import rebue.ord.mo.OrdOrderMo;
 import rebue.ord.ro.CancellationOfOrderRo;
 import rebue.ord.ro.ModifyOrderRealMoneyRo;
@@ -147,13 +145,13 @@ public class OrdOrderCtrl {
         _log.info("result: " + result);
         return result;
     }
-
+    
     /**
      * 供应商查询订单信息
      * 
      * @mbg.overrideByMethodName
      */
-    @GetMapping("/ord/order/Supplier")
+    @GetMapping("/ord/order/supplier")
     PageInfo<OrdOrderRo> listSupplier(final ListOrderTo to, @RequestParam(value = "pageNum", required = false) Integer pageNum,
             @RequestParam(value = "pageSize", required = false) Integer pageSize, final HttpServletRequest req) throws ParseException {
         if (pageNum == null) {
@@ -180,6 +178,42 @@ public class OrdOrderCtrl {
 
         // 查询订单
         final PageInfo<OrdOrderRo> result = svc.SupplierlistOrder(to, pageNum, pageSize);
+        _log.info("result: " + result.getList());
+        return result;
+    }
+    
+    /**
+     * 供应商查询订单交易信息列表，
+     * 
+     * @mbg.overrideByMethodName
+     */
+    @GetMapping("/ord/order/supplier/listOrderTrade")
+    PageInfo<OrdOrderRo> listTrade(final ListOrderTo to, @RequestParam(value = "pageNum", required = false) Integer pageNum,
+            @RequestParam(value = "pageSize", required = false) Integer pageSize, final HttpServletRequest req) throws ParseException {
+        if (pageNum == null) {
+            pageNum = 1;
+        }
+        if (pageSize == null) {
+            pageSize = 5;
+        }
+        _log.info("list ListOrderTo:" + to + ", pageNum = " + pageNum + ", pageSize = " + pageSize);
+        if (pageSize > 50) {
+            final String msg = "pageSize不能大于50";
+            _log.error(msg);
+            throw new IllegalArgumentException(msg);
+        }
+
+        if (!isDebug) {
+            final Long orgId = (Long) JwtUtils.getJwtAdditionItemInCookie(req, "orgId");
+            if (orgId == null) {
+                return new PageInfo<>();
+            }
+            to.setOrgId(orgId);
+        }
+        _log.info("当前用户的组织ID: {}", to.getOrgId());
+
+        // 查询订单
+        final PageInfo<OrdOrderRo> result = svc.listOrderTrade(to, pageNum, pageSize);
         _log.info("result: " + result.getList());
         return result;
     }
