@@ -179,7 +179,7 @@ public class OrdOrderSvcImpl extends MybatisBaseSvcImpl<OrdOrderMo, java.lang.Lo
     @Resource
     private SucUserSvc               sucUserSvc;
     @Resource
-    private SucOrgSvc               sucOrgSvc;
+    private SucOrgSvc                sucOrgSvc;
     @Resource
     private OrdBuyRelationSvc        ordBuyRelationSvc;
     @Resource
@@ -393,14 +393,14 @@ public class OrdOrderSvcImpl extends MybatisBaseSvcImpl<OrdOrderMo, java.lang.Lo
         // 根据上线组织拆单
         for (final Entry<Long, List<OrdOrderDetailMo>> onlineOrg : onlineOrgs.entrySet()) {
             final OrdOrderMo orderMo = new OrdOrderMo();
-            // orderMo.setId(_idWorker.getId());
-            orderMo.setOrderCode(_idWorker.getIdStr()); // 订单编号 TODO 重写订单编号的生成算法
+            orderMo.setId(_idWorker.getId());
             orderMo.setOrderState((byte) OrderStateDic.ORDERED.getCode()); // 订单状态已下单
             orderMo.setOrderTime(now); // 下单时间
             orderMo.setOnlineOrgId(onlineOrg.getKey()); // 上线组织ID(卖家ID)
             orderMo.setPayOrderId(payOrderId); // 支付订单ID
-
             orderMo.setUserId(to.getUserId()); // 下单人用户ID
+//            orderMo.setOrderCode(_idWorker.getIdStr()); // 订单编号 TODO 重写订单编号的生成算法
+            orderMo.setOrderCode(genOrderCode(orderMo.getOrderTime(), orderMo.getId(), orderMo.getUserId()));
 
             _log.debug("遍历订单详情计算订单的下单金额");
             // 下单金额
@@ -1218,6 +1218,25 @@ public class OrdOrderSvcImpl extends MybatisBaseSvcImpl<OrdOrderMo, java.lang.Lo
     }
 
     /**
+     * 生成订单编号
+     * 
+     * @param orderTime
+     *            下单时间
+     * @param orderId
+     *            订单ID
+     * @param userId
+     *            用户ID
+     * @return YYMMDDHH-订单ID末8位-用户ID末8位
+     */
+    private String genOrderCode(final Date orderTime, final Long orderId, final Long userId) {
+        final SimpleDateFormat sdf = new SimpleDateFormat("YYMMDDHH");
+        final String YYMMDDHH = sdf.format(orderTime);
+        final String orderId8 = StringUtils.right(orderId.toString(), 8);
+        final String userId8 = StringUtils.right(userId.toString(), 8);
+        return YYMMDDHH + "-" + orderId8 + "-" + userId8;
+    }
+
+    /**
      * 处理订单支付完成的通知 1. 根据支付订单ID获取所有订单(如果没有找到，退款) 2.
      * 判断通知回来的支付金额是否和订单中记录的实际交易金额相同(如果不同，退款) 3. 取消订单自动取消任务 4.
      * 按不同发货组织拆单，并重新计算拆单后的订单实际交易金额 5. 根据支付订单ID修改订单状态为已支付 6. 匹配购买关系
@@ -1318,9 +1337,10 @@ public class OrdOrderSvcImpl extends MybatisBaseSvcImpl<OrdOrderMo, java.lang.Lo
                 if (tempOrder == null) {
                     _log.debug("发现不同发货组织的订单详情，需要添加新订单");
                     tempOrder = dozerMapper.map(order, OrdOrderMo.class);
-                    tempOrder.setId(null);
+                    tempOrder.setId(_idWorker.getId());
                     tempOrder.setDeliverOrgId(orderDetail.getDeliverOrgId());
-                    tempOrder.setOrderCode(_idWorker.getIdStr());
+//                    tempOrder.setOrderCode(_idWorker.getIdStr());
+                    tempOrder.setOrderCode(genOrderCode(tempOrder.getOrderTime(), tempOrder.getId(), tempOrder.getUserId()));
                     thisSvc.add(tempOrder);
                     orderMap.put(orderDetail.getDeliverOrgId(), tempOrder);
                 }
@@ -1480,23 +1500,23 @@ public class OrdOrderSvcImpl extends MybatisBaseSvcImpl<OrdOrderMo, java.lang.Lo
     public PageInfo<OrdOrderRo> listOrder(final ListOrderTo to, final int pageNum, final int pageSize) {
         _log.info("获取订单的参数为: {}", to);
         _log.info("orderList: ro-{}; pageNum-{}; pageSize-{}", to, pageNum, pageSize);
-        PageInfo<OrdOrderRo>  result=PageHelper.startPage(pageNum, pageSize).doSelectPageInfo(() -> _mapper.listOrder(to));
+        final PageInfo<OrdOrderRo> result = PageHelper.startPage(pageNum, pageSize).doSelectPageInfo(() -> _mapper.listOrder(to));
         _log.info("获取订单的结果为: {}", result.getList());
-         List<SucOrgMo> sucOrgResult =sucOrgSvc.listAll();
-         _log.info("获取所有组织的结果为: {}", sucOrgResult);
-         	for (OrdOrderRo ordOrderRo : result.getList()) {
-				for (SucOrgMo sucOrgMo : sucOrgResult) {
-					if(ordOrderRo.getOnlineOrgId().equals(sucOrgMo.getId())) {
-				         _log.info("设置上线组织ordOrderRo-{},sucOrgMo-{}", sucOrgResult,sucOrgMo);
-				         ordOrderRo.setOnlineOrgName(sucOrgMo.getName());
-					}
-					if(ordOrderRo.getDeliverOrgId().equals(sucOrgMo.getId())) {
-				         _log.info("设置发货组织ordOrderRo-{},sucOrgMo-{}", sucOrgResult,sucOrgMo);
-						ordOrderRo.setDeliverOrgName(sucOrgMo.getName());
-					}
-				}
-			}
-          
+        final List<SucOrgMo> sucOrgResult = sucOrgSvc.listAll();
+        _log.info("获取所有组织的结果为: {}", sucOrgResult);
+        for (final OrdOrderRo ordOrderRo : result.getList()) {
+            for (final SucOrgMo sucOrgMo : sucOrgResult) {
+                if (ordOrderRo.getOnlineOrgId().equals(sucOrgMo.getId())) {
+                    _log.info("设置上线组织ordOrderRo-{},sucOrgMo-{}", sucOrgResult, sucOrgMo);
+                    ordOrderRo.setOnlineOrgName(sucOrgMo.getName());
+                }
+                if (ordOrderRo.getDeliverOrgId().equals(sucOrgMo.getId())) {
+                    _log.info("设置发货组织ordOrderRo-{},sucOrgMo-{}", sucOrgResult, sucOrgMo);
+                    ordOrderRo.setDeliverOrgName(sucOrgMo.getName());
+                }
+            }
+        }
+
         return result;
     }
 
@@ -1632,11 +1652,11 @@ public class OrdOrderSvcImpl extends MybatisBaseSvcImpl<OrdOrderMo, java.lang.Lo
 
     }
 
-	@Override
-	public PageInfo<OrdOrderRo> listOrderTrade(ListOrderTo to, int pageNum, int pageSize) {
-	       _log.info("获取订单的参数为: {}", to);
-	        _log.info("orderList: ro-{}; pageNum-{}; pageSize-{}", to, pageNum, pageSize);
-	        PageInfo<OrdOrderRo>  result=PageHelper.startPage(pageNum, pageSize).doSelectPageInfo(() -> _mapper.listOrderTrade(to));
-	        return result;
-	}
+    @Override
+    public PageInfo<OrdOrderRo> listOrderTrade(final ListOrderTo to, final int pageNum, final int pageSize) {
+        _log.info("获取订单的参数为: {}", to);
+        _log.info("orderList: ro-{}; pageNum-{}; pageSize-{}", to, pageNum, pageSize);
+        final PageInfo<OrdOrderRo> result = PageHelper.startPage(pageNum, pageSize).doSelectPageInfo(() -> _mapper.listOrderTrade(to));
+        return result;
+    }
 }
