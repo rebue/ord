@@ -151,7 +151,7 @@ public class OrdOrderCtrl {
      * 
      * @mbg.overrideByMethodName
      */
-    @GetMapping("/ord/order/supplier")
+    @GetMapping("/ord/order/Supplier")
     PageInfo<OrdOrderRo> listSupplier(final ListOrderTo to, @RequestParam(value = "pageNum", required = false) Integer pageNum,
             @RequestParam(value = "pageSize", required = false) Integer pageSize, final HttpServletRequest req) throws ParseException {
         if (pageNum == null) {

@@ -1502,21 +1502,22 @@ public class OrdOrderSvcImpl extends MybatisBaseSvcImpl<OrdOrderMo, java.lang.Lo
         _log.info("orderList: ro-{}; pageNum-{}; pageSize-{}", to, pageNum, pageSize);
         final PageInfo<OrdOrderRo> result = PageHelper.startPage(pageNum, pageSize).doSelectPageInfo(() -> _mapper.listOrder(to));
         _log.info("获取订单的结果为: {}", result.getList());
-        final List<SucOrgMo> sucOrgResult = sucOrgSvc.listAll();
-        _log.info("获取所有组织的结果为: {}", sucOrgResult);
-        for (final OrdOrderRo ordOrderRo : result.getList()) {
-            for (final SucOrgMo sucOrgMo : sucOrgResult) {
-                if (ordOrderRo.getOnlineOrgId().equals(sucOrgMo.getId())) {
-                    _log.info("设置上线组织ordOrderRo-{},sucOrgMo-{}", sucOrgResult, sucOrgMo);
-                    ordOrderRo.setOnlineOrgName(sucOrgMo.getName());
-                }
-                if (ordOrderRo.getDeliverOrgId().equals(sucOrgMo.getId())) {
-                    _log.info("设置发货组织ordOrderRo-{},sucOrgMo-{}", sucOrgResult, sucOrgMo);
-                    ordOrderRo.setDeliverOrgName(sucOrgMo.getName());
-                }
-            }
-        }
-
+         List<SucOrgMo> sucOrgResult =sucOrgSvc.listAll();
+         _log.info("获取所有组织的结果为: {}", sucOrgResult);
+         	for (OrdOrderRo ordOrderRo : result.getList()) {
+				for (SucOrgMo sucOrgMo : sucOrgResult) {
+			         _log.info("将要对比的对象---------ordOrderRo-{},sucOrgMo-{}", ordOrderRo,sucOrgMo);
+					if(ordOrderRo.getOnlineOrgId() !=null &&ordOrderRo.getOnlineOrgId().equals(sucOrgMo.getId())) {
+				         _log.info("设置上线组织ordOrderRo-{},sucOrgMo-{}", ordOrderRo,sucOrgMo);
+				         ordOrderRo.setOnlineOrgName(sucOrgMo.getName());
+					}
+					if(ordOrderRo.getDeliverOrgId() !=null && ordOrderRo.getDeliverOrgId().equals(sucOrgMo.getId())) {
+				         _log.info("设置发货组织ordOrderRo-{},sucOrgMo-{}", ordOrderRo,sucOrgMo);
+						ordOrderRo.setDeliverOrgName(sucOrgMo.getName());
+					}
+				}
+			}
+          
         return result;
     }
 
