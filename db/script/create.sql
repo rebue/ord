@@ -1,6 +1,6 @@
 /*==============================================================*/
 /* DBMS name:      MySQL 5.0                                    */
-/* Created on:     2018/12/21 8:52:44                           */
+/* Created on:     2018/12/21 17:17:18                          */
 /*==============================================================*/
 
 
@@ -87,6 +87,14 @@ create table ORD_ORDER
 (
    ID                   bigint not null comment '订单ID',
    ORDER_CODE           varchar(50) not null comment '订单编号',
+   ORDER_STATE          tinyint not null comment '订单状态（-1：作废  1：已下单（待支付）  2：已支付（待发货）  3：已发货（待签收）  4：已签收（待结算）  5：已结算  ）
+            -1：作废
+            1：已下单（待支付）
+            2：已支付（待发货）
+            3：已发货（待签收）
+            4：已签收（待结算）
+            6：开始结算   
+            5：已结算',
    ORDER_TITLE          varchar(200) not null comment '订单标题',
    ONLINE_ORG_ID        bigint comment '上线组织ID(卖家ID)',
    DELIVER_ORG_ID       bigint comment '发货组织ID',
@@ -97,13 +105,6 @@ create table ORD_ORDER
             @deprecated',
    RETURN_AMOUNT2       decimal(50,4) comment '可退货总额2（退到余额）
             @deprecated',
-   ORDER_STATE          tinyint not null comment '订单状态（-1：作废  1：已下单（待支付）  2：已支付（待发货）  3：已发货（待签收）  4：已签收（待结算）  5：已结算  ）
-            -1：作废
-            1：已下单（待支付）
-            2：已支付（待发货）
-            3：已发货（待签收）
-            4：已签收（待结算）
-            5：已结算',
    USER_ID              bigint not null comment '下单人用户ID',
    USER_NAME            varchar(50) comment '作废-下单人姓名
             @deprecated',
