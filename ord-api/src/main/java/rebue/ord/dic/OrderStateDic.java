@@ -14,6 +14,7 @@ import rebue.wheel.baseintf.EnumBase;
  * 2. 已支付（待发货）
  * 3. 已发货（待签收）
  * 4. 已签收（待结算）
+ * 6. 开始结算
  * 5. 已结算
  */
 public enum OrderStateDic implements EnumBase {
@@ -38,6 +39,10 @@ public enum OrderStateDic implements EnumBase {
      * 4. 已签收（待结算）
      */
     SIGNED(4),
+    /**
+     * 6. 开始结算
+     */
+    START_SETTLE(6),
     /**
      * 5. 已结算
      */
