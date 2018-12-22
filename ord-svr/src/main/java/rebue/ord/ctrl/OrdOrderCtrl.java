@@ -3,8 +3,6 @@ package rebue.ord.ctrl;
 import java.beans.IntrospectionException;
 import java.lang.reflect.InvocationTargetException;
 import java.text.ParseException;
-import java.text.SimpleDateFormat;
-import java.util.Date;
 import java.util.List;
 import java.util.Map;
 
@@ -43,6 +41,7 @@ import rebue.ord.to.ListOrderTo;
 import rebue.ord.to.OrderSignInTo;
 import rebue.ord.to.OrderTo;
 import rebue.ord.to.ShipmentConfirmationTo;
+import rebue.ord.to.UpdateOrgTo;
 import rebue.robotech.dic.ResultDic;
 import rebue.robotech.ro.Ro;
 import rebue.suc.svr.feign.SucUserSvc;
@@ -547,35 +546,14 @@ public class OrdOrderCtrl {
     }
     
     /**
-     * 修改订单
+     * 修deliverOrgId和supplierId
      *
      */
-    @PutMapping("/ord/order/update")
-    Ro modify(@RequestBody final OrdOrderMo mo) throws Exception {
-        _log.info("modify OrdOrderMo: {}", mo);
-        final Ro ro = new Ro();
-        try {
-            if (svc.modify(mo) == 1) {
-                final String msg = "修改成功";
-                _log.info("{}: mo-{}", msg, mo);
-                ro.setMsg(msg);
-                ro.setResult(ResultDic.SUCCESS);
-                return ro;
-            } else {
-                final String msg = "修改失败";
-                _log.error("{}: mo-{}", msg, mo);
-                ro.setMsg(msg);
-                ro.setResult(ResultDic.FAIL);
-                return ro;
-            }
-        }catch (final RuntimeException e) {
-            final SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-            final String msg = "修改失败，出现运行时异常(" + sdf.format(new Date()) + ")";
-            _log.error("{}: mo-{}", msg, mo);
-            ro.setMsg(msg);
-            ro.setResult(ResultDic.FAIL);
-            return ro;
-        }
+    @PutMapping("/ord/order/updateOrg")
+    Ro updateOrg(@RequestBody final UpdateOrgTo to) throws Exception {
+        _log.info("updateOrg UpdateOrgTo: {}", to);
+        final Ro ro=svc.modifyOrg(to);
+        return ro;
     }
 
 }

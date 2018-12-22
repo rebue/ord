@@ -46,6 +46,9 @@ public class DetailandBuyRelationRo {
 
 	/** 购买单位 **/
 	private String buyUnit;
+	
+	/**供应商名字**/
+	private String  supplierName;
 
 	/** 退货数量 **/
 	private Integer returnCount;
