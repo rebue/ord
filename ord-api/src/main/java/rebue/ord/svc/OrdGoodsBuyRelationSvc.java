@@ -1,14 +1,15 @@
 package rebue.ord.svc;
 
+import rebue.ord.jo.OrdGoodsBuyRelationJo;
 import rebue.ord.mo.OrdGoodsBuyRelationMo;
-import rebue.robotech.svc.MybatisBaseSvc;
+import rebue.robotech.svc.BaseSvc;
 
 /**
  * 用户商品购买关系
  *
  * @mbg.generated 自动生成的注释，如需修改本注释，请删除本行
  */
-public interface OrdGoodsBuyRelationSvc extends MybatisBaseSvc<OrdGoodsBuyRelationMo, java.lang.Long> {
+public interface OrdGoodsBuyRelationSvc extends BaseSvc<java.lang.Long, OrdGoodsBuyRelationMo, OrdGoodsBuyRelationJo> {
 
     /**
      *  导出redis中的购买关系到数据库中

@@ -1,19 +1,19 @@
 package rebue.ord.svc;
 
 import java.util.List;
-
 import rebue.ord.dic.OrderTaskTypeDic;
+import rebue.ord.jo.OrdTaskJo;
 import rebue.ord.mo.OrdTaskMo;
 import rebue.robotech.dic.TaskExecuteStateDic;
 import rebue.robotech.ro.Ro;
-import rebue.robotech.svc.MybatisBaseSvc;
+import rebue.robotech.svc.BaseSvc;
 
 /**
  * 订单任务
  *
  * @mbg.generated 自动生成的注释，如需修改本注释，请删除本行
  */
-public interface OrdTaskSvc extends MybatisBaseSvc<OrdTaskMo, java.lang.Long> {
+public interface OrdTaskSvc extends BaseSvc<java.lang.Long, OrdTaskMo, OrdTaskJo> {
 
     /**
      * 根据订单任务状态和任务类型获取订单任务ID列表
@@ -27,7 +27,7 @@ public interface OrdTaskSvc extends MybatisBaseSvc<OrdTaskMo, java.lang.Long> {
 
     /**
      * 执行订单自动签收的任务
-     * 
+     *
      * @param taskId
      *            任务ID
      */
@@ -35,7 +35,7 @@ public interface OrdTaskSvc extends MybatisBaseSvc<OrdTaskMo, java.lang.Long> {
 
     /**
      * 执行订单自动取消的任务
-     * 
+     *
      * @param taskId
      *            任务ID
      */
@@ -65,5 +65,4 @@ public interface OrdTaskSvc extends MybatisBaseSvc<OrdTaskMo, java.lang.Long> {
      * 执行计算首单购买的任务
      */
     void executeCalcFirstBuy(Long taskId);
-
 }

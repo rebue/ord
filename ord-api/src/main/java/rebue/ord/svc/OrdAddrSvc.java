@@ -1,15 +1,16 @@
 package rebue.ord.svc;
 
 import java.util.Map;
+import rebue.ord.jo.OrdAddrJo;
 import rebue.ord.mo.OrdAddrMo;
-import rebue.robotech.svc.MybatisBaseSvc;
+import rebue.robotech.svc.BaseSvc;
 
 /**
  * 用户收货地址
  *
  * @mbg.generated 自动生成的注释，如需修改本注释，请删除本行
  */
-public interface OrdAddrSvc extends MybatisBaseSvc<OrdAddrMo, java.lang.Long> {
+public interface OrdAddrSvc extends BaseSvc<java.lang.Long, OrdAddrMo, OrdAddrJo> {
 
     /**
      *  修改用户默认收货地址 Title: exUpdate Description:

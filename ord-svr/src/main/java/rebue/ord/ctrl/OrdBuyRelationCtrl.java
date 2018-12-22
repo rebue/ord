@@ -4,7 +4,6 @@ import com.github.pagehelper.PageInfo;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.List;
-
 import javax.annotation.Resource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -184,8 +183,7 @@ public class OrdBuyRelationCtrl {
         _log.info("get OrdBuyRelationMo by id: " + id);
         return svc.getById(id);
     }
-    
-    
+
     /**
      *  根据oderId获取购买关系 Title: orderDetailInfo Description:
      *
@@ -194,7 +192,7 @@ public class OrdBuyRelationCtrl {
      *  @date 2018年4月9日 下午5:02:41
      */
     @GetMapping("/ord/buyrelation/info")
-    List<DetailandBuyRelationRo> orderRelationInfo(@RequestParam("orderId") java.lang.Long orderId ) {
+    List<DetailandBuyRelationRo> orderRelationInfo(@RequestParam("orderId") java.lang.Long orderId) {
         _log.info("获取订单购买关系的参数为：{}", orderId);
         List<DetailandBuyRelationRo> list = svc.getBuyRelationByOrderId(orderId);
         _log.info("获取到的订单详情为：{}", list);

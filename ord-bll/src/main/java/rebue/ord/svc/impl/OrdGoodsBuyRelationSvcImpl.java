@@ -44,13 +44,6 @@ public class OrdGoodsBuyRelationSvcImpl extends MybatisBaseSvcImpl<OrdGoodsBuyRe
     @Transactional(readOnly = false, propagation = Propagation.REQUIRED)
     public int add(OrdGoodsBuyRelationMo mo) {
         _log.info("添加用户商品购买关系");
-        int countGoodsBuyRelation = _mapper.countGoodsBuyRelation(mo);
-        if (countGoodsBuyRelation == 1) {
-        	_log.info("修改商品推广关系时间的参数为：{}", mo);
-        	int updateGoodsBuyRelationTimeResult = _mapper.updateGoodsBuyRelationTime(mo);
-        	_log.info("修改商品推广关系时间的返回值为：{}", updateGoodsBuyRelationTimeResult);
-			return updateGoodsBuyRelationTimeResult;
-		}
         // 如果id为空那么自动生成分布式id
         if (mo.getId() == null || mo.getId() == 0) {
             mo.setId(_idWorker.getId());

@@ -4,15 +4,12 @@ import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-
 import javax.annotation.Resource;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
-
 import rebue.ord.mapper.OrdOrderDetailMapper;
 import rebue.ord.mo.OrdBuyRelationMo;
 import rebue.ord.mo.OrdOrderDetailMo;
@@ -29,10 +26,13 @@ import rebue.suc.svr.feign.SucUserSvc;
 /**
  * 订单详情
  *
- * 在单独使用不带任何参数的 @Transactional 注释时， propagation(传播模式)=REQUIRED，readOnly=false，
- * isolation(事务隔离级别)=READ_COMMITTED， 而且事务不会针对受控异常（checked exception）回滚。
+ * 在单独使用不带任何参数的 @Transactional 注释时，
+ * propagation(传播模式)=REQUIRED，readOnly=false，
+ * isolation(事务隔离级别)=READ_COMMITTED，
+ * 而且事务不会针对受控异常（checked exception）回滚。
  *
- * 注意： 一般是查询的数据库操作，默认设置readOnly=true, propagation=Propagation.SUPPORTS
+ * 注意：
+ * 一般是查询的数据库操作，默认设置readOnly=true, propagation=Propagation.SUPPORTS
  * 而涉及到增删改的数据库操作的方法，要设置 readOnly=false, propagation=Propagation.REQUIRED
  *
  * @mbg.generated 自动生成的注释，如需修改本注释，请删除本行
@@ -51,7 +51,7 @@ public class OrdOrderDetailSvcImpl extends MybatisBaseSvcImpl<OrdOrderDetailMo, 
      */
     @Override
     @Transactional(readOnly = false, propagation = Propagation.REQUIRED)
-    public int add(final OrdOrderDetailMo mo) {
+    public int add(OrdOrderDetailMo mo) {
         _log.info("添加订单详情");
         // 如果id为空那么自动生成分布式id
         if (mo.getId() == null || mo.getId() == 0) {
@@ -63,13 +63,13 @@ public class OrdOrderDetailSvcImpl extends MybatisBaseSvcImpl<OrdOrderDetailMo, 
     /**
      */
     @Resource
-    private SucUserSvc        sucUserSvc;
+    private SucUserSvc sucUserSvc;
 
     @Resource
     private OrdBuyRelationSvc selfSvc;
 
     @Resource
-    private SucOrgSvc         sucOrgSvc;
+    private SucOrgSvc sucOrgSvc;
 
     /**
      * 修改订单详情的退货情况(根据订单详情ID、已退货数量、旧的返现金总额，修改退货总数、返现金总额以及退货状态)
@@ -89,16 +89,14 @@ public class OrdOrderDetailSvcImpl extends MybatisBaseSvcImpl<OrdOrderDetailMo, 
      */
     @Override
     @Transactional(readOnly = false, propagation = Propagation.REQUIRED)
-    public int modifyReturn(final Integer returnTotal, final BigDecimal newCashbackTotal, final Byte returnState, final Long whereDetailId, final Integer whereReturnedCount,
-            final BigDecimal whereOldCashbackTotal) {
-        _log.info("修改订单详情的退货情况: 退货总数-{}, 新的返现金总额-{}, 退货状态-{}, where-订单详情ID-{}, where-之前的已退货数量-{}, where-退货之前的返现金总额-{}", returnTotal, newCashbackTotal, returnState, whereDetailId,
-                whereReturnedCount, whereOldCashbackTotal);
+    public int modifyReturn(final Integer returnTotal, final BigDecimal newCashbackTotal, final Byte returnState, final Long whereDetailId, final Integer whereReturnedCount, final BigDecimal whereOldCashbackTotal) {
+        _log.info("修改订单详情的退货情况: 退货总数-{}, 新的返现金总额-{}, 退货状态-{}, where-订单详情ID-{}, where-之前的已退货数量-{}, where-退货之前的返现金总额-{}", returnTotal, newCashbackTotal, returnState, whereDetailId, whereReturnedCount, whereOldCashbackTotal);
         return _mapper.updateReturn(returnTotal, newCashbackTotal, returnState, whereDetailId, whereReturnedCount, whereOldCashbackTotal);
     }
 
     /**
      * 修改订单详情实际金额和退货状态
-     * 
+     *
      * @param id
      * @param newActualAmount
      * @param oldActualAmount
@@ -108,8 +106,7 @@ public class OrdOrderDetailSvcImpl extends MybatisBaseSvcImpl<OrdOrderDetailMo, 
      */
     @Override
     @Transactional(readOnly = false, propagation = Propagation.REQUIRED)
-    public int modifyActualAmountANDReturnState(final Long id, final BigDecimal newActualAmount, final BigDecimal oldActualAmount, final Byte returnState,
-            final Byte returnedState) {
+    public int modifyActualAmountANDReturnState(final Long id, final BigDecimal newActualAmount, final BigDecimal oldActualAmount, final Byte returnState, final Byte returnedState) {
         _log.info("修改订单详情实际金额的参数为：详情id-{}，新的实际金额-{}，旧的实际金额-{}, 新的退货状态-{}, 旧的退货状态-{}", id, newActualAmount, oldActualAmount, returnState, returnedState);
         return _mapper.updateActualAmountANDReturnState(id, newActualAmount, oldActualAmount, returnState, returnedState);
     }
@@ -202,14 +199,12 @@ public class OrdOrderDetailSvcImpl extends MybatisBaseSvcImpl<OrdOrderDetailMo, 
             item.setCashbackCommissionSlot(detailList.get(i).getCommissionSlot());
             item.setCashbackCommissionState(detailList.get(i).getCommissionState());
             item.setSubjectType(detailList.get(i).getSubjectType());
-
             _log.info("获取当前供应商参数为： {}", detailList.get(i).getSupplierId());
             final SucOrgRo sucOrgRo = sucOrgSvc.getById(detailList.get(i).getSupplierId());
             _log.info("获取当前供应商结果为： {}", sucOrgRo.getRecord());
             if (sucOrgRo != null && sucOrgRo.getRecord() != null && sucOrgRo.getRecord().getName() != null) {
                 item.setSupplierName(sucOrgRo.getRecord().getName());
             }
-
             uPmo.setUplineOrderDetailId(detailList.get(i).getId());
             _log.info("当前下家关系的的参数为： {}", uPmo);
             final List<OrdBuyRelationMo> Uplist = selfSvc.list(uPmo);
@@ -260,7 +255,7 @@ public class OrdOrderDetailSvcImpl extends MybatisBaseSvcImpl<OrdOrderDetailMo, 
 
     /**
      * 得到买家已下单指定上线规格商品的数量(以此来限制买家购买)
-     * 
+     *
      * @param userId
      *            购买用户的用户ID
      * @param onlineSpecId
@@ -294,7 +289,7 @@ public class OrdOrderDetailSvcImpl extends MybatisBaseSvcImpl<OrdOrderDetailMo, 
 
     /**
      * 修改返现总额、退货数量
-     * 
+     *
      * @param id
      * @param oldCashbackTotal
      * @param newCashbackTotal
@@ -304,16 +299,14 @@ public class OrdOrderDetailSvcImpl extends MybatisBaseSvcImpl<OrdOrderDetailMo, 
      */
     @Override
     @Transactional(readOnly = false, propagation = Propagation.REQUIRED)
-    public int modifyReturnNumAndCashbackTotal(final Long id, final BigDecimal oldCashbackTotal, final BigDecimal newCashbackTotal, final Integer returnedCount,
-            final Integer returnTotal) {
-        _log.info("修改返现总额和退货数量的参数为：id={}, oldCashbackTotal={}, newCashbackTotal={}, returnedCount={}, returnTotal={}", id, oldCashbackTotal, newCashbackTotal, returnedCount,
-                returnTotal);
+    public int modifyReturnNumAndCashbackTotal(final Long id, final BigDecimal oldCashbackTotal, final BigDecimal newCashbackTotal, final Integer returnedCount, final Integer returnTotal) {
+        _log.info("修改返现总额和退货数量的参数为：id={}, oldCashbackTotal={}, newCashbackTotal={}, returnedCount={}, returnTotal={}", id, oldCashbackTotal, newCashbackTotal, returnedCount, returnTotal);
         return _mapper.updateReturnNumAndCashbackTotal(id, oldCashbackTotal, newCashbackTotal, returnedCount, returnTotal);
     }
 
     /**
      * 根据id修改供应商id
-     * 
+     *
      * @param id
      *            订单详情id
      * @param newSupplierId
@@ -340,13 +333,12 @@ public class OrdOrderDetailSvcImpl extends MybatisBaseSvcImpl<OrdOrderDetailMo, 
 
     /**
      * 计算首单购买
-     * 
+     *
      * @param onlineSpecId
      *            上线规格ID
      */
     @Override
     public void calcFirstBuy(final Long onlineSpecId) {
-        // TODO Auto-generated method stub
-
+    // _dao.
     }
 }

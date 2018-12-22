@@ -5,15 +5,12 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-
 import javax.annotation.Resource;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
-
 import rebue.ord.dic.BuyRelationDic;
 import rebue.ord.mapper.OrdBuyRelationMapper;
 import rebue.ord.mo.OrdBuyRelationMo;
@@ -31,10 +28,13 @@ import rebue.suc.svr.feign.SucUserSvc;
 /**
  * 订单购买关系
  *
- * 在单独使用不带任何参数的 @Transactional 注释时， propagation(传播模式)=REQUIRED，readOnly=false，
- * isolation(事务隔离级别)=READ_COMMITTED， 而且事务不会针对受控异常（checked exception）回滚。
+ * 在单独使用不带任何参数的 @Transactional 注释时，
+ * propagation(传播模式)=REQUIRED，readOnly=false，
+ * isolation(事务隔离级别)=READ_COMMITTED，
+ * 而且事务不会针对受控异常（checked exception）回滚。
  *
- * 注意： 一般是查询的数据库操作，默认设置readOnly=true, propagation=Propagation.SUPPORTS
+ * 注意：
+ * 一般是查询的数据库操作，默认设置readOnly=true, propagation=Propagation.SUPPORTS
  * 而涉及到增删改的数据库操作的方法，要设置 readOnly=false, propagation=Propagation.REQUIRED
  *
  * @mbg.generated 自动生成的注释，如需修改本注释，请删除本行
@@ -46,31 +46,14 @@ public class OrdBuyRelationSvcImpl extends MybatisBaseSvcImpl<OrdBuyRelationMo, 
     /**
      * @mbg.generated 自动生成，如需修改，请删除本行
      */
-    private static final Logger    _log = LoggerFactory.getLogger(OrdBuyRelationSvcImpl.class);
-
-    @Resource
-    private OrdOrderSvc            ordOrderSvc;
-
-    @Resource
-    private OrdOrderDetailSvc      ordOrderDetailSvc;
-
-    @Resource
-    private OrdGoodsBuyRelationSvc ordGoodsBuyRelationSvc;
-
-    /**
-     */
-    @Resource
-    private SucUserSvc             sucUserSvc;
-
-    @Resource
-    private OrdBuyRelationSvc      selfSvc;
+    private static final Logger _log = LoggerFactory.getLogger(OrdBuyRelationSvcImpl.class);
 
     /**
      * @mbg.generated 自动生成，如需修改，请删除本行
      */
     @Override
     @Transactional(readOnly = false, propagation = Propagation.REQUIRED)
-    public int add(final OrdBuyRelationMo mo) {
+    public int add(OrdBuyRelationMo mo) {
         _log.info("添加订单购买关系");
         // 如果id为空那么自动生成分布式id
         if (mo.getId() == null || mo.getId() == 0) {
@@ -79,6 +62,23 @@ public class OrdBuyRelationSvcImpl extends MybatisBaseSvcImpl<OrdBuyRelationMo, 
         return super.add(mo);
     }
 
+    @Resource
+    private OrdOrderSvc ordOrderSvc;
+
+    @Resource
+    private OrdOrderDetailSvc ordOrderDetailSvc;
+
+    @Resource
+    private OrdGoodsBuyRelationSvc ordGoodsBuyRelationSvc;
+
+    /**
+     */
+    @Resource
+    private SucUserSvc sucUserSvc;
+
+    @Resource
+    private OrdBuyRelationSvc selfSvc;
+
     @Override
     public int updateByUplineOrderDetailId(final OrdBuyRelationMo mo) {
         return _mapper.updateByUplineOrderDetailId(mo);
@@ -86,9 +86,9 @@ public class OrdBuyRelationSvcImpl extends MybatisBaseSvcImpl<OrdBuyRelationMo, 
 
     @Override
     @Transactional(readOnly = false, propagation = Propagation.REQUIRED)
-    public String matchBuyRelation(final long userId, final long onlineId, final BigDecimal buyPrice, final long downLineDetailId, final long downLineOrderId,final long orderTimestamp) {
+    public String matchBuyRelation(final long userId, final long onlineId, final BigDecimal buyPrice, final long downLineDetailId, final long downLineOrderId, final long orderTimestamp) {
         _log.info("按匹配自己匹配购买关系");
-        final boolean getBuyRelationResultByOwn = selfSvc.getAndUpdateBuyRelationByOwn(userId, onlineId, buyPrice, downLineDetailId, downLineOrderId,orderTimestamp);
+        final boolean getBuyRelationResultByOwn = selfSvc.getAndUpdateBuyRelationByOwn(userId, onlineId, buyPrice, downLineDetailId, downLineOrderId, orderTimestamp);
         _log.info(downLineDetailId + "按匹配自己匹配购买关系的返回值为：{}", getBuyRelationResultByOwn);
         if (getBuyRelationResultByOwn == false) {
             _log.info("根据购买规则匹配购买关系");
@@ -140,7 +140,7 @@ public class OrdBuyRelationSvcImpl extends MybatisBaseSvcImpl<OrdBuyRelationMo, 
      */
     @Override
     @Transactional(readOnly = false, propagation = Propagation.REQUIRED)
-    public boolean getAndUpdateBuyRelationByOwn(final long id, final long onlineId, final BigDecimal buyPrice, final long downLineDetailId, final long downLineOrderId,final long orderTimestamp) {
+    public boolean getAndUpdateBuyRelationByOwn(final long id, final long onlineId, final BigDecimal buyPrice, final long downLineDetailId, final long downLineOrderId, final long orderTimestamp) {
         // 获取用户购买关系
         _log.info("获取用户购买关系的id:" + id + " onlineId:" + onlineId + " buyPricce:" + buyPrice + " downLineDetailId:" + downLineDetailId + " downLineOrderId" + downLineOrderId);
         long downLineRelationId1 = 0;
@@ -166,7 +166,7 @@ public class OrdBuyRelationSvcImpl extends MybatisBaseSvcImpl<OrdBuyRelationMo, 
         map.put("commissionSlot", (byte) 1);
         map.put("downLineRelationId1", downLineRelationId1);
         map.put("downLineRelationId2", downLineRelationId2);
-        //用于标志是否匹配自己的购买关系，如果是匹配自己的购买关系，只匹配该订单详情时间往前的订单详情，不匹配该订单详情往后的订单详情
+        // 用于标志是否匹配自己的购买关系，如果是匹配自己的购买关系，只匹配该订单详情时间往前的订单详情，不匹配该订单详情往后的订单详情
         map.put("orderTimestamp", orderTimestamp);
         _log.info("获取用户自己购买剩余1个购买名额的订单详情的参数为：{}" + map);
         final OrdOrderDetailMo orderDetailOfOneCommissionSlot = ordOrderDetailSvc.getOrderDetailForOneCommissonSlot(map);
@@ -455,7 +455,7 @@ public class OrdBuyRelationSvcImpl extends MybatisBaseSvcImpl<OrdBuyRelationMo, 
             ordBuyRelationMo.setDownlineUserId(id);
             ordBuyRelationMo.setDownlineOrderDetailId(downLineDetailId);
             ordBuyRelationMo.setDownlineOrderId(downLineOrderId);
-            ordBuyRelationMo.setRelationSource((byte)BuyRelationDic.BuyRelationByFour.getCode());
+            ordBuyRelationMo.setRelationSource((byte) BuyRelationDic.BuyRelationByFour.getCode());
             _log.error("添加购买关系参数:{}", ordBuyRelationMo);
             final int addBuyRelationResult = selfSvc.add(ordBuyRelationMo);
             if (addBuyRelationResult != 1) {
@@ -622,7 +622,6 @@ public class OrdBuyRelationSvcImpl extends MybatisBaseSvcImpl<OrdBuyRelationMo, 
     @Override
     public List<DetailandBuyRelationRo> getBuyRelationByOrderId(final long orderId) {
         final List<DetailandBuyRelationRo> result = new ArrayList<>();
-
         _log.info("根据orderId获取购买关系参数为： {}", orderId);
         _log.info("先查询订单详情参数为： {}", orderId);
         // 查询回来的订单详情列表
@@ -692,5 +691,4 @@ public class OrdBuyRelationSvcImpl extends MybatisBaseSvcImpl<OrdBuyRelationMo, 
         }
         return result;
     }
-    
 }

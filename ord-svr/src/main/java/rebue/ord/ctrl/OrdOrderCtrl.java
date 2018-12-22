@@ -12,7 +12,6 @@ import javax.servlet.http.HttpServletRequest;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -57,12 +56,6 @@ import rebue.wheel.turing.JwtUtils;
 public class OrdOrderCtrl {
 
     /**
-     * 是否测试模式（测试模式下不用从Cookie中获取用户ID）
-     */
-    @Value("${debug:false}")
-    private Boolean             isDebug;
-
-    /**
      * @mbg.generated 自动生成，如需修改，请删除本行
      */
     private static final Logger _log = LoggerFactory.getLogger(OrdOrderCtrl.class);
@@ -73,43 +66,56 @@ public class OrdOrderCtrl {
     @Resource
     private OrdOrderSvc         svc;
 
+    /**
+     * 获取单个订单信息
+     *
+     * @mbg.generated 自动生成，如需修改，请删除本行
+     */
+    @GetMapping("/ord/order/getbyid")
+    OrdOrderMo getById(@RequestParam("id") final java.lang.Long id) {
+        _log.info("get OrdOrderMo by id: " + id);
+        return svc.getById(id);
+    }
+
+    /**
+     * 添加订单信息
+     */
+    Ro add(@RequestBody final OrdOrderMo mo) throws Exception {
+        throw new RuntimeException("不提供此方法");
+    }
+
+    /**
+     * 修改订单信息
+     */
+    Ro modify(@RequestBody final OrdOrderMo mo) throws Exception {
+        throw new RuntimeException("不提供此方法");
+    }
+
+    /**
+     * 删除订单信息
+     */
+    Ro del(@RequestParam("id") final java.lang.Long id) {
+        throw new RuntimeException("不提供此方法");
+    }
+
+    /**
+     * 是否测试模式（测试模式下不用从Cookie中获取用户ID）
+     */
+    @Value("${debug:false}")
+    private Boolean    isDebug;
+
     @Resource
-    private SucUserSvc          sucSvc;
+    private SucUserSvc sucSvc;
 
     /**
      * 前面经过的代理
      */
     @Value("${afc.passProxy:noproxy}")
-    private String              passProxy;
-
-    /**
-     * 删除订单信息
-     *
-     * @mbg.generated 自动生成，如需修改，请删除本行
-     */
-    @DeleteMapping("/ord/order")
-    Ro del(@RequestParam("id") final java.lang.Long id) {
-        _log.info("del OrdOrderMo by id: {}", id);
-        final int result = svc.del(id);
-        final Ro ro = new Ro();
-        if (result == 1) {
-            final String msg = "删除成功";
-            _log.info("{}: id-{}", msg, id);
-            ro.setMsg(msg);
-            ro.setResult(ResultDic.SUCCESS);
-            return ro;
-        } else {
-            final String msg = "删除失败，找不到该记录";
-            _log.error("{}: id-{}", msg, id);
-            ro.setMsg(msg);
-            ro.setResult(ResultDic.FAIL);
-            return ro;
-        }
-    }
+    private String     passProxy;
 
     /**
      * 查询订单信息
-     * 
+     *
      * @mbg.overrideByMethodName
      */
     @GetMapping("/ord/order")
@@ -127,7 +133,6 @@ public class OrdOrderCtrl {
             _log.error(msg);
             throw new IllegalArgumentException(msg);
         }
-
         if (!isDebug) {
             final Long orgId = (Long) JwtUtils.getJwtAdditionItemInCookie(req, "orgId");
             if (orgId == null) {
@@ -138,16 +143,15 @@ public class OrdOrderCtrl {
             to.setOrgId(520874560590053376L);
         }
         _log.info("获取当前用户的组织ID: {}", to.getOrgId());
-
         // 查询订单
         final PageInfo<OrdOrderRo> result = svc.listOrder(to, pageNum, pageSize);
         _log.info("result: " + result);
         return result;
     }
-    
+
     /**
      * 供应商查询订单信息
-     * 
+     *
      * @mbg.overrideByMethodName
      */
     @GetMapping("/ord/order/Supplier")
@@ -165,7 +169,6 @@ public class OrdOrderCtrl {
             _log.error(msg);
             throw new IllegalArgumentException(msg);
         }
-
         if (!isDebug) {
             final Long orgId = (Long) JwtUtils.getJwtAdditionItemInCookie(req, "orgId");
             if (orgId == null) {
@@ -174,16 +177,15 @@ public class OrdOrderCtrl {
             to.setOrgId(orgId);
         }
         _log.info("当前用户的组织ID: {}", to.getOrgId());
-
         // 查询订单
         final PageInfo<OrdOrderRo> result = svc.SupplierlistOrder(to, pageNum, pageSize);
         _log.info("result: " + result.getList());
         return result;
     }
-    
+
     /**
      * 供应商查询订单交易信息列表，
-     * 
+     *
      * @mbg.overrideByMethodName
      */
     @GetMapping("/ord/order/supplier/listOrderTrade")
@@ -201,7 +203,6 @@ public class OrdOrderCtrl {
             _log.error(msg);
             throw new IllegalArgumentException(msg);
         }
-
         if (!isDebug) {
             final Long orgId = (Long) JwtUtils.getJwtAdditionItemInCookie(req, "orgId");
             if (orgId == null) {
@@ -210,22 +211,10 @@ public class OrdOrderCtrl {
             to.setOrgId(orgId);
         }
         _log.info("当前用户的组织ID: {}", to.getOrgId());
-
         // 查询订单
         final PageInfo<OrdOrderRo> result = svc.listOrderTrade(to, pageNum, pageSize);
         _log.info("result: " + result.getList());
         return result;
-    }
-
-    /**
-     * 获取单个订单信息
-     *
-     * @mbg.generated 自动生成，如需修改，请删除本行
-     */
-    @GetMapping("/ord/order/getbyid")
-    OrdOrderMo getById(@RequestParam("id") final java.lang.Long id) {
-        _log.info("get OrdOrderMo by id: " + id);
-        return svc.getById(id);
     }
 
     /**
@@ -257,10 +246,10 @@ public class OrdOrderCtrl {
         OrderRo ro = new OrderRo();
         _log.info("用户下订单的参数为：{}", to);
         // FIXME 为兼容旧的微信公众号网站，暂时由传过来的参数中指定当前用户
-//        _log.info("设置下单的用户为当前用户");
-//        if (!isDebug || to.getUserId() == null) {
-//            to.setUserId(JwtUtils.getJwtUserIdInCookie(req));
-//        }
+        // _log.info("设置下单的用户为当前用户");
+        // if (!isDebug || to.getUserId() == null) {
+        // to.setUserId(JwtUtils.getJwtUserIdInCookie(req));
+        // }
         // 设置是否是测试用户
         to.setIsTester(sucSvc.isTester(to.getUserId()));
         try {
@@ -326,7 +315,6 @@ public class OrdOrderCtrl {
             return svc.cancelDelivery(to);
         } catch (final RuntimeException e) {
             _log.error("用户取消发货出现异常，{}", e);
-
             ro.setResult(ResultDic.FAIL);
             ro.setMsg("取消失败");
             return ro;
@@ -409,7 +397,6 @@ public class OrdOrderCtrl {
                 return confirmationRo;
             }
         }
-
     }
 
     /**
@@ -466,24 +453,6 @@ public class OrdOrderCtrl {
     }
 
     /**
-     * 获取用户待返订单:
-     *
-     * @param qo
-     * @return
-     * @date 2018年4月14日 下午2:30:53
-     */
-    // @GetMapping("/ord/order/getCashBackOrders")
-    // List<Map<String, Object>> getCashBackOrders(@RequestParam Map<String, Object>
-    // map)
-    // throws ParseException, IllegalAccessException, IllegalArgumentException,
-    // InvocationTargetException, IntrospectionException {
-    // _log.info("查询订单信息的参数为：{}", map.toString());
-    // List<Map<String, Object>> list = svc.getCashBackOrder(map);
-    // _log.info("查询订单信息的返回值：{}", String.valueOf(list));
-    // return list;
-    // }
-
-    /**
      * 根据定单编号获取单个订单信息
      */
     @GetMapping("/ord/getByOrderCode/{orderCode}")
@@ -499,9 +468,6 @@ public class OrdOrderCtrl {
 
     /**
      * 修改收件人信息
-     * 
-     * @param qo
-     * @return
      */
     @PutMapping("/ord/order/modifyreceiverinfo")
     Ro modifyOrderReceiverInfo(final OrdOrderMo qo) {
@@ -511,9 +477,6 @@ public class OrdOrderCtrl {
 
     /**
      * 查询订单信息(list)
-     * 
-     * @param mo
-     * @return
      */
     @GetMapping("/ord/order/listselective")
     List<OrdOrderMo> listSelective(final OrdOrderMo mo) {
@@ -523,9 +486,6 @@ public class OrdOrderCtrl {
 
     /**
      * 根据订单id修改支付订单id
-     * 
-     * @param id
-     * @return
      */
     @PutMapping("/ord/order/modifypayorderid")
     Ro modifyPayOrderId(@RequestParam("id") final java.lang.Long id) {
@@ -535,25 +495,20 @@ public class OrdOrderCtrl {
 
     /**
      * 根据组织Id获取未发货的订单详情的总成本价
-     * 
-     * @param mo
-     * @return
      */
     @GetMapping("/ord/order/getSettleTotal")
     OrdSettleRo getSettleTotal(final OrdOrderMo mo) {
         _log.info("根据组织Id获取未发货的订单详情的总成本价参数为：{}", mo);
         return svc.getSettleTotalForOrgId(mo);
     }
-    
+
     /**
      * 修deliverOrgId和supplierId
-     *
      */
     @PutMapping("/ord/order/updateOrg")
     Ro updateOrg(@RequestBody final UpdateOrgTo to) throws Exception {
         _log.info("updateOrg UpdateOrgTo: {}", to);
-        final Ro ro=svc.modifyOrg(to);
+        final Ro ro = svc.modifyOrg(to);
         return ro;
     }
-
 }

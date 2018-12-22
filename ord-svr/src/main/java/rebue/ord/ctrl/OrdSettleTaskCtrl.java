@@ -1,11 +1,9 @@
-package ${modulePackage}.ctrl;
+package rebue.ord.ctrl;
 
+import com.github.pagehelper.PageInfo;
 import java.text.SimpleDateFormat;
 import java.util.Date;
-import java.util.List;
-
 import javax.annotation.Resource;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.dao.DuplicateKeyException;
@@ -16,33 +14,29 @@ import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
-
-import com.github.pagehelper.PageInfo;
-
-import ${moClassFullName};
-import ${modulePackage}.svc.${entityName}Svc;
-
+import rebue.ord.mo.OrdSettleTaskMo;
+import rebue.ord.svc.OrdSettleTaskSvc;
 import rebue.robotech.dic.ResultDic;
-import rebue.robotech.ro.IdRo;
 import rebue.robotech.ro.Ro;
 
 /**
- * ${table.remarks}
+ * 结算任务
  *
  * @mbg.generated 自动生成的注释，如需修改本注释，请删除本行
  */
 @RestController
-public class ${entityName}Ctrl {
+public class OrdSettleTaskCtrl {
+
     /**
      * @mbg.generated 自动生成，如需修改，请删除本行
      */
-    private final static Logger _log = LoggerFactory.getLogger(${entityName}Ctrl.class);
+    private static final Logger _log = LoggerFactory.getLogger(OrdSettleTaskCtrl.class);
 
     /**
      * @mbg.generated 自动生成，如需修改，请删除本行
      */
     @Resource
-    private ${entityName}Svc svc;
+    private OrdSettleTaskSvc svc;
 
     /**
      * 有唯一约束的字段名称
@@ -52,14 +46,14 @@ public class ${entityName}Ctrl {
     private String _uniqueFilesName = "某字段内容";
 
     /**
-     * 添加${entityTitle}
+     * 添加结算任务
      *
      * @mbg.generated 自动生成，如需修改，请删除本行
      */
-    @PostMapping("/${strutil.toLowerCase(entityNamePrefix)}/${strutil.toLowerCase(entitySimpleName)}")
-    IdRo add(@RequestBody ${moClassShortName} mo) throws Exception {
-        _log.info("add ${moClassShortName}: {}", mo);
-        IdRo ro = new IdRo();
+    @PostMapping("/ord/settletask")
+    Ro add(@RequestBody OrdSettleTaskMo mo) throws Exception {
+        _log.info("add OrdSettleTaskMo: {}", mo);
+        Ro ro = new Ro();
         try {
             int result = svc.add(mo);
             if (result == 1) {
@@ -67,7 +61,6 @@ public class ${entityName}Ctrl {
                 _log.info("{}: mo-{}", msg, mo);
                 ro.setMsg(msg);
                 ro.setResult(ResultDic.SUCCESS);
-                ro.setId(mo.getId().toString());
                 return ro;
             } else {
                 String msg = "添加失败";
@@ -84,8 +77,8 @@ public class ${entityName}Ctrl {
             return ro;
         } catch (RuntimeException e) {
             SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-            String msg = "添加失败，出现运行时异常(" + sdf.format(new Date()) + ")";
-            _log.error(msg + ": mo=" + mo, e);
+            String msg = "修改失败，出现运行时异常(" + sdf.format(new Date()) + ")";
+            _log.error("{}: mo-{}", msg, mo);
             ro.setMsg(msg);
             ro.setResult(ResultDic.FAIL);
             return ro;
@@ -93,13 +86,13 @@ public class ${entityName}Ctrl {
     }
 
     /**
-     * 修改${entityTitle}
+     * 修改结算任务
      *
      * @mbg.generated 自动生成，如需修改，请删除本行
      */
-    @PutMapping("/${strutil.toLowerCase(entityNamePrefix)}/${strutil.toLowerCase(entitySimpleName)}")
-    Ro modify(@RequestBody ${moClassShortName} mo) throws Exception {
-        _log.info("modify ${moClassShortName}: {}", mo);
+    @PutMapping("/ord/settletask")
+    Ro modify(@RequestBody OrdSettleTaskMo mo) throws Exception {
+        _log.info("modify OrdSettleTaskMo: {}", mo);
         Ro ro = new Ro();
         try {
             if (svc.modify(mo) == 1) {
@@ -117,7 +110,7 @@ public class ${entityName}Ctrl {
             }
         } catch (DuplicateKeyException e) {
             String msg = "修改失败，" + _uniqueFilesName + "已存在，不允许出现重复";
-            _log.error(msg + ": mo=" + mo, e);
+            _log.error("{}: mo-{}", msg, mo);
             ro.setMsg(msg);
             ro.setResult(ResultDic.FAIL);
             return ro;
@@ -132,41 +125,14 @@ public class ${entityName}Ctrl {
     }
 
     /**
-     * 删除${entityTitle}
-     * 
+     * 删除结算任务
+     *
      * @mbg.generated 自动生成，如需修改，请删除本行
      */
-    @DeleteMapping("/${strutil.toLowerCase(entityNamePrefix)}/${strutil.toLowerCase(entitySimpleName)}")
-    Ro del(<&
-        for(id in ids){
-            if(!idLP.first) {
-                print(', ');
-            }
-            print('@RequestParam("');
-            print(id.key);
-            print('") ');
-            print(id.value);
-            print(' ');
-            print(id.key);
-        }
-    &>) {
-        _log.info("del ${moClassShortName} by id: {}", <&
-            for(id in ids){
-                if(!idLP.first) {
-                    print(', ');
-                }
-                print(id.key);
-            }
-        &>);
-        int result = svc.del(<&
-            for(id in ids){
-                if(!idLP.first) {
-                    print(', ');
-                }
-                print(id.key);
-            }
-        &>);
-
+    @DeleteMapping("/ord/settletask")
+    Ro del(@RequestParam("id") java.lang.Long id) {
+        _log.info("del OrdSettleTaskMo by id: {}", id);
+        int result = svc.del(id);
         Ro ro = new Ro();
         if (result == 1) {
             String msg = "删除成功";
@@ -184,48 +150,35 @@ public class ${entityName}Ctrl {
     }
 
     /**
-     * 查询${entityTitle}
-     * 
+     * 查询结算任务
+     *
      * @mbg.generated 自动生成，如需修改，请删除本行
      */
-    @GetMapping("/${strutil.toLowerCase(entityNamePrefix)}/${strutil.toLowerCase(entitySimpleName)}")
-    PageInfo<${moClassShortName}> list(${moClassShortName} mo, @RequestParam(value = "pageNum", required = false) Integer pageNum, @RequestParam(value = "pageSize", required = false) Integer pageSize) {
+    @GetMapping("/ord/settletask")
+    PageInfo<OrdSettleTaskMo> list(OrdSettleTaskMo mo, @RequestParam(value = "pageNum", required = false) Integer pageNum, @RequestParam(value = "pageSize", required = false) Integer pageSize) {
         if (pageNum == null)
             pageNum = 1;
         if (pageSize == null)
             pageSize = 5;
-        _log.info("list ${moClassShortName}:" + mo + ", pageNum = " + pageNum + ", pageSize = " + pageSize);
+        _log.info("list OrdSettleTaskMo:" + mo + ", pageNum = " + pageNum + ", pageSize = " + pageSize);
         if (pageSize > 50) {
             String msg = "pageSize不能大于50";
             _log.error(msg);
             throw new IllegalArgumentException(msg);
         }
-        PageInfo<${moClassShortName}> result = svc.list(mo, pageNum, pageSize);
+        PageInfo<OrdSettleTaskMo> result = svc.list(mo, pageNum, pageSize);
         _log.info("result: " + result);
         return result;
     }
 
     /**
-     * 获取单个${entityTitle}
-     * 
+     * 获取单个结算任务
+     *
      * @mbg.generated 自动生成，如需修改，请删除本行
      */
-    @GetMapping("/${strutil.toLowerCase(entityNamePrefix)}/${strutil.toLowerCase(entitySimpleName)}/getbyid")
-    ${entityName}Mo getById(<&
-        for(id in ids){
-            if(!idLP.first) {
-                print(', ');
-            }
-            print('@RequestParam("');
-            print(id.key);
-            print('") ');
-            print(id.value);
-            print(' ');
-            print(id.key);
-        }
-    &>) {
-        _log.info("get ${moClassShortName} by id: {}", id);
+    @GetMapping("/ord/settletask/getbyid")
+    OrdSettleTaskMo getById(@RequestParam("id") java.lang.Long id) {
+        _log.info("get OrdSettleTaskMo by id: " + id);
         return svc.getById(id);
     }
-
 }

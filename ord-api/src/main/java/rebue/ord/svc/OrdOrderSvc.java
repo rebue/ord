@@ -1,5 +1,6 @@
 package rebue.ord.svc;
 
+import com.github.pagehelper.PageInfo;
 import java.beans.IntrospectionException;
 import java.lang.reflect.InvocationTargetException;
 import java.math.BigDecimal;
@@ -7,10 +8,8 @@ import java.text.ParseException;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
-
-import com.github.pagehelper.PageInfo;
-
 import rebue.afc.msg.PayDoneMsg;
+import rebue.ord.jo.OrdOrderJo;
 import rebue.ord.mo.OrdOrderMo;
 import rebue.ord.ro.CancellationOfOrderRo;
 import rebue.ord.ro.ModifyOrderRealMoneyRo;
@@ -27,14 +26,14 @@ import rebue.ord.to.OrderTo;
 import rebue.ord.to.ShipmentConfirmationTo;
 import rebue.ord.to.UpdateOrgTo;
 import rebue.robotech.ro.Ro;
-import rebue.robotech.svc.MybatisBaseSvc;
+import rebue.robotech.svc.BaseSvc;
 
 /**
  * 订单信息
  *
  * @mbg.generated 自动生成的注释，如需修改本注释，请删除本行
  */
-public interface OrdOrderSvc extends MybatisBaseSvc<OrdOrderMo, java.lang.Long> {
+public interface OrdOrderSvc extends BaseSvc<java.lang.Long, OrdOrderMo, OrdOrderJo> {
 
     /**
      * 下订单
@@ -53,8 +52,7 @@ public interface OrdOrderSvc extends MybatisBaseSvc<OrdOrderMo, java.lang.Long> 
      * @throws IllegalAccessException
      * @date 2018年4月9日 下午4:48:40
      */
-    List<Map<String, Object>> selectOrderInfo(Map<String, Object> map)
-            throws ParseException, IntrospectionException, IllegalAccessException, IllegalArgumentException, InvocationTargetException;
+    List<Map<String, Object>> selectOrderInfo(Map<String, Object> map) throws ParseException, IntrospectionException, IllegalAccessException, IllegalArgumentException, InvocationTargetException;
 
     /**
      * 取消订单 Title: cancellationOfOrder Description:
@@ -91,13 +89,7 @@ public interface OrdOrderSvc extends MybatisBaseSvc<OrdOrderMo, java.lang.Long> 
      */
     ShipmentConfirmationRo shipmentConfirmation(ShipmentConfirmationTo mo);
 
-    /**
-     *  发货并获取物流轨迹
-     */
-
     ShipmentConfirmationRo shipmentAndGetTrace(ShipmentConfirmationTo to);
-    
-    
 
     /**
      * 订单签收 Title: orderSignIn Description:
@@ -110,7 +102,7 @@ public interface OrdOrderSvc extends MybatisBaseSvc<OrdOrderMo, java.lang.Long> 
 
     /**
      * 修改订单退款金额(根据订单ID和已退款总额)
-     * 
+     *
      * @param refundTotal
      *            退款总额
      * @param orderState
@@ -119,7 +111,6 @@ public interface OrdOrderSvc extends MybatisBaseSvc<OrdOrderMo, java.lang.Long> 
      *            where条件-订单ID
      * @param whereRefundedTotal
      *            where条件-已退款总额
-     *
      */
     int modifyRefund(BigDecimal refundTotal, Byte orderState, Long whereOrderId, BigDecimal whereRefundedTotal);
 
@@ -163,20 +154,15 @@ public interface OrdOrderSvc extends MybatisBaseSvc<OrdOrderMo, java.lang.Long> 
     Byte selectOrderStateByOrderCode(String id);
 
     /**
-     * 查询用户待返现订单信息
-     */
-//    List<Map<String, Object>> getCashBackOrder(Map<String, Object> map) throws ParseException, IntrospectionException, IllegalAccessException, IllegalArgumentException, InvocationTargetException;
-
-    /**
      * 分页查询订单
      */
     PageInfo<OrdOrderRo> listOrder(ListOrderTo to, int pageNum, int pageSize);
-    
+
     /**
      * 供应商分页查询订单
      */
     PageInfo<OrdOrderRo> SupplierlistOrder(ListOrderTo to, int pageNum, int pageSize);
-    
+
     /**
      * 供应商分页查询订单d订单交易
      */
@@ -184,7 +170,7 @@ public interface OrdOrderSvc extends MybatisBaseSvc<OrdOrderMo, java.lang.Long> 
 
     /**
      * 修改收件人信息
-     * 
+     *
      * @param mo
      * @return
      */
@@ -192,7 +178,7 @@ public interface OrdOrderSvc extends MybatisBaseSvc<OrdOrderMo, java.lang.Long> 
 
     /**
      * 根据订单id修改支付订单id
-     * 
+     *
      * @param id
      * @return
      */
@@ -200,7 +186,7 @@ public interface OrdOrderSvc extends MybatisBaseSvc<OrdOrderMo, java.lang.Long> 
 
     /**
      * 根据订单id查询订单签收时间
-     * 
+     *
      * @param orderIds
      * @return
      */
@@ -221,19 +207,19 @@ public interface OrdOrderSvc extends MybatisBaseSvc<OrdOrderMo, java.lang.Long> 
      * @param to
      * @return
      */
-	Ro cancelDelivery(CancelDeliveryTo to);
-	
-	/**
-	 * 获取订单已经结算或者是未结算的详情总成本价
-	 * @param order
-	 * @return
-	 */
-	OrdSettleRo getSettleTotalForOrgId(OrdOrderMo order);
-	
-	/**
-	 * 修改组织
-	 * @param to
-	 * @return
-	 */
+    Ro cancelDelivery(CancelDeliveryTo to);
+
+    /**
+     *  获取订单已经结算或者是未结算的详情总成本价
+     *  @param order
+     *  @return
+     */
+    OrdSettleRo getSettleTotalForOrgId(OrdOrderMo order);
+
+    /**
+     *  修改组织
+     *  @param to
+     *  @return
+     */
     Ro modifyOrg(UpdateOrgTo to);
 }

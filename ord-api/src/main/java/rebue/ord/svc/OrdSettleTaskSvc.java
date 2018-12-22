@@ -1,13 +1,16 @@
 package rebue.ord.svc;
 
+import rebue.ord.jo.OrdSettleTaskJo;
+import rebue.ord.mo.OrdSettleTaskMo;
 import rebue.ord.mo.OrdTaskMo;
+import rebue.robotech.svc.BaseSvc;
 
 /**
  * 结算任务
  *
  * @mbg.generated 自动生成的注释，如需修改本注释，请删除本行
  */
-public interface OrdSettleTaskSvc {
+public interface OrdSettleTaskSvc extends BaseSvc<java.lang.Long, OrdSettleTaskMo, OrdSettleTaskJo> {
 
     /**
      * 添加启动结算订单的任务(根据订单ID添加)
@@ -27,6 +30,5 @@ public interface OrdSettleTaskSvc {
     /**
      * 执行订单结算完成的任务(根据订单ID)
      */
-	void executeCompleteSettleTask(Long orderId);
-
+    void executeCompleteSettleTask(Long orderId);
 }

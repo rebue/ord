@@ -2,15 +2,12 @@ package rebue.ord.svc.impl;
 
 import java.util.Date;
 import java.util.List;
-
 import javax.annotation.Resource;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
-
 import rebue.ord.dic.OrderStateDic;
 import rebue.ord.dic.OrderTaskTypeDic;
 import rebue.ord.mapper.OrdTaskMapper;
@@ -32,10 +29,13 @@ import rebue.wheel.NetUtils;
 /**
  * 订单任务
  *
- * 在单独使用不带任何参数的 @Transactional 注释时， propagation(传播模式)=REQUIRED，readOnly=false，
- * isolation(事务隔离级别)=READ_COMMITTED， 而且事务不会针对受控异常（checked exception）回滚。
+ * 在单独使用不带任何参数的 @Transactional 注释时，
+ * propagation(传播模式)=REQUIRED，readOnly=false，
+ * isolation(事务隔离级别)=READ_COMMITTED，
+ * 而且事务不会针对受控异常（checked exception）回滚。
  *
- * 注意： 一般是查询的数据库操作，默认设置readOnly=true, propagation=Propagation.SUPPORTS
+ * 注意：
+ * 一般是查询的数据库操作，默认设置readOnly=true, propagation=Propagation.SUPPORTS
  * 而涉及到增删改的数据库操作的方法，要设置 readOnly=false, propagation=Propagation.REQUIRED
  *
  * @mbg.generated 自动生成的注释，如需修改本注释，请删除本行
@@ -49,7 +49,7 @@ public class OrdTaskSvcImpl extends MybatisBaseSvcImpl<OrdTaskMo, java.lang.Long
      */
     @Override
     @Transactional(readOnly = false, propagation = Propagation.REQUIRED)
-    public int add(final OrdTaskMo mo) {
+    public int add(OrdTaskMo mo) {
         _log.info("添加订单任务");
         // 如果id为空那么自动生成分布式id
         if (mo.getId() == null || mo.getId() == 0) {
@@ -61,11 +61,13 @@ public class OrdTaskSvcImpl extends MybatisBaseSvcImpl<OrdTaskMo, java.lang.Long
     private static final Logger _log = LoggerFactory.getLogger(OrdTaskSvcImpl.class);
 
     @Resource
-    private OrdOrderSvc         orderSvc;
+    private OrdOrderSvc orderSvc;
+
     @Resource
-    private OrdOrderDetailSvc   orderDetailSvc;
+    private OrdOrderDetailSvc orderDetailSvc;
+
     @Resource
-    private OrdSettleTaskSvc    settleTaskSvc;
+    private OrdSettleTaskSvc settleTaskSvc;
 
     /**
      * 获取需要执行任务的ID列表(根据任务类型)
@@ -87,7 +89,7 @@ public class OrdTaskSvcImpl extends MybatisBaseSvcImpl<OrdTaskMo, java.lang.Long
 
     /**
      * 执行订单自动签收任务
-     * 
+     *
      * @param taskId
      *            任务ID
      */
@@ -114,7 +116,7 @@ public class OrdTaskSvcImpl extends MybatisBaseSvcImpl<OrdTaskMo, java.lang.Long
             try {
                 final OrderSignInTo orderSignInTo = new OrderSignInTo();
                 orderSignInTo.setOrderId(Long.parseLong(ordTaskMo.getOrderId()));
-//                orderSignInTo.setOrderCode(ordTaskMo.getOrderId());
+                // orderSignInTo.setOrderCode(ordTaskMo.getOrderId());
                 orderSignInTo.setIp(NetUtils.getFirstIpOfLocalHost());
                 orderSignInTo.setMac(NetUtils.getFirstMacAddrOfLocalHost());
                 _log.info("执行订单签收任务订单签收的参数为：{}", ordTaskMo);
@@ -139,7 +141,6 @@ public class OrdTaskSvcImpl extends MybatisBaseSvcImpl<OrdTaskMo, java.lang.Long
     public Ro cancelTask(final Long orderId, final OrderTaskTypeDic taskType) {
         _log.info("取消任务: orderId==={}, taskType==={}", orderId, taskType);
         final Ro ro = new Ro();
-
         // 根据交易类型和订单详情ID查找任务
         final OrdTaskMo condition = new OrdTaskMo();
         condition.setOrderId(orderId.toString());
@@ -166,7 +167,6 @@ public class OrdTaskSvcImpl extends MybatisBaseSvcImpl<OrdTaskMo, java.lang.Long
             ro.setMsg(msg);
             return ro;
         }
-
         // 取消任务，rowCount为影响的行数
         final int rowCount = _mapper.cancelTask(task.getId(), task.getExecuteState(), TaskExecuteStateDic.CANCEL.getCode());
         if (rowCount != 1) {
@@ -177,7 +177,6 @@ public class OrdTaskSvcImpl extends MybatisBaseSvcImpl<OrdTaskMo, java.lang.Long
             ro.setMsg(msg);
             return ro;
         }
-
         final String msg = "任务取消成功";
         _log.info(msg);
         ro.setResult(ResultDic.SUCCESS);
@@ -187,7 +186,7 @@ public class OrdTaskSvcImpl extends MybatisBaseSvcImpl<OrdTaskMo, java.lang.Long
 
     /**
      * 执行订单自动取消任务
-     * 
+     *
      * @param taskId
      *            任务ID
      */
@@ -214,7 +213,7 @@ public class OrdTaskSvcImpl extends MybatisBaseSvcImpl<OrdTaskMo, java.lang.Long
             try {
                 final OrdOrderMo ordOrderMo = new OrdOrderMo();
                 ordOrderMo.setId(Long.parseLong(ordTaskMo.getOrderId()));
-//				ordOrderMo.setOrderCode(ordTaskMo.getOrderId());
+                // ordOrderMo.setOrderCode(ordTaskMo.getOrderId());
                 _log.info("执行订单取消任务订单的参数为：{}", ordTaskMo.getOrderId());
                 // 订单取消
                 final CancellationOfOrderRo cancelRo = orderSvc.cancellationOfOrder(ordOrderMo);
@@ -241,7 +240,6 @@ public class OrdTaskSvcImpl extends MybatisBaseSvcImpl<OrdTaskMo, java.lang.Long
             _log.error(msg);
             throw new RuntimeException(msg);
         }
-
         // 获取任务信息
         final OrdTaskMo taskMo = getById(taskId);
         if (taskMo == null) {
@@ -255,7 +253,6 @@ public class OrdTaskSvcImpl extends MybatisBaseSvcImpl<OrdTaskMo, java.lang.Long
             _log.error("{}: {}", msg, taskMo);
             throw new RuntimeException(msg);
         }
-
         _log.info("开始执行任务-添加订单结算子任务");
         // 计算当前时间
         final Date now = new Date();
@@ -274,13 +271,13 @@ public class OrdTaskSvcImpl extends MybatisBaseSvcImpl<OrdTaskMo, java.lang.Long
             _log.error("{}-{}", msg, taskMo);
             throw new RuntimeException(msg);
         }
-//        if (taskMo.getTradeType() == TradeTypeDic.SETTLE_COMMISSION.getCode()) {
-//            _log.info("发送返佣结算完成通知");
-//            final CommissionSettleDoneMsg msg = new CommissionSettleDoneMsg();
-//            msg.setOrderDetailId(taskMo.getOrderDetailId());
-//            msg.setSettleTime(now);
-//            commissionSettleNotifyPub.send(msg);
-//        }
+    // if (taskMo.getTradeType() == TradeTypeDic.SETTLE_COMMISSION.getCode()) {
+    // _log.info("发送返佣结算完成通知");
+    // final CommissionSettleDoneMsg msg = new CommissionSettleDoneMsg();
+    // msg.setOrderDetailId(taskMo.getOrderDetailId());
+    // msg.setSettleTime(now);
+    // commissionSettleNotifyPub.send(msg);
+    // }
     }
 
     /**
@@ -294,7 +291,6 @@ public class OrdTaskSvcImpl extends MybatisBaseSvcImpl<OrdTaskMo, java.lang.Long
             _log.error(msg);
             throw new RuntimeException(msg);
         }
-
         // 获取任务信息
         final OrdTaskMo taskMo = getById(taskId);
         if (taskMo == null) {
@@ -308,7 +304,6 @@ public class OrdTaskSvcImpl extends MybatisBaseSvcImpl<OrdTaskMo, java.lang.Long
             _log.error("{}: {}", msg, taskMo);
             throw new RuntimeException(msg);
         }
-
         _log.info("开始执行任务");
         // 计算当前时间
         final Date now = new Date();
@@ -340,7 +335,6 @@ public class OrdTaskSvcImpl extends MybatisBaseSvcImpl<OrdTaskMo, java.lang.Long
             _log.error(msg);
             throw new RuntimeException(msg);
         }
-
         // 获取任务信息
         final OrdTaskMo taskMo = getById(taskId);
         if (taskMo == null) {
@@ -354,7 +348,6 @@ public class OrdTaskSvcImpl extends MybatisBaseSvcImpl<OrdTaskMo, java.lang.Long
             _log.error("{}: {}", msg, taskMo);
             throw new RuntimeException(msg);
         }
-
         _log.info("开始执行任务");
         // 计算当前时间
         final Date now = new Date();
@@ -386,7 +379,6 @@ public class OrdTaskSvcImpl extends MybatisBaseSvcImpl<OrdTaskMo, java.lang.Long
             _log.error(msg);
             throw new RuntimeException(msg);
         }
-
         // 获取任务信息
         final OrdTaskMo taskMo = getById(taskId);
         if (taskMo == null) {
@@ -400,7 +392,6 @@ public class OrdTaskSvcImpl extends MybatisBaseSvcImpl<OrdTaskMo, java.lang.Long
             _log.error("{}: {}", msg, taskMo);
             throw new RuntimeException(msg);
         }
-
         _log.info("开始执行任务");
         // 计算当前时间
         final Date now = new Date();
