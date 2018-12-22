@@ -283,4 +283,10 @@ public interface OrdOrderMapper extends MybatisBaseMapper<OrdOrderMo, Long> {
     @Select("SELECT  SUM(COST_PRICE * BUY_COUNT) AS notSettle FROM  ORD_ORDER_DETAIL WHERE ORDER_ID IN (SELECT DISTINCT Id FROM ORD_ORDER WHERE DELIVER_ORG_ID = ${deliverOrgId} AND ORDER_STATE = ${orderState})")
     OrdSettleRo getSettleTotalForOrgId(@Param("deliverOrgId") Long orgId,@Param("orderState") byte orderState);
     
+    /**
+     * 根据订单id修改发货组织
+     */
+    @Update("update ORD_ORDER set DELIVER_ORG_ID = #{deliverOrgId,jdbcType=BIGINT} where ID = #{id,jdbcType=BIGINT}")
+    int updateOrg(@Param("deliverOrgId") Long deliverOrgId, @Param("id") Long id);
+
 }

@@ -84,6 +84,12 @@ public interface OrdOrderDetailMapper extends MybatisBaseMapper<OrdOrderDetailMo
      */
     @Update("UPDATE ORD_ORDER_DETAIL SET IS_DELIVERED = 1 WHERE ORDER_ID = #{orderId,jdbcType=BIGINT}")
     int modifyIsDeliverByOrderId(@Param("orderId") long orderId);
+    
+    /**
+     *  根据订单id修改发货组织id和供应商id
+     */
+    @Update("UPDATE ORD_ORDER_DETAIL SET  DELIVER_ORG_ID= #{deliverOrgId,jdbcType=BIGINT} , SUPPLIER_ID= #{supplierId,jdbcType=BIGINT}  WHERE ORDER_ID = #{orderId,jdbcType=BIGINT}")
+    int modifyOrg(@Param("supplierId") long supplierId ,@Param("deliverOrgId") long deliverOrgId,@Param("orderId") long orderId);
 
     /**
      *  修改订单详情实际购买金额

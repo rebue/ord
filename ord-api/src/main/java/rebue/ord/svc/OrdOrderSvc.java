@@ -25,6 +25,7 @@ import rebue.ord.to.ListOrderTo;
 import rebue.ord.to.OrderSignInTo;
 import rebue.ord.to.OrderTo;
 import rebue.ord.to.ShipmentConfirmationTo;
+import rebue.ord.to.UpdateOrgTo;
 import rebue.robotech.ro.Ro;
 import rebue.robotech.svc.MybatisBaseSvc;
 
@@ -228,4 +229,11 @@ public interface OrdOrderSvc extends MybatisBaseSvc<OrdOrderMo, java.lang.Long> 
 	 * @return
 	 */
 	OrdSettleRo getSettleTotalForOrgId(OrdOrderMo order);
+	
+	/**
+	 * 修改组织
+	 * @param to
+	 * @return
+	 */
+    Ro modifyOrg(UpdateOrgTo to);
 }
