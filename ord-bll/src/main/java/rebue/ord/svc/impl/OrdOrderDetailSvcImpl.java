@@ -19,8 +19,11 @@ import rebue.ord.mo.OrdOrderDetailMo;
 import rebue.ord.ro.DetailandBuyRelationRo;
 import rebue.ord.svc.OrdBuyRelationSvc;
 import rebue.ord.svc.OrdOrderDetailSvc;
+import rebue.ord.to.UpdateOrgTo;
 import rebue.robotech.svc.impl.MybatisBaseSvcImpl;
 import rebue.suc.mo.SucUserMo;
+import rebue.suc.ro.SucOrgRo;
+import rebue.suc.svr.feign.SucOrgSvc;
 import rebue.suc.svr.feign.SucUserSvc;
 
 /**
@@ -64,6 +67,9 @@ public class OrdOrderDetailSvcImpl extends MybatisBaseSvcImpl<OrdOrderDetailMo, 
 
     @Resource
     private OrdBuyRelationSvc selfSvc;
+
+    @Resource
+    private SucOrgSvc         sucOrgSvc;
 
     /**
      * 修改订单详情的退货情况(根据订单详情ID、已退货数量、旧的返现金总额，修改退货总数、返现金总额以及退货状态)
@@ -196,6 +202,14 @@ public class OrdOrderDetailSvcImpl extends MybatisBaseSvcImpl<OrdOrderDetailMo, 
             item.setCashbackCommissionSlot(detailList.get(i).getCommissionSlot());
             item.setCashbackCommissionState(detailList.get(i).getCommissionState());
             item.setSubjectType(detailList.get(i).getSubjectType());
+
+            _log.info("获取当前供应商参数为： {}", detailList.get(i).getSupplierId());
+            final SucOrgRo sucOrgRo = sucOrgSvc.getById(detailList.get(i).getSupplierId());
+            _log.info("获取当前供应商结果为： {}", sucOrgRo.getRecord());
+            if (sucOrgRo != null && sucOrgRo.getRecord() != null && sucOrgRo.getRecord().getName() != null) {
+                item.setSupplierName(sucOrgRo.getRecord().getName());
+            }
+
             uPmo.setUplineOrderDetailId(detailList.get(i).getId());
             _log.info("当前下家关系的的参数为： {}", uPmo);
             final List<OrdBuyRelationMo> Uplist = selfSvc.list(uPmo);
@@ -316,6 +330,15 @@ public class OrdOrderDetailSvcImpl extends MybatisBaseSvcImpl<OrdOrderDetailMo, 
     }
 
     /**
+     * 根据订单id修改发货组织和供应商
+     */
+    @Override
+    public int modifyOrg(final UpdateOrgTo to) {
+        final Long orderId = to.getId();
+        return _mapper.modifyOrg(to.getSupplierId(), to.getDeliverOrgId(), orderId);
+    }
+
+    /**
      * 计算首单购买
      * 
      * @param onlineSpecId
@@ -326,5 +349,4 @@ public class OrdOrderDetailSvcImpl extends MybatisBaseSvcImpl<OrdOrderDetailMo, 
         // TODO Auto-generated method stub
 
     }
-
 }

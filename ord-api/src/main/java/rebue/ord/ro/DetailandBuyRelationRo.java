@@ -53,6 +53,8 @@ public class DetailandBuyRelationRo {
 	/** 退货状态（0：未退货 1：退货中 2：已退货） **/
 	private Byte returnState;
 
+	/**供应商名字**/
+	private String  supplierName;
 	/**
 	 * 版块类型（0：普通，1：全返）
 	 *

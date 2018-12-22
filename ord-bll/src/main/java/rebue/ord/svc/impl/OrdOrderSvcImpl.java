@@ -93,6 +93,7 @@ import rebue.ord.to.OrderDetailTo;
 import rebue.ord.to.OrderSignInTo;
 import rebue.ord.to.OrderTo;
 import rebue.ord.to.ShipmentConfirmationTo;
+import rebue.ord.to.UpdateOrgTo;
 import rebue.robotech.dic.ResultDic;
 import rebue.robotech.dic.TaskExecuteStateDic;
 import rebue.robotech.ro.Ro;
@@ -1506,7 +1507,6 @@ public class OrdOrderSvcImpl extends MybatisBaseSvcImpl<OrdOrderMo, java.lang.Lo
          _log.info("获取所有组织的结果为: {}", sucOrgResult);
          	for (OrdOrderRo ordOrderRo : result.getList()) {
 				for (SucOrgMo sucOrgMo : sucOrgResult) {
-			         _log.info("将要对比的对象---------ordOrderRo-{},sucOrgMo-{}", ordOrderRo,sucOrgMo);
 					if(ordOrderRo.getOnlineOrgId() !=null &&ordOrderRo.getOnlineOrgId().equals(sucOrgMo.getId())) {
 				         _log.info("设置上线组织ordOrderRo-{},sucOrgMo-{}", ordOrderRo,sucOrgMo);
 				         ordOrderRo.setOnlineOrgName(sucOrgMo.getName());
@@ -1660,4 +1660,28 @@ public class OrdOrderSvcImpl extends MybatisBaseSvcImpl<OrdOrderMo, java.lang.Lo
         final PageInfo<OrdOrderRo> result = PageHelper.startPage(pageNum, pageSize).doSelectPageInfo(() -> _mapper.listOrderTrade(to));
         return result;
     }
+    
+    /**
+     * 修改组织
+     */
+	@Override
+	public Ro modifyOrg(UpdateOrgTo to) {
+        final Ro ro = new Ro();
+        _log.info("修改组订单发货组织的参数为: {}", to);
+        int i=_mapper.updateOrg(to.getDeliverOrgId(),to.getId());
+        _log.info("修改组织的结果为: {}", i);
+        if(i !=1) {
+            throw new RuntimeException("修改失败");
+        }
+        _log.info("修改组订单详情发货组织和供应商的参数为: {}", to);
+
+        i=orderDetailSvc.modifyOrg(to);
+        _log.info("修改组订单详情发货组织和供应商的结果为: {}", i);
+        if(i<1) {
+            throw new RuntimeException("修改失败");
+        }
+        ro.setResult(ResultDic.SUCCESS);
+        ro.setMsg("修改成功");
+        return ro;
+	}
 }

@@ -6,6 +6,7 @@ import java.util.Map;
 
 import rebue.ord.mo.OrdOrderDetailMo;
 import rebue.ord.ro.DetailandBuyRelationRo;
+import rebue.ord.to.UpdateOrgTo;
 import rebue.robotech.svc.MybatisBaseSvc;
 
 /**
@@ -130,4 +131,8 @@ public interface OrdOrderDetailSvc extends MybatisBaseSvc<OrdOrderDetailMo, java
      */
     void calcFirstBuy(Long onlineSpecId);
 
+    /**
+     * 修改组织
+     */
+    int modifyOrg(UpdateOrgTo to);
 }

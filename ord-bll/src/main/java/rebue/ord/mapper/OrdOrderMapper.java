@@ -17,57 +17,57 @@ import rebue.robotech.mapper.MybatisBaseMapper;
 public interface OrdOrderMapper extends MybatisBaseMapper<OrdOrderMo, Long> {
 
     /**
-     *    @mbg.generated 自动生成，如需修改，请删除本行
+     * @mbg.generated 自动生成，如需修改，请删除本行
      */
     int deleteByPrimaryKey(Long id);
 
     /**
-     *    @mbg.generated 自动生成，如需修改，请删除本行
+     * @mbg.generated 自动生成，如需修改，请删除本行
      */
     int insert(OrdOrderMo record);
 
     /**
-     *    @mbg.generated 自动生成，如需修改，请删除本行
+     * @mbg.generated 自动生成，如需修改，请删除本行
      */
     int insertSelective(OrdOrderMo record);
 
     /**
-     *    @mbg.generated 自动生成，如需修改，请删除本行
+     * @mbg.generated 自动生成，如需修改，请删除本行
      */
     OrdOrderMo selectByPrimaryKey(Long id);
 
     /**
-     *    @mbg.generated 自动生成，如需修改，请删除本行
+     * @mbg.generated 自动生成，如需修改，请删除本行
      */
     int updateByPrimaryKeySelective(OrdOrderMo record);
 
     /**
-     *    @mbg.generated 自动生成，如需修改，请删除本行
+     * @mbg.generated 自动生成，如需修改，请删除本行
      */
     int updateByPrimaryKey(OrdOrderMo record);
 
     /**
-     *    @mbg.generated 自动生成，如需修改，请删除本行
+     * @mbg.generated 自动生成，如需修改，请删除本行
      */
     List<OrdOrderMo> selectAll();
 
     /**
-     *    @mbg.generated 自动生成，如需修改，请删除本行
+     * @mbg.generated 自动生成，如需修改，请删除本行
      */
     List<OrdOrderMo> selectSelective(OrdOrderMo record);
 
     /**
-     *    @mbg.generated 自动生成，如需修改，请删除本行
+     * @mbg.generated 自动生成，如需修改，请删除本行
      */
     boolean existByPrimaryKey(Long id);
 
     /**
-     *    @mbg.generated 自动生成，如需修改，请删除本行
+     * @mbg.generated 自动生成，如需修改，请删除本行
      */
     boolean existSelective(OrdOrderMo record);
 
     /**
-     *    @mbg.generated 自动生成，如需修改，请删除本行
+     * @mbg.generated 自动生成，如需修改，请删除本行
      */
     int countSelective(OrdOrderMo record);
 
@@ -134,8 +134,9 @@ public interface OrdOrderMapper extends MybatisBaseMapper<OrdOrderMo, Long> {
      */
     int orderSignIn(OrdOrderMo record);
 
-    // 
-    int updateRefund(@Param("returnTotal") BigDecimal refundTotal, @Param("orderState") Byte orderState, @Param("id") Long whereOrderId, @Param("returnedTotal") BigDecimal whereRefundedTotal);
+    //
+    int updateRefund(@Param("returnTotal") BigDecimal refundTotal, @Param("orderState") Byte orderState, @Param("id") Long whereOrderId,
+            @Param("returnedTotal") BigDecimal whereRefundedTotal);
 
     /**
      * 根据订单编号修改订单状态 Title: modifyOrderStateByOderCode Description:
@@ -224,16 +225,26 @@ public interface OrdOrderMapper extends MybatisBaseMapper<OrdOrderMo, Long> {
     @Select("select RECEIVED_TIME from ORD_ORDER where ID in (${orderIds}) order by RECEIVED_TIME desc")
     List<OrdOrderMo> selectOrderSignTime(@Param("orderIds") String orderIds);
 
-    @// 
-    Update("UPDATE ORD_ORDER a " + "SET " + "    a.ORDER_MONEY = (SELECT " + "            SUM(b.BUY_COUNT * b.BUY_PRICE)" + "        FROM" + "            ORD_ORDER_DETAIL b" + "        WHERE" + "            b.ORDER_ID = #{orderId})," + "    a.REAL_MONEY = (SELECT " + "            SUM(c.ACTUAL_AMOUNT)" + "        FROM" + "            ORD_ORDER_DETAIL c" + "        WHERE" + "            c.ORDER_ID = #{orderId})" + " WHERE" + "    a.ID = #{orderId}")
+    @//
+    Update("UPDATE ORD_ORDER a " + "SET " + "    a.ORDER_MONEY = (SELECT " + "            SUM(b.BUY_COUNT * b.BUY_PRICE)" + "        FROM" + "            ORD_ORDER_DETAIL b"
+            + "        WHERE" + "            b.ORDER_ID = #{orderId})," + "    a.REAL_MONEY = (SELECT " + "            SUM(c.ACTUAL_AMOUNT)" + "        FROM"
+            + "            ORD_ORDER_DETAIL c" + "        WHERE" + "            c.ORDER_ID = #{orderId})" + " WHERE" + "    a.ID = #{orderId}")
     void updateAmountAfterSplitOrder(@Param("orderId") Long orderId);
 
     /**
      * 根据组织Id获取结算的详情总额
+     * 
      * @param orgId
      * @param orderState
      * @return
      */
     @Select("SELECT  SUM(COST_PRICE * BUY_COUNT) AS notSettle FROM  ORD_ORDER_DETAIL WHERE ORDER_ID IN (SELECT DISTINCT Id FROM ORD_ORDER WHERE DELIVER_ORG_ID = ${deliverOrgId} AND ORDER_STATE = ${orderState})")
     OrdSettleRo getSettleTotalForOrgId(@Param("deliverOrgId") Long orgId, @Param("orderState") byte orderState);
+
+    /**
+     * 根据订单id修改发货组织
+     */
+    @Update("update ORD_ORDER set DELIVER_ORG_ID = #{deliverOrgId,jdbcType=BIGINT} where ID = #{id,jdbcType=BIGINT}")
+    int updateOrg(@Param("deliverOrgId") Long deliverOrgId, @Param("id") Long id);
+
 }

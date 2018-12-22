@@ -201,4 +201,16 @@ public class OrdOrderDetailCtrl {
         _log.info("获取到的订单详情为：{}", String.valueOf(list));
         return list;
     }
+    
+    /**
+     * 获取订单详情
+     */
+    @GetMapping("/ord/detailList")
+    List<OrdOrderDetailMo> listAll(final OrdOrderDetailMo mo){
+        _log.info("获取订单详情参数为: {}"+ mo);
+        List<OrdOrderDetailMo> result=svc.list(mo);
+        _log.info("获取订单详情结果为: {}"+ mo);
+        return result;
+    }
+    
 }
