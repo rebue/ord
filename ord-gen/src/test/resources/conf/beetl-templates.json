@@ -1,22 +1,22 @@
 [
 	{
-		"templateName": "svc.btl",
-		"targetDir": "../ord-api/src/main/java/${modulePath}/svc/",
-		"targetFile": "${entityName}Svc.java",
+		"templateName": "test.btl",
+		"targetDir": "../ord-svr/src/test/java/${modulePath}/test/",
+		"targetFile": "${entityName}Tests.java",
 		"isGenTargetOnMiddleTable": false,
 		"backup": false
 	},
 	{
-		"templateName": "svc-impl.btl",
-		"targetDir": "../ord-bll/src/main/java/${modulePath}/svc/impl/",
-		"targetFile": "${entityName}SvcImpl.java",
+		"templateName": "dao.btl",
+		"targetDir": "../ord-bll/src/main/java/${modulePath}/dao/",
+		"targetFile": "${entityName}Dao.java",
 		"isGenTargetOnMiddleTable": false,
 		"backup": false
 	},
 	{
-		"templateName": "ctrl.btl",
-		"targetDir": "../ord-svr/src/main/java/${modulePath}/ctrl/",
-		"targetFile": "${entityName}Ctrl.java",
+		"templateName": "jo.btl",
+		"targetDir": "../ord-api/src/main/java/${modulePath}/jo/",
+		"targetFile": "${entityName}Jo.java",
 		"isGenTargetOnMiddleTable": false,
 		"backup": false
 	}

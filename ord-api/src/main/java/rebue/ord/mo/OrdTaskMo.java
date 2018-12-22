@@ -58,22 +58,13 @@ public class OrdTaskMo implements Serializable {
     private Date executeFactTime;
 
     /**
-     *    任务类型（1：取消订单  2：订单签收）
+     *    任务类型（1：订单自动取消的任务  2：订单自动签收的任务 3: 订单开始结算的任务 4: 订单结算的任务 5: 订单完成结算的任务）
      *
      *    数据库字段: ORD_TASK.TASK_TYPE
      *
      *    @mbg.generated 自动生成，如需修改，请删除本行
      */
     private Byte taskType;
-
-    /**
-     *    订单ID(销售订单ID)
-     *
-     *    数据库字段: ORD_TASK.ORDER_ID
-     *
-     *    @mbg.generated 自动生成，如需修改，请删除本行
-     */
-    private String orderId;
 
     /**
      *    子任务类型
@@ -83,6 +74,15 @@ public class OrdTaskMo implements Serializable {
      *    @mbg.generated 自动生成，如需修改，请删除本行
      */
     private Byte subTaskType;
+
+    /**
+     *    订单ID(销售订单ID)
+     *
+     *    数据库字段: ORD_TASK.ORDER_ID
+     *
+     *    @mbg.generated 自动生成，如需修改，请删除本行
+     */
+    private String orderId;
 
     /**
      *    @mbg.generated 自动生成，如需修改，请删除本行
@@ -178,7 +178,7 @@ public class OrdTaskMo implements Serializable {
     }
 
     /**
-     *    任务类型（1：取消订单  2：订单签收）
+     *    任务类型（1：订单自动取消的任务  2：订单自动签收的任务 3: 订单开始结算的任务 4: 订单结算的任务 5: 订单完成结算的任务）
      *
      *    数据库字段: ORD_TASK.TASK_TYPE
      *
@@ -189,7 +189,7 @@ public class OrdTaskMo implements Serializable {
     }
 
     /**
-     *    任务类型（1：取消订单  2：订单签收）
+     *    任务类型（1：订单自动取消的任务  2：订单自动签收的任务 3: 订单开始结算的任务 4: 订单结算的任务 5: 订单完成结算的任务）
      *
      *    数据库字段: ORD_TASK.TASK_TYPE
      *
@@ -197,28 +197,6 @@ public class OrdTaskMo implements Serializable {
      */
     public void setTaskType(Byte taskType) {
         this.taskType = taskType;
-    }
-
-    /**
-     *    订单ID(销售订单ID)
-     *
-     *    数据库字段: ORD_TASK.ORDER_ID
-     *
-     *    @mbg.generated 自动生成，如需修改，请删除本行
-     */
-    public String getOrderId() {
-        return orderId;
-    }
-
-    /**
-     *    订单ID(销售订单ID)
-     *
-     *    数据库字段: ORD_TASK.ORDER_ID
-     *
-     *    @mbg.generated 自动生成，如需修改，请删除本行
-     */
-    public void setOrderId(String orderId) {
-        this.orderId = orderId;
     }
 
     /**
@@ -244,6 +222,28 @@ public class OrdTaskMo implements Serializable {
     }
 
     /**
+     *    订单ID(销售订单ID)
+     *
+     *    数据库字段: ORD_TASK.ORDER_ID
+     *
+     *    @mbg.generated 自动生成，如需修改，请删除本行
+     */
+    public String getOrderId() {
+        return orderId;
+    }
+
+    /**
+     *    订单ID(销售订单ID)
+     *
+     *    数据库字段: ORD_TASK.ORDER_ID
+     *
+     *    @mbg.generated 自动生成，如需修改，请删除本行
+     */
+    public void setOrderId(String orderId) {
+        this.orderId = orderId;
+    }
+
+    /**
      *    @mbg.generated 自动生成，如需修改，请删除本行
      */
     @Override
@@ -257,8 +257,8 @@ public class OrdTaskMo implements Serializable {
         sb.append(", executePlanTime=").append(executePlanTime);
         sb.append(", executeFactTime=").append(executeFactTime);
         sb.append(", taskType=").append(taskType);
-        sb.append(", orderId=").append(orderId);
         sb.append(", subTaskType=").append(subTaskType);
+        sb.append(", orderId=").append(orderId);
         sb.append(", serialVersionUID=").append(serialVersionUID);
         sb.append("]");
         return sb.toString();

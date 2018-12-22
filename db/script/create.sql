@@ -1,6 +1,6 @@
 /*==============================================================*/
 /* DBMS name:      MySQL 5.0                                    */
-/* Created on:     2018/12/21 17:21:12                          */
+/* Created on:     2018/12/22 8:46:35                           */
 /*==============================================================*/
 
 
@@ -158,6 +158,7 @@ create table ORD_ORDER_DETAIL
    ONLINE_ID            bigint not null comment '上线ID',
    PRODUCT_ID           bigint not null comment '产品ID',
    PRODUCT_SPEC_ID      bigint comment '产品规格ID',
+   ORDER_TIMESTAMP      bigint not null default 0 comment '下单时间戳(用于排序识别详情的先后顺序)',
    SUBJECT_TYPE         tinyint not null default 0 comment '版块类型（0：普通，1：全返）',
    COMMISSION_SLOT      tinyint comment '返佣金名额',
    COMMISSION_STATE     tinyint comment '返佣金状态（0：匹配中，1：待返，2：已返）',
@@ -171,7 +172,7 @@ create table ORD_ORDER_DETAIL
    COST_PRICE           decimal(18,4) comment '成本价格（单个）',
    BUY_POINT            decimal(18,4) comment '购买积分',
    BUY_POINT_TOTAL      decimal(18,4) comment '购买总积分',
-   PAY_SEQU             tinyint comment '支付顺序',
+   PAY_SEQ              tinyint comment '支付顺序',
    SUPPLIER_ID          bigint comment '供应商ID',
    DELIVER_ORG_ID       bigint not null comment '发货组织ID(默认填入上线组织ID，可变更为供应商的ID)',
    CASHBACK_AMOUNT      decimal(18,4) not null comment '返现金额',
@@ -181,7 +182,7 @@ create table ORD_ORDER_DETAIL
    USER_ID              bigint not null comment '用户ID',
    IS_DELIVERED         bool comment '是否已发货',
    primary key (ID),
-   unique key AK_PAY_SEQU (PAY_SEQU)
+   unique key AK_PAY_SEQ (PAY_SEQ)
 );
 
 alter table ORD_ORDER_DETAIL comment '订单详情';

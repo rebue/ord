@@ -4,12 +4,10 @@ import java.math.BigDecimal;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
-
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
 import org.apache.ibatis.annotations.Select;
 import org.apache.ibatis.annotations.Update;
-
 import rebue.ord.mo.OrdOrderMo;
 import rebue.ord.ro.OrdSettleRo;
 import rebue.ord.to.ListOrderTo;
@@ -19,67 +17,57 @@ import rebue.robotech.mapper.MybatisBaseMapper;
 public interface OrdOrderMapper extends MybatisBaseMapper<OrdOrderMo, Long> {
 
     /**
-     * @mbg.generated 自动生成，如需修改，请删除本行
+     *    @mbg.generated 自动生成，如需修改，请删除本行
      */
-    @Override
     int deleteByPrimaryKey(Long id);
 
     /**
-     * @mbg.generated 自动生成，如需修改，请删除本行
+     *    @mbg.generated 自动生成，如需修改，请删除本行
      */
-    @Override
     int insert(OrdOrderMo record);
 
     /**
-     * @mbg.generated 自动生成，如需修改，请删除本行
+     *    @mbg.generated 自动生成，如需修改，请删除本行
      */
-    @Override
     int insertSelective(OrdOrderMo record);
 
     /**
-     * @mbg.generated 自动生成，如需修改，请删除本行
+     *    @mbg.generated 自动生成，如需修改，请删除本行
      */
-    @Override
     OrdOrderMo selectByPrimaryKey(Long id);
 
     /**
-     * @mbg.generated 自动生成，如需修改，请删除本行
+     *    @mbg.generated 自动生成，如需修改，请删除本行
      */
-    @Override
     int updateByPrimaryKeySelective(OrdOrderMo record);
 
     /**
-     * @mbg.generated 自动生成，如需修改，请删除本行
+     *    @mbg.generated 自动生成，如需修改，请删除本行
      */
-    @Override
     int updateByPrimaryKey(OrdOrderMo record);
 
     /**
-     * @mbg.generated 自动生成，如需修改，请删除本行
+     *    @mbg.generated 自动生成，如需修改，请删除本行
      */
-    @Override
     List<OrdOrderMo> selectAll();
 
     /**
-     * @mbg.generated 自动生成，如需修改，请删除本行
+     *    @mbg.generated 自动生成，如需修改，请删除本行
      */
-    @Override
     List<OrdOrderMo> selectSelective(OrdOrderMo record);
 
     /**
-     * @mbg.generated 自动生成，如需修改，请删除本行
+     *    @mbg.generated 自动生成，如需修改，请删除本行
      */
-    @Override
     boolean existByPrimaryKey(Long id);
 
     /**
-     * @mbg.generated 自动生成，如需修改，请删除本行
+     *    @mbg.generated 自动生成，如需修改，请删除本行
      */
-    @Override
     boolean existSelective(OrdOrderMo record);
 
     /**
-     * @mbg.generated 自动生成，如需修改，请删除本行
+     *    @mbg.generated 自动生成，如需修改，请删除本行
      */
     int countSelective(OrdOrderMo record);
 
@@ -146,21 +134,8 @@ public interface OrdOrderMapper extends MybatisBaseMapper<OrdOrderMo, Long> {
      */
     int orderSignIn(OrdOrderMo record);
 
-    /**
-     * 修改订单退款金额(根据订单ID和已退款总额)
-     * 
-     * @param refundTotal
-     *            退款总额
-     * @param orderState
-     *            订单状态
-     * @param whereOrderId
-     *            where条件-订单ID
-     * @param whereRefundedTotal
-     *            where条件-已退款总额
-     */
-    int updateRefund(@Param("returnTotal") BigDecimal refundTotal,//
-            @Param("orderState") Byte orderState,//
-            @Param("id") Long whereOrderId, @Param("returnedTotal") BigDecimal whereRefundedTotal);
+    // 
+    int updateRefund(@Param("returnTotal") BigDecimal refundTotal, @Param("orderState") Byte orderState, @Param("id") Long whereOrderId, @Param("returnedTotal") BigDecimal whereRefundedTotal);
 
     /**
      * 根据订单编号修改订单状态 Title: modifyOrderStateByOderCode Description:
@@ -218,22 +193,16 @@ public interface OrdOrderMapper extends MybatisBaseMapper<OrdOrderMo, Long> {
      * 分页查询订单信息
      */
     List<OrdOrderMo> listOrder(ListOrderTo to);
-    
-    
+
     /**
      * 供应商分页查询订单信息
      */
     List<OrdOrderMo> listOrderSupplier(ListOrderTo to);
-    
+
     /**
      * 供应商分页查询订单交易信息
      */
     List<OrdOrderMo> listOrderTrade(ListOrderTo to);
-
-//    /**
-//     * 根据支付订单ID获取订单详情列表
-//     */
-//    List<OrdOrderMo> listByPayOrderId(Long payOrderId);
 
     /**
      * 修改收件人信息
@@ -248,31 +217,16 @@ public interface OrdOrderMapper extends MybatisBaseMapper<OrdOrderMo, Long> {
 
     /**
      * 根据订单id查询订单签收时间
-     * 
+     *
      * @param orderIds
      * @return
      */
     @Select("select RECEIVED_TIME from ORD_ORDER where ID in (${orderIds}) order by RECEIVED_TIME desc")
     List<OrdOrderMo> selectOrderSignTime(@Param("orderIds") String orderIds);
 
-    @Update("UPDATE ORD_ORDER a " //
-            + "SET " //
-            + "    a.ORDER_MONEY = (SELECT " //
-            + "            SUM(b.BUY_COUNT * b.BUY_PRICE)" //
-            + "        FROM" //
-            + "            ORD_ORDER_DETAIL b" //
-            + "        WHERE" //
-            + "            b.ORDER_ID = #{orderId})," //
-            + "    a.REAL_MONEY = (SELECT " //
-            + "            SUM(c.ACTUAL_AMOUNT)" //
-            + "        FROM" //
-            + "            ORD_ORDER_DETAIL c" //
-            + "        WHERE" //
-            + "            c.ORDER_ID = #{orderId})" //
-            + " WHERE" //
-            + "    a.ID = #{orderId}")
+    @// 
+    Update("UPDATE ORD_ORDER a " + "SET " + "    a.ORDER_MONEY = (SELECT " + "            SUM(b.BUY_COUNT * b.BUY_PRICE)" + "        FROM" + "            ORD_ORDER_DETAIL b" + "        WHERE" + "            b.ORDER_ID = #{orderId})," + "    a.REAL_MONEY = (SELECT " + "            SUM(c.ACTUAL_AMOUNT)" + "        FROM" + "            ORD_ORDER_DETAIL c" + "        WHERE" + "            c.ORDER_ID = #{orderId})" + " WHERE" + "    a.ID = #{orderId}")
     void updateAmountAfterSplitOrder(@Param("orderId") Long orderId);
-    
 
     /**
      * 根据组织Id获取结算的详情总额
@@ -281,6 +235,5 @@ public interface OrdOrderMapper extends MybatisBaseMapper<OrdOrderMo, Long> {
      * @return
      */
     @Select("SELECT  SUM(COST_PRICE * BUY_COUNT) AS notSettle FROM  ORD_ORDER_DETAIL WHERE ORDER_ID IN (SELECT DISTINCT Id FROM ORD_ORDER WHERE DELIVER_ORG_ID = ${deliverOrgId} AND ORDER_STATE = ${orderState})")
-    OrdSettleRo getSettleTotalForOrgId(@Param("deliverOrgId") Long orgId,@Param("orderState") byte orderState);
-    
+    OrdSettleRo getSettleTotalForOrgId(@Param("deliverOrgId") Long orgId, @Param("orderState") byte orderState);
 }

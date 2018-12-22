@@ -144,12 +144,16 @@ alter table ORD_ORDER_DETAIL modify ONLINE_SPEC_ID       bigint not null comment
 
 -- --------------------------------------------------------------------------------------------------------------------
 
-alter table ORD_ORDER_DETAIL  		add 						ORDER_TIMESTAMP      bigint not null default 0 comment '下单时间戳(用于排序)';
+alter table ORD_ORDER_DETAIL  		add 						ORDER_TIMESTAMP      bigint not null default 0 comment '下单时间戳(用于排序识别详情的先后顺序)';
 
----------------------------------------------------------上面的已更新到线上----------------------------------------------------
+
+
+
+
+-- -------------------------------------------------------上面的已更新到线上----------------------------------------------------
 
 alter table ORD_ORDER_DETAIL add BUY_POINT            decimal(18,4) comment '购买积分';
 alter table ORD_ORDER_DETAIL add BUY_POINT_TOTAL      decimal(18,4) comment '购买总积分';
-alter table ORD_ORDER_DETAIL add PAY_SEQU             tinyint comment '支付顺序';
-alter table ORD_ORDER_DETAIL add unique key AK_PAY_SEQU (PAY_SEQU);
+alter table ORD_ORDER_DETAIL add PAY_SEQ             tinyint comment '支付顺序';
+alter table ORD_ORDER_DETAIL add unique key AK_PAY_SEQU (PAY_SEQ);
 

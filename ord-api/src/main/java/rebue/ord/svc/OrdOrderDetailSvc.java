@@ -44,7 +44,7 @@ public interface OrdOrderDetailSvc extends MybatisBaseSvc<OrdOrderDetailMo, java
      * 根据详情ID修改退货状态 Title: modifyReturnStateById Description:
      */
     int modifyReturnStateById(long id, byte returnState);
-    
+
     /**
      * 根据订单ID修改发货状态 Title: modifyReturnStateById Description:
      */
@@ -85,37 +85,49 @@ public interface OrdOrderDetailSvc extends MybatisBaseSvc<OrdOrderDetailMo, java
      */
     void settleBuyer(Long orderDetailId);
 
-	/**
-	 * 修改返现总额、退货数量
-	 * @param id
-	 * @param oldCashbackTotal
-	 * @param newCashbackTotal
-	 * @param returnedCount
-	 * @param returnTotal
-	 * @return
-	 */
-	int modifyReturnNumAndCashbackTotal(Long id, BigDecimal oldCashbackTotal, BigDecimal newCashbackTotal,
-			Integer returnedCount, Integer returnTotal);
+    /**
+     * 修改返现总额、退货数量
+     * 
+     * @param id
+     * @param oldCashbackTotal
+     * @param newCashbackTotal
+     * @param returnedCount
+     * @param returnTotal
+     * @return
+     */
+    int modifyReturnNumAndCashbackTotal(Long id, BigDecimal oldCashbackTotal, BigDecimal newCashbackTotal, Integer returnedCount, Integer returnTotal);
 
-	/**
-	 * 修改订单详情实际金额和退货状态
-	 * @param id
-	 * @param newActualAmount
-	 * @param oldActualAmount
-	 * @param returnState
-	 * @param returnedState
-	 * @return
-	 */
-	int modifyActualAmountANDReturnState(Long id, BigDecimal newActualAmount, BigDecimal oldActualAmount,
-			Byte returnState, Byte returnedState);
+    /**
+     * 修改订单详情实际金额和退货状态
+     * 
+     * @param id
+     * @param newActualAmount
+     * @param oldActualAmount
+     * @param returnState
+     * @param returnedState
+     * @return
+     */
+    int modifyActualAmountANDReturnState(Long id, BigDecimal newActualAmount, BigDecimal oldActualAmount, Byte returnState, Byte returnedState);
 
-	/**
-	 * 根据id修改供应商id
-	 * @param id 订单详情id
-	 * @param newSupplierId 新供应商id
-	 * @param oldSupplierId 旧供应商id
-	 * @return
-	 */
-	int updateSupplierIdById(Long id, Long newSupplierId, Long oldSupplierId);
+    /**
+     * 根据id修改供应商id
+     * 
+     * @param id
+     *            订单详情id
+     * @param newSupplierId
+     *            新供应商id
+     * @param oldSupplierId
+     *            旧供应商id
+     * @return
+     */
+    int updateSupplierIdById(Long id, Long newSupplierId, Long oldSupplierId);
+
+    /**
+     * 计算首单购买
+     * 
+     * @param onlineSpecId
+     *            上线规格ID
+     */
+    void calcFirstBuy(Long onlineSpecId);
 
 }

@@ -21,40 +21,46 @@ import rebue.sbs.feign.FeignConfig;
 @FeignClient(name = "ord-svr", configuration = FeignConfig.class)
 public interface OrdTaskSvc {
 
-	/**
-	 * 获取订单任务ID列表(根据订单任务状态和任务类型)
-	 */
-	@GetMapping(value = "/ord/tasks")
-	List<Long> getTaskIdsThatShouldExecute(@RequestParam("executeState") TaskExecuteStateDic executeState,
-			@RequestParam("taskType") OrderTaskTypeDic taskType);
+    /**
+     * 获取订单任务ID列表(根据订单任务状态和任务类型)
+     */
+    @GetMapping(value = "/ord/tasks")
+    List<Long> getTaskIdsThatShouldExecute(@RequestParam("executeState") TaskExecuteStateDic executeState, @RequestParam("taskType") OrderTaskTypeDic taskType);
 
-	/**
-	 * 执行订单自动签收的任务
-	 */
-	@PostMapping("/ord/task/signin")
-	void executeSignInOrderTask(@RequestParam("taskId") Long taskId);
+    /**
+     * 执行订单自动签收的任务
+     */
+    @PostMapping("/ord/task/signin")
+    void executeSignInOrderTask(@RequestParam("taskId") Long taskId);
 
-	/**
-	 * 执行订单自动取消的任务
-	 */
-	@PostMapping("/ord/task/cancleOrder")
-	void executeCancelOrderTask(@RequestParam("taskId") Long taskId);
+    /**
+     * 执行订单自动取消的任务
+     */
+    @PostMapping("/ord/task/cancleOrder")
+    void executeCancelOrderTask(@RequestParam("taskId") Long taskId);
 
-	/**
-	 * 执行订单启动结算的任务
-	 */
-	@PostMapping("/ord/task/executeStartSettle")
-	void executeStartSettleTask(@RequestParam("taskId") Long taskId);
+    /**
+     * 执行订单启动结算的任务
+     */
+    @PostMapping("/ord/task/executeStartSettle")
+    void executeStartSettleTask(@RequestParam("taskId") Long taskId);
 
-	/**
-	 * 执行订单结算的任务
-	 */
-	@PostMapping("/ord/task/executeSettle")
-	void executeSettleTask(@RequestParam("taskId") final Long taskId);
+    /**
+     * 执行订单结算的任务
+     */
+    @PostMapping("/ord/task/executeSettle")
+    void executeSettleTask(@RequestParam("taskId") final Long taskId);
 
-	/**
+    /**
      * 执行订单结算完成的任务
      */
     @PostMapping("/ord/task/executeCompleteSettle")
     void executeCompleteSettleTask(@RequestParam("taskId") final Long taskId);
+
+    /**
+     * 执行计算首单购买的任务
+     */
+    @PostMapping("/ord/task/executeCalcFirstBuy")
+    void executeCalcFirstBuy(@RequestParam("taskId") Long taskId);
+
 }

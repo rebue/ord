@@ -19,7 +19,7 @@ import rebue.robotech.dic.TaskExecuteStateDic;
 @Component
 public class OrderCompleteSettleTasks {
 
-    private final static Logger _log = LoggerFactory.getLogger(OrderAutoCancelTasks.class);
+    private final static Logger _log = LoggerFactory.getLogger(OrderCompleteSettleTasks.class);
 
     @Resource
     private OrdTaskSvc          taskSvc;
