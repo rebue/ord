@@ -1,8 +1,5 @@
 package rebue.ord.svc.impl;
 
-import com.github.dozermapper.core.Mapper;
-import com.github.pagehelper.PageHelper;
-import com.github.pagehelper.PageInfo;
 import java.beans.BeanInfo;
 import java.beans.IntrospectionException;
 import java.beans.Introspector;
@@ -21,7 +18,9 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+
 import javax.annotation.Resource;
+
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -29,9 +28,13 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
+
+import com.github.dozermapper.core.Mapper;
+import com.github.pagehelper.PageHelper;
+import com.github.pagehelper.PageInfo;
+
 import rebue.afc.msg.PayDoneMsg;
 import rebue.afc.svr.feign.AfcRefundSvc;
-import rebue.afc.svr.feign.AfcSettleTaskSvc;
 import rebue.afc.to.RefundApprovedTo;
 import rebue.afc.to.RefundImmediateTo;
 import rebue.kdi.ro.EOrderRo;
@@ -127,7 +130,7 @@ public class OrdOrderSvcImpl extends MybatisBaseSvcImpl<OrdOrderMo, java.lang.Lo
      */
     @Override
     @Transactional(readOnly = false, propagation = Propagation.REQUIRED)
-    public int add(OrdOrderMo mo) {
+    public int add(final OrdOrderMo mo) {
         _log.info("添加订单信息");
         // 如果id为空那么自动生成分布式id
         if (mo.getId() == null || mo.getId() == 0) {
@@ -140,76 +143,73 @@ public class OrdOrderSvcImpl extends MybatisBaseSvcImpl<OrdOrderMo, java.lang.Lo
      * 执行取消用户订单时间
      */
     @Value("${ord.testSupplierOrgId:-1}")
-    private Long testSupplierOrgId;
+    private Long                     testSupplierOrgId;
 
     /**
      * 执行取消用户订单时间
      */
     @Value("${ord.cancel-order-time}")
-    private int cancelOrderTime;
+    private int                      cancelOrderTime;
 
     /**
      * 执行用户订单签收时间
      */
     @Value("${ord.signin-order-time}")
-    private int signinOrderTime;
+    private int                      signinOrderTime;
 
     @Resource
-    private OrdAddrSvc ordAddrSvc;
+    private OrdAddrSvc               ordAddrSvc;
 
     @Resource
-    private OrdOrderDetailSvc orderDetailSvc;
+    private OrdOrderDetailSvc        orderDetailSvc;
 
     @Resource
-    private OrdReturnSvc returnSvc;
+    private OrdReturnSvc             returnSvc;
 
     @Resource
-    private OrdTaskSvc ordTaskSvc;
+    private OrdTaskSvc               ordTaskSvc;
 
     @Resource
-    private OnlOnlineSvc onlineSvc;
+    private OnlOnlineSvc             onlineSvc;
 
     @Resource
-    private OnlOnlineSpecSvc onlOnlineSpecSvc;
+    private OnlOnlineSpecSvc         onlOnlineSpecSvc;
 
     @Resource
-    private OnlCartSvc onlCartSvc;
+    private OnlCartSvc               onlCartSvc;
 
     @Resource
-    private KdiSvc kdiSvc;
+    private KdiSvc                   kdiSvc;
 
     @Resource
-    private OnlOnlinePicSvc onlOnlinePicSvc;
+    private OnlOnlinePicSvc          onlOnlinePicSvc;
 
     @Resource
-    private AfcSettleTaskSvc afcSettleTaskSvc;
+    private AfcRefundSvc             refundSvc;
 
     @Resource
-    private AfcRefundSvc refundSvc;
+    private SucUserSvc               sucUserSvc;
 
     @Resource
-    private SucUserSvc sucUserSvc;
+    private SucOrgSvc                sucOrgSvc;
 
     @Resource
-    private SucOrgSvc sucOrgSvc;
+    private OrdBuyRelationSvc        ordBuyRelationSvc;
 
     @Resource
-    private OrdBuyRelationSvc ordBuyRelationSvc;
+    private OrdOrderSvc              thisSvc;
 
     @Resource
-    private OrdOrderSvc thisSvc;
+    private OrdSettleTaskSvc         ordSettleTaskSvc;
 
     @Resource
-    private OrdSettleTaskSvc ordSettleTaskSvc;
-
-    @Resource
-    private AfcRefundSvc afcRefundSvc;
+    private AfcRefundSvc             afcRefundSvc;
 
     @Resource
     private OrdOrderDetailDeliverSvc ordOrderDetailDeliverSvc;
 
     @Resource
-    private Mapper dozerMapper;
+    private Mapper                   dozerMapper;
 
     /**
      * 检查订单是否可结算 1. 订单必须存在 2. 订单必须处于签收状态 3. 订单必须已经记录签收时间 4. 已经超过订单启动结算的时间 5.
@@ -368,7 +368,7 @@ public class OrdOrderSvcImpl extends MybatisBaseSvcImpl<OrdOrderMo, java.lang.Lo
                 for (int i = 0; i < orderDetailTo.getBuyCount(); i++) {
                     orderDetails.add(orderDetailMo);
                     orderDetailMo = dozerMapper.map(orderDetailMo, OrdOrderDetailMo.class);
-                // orderDetailMo.setOrderTimestamp(orderTimestamp++);
+                    // orderDetailMo.setOrderTimestamp(orderTimestamp++);
                 }
             }
             // 添加要更新的上线规格信息
@@ -451,6 +451,7 @@ public class OrdOrderSvcImpl extends MybatisBaseSvcImpl<OrdOrderMo, java.lang.Lo
                 orderDetailMo.setIsSettleBuyer(false);
                 orderDetailSvc.add(orderDetailMo);
             }
+
             _log.debug("计算自动取消订单的执行时间");
             final Calendar calendar = Calendar.getInstance();
             calendar.setTime(now);
@@ -466,6 +467,7 @@ public class OrdOrderSvcImpl extends MybatisBaseSvcImpl<OrdOrderMo, java.lang.Lo
             _log.debug("添加自动取消订单任务的参数为：{}", ordTaskMo);
             // 添加取消订单任务
             ordTaskSvc.add(ordTaskMo);
+
             final UpdateOnlineAfterOrderTo updateOnlineTo = new UpdateOnlineAfterOrderTo();
             updateOnlineTo.setUserId(to.getUserId());
             updateOnlineTo.setSpecList(specList);
@@ -487,7 +489,8 @@ public class OrdOrderSvcImpl extends MybatisBaseSvcImpl<OrdOrderMo, java.lang.Lo
      * 查询用户订单信息
      */
     @Override
-    public List<Map<String, Object>> selectOrderInfo(final Map<String, Object> map) throws ParseException, IntrospectionException, IllegalAccessException, IllegalArgumentException, InvocationTargetException {
+    public List<Map<String, Object>> selectOrderInfo(final Map<String, Object> map)
+            throws ParseException, IntrospectionException, IllegalAccessException, IllegalArgumentException, InvocationTargetException {
         final List<Map<String, Object>> list = new ArrayList<>();
         _log.info("查询用户订单信息的参数为：{}", map.toString());
         final List<OrdOrderMo> orderList = _mapper.selectOrderInfo(map);
@@ -1047,7 +1050,6 @@ public class OrdOrderSvcImpl extends MybatisBaseSvcImpl<OrdOrderMo, java.lang.Lo
     @Transactional(readOnly = false, propagation = Propagation.REQUIRED)
     public OrderSignInRo orderSignIn(final OrderSignInTo to) {
         final OrderSignInRo orderSignInRo = new OrderSignInRo();
-        final Map<String, Object> map = new HashMap<>();
         final Long orderId = to.getOrderId();
         // map.put("id", orderId);
         // _log.info("用户查询订单的参数为：{}", String.valueOf(map));
@@ -1212,9 +1214,14 @@ public class OrdOrderSvcImpl extends MybatisBaseSvcImpl<OrdOrderMo, java.lang.Lo
     }
 
     /**
-     * 处理订单支付完成的通知 1. 根据支付订单ID获取所有订单(如果没有找到，退款) 2.
-     * 判断通知回来的支付金额是否和订单中记录的实际交易金额相同(如果不同，退款) 3. 取消订单自动取消任务 4.
-     * 按不同发货组织拆单，并重新计算拆单后的订单实际交易金额 5. 根据支付订单ID修改订单状态为已支付 6. 匹配购买关系
+     * 处理订单支付完成的通知
+     * 1. 根据支付订单ID获取所有订单(如果没有找到，退款)
+     * 2. 判断通知回来的支付金额是否和订单中记录的实际交易金额相同(如果不同，退款)
+     * 3. 取消订单自动取消任务
+     * 4. 按不同发货组织拆单，并重新计算拆单后的订单实际交易金额
+     * 5. 根据支付订单ID修改订单状态为已支付
+     * 6. 添加首单计算的任务
+     * 7. 匹配购买关系
      */
     @Override
     @Transactional(readOnly = false, propagation = Propagation.REQUIRED)
@@ -1242,6 +1249,7 @@ public class OrdOrderSvcImpl extends MybatisBaseSvcImpl<OrdOrderMo, java.lang.Lo
             orderTotal = orderTotal.add(order.getRealMoney());
         }
         _log.debug("计算订单总额的结果是: {}", orderTotal);
+
         _log.info("2. 判断通知回来的支付金额是否和订单中记录的实际交易金额相同(如果不同，退款)");
         if (payDoneMsg.getPayAmount().compareTo(orderTotal) != 0) {
             final String msg = "支付金额与订单中记录的实际金额不一致(" + payDoneMsg.getPayAmount() + ":" + orderTotal + ")，只能退款";
@@ -1252,6 +1260,7 @@ public class OrdOrderSvcImpl extends MybatisBaseSvcImpl<OrdOrderMo, java.lang.Lo
             final Ro refundGoBackRo = refundSvc.refundImmediate(refundGoBackTo);
             return refundGoBackRo.getResult().equals(ResultDic.SUCCESS);
         }
+
         _log.info("3. 取消订单自动取消任务");
         for (final OrdOrderMo ordOrderMo : orders) {
             _log.info("处理订单支付完成的通知取消订单自动取消任务的参数为：{}", ordOrderMo.getId());
@@ -1262,8 +1271,9 @@ public class OrdOrderSvcImpl extends MybatisBaseSvcImpl<OrdOrderMo, java.lang.Lo
                 return false;
             }
         }
-        final List<OrdOrderDetailMo> orderDetailAlls = new LinkedList<>();
+
         _log.info("4. 按不同发货组织拆单，并重新计算拆单后的订单实际交易金额");
+        final List<OrdOrderDetailMo> orderDetailAlls = new LinkedList<>();
         _log.debug("遍历订单，一个订单一个订单的处理拆单问题");
         for (final OrdOrderMo order : orders) {
             _log.debug("目前遍历到的订单信息-{}", order);
@@ -1333,6 +1343,7 @@ public class OrdOrderSvcImpl extends MybatisBaseSvcImpl<OrdOrderMo, java.lang.Lo
                 _mapper.updateAmountAfterSplitOrder(tempMo.getId());
             }
         }
+
         _log.info("5. 根据支付订单ID修改订单状态为已支付");
         _log.info("订单支付完成，根据PAY_ORDER_ID修改订单状态为已支付: payOrderId-{}, payTime-{}", payOrderId, payDoneMsg.getPayTime());
         final int result = _mapper.paidOrder(payOrderId, payDoneMsg.getPayTime());
@@ -1341,7 +1352,33 @@ public class OrdOrderSvcImpl extends MybatisBaseSvcImpl<OrdOrderMo, java.lang.Lo
             _log.warn("根据支付订单ID修改订单状态为已支付不成功，可能碰到并发的问题: payOrderId-{}", payOrderId);
             return false;
         }
-        _log.info("6. 匹配购买关系");
+
+        _log.info("6. 添加计算首单的任务");
+        _log.info("遍历订单详情: 添加计算首单的任务");
+        for (final OrdOrderDetailMo orderDetail : orderDetailAlls) {
+            try {
+                _log.debug("添加计算首单的任务: orderDetail-{}", orderDetail);
+                _log.debug("设置计算首单任务的执行时间为5分钟后执行");
+                final Calendar calendar = Calendar.getInstance();
+                calendar.setTime(new Date());
+                calendar.add(Calendar.MINUTE, 5);
+                final Date executePlanTime = calendar.getTime();
+                _log.debug("计算首单任务的执行时间为: {}", executePlanTime);
+                _log.debug("准备添加计算首单的任务");
+                final OrdTaskMo ordTaskMo = new OrdTaskMo();
+                ordTaskMo.setExecuteState((byte) TaskExecuteStateDic.NONE.getCode());
+                ordTaskMo.setExecutePlanTime(executePlanTime);
+                ordTaskMo.setTaskType((byte) OrderTaskTypeDic.CALC_FIRST_BUY.getCode());
+                ordTaskMo.setOrderId(String.valueOf(orderDetail.getOnlineSpecId()));    // 计算首单的任务的订单ID其实是上线规格ID
+                _log.debug("添加计算首单任务的参数为：{}", ordTaskMo);
+                // 添加取消订单任务
+                ordTaskSvc.add(ordTaskMo);
+            } catch (final Exception e) {
+                _log.error("添加计算首单的任务报错：", e);
+            }
+        }
+
+        _log.info("7. 匹配购买关系");
         _log.info("遍历订单详情: 添加订单购买关系");
         for (final OrdOrderDetailMo orderDetail : orderDetailAlls) {
             try {
@@ -1381,10 +1418,10 @@ public class OrdOrderSvcImpl extends MybatisBaseSvcImpl<OrdOrderMo, java.lang.Lo
         _log.info("orderList: ro-{}; pageNum-{}; pageSize-{}", to, pageNum, pageSize);
         final PageInfo<OrdOrderRo> result = PageHelper.startPage(pageNum, pageSize).doSelectPageInfo(() -> _mapper.listOrder(to));
         _log.info("获取订单的结果为: {}", result.getList());
-        List<SucOrgMo> sucOrgResult = sucOrgSvc.listAll();
+        final List<SucOrgMo> sucOrgResult = sucOrgSvc.listAll();
         _log.info("获取所有组织的结果为: {}", sucOrgResult);
-        for (OrdOrderRo ordOrderRo : result.getList()) {
-            for (SucOrgMo sucOrgMo : sucOrgResult) {
+        for (final OrdOrderRo ordOrderRo : result.getList()) {
+            for (final SucOrgMo sucOrgMo : sucOrgResult) {
                 if (ordOrderRo.getOnlineOrgId() != null && ordOrderRo.getOnlineOrgId().equals(sucOrgMo.getId())) {
                     _log.info("设置上线组织ordOrderRo-{},sucOrgMo-{}", ordOrderRo, sucOrgMo);
                     ordOrderRo.setOnlineOrgName(sucOrgMo.getName());
@@ -1459,7 +1496,8 @@ public class OrdOrderSvcImpl extends MybatisBaseSvcImpl<OrdOrderMo, java.lang.Lo
                 return ro;
             }
             if (ordOrderDetailMo.getSupplierId() != onlOnlineMo.getSupplierId()) {
-                _log.info("根据订单id修改支付订单id修改供应商id的参数为：id={}, newSupplierId={}, oldSupplierId={}", ordOrderDetailMo.getId(), onlOnlineMo.getSupplierId(), ordOrderDetailMo.getSupplierId());
+                _log.info("根据订单id修改支付订单id修改供应商id的参数为：id={}, newSupplierId={}, oldSupplierId={}", ordOrderDetailMo.getId(), onlOnlineMo.getSupplierId(),
+                        ordOrderDetailMo.getSupplierId());
                 final int updateSupplierIdByIdResult = orderDetailSvc.updateSupplierIdById(ordOrderDetailMo.getId(), onlOnlineMo.getSupplierId(), ordOrderDetailMo.getSupplierId());
                 _log.info("根据订单id修改支付订单id修改供应商id的返回值为：{}", updateSupplierIdByIdResult);
                 if (updateSupplierIdByIdResult != 1) {
@@ -1538,7 +1576,7 @@ public class OrdOrderSvcImpl extends MybatisBaseSvcImpl<OrdOrderMo, java.lang.Lo
      * 修改组织
      */
     @Override
-    public Ro modifyOrg(UpdateOrgTo to) {
+    public Ro modifyOrg(final UpdateOrgTo to) {
         final Ro ro = new Ro();
         _log.info("修改组订单发货组织的参数为: {}", to);
         int i = _mapper.updateOrg(to.getDeliverOrgId(), to.getId());

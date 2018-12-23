@@ -34,6 +34,7 @@ public enum OrderTaskTypeDic implements EnumBase {
     COMPLETE_SETTLE(5),
     /**
      * 6：计算首单购买的任务
+     * 计算首单的任务的订单ID其实是上线规格ID
      */
     CALC_FIRST_BUY(6);
 
