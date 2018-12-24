@@ -607,6 +607,13 @@ public class OrdReturnSvcImpl extends MybatisBaseSvcImpl<OrdReturnMo, java.lang.
                 throw new RuntimeException("修改销售数量失败");
             }
         }
+        
+        if (detail.getPaySeq() == 1) {
+        	_log.info("同意退款计算首单购买的参数为：{}", detail.getOnlineSpecId());
+            orderDetailSvc.calcFirstBuy(detail.getOnlineSpecId());
+            _log.info("同意退款计算首单购买成功，请求的参数为：{}", detail.getOnlineSpecId());
+		}
+        
         // 退款
         final RefundApprovedTo refundTo = new RefundApprovedTo();
         refundTo.setOrderId(String.valueOf(order.getPayOrderId()));

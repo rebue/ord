@@ -2,6 +2,8 @@ package rebue.ord.svc.impl;
 
 import java.math.BigDecimal;
 import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.Date;
 import java.util.List;
 import java.util.Map;
 
@@ -15,15 +17,19 @@ import org.springframework.transaction.annotation.Transactional;
 
 import rebue.ord.dao.OrdOrderDetailDao;
 import rebue.ord.dic.OrderStateDic;
+import rebue.ord.dic.OrderTaskTypeDic;
 import rebue.ord.dic.ReturnStateDic;
 import rebue.ord.jo.OrdOrderDetailJo;
 import rebue.ord.mapper.OrdOrderDetailMapper;
 import rebue.ord.mo.OrdBuyRelationMo;
 import rebue.ord.mo.OrdOrderDetailMo;
+import rebue.ord.mo.OrdTaskMo;
 import rebue.ord.ro.DetailandBuyRelationRo;
 import rebue.ord.svc.OrdBuyRelationSvc;
 import rebue.ord.svc.OrdOrderDetailSvc;
+import rebue.ord.svc.OrdTaskSvc;
 import rebue.ord.to.UpdateOrgTo;
+import rebue.robotech.dic.TaskExecuteStateDic;
 import rebue.robotech.svc.impl.BaseSvcImpl;
 import rebue.suc.mo.SucUserMo;
 import rebue.suc.ro.SucOrgRo;
@@ -77,6 +83,9 @@ public class OrdOrderDetailSvcImpl extends BaseSvcImpl<java.lang.Long, OrdOrderD
 
     @Resource
     private SucOrgSvc         sucOrgSvc;
+    
+    @Resource
+    private OrdTaskSvc ordTaskSvc;
 
     /**
      * 修改订单详情的退货情况(根据订单详情ID、已退货数量、旧的返现金总额，修改退货总数、返现金总额以及退货状态)
@@ -369,5 +378,31 @@ public class OrdOrderDetailSvcImpl extends BaseSvcImpl<java.lang.Long, OrdOrderD
 
         _log.debug("设置新的首单的支付顺序标志");
         _mapper.setFirstPaySeq(orderDetailMo.getId());
+        
+        // TODO 查找是否有结算积分的子任务，如果有则添加结算首单积分的子任务
+        OrdTaskMo ordTaskMo = new OrdTaskMo();
+        ordTaskMo.setOrderId(orderDetailMo.getId().toString());
+        ordTaskMo.setTaskType((byte) OrderTaskTypeDic.CALC_FIRST_BUY.getCode());
+        _log.info("计算首单购买查询结算首单积分任务的参数为：{}", ordTaskMo);
+        OrdTaskMo taskMo = ordTaskSvc.getOne(ordTaskMo);
+        _log.info("计算首单购买查询结算首单积分任务的参数为：{}", taskMo);
+        if (taskMo == null) {
+        	_log.debug("添加计算首单的任务: orderDetail-{}", orderDetailMo);
+            _log.debug("设置计算首单任务的执行时间为1分钟后执行");
+            final Calendar calendar = Calendar.getInstance();
+            calendar.setTime(new Date());
+            calendar.add(Calendar.MINUTE, 1);
+            final Date executePlanTime = calendar.getTime();
+            _log.debug("计算首单任务的执行时间为: {}", executePlanTime);
+            _log.debug("准备添加计算首单的任务");
+            ordTaskMo = new OrdTaskMo();
+            ordTaskMo.setExecuteState((byte) TaskExecuteStateDic.NONE.getCode());
+            ordTaskMo.setExecutePlanTime(executePlanTime);
+            ordTaskMo.setTaskType((byte) OrderTaskTypeDic.CALC_FIRST_BUY.getCode());
+            ordTaskMo.setOrderId(String.valueOf(orderDetailMo.getId()));    // 计算首单的任务的订单ID其实是上线规格ID
+            _log.debug("添加计算首单任务的参数为：{}", ordTaskMo);
+            // 添加取消订单任务
+            ordTaskSvc.add(ordTaskMo);
+		}
     }
 }
