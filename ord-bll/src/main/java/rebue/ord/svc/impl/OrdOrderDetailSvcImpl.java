@@ -19,6 +19,7 @@ import rebue.ord.mo.OrdOrderDetailMo;
 import rebue.ord.ro.DetailandBuyRelationRo;
 import rebue.ord.svc.OrdBuyRelationSvc;
 import rebue.ord.svc.OrdOrderDetailSvc;
+import rebue.ord.svc.OrdOrderSvc;
 import rebue.ord.to.UpdateOrgTo;
 import rebue.robotech.svc.impl.MybatisBaseSvcImpl;
 import rebue.suc.mo.SucUserMo;
@@ -71,6 +72,13 @@ public class OrdOrderDetailSvcImpl extends MybatisBaseSvcImpl<OrdOrderDetailMo, 
 	
     @Resource
     private SucOrgSvc                sucOrgSvc;
+    
+    
+    /**
+     * @mbg.generated 自动生成，如需修改，请删除本行
+     */
+    @Resource
+    private OrdOrderSvc         ordOrderSvc;
 
 	/**
 	 * 修改订单详情的退货情况(根据订单详情ID、已退货数量、旧的返现金总额，修改退货总数、返现金总额以及退货状态)
@@ -198,18 +206,23 @@ public class OrdOrderDetailSvcImpl extends MybatisBaseSvcImpl<OrdOrderDetailMo, 
 			item.setSubjectType(detailList.get(i).getSubjectType());
 			
 			_log.info("获取当前供应商参数为： {}", detailList.get(i).getSupplierId());
-			SucOrgRo sucOrgRo =sucOrgSvc.getById(detailList.get(i).getSupplierId());
-			_log.info("获取当前供应商结果为： {}", sucOrgRo.getRecord());
-			if(sucOrgRo !=null && sucOrgRo.getRecord() !=null &&sucOrgRo.getRecord().getName()!=null) {
-				item.setSupplierName(sucOrgRo.getRecord().getName());
+			if(detailList.get(i).getSupplierId() != null) {
+				SucOrgRo sucOrgRo =sucOrgSvc.getById(detailList.get(i).getSupplierId());
+				_log.info("获取当前供应商结果为： {}", sucOrgRo.getRecord());
+				if(sucOrgRo !=null && sucOrgRo.getRecord() !=null &&sucOrgRo.getRecord().getName()!=null) {
+					item.setSupplierName(sucOrgRo.getRecord().getName());
+				}
 			}
-			
 			uPmo.setUplineOrderDetailId(detailList.get(i).getId());
 			_log.info("当前下家关系的的参数为： {}", uPmo);
 			final List<OrdBuyRelationMo> Uplist = selfSvc.list(uPmo);
 			_log.info("查询下家关系的结果为： {}", Uplist);
 			for (int j = 0; j < Uplist.size(); j++) {
 				final Long dId = Uplist.get(j).getDownlineUserId();
+				final Long OrderId = Uplist.get(j).getDownlineOrderId();
+				//当前条购买关系的下家订单id
+				_log.info("开始获取第一个下家订单id为： {}", OrderId);
+				
 				// 当前条购买关系的下家名字
 				_log.info("开始获取下家名字id为： {}", dId);
 				final SucUserMo dUserName = sucUserSvc.getById(dId);
