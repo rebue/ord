@@ -15,7 +15,7 @@ import rebue.wheel.baseintf.EnumBase;
  * 4: 结算-将利润打到卖家的余额
  * 5: 结算-结算平台服务费
  * 6: 结算-结算返佣金
- * 7: 结算-完成结算
+ * 7: 结算-结算购买所得积分给买家
  */
 public enum SettleTaskTypeDic implements EnumBase {
 
@@ -42,7 +42,11 @@ public enum SettleTaskTypeDic implements EnumBase {
     /**
      * 6: 结算-结算返佣金
      */
-    SETTLE_COMMISSION(6);
+    SETTLE_COMMISSION(6),
+    /**
+     * 7: 结算-结算购买所得积分给买家
+     */
+    SETTLE_POINT_TO_BUYER(7);
 
     /**
      * 枚举的所有项，注意这个变量是静态单例的
