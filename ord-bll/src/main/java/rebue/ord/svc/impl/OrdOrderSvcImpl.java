@@ -25,6 +25,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.dao.DuplicateKeyException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
@@ -1373,6 +1374,8 @@ public class OrdOrderSvcImpl extends MybatisBaseSvcImpl<OrdOrderMo, java.lang.Lo
                 _log.debug("添加计算首单任务的参数为：{}", ordTaskMo);
                 // 添加取消订单任务
                 ordTaskSvc.add(ordTaskMo);
+            } catch (final DuplicateKeyException e) {
+                _log.info("已经存在计算首单的任务：onlineSpecId-" + orderDetail.getOnlineSpecId(), e);
             } catch (final Exception e) {
                 _log.error("添加计算首单的任务报错：", e);
             }
