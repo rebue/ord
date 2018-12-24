@@ -1359,10 +1359,10 @@ public class OrdOrderSvcImpl extends MybatisBaseSvcImpl<OrdOrderMo, java.lang.Lo
         for (final OrdOrderDetailMo orderDetail : orderDetailAlls) {
             try {
                 _log.debug("添加计算首单的任务: orderDetail-{}", orderDetail);
-                _log.debug("设置计算首单任务的执行时间为5分钟后执行");
+                _log.debug("设置计算首单任务的执行时间为150分钟后执行");
                 final Calendar calendar = Calendar.getInstance();
                 calendar.setTime(new Date());
-                calendar.add(Calendar.MINUTE, 5);
+                calendar.add(Calendar.MINUTE, 150);
                 final Date executePlanTime = calendar.getTime();
                 _log.debug("计算首单任务的执行时间为: {}", executePlanTime);
                 _log.debug("准备添加计算首单的任务");
