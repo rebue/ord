@@ -148,14 +148,22 @@ alter table ORD_ORDER_DETAIL  		add 						ORDER_TIMESTAMP      bigint not null d
 
 -- --------------------------------------------------------------------------------------------------------------------
 
+
+
+
+
 alter table ORD_ORDER_DETAIL add BUY_POINT            decimal(18,4) comment '购买积分';
 alter table ORD_ORDER_DETAIL add BUY_POINT_TOTAL      decimal(18,4) comment '购买总积分';
 alter table ORD_ORDER_DETAIL add PAY_SEQ             tinyint comment '支付顺序';
 alter table ORD_ORDER_DETAIL add unique key AK_PAY_SEQU (PAY_SEQ);
 
 
-
-
-
 -- ------------------------------------------------------- 上面的已更新到线上 2018.12.23 ----------------------------------------------------
 
+
+
+
+
+alter table ORD_BUY_RELATION add unique key AK_DOWNLINE_ORDER_DETAIL (DOWNLINE_ORDER_DETAIL_ID);
+
+-- ------------------------------------------------------- 上面的已更新到线上 2018.12.24 ----------------------------------------------------

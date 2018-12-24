@@ -1,6 +1,6 @@
 /*==============================================================*/
 /* DBMS name:      MySQL 5.0                                    */
-/* Created on:     2018/12/22 8:46:35                           */
+/* Created on:     2018/12/24 16:10:36                          */
 /*==============================================================*/
 
 
@@ -56,10 +56,11 @@ create table ORD_BUY_RELATION
    DOWNLINE_USER_ID     bigint not null comment '下家用户ID',
    DOWNLINE_ORDER_ID    bigint not null comment '下家订单ID',
    DOWNLINE_ORDER_DETAIL_ID bigint not null comment '下家订单详情ID',
-   IS_SIGN_IN           bool not null default false comment '是否已签收',
+   IS_SIGN_IN           bool not null default false comment '下家是否已签收',
    RELATION_SOURCE      tinyint not null comment '关系来源（1：自己匹配自己  2：购买关系  3：注册关系  4：差一人且已有购买关系  5：差两人  6：差一人但没有购买关系）',
    primary key (ID),
-   unique key AK_UPLINE_AND_DOWNLINE_ORDER_DETAIL (UPLINE_ORDER_DETAIL_ID, DOWNLINE_ORDER_DETAIL_ID)
+   unique key AK_UPLINE_AND_DOWNLINE_ORDER_DETAIL (UPLINE_ORDER_DETAIL_ID, DOWNLINE_ORDER_DETAIL_ID),
+   unique key AK_DOWNLINE_ORDER_DETAIL (DOWNLINE_ORDER_DETAIL_ID)
 );
 
 alter table ORD_BUY_RELATION comment '订单购买关系';
