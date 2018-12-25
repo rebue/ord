@@ -16,6 +16,7 @@ import org.springframework.transaction.annotation.Transactional;
 import rebue.ord.mapper.OrdOrderDetailMapper;
 import rebue.ord.mo.OrdBuyRelationMo;
 import rebue.ord.mo.OrdOrderDetailMo;
+import rebue.ord.mo.OrdOrderMo;
 import rebue.ord.ro.DetailandBuyRelationRo;
 import rebue.ord.svc.OrdBuyRelationSvc;
 import rebue.ord.svc.OrdOrderDetailSvc;
@@ -218,11 +219,14 @@ public class OrdOrderDetailSvcImpl extends MybatisBaseSvcImpl<OrdOrderDetailMo, 
 			final List<OrdBuyRelationMo> Uplist = selfSvc.list(uPmo);
 			_log.info("查询下家关系的结果为： {}", Uplist);
 			for (int j = 0; j < Uplist.size(); j++) {
+				_log.info("开始获取下家信息开始--------------------------------------");
+
 				final Long dId = Uplist.get(j).getDownlineUserId();
 				final Long OrderId = Uplist.get(j).getDownlineOrderId();
-				//当前条购买关系的下家订单id
-				_log.info("开始获取第一个下家订单id为： {}", OrderId);
-				
+				//当前条购买关系的下家订单
+				_log.info("开始获取下家订单签收时间,订单id为： {}", OrderId);
+				OrdOrderMo ordOrderMo=ordOrderSvc.getById(OrderId);
+				_log.info("开始获取下家订单签收时间返回值： {}", ordOrderMo);
 				// 当前条购买关系的下家名字
 				_log.info("开始获取下家名字id为： {}", dId);
 				final SucUserMo dUserName = sucUserSvc.getById(dId);
@@ -234,6 +238,13 @@ public class OrdOrderDetailSvcImpl extends MybatisBaseSvcImpl<OrdOrderDetailMo, 
 					if (dUserName != null) {
 						item.setDownlineUserName1(dUserName.getWxNickname());
 					}
+					//设置第一个下家的签收时间
+					_log.info("设置第一个下家签收时间： {}", ordOrderMo.getReceivedTime());
+					if(ordOrderMo !=null && ordOrderMo.getReceivedTime() !=null ) {
+						_log.info("设置第一个下家签收时间： {}", ordOrderMo.getReceivedTime());
+						item.setDownlineReceivedTime1(ordOrderMo.getReceivedTime());
+						item.setDownlineOrderCode1(ordOrderMo.getOrderCode());
+					}
 				} else {
 					_log.info("设置第二个下家名字： {}", dUserName);
 					item.setDownlineRelationSource2(Uplist.get(j).getRelationSource());
@@ -241,14 +252,35 @@ public class OrdOrderDetailSvcImpl extends MybatisBaseSvcImpl<OrdOrderDetailMo, 
 					if (dUserName != null) {
 						item.setDownlineUserName2(dUserName.getWxNickname());
 					}
+					//设置第二个下家的签收时间
+					_log.info("设置第二个下家签收时间： {}", ordOrderMo.getReceivedTime());
+					if(ordOrderMo !=null && ordOrderMo.getReceivedTime() !=null ) {
+						item.setDownlineReceivedTime2(ordOrderMo.getReceivedTime());
+						item.setDownlineOrderCode2(ordOrderMo.getOrderCode());
+
+					}
 				}
+				_log.info("开始获取下家信息结束+++++++++++++++++++++++");
 			}
 			dWmo.setDownlineOrderDetailId(detailList.get(i).getId());
 			_log.info("当前订单详情上家关系的参数为： {}", dWmo);
 			// 已经获取到第一条订单详情的所有购买关系
 			final List<OrdBuyRelationMo> dwList = selfSvc.list(dWmo);
 			_log.info("当前订单详情上家关系的结果为： {}", dwList);
+
+			
 			for (int j = 0; j < dwList.size(); j++) {
+				_log.info("开始获取上家信息开始=======================");
+
+				_log.info("当前订单详情上家订单的参数为： {}", dwList.get(0).getUplineOrderId());
+				OrdOrderMo	ordOrderMo=ordOrderSvc.getById(dwList.get(0).getUplineOrderId());
+				_log.info("当前订单详情上家订单的返回值为： {}",ordOrderMo.getReceivedTime());
+				//设置上家的订单签收时间
+				if(ordOrderMo != null && ordOrderMo.getReceivedTime() !=null) {
+					item.setUplineReceivedTime(ordOrderMo.getReceivedTime());
+					item.setUplineOrderCode(ordOrderMo.getOrderCode());
+				}
+				
 				final Long uId = dwList.get(0).getUplineUserId();
 				// 当前条购买关系的上家名字
 				_log.info("开始获取上家名字id为： {}", uId);
@@ -259,6 +291,8 @@ public class OrdOrderDetailSvcImpl extends MybatisBaseSvcImpl<OrdOrderDetailMo, 
 				if (uUserName != null) {
 					item.setUplineUserName(uUserName.getWxNickname());
 				}
+				_log.info("开始获取上家信息结束——————————————————————————");
+
 			}
 			result.add(item);
 		}

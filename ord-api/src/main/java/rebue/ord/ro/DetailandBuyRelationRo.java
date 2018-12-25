@@ -105,6 +105,11 @@ public class DetailandBuyRelationRo {
     private Date              downlineReceivedTime1;
     
     /**
+     * 第一个下家的订单编号
+     */
+    private String             downlineOrderCode1;
+    
+    /**
      * 第二个下家签收时间
      */
     @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss")
@@ -112,12 +117,22 @@ public class DetailandBuyRelationRo {
     private Date              downlineReceivedTime2;
    
     /**
+     * 第二个下家的订单编号
+     */
+    private String             downlineOrderCode2;
+    
+    /**
      * 上家签收时间
      */
     @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss")
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd HH:mm:ss", timezone = "GMT+8")
     private Date              uplineReceivedTime;
-
+    	
+    /**
+     * 第二个下家的订单编号
+     */
+    private String             uplineOrderCode;
+    
 	/**
 	 * 第二条关系来源 关系来源（1：自己匹配自己 2：购买关系 3：注册关系 4：差一人且已有购买关系 5：差两人 6：差一人但没有购买关系）
 	 */
