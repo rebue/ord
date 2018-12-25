@@ -88,6 +88,7 @@ import rebue.ord.svc.OrdReturnSvc;
 import rebue.ord.svc.OrdSettleTaskSvc;
 import rebue.ord.svc.OrdTaskSvc;
 import rebue.ord.to.CancelDeliveryTo;
+import rebue.ord.to.GetSettleTotalTo;
 import rebue.ord.to.ListOrderTo;
 import rebue.ord.to.OrderDetailTo;
 import rebue.ord.to.OrderSignInTo;
@@ -1633,18 +1634,18 @@ public class OrdOrderSvcImpl extends MybatisBaseSvcImpl<OrdOrderMo, java.lang.Lo
      * 根据组织Id获取未结算或者已经结算的详情的总额
      */
     @Override
-    public OrdSettleRo getSettleTotalForOrgId(final OrdOrderMo mo) {
+    public OrdSettleRo getSettleTotalForOrgId(final GetSettleTotalTo mo) {
         _log.info("根据组织Id获取未结算或者已经结算的详情的总额: {}", mo);
         final OrdSettleRo result = new OrdSettleRo();
         OrdSettleRo temp = new OrdSettleRo();
         mo.setOrderState((byte) 4);
-        temp = _mapper.getSettleTotalForOrgId(mo.getDeliverOrgId(), mo.getOrderState());
+        temp = _mapper.getSettleTotalForOrgId(mo.getSupplierId(), mo.getOrderState());
         _log.info("根据组织Id获取等待详情的结果: {}", temp);
         if (temp != null) {
             result.setNotSettle(temp.getNotSettle());
         }
         mo.setOrderState((byte) 5);
-        temp = _mapper.getSettleTotalForOrgId(mo.getDeliverOrgId(), mo.getOrderState());
+        temp = _mapper.getSettleTotalForOrgId(mo.getSupplierId(), mo.getOrderState());
         _log.info("根据组织Id获取已经详情的结果: {}", temp);
         if (temp != null) {
             result.setAlreadySettle(temp.getNotSettle());

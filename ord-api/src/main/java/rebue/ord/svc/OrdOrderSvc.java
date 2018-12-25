@@ -21,6 +21,7 @@ import rebue.ord.ro.OrderSignInRo;
 import rebue.ord.ro.SetUpExpressCompanyRo;
 import rebue.ord.ro.ShipmentConfirmationRo;
 import rebue.ord.to.CancelDeliveryTo;
+import rebue.ord.to.GetSettleTotalTo;
 import rebue.ord.to.ListOrderTo;
 import rebue.ord.to.OrderSignInTo;
 import rebue.ord.to.OrderTo;
@@ -228,7 +229,7 @@ public interface OrdOrderSvc extends MybatisBaseSvc<OrdOrderMo, java.lang.Long> 
 	 * @param order
 	 * @return
 	 */
-	OrdSettleRo getSettleTotalForOrgId(OrdOrderMo order);
+	OrdSettleRo getSettleTotalForOrgId(GetSettleTotalTo order);
 	
 	/**
 	 * 修改组织

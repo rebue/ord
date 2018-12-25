@@ -37,6 +37,7 @@ import rebue.ord.ro.SetUpExpressCompanyRo;
 import rebue.ord.ro.ShipmentConfirmationRo;
 import rebue.ord.svc.OrdOrderSvc;
 import rebue.ord.to.CancelDeliveryTo;
+import rebue.ord.to.GetSettleTotalTo;
 import rebue.ord.to.ListOrderTo;
 import rebue.ord.to.OrderSignInTo;
 import rebue.ord.to.OrderTo;
@@ -540,7 +541,7 @@ public class OrdOrderCtrl {
      * @return
      */
     @GetMapping("/ord/order/getSettleTotal")
-    OrdSettleRo getSettleTotal(final OrdOrderMo mo) {
+    OrdSettleRo getSettleTotal(final GetSettleTotalTo mo) {
         _log.info("根据组织Id获取未发货的订单详情的总成本价参数为：{}", mo);
         return svc.getSettleTotalForOrgId(mo);
     }
