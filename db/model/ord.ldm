@@ -1712,7 +1712,7 @@ DESTINATION 0 新宋体,8,N</a:FontList>
 <o:RelationshipSymbol Id="o36">
 <a:CreationDate>1536310761</a:CreationDate>
 <a:ModificationDate>1536310761</a:ModificationDate>
-<a:Rect>((-38637,18192), (-26699,19960))</a:Rect>
+<a:Rect>((-38637,18192), (-26699,19959))</a:Rect>
 <a:ListOfPoints>((-26699,18992),(-38637,18992))</a:ListOfPoints>
 <a:CornerStyle>1</a:CornerStyle>
 <a:ArrowStyle>4627</a:ArrowStyle>
@@ -4107,9 +4107,10 @@ LABL 0 Arial,8,N</a:FontList>
 <a:Code>IS_SIGN_IN</a:Code>
 <a:CreationDate>1537186498</a:CreationDate>
 <a:Creator>zbz</a:Creator>
-<a:ModificationDate>1545639018</a:ModificationDate>
+<a:ModificationDate>1545719618</a:ModificationDate>
 <a:Modifier>zbz</a:Modifier>
-<a:Comment>下家是否已签收</a:Comment>
+<a:Comment>下家是否已签收
+@deprecated</a:Comment>
 <a:DefaultValue>false</a:DefaultValue>
 <a:DataType>BL</a:DataType>
 <a:LogicalAttribute.Mandatory>1</a:LogicalAttribute.Mandatory>

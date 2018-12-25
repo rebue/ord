@@ -20,10 +20,13 @@ import rebue.afc.mo.AfcTradeMo;
 import rebue.afc.platform.dic.PlatformTradeTypeDic;
 import rebue.afc.svr.feign.AfcPlatformTradeTradeSvc;
 import rebue.afc.svr.feign.AfcTradeSvc;
+import rebue.ord.dic.CommissionStateDic;
 import rebue.ord.dic.OrderStateDic;
 import rebue.ord.dic.OrderTaskTypeDic;
 import rebue.ord.dic.ReturnStateDic;
 import rebue.ord.dic.SettleTaskTypeDic;
+import rebue.ord.mapper.OrdBuyRelationMapper;
+import rebue.ord.mapper.OrdOrderDetailMapper;
 import rebue.ord.mapper.OrdSettleTaskMapper;
 import rebue.ord.mo.OrdBuyRelationMo;
 import rebue.ord.mo.OrdOrderDetailMo;
@@ -127,10 +130,8 @@ public class OrdSettleTaskSvcImpl extends MybatisBaseSvcImpl<OrdSettleTaskMo, ja
 
     @Resource
     private OrdSettleTaskSvc         thisSvc;
-
     @Resource
     private OrdTaskSvc               taskSvc;
-
     @Resource
     private OrdOrderSvc              orderSvc;
     @Resource
@@ -143,6 +144,11 @@ public class OrdSettleTaskSvcImpl extends MybatisBaseSvcImpl<OrdSettleTaskMo, ja
     private OrdBuyRelationSvc        buyRelationSvc;
     @Resource
     private PntPointSvc              pntPointSvc;
+
+    @Resource
+    private OrdBuyRelationMapper     buyRelationMapper;
+    @Resource
+    private OrdOrderDetailMapper     orderDetailMapper;
 
     /**
      * 添加启动结算订单的任务(根据订单ID添加)
@@ -572,7 +578,8 @@ public class OrdSettleTaskSvcImpl extends MybatisBaseSvcImpl<OrdSettleTaskMo, ja
         if (tradeMo.getOrderDetailId() == null) {
             tradeMo.setOrderDetailId(orderDetail.getId().toString());
         }
-        tradeMo.setTradeDetail(orderDetail.getOnlineTitle() + orderDetail.getSpecName());
+        tradeMo.setTradeDetail(orderDetail.getOnlineTitle() + orderDetail.getSpecName() + " x " //
+                + (orderDetail.getBuyCount() - orderDetail.getReturnCount()));
         tradeMo.setOpId(0L);
         _log.info("执行添加一笔交易的参数为：{}", tradeMo);
         afcTradeSvc.addTrade(tradeMo);
@@ -580,89 +587,76 @@ public class OrdSettleTaskSvcImpl extends MybatisBaseSvcImpl<OrdSettleTaskMo, ja
 
     /**
      * 结算返佣
+     * 1. 如果本订单详情符合返佣条件，则返佣
+     * 2. 如果本订单详情的上家订单详情符合返佣条件，则返佣
      */
     private void settleCommission(final OrdTaskMo taskMo, final OrdOrderMo order, final OrdOrderDetailMo orderDetail, final Date now) {
         // 判断订单详情板块类型是否为全返
         if (orderDetail.getSubjectType() == 1) {
-            final OrdBuyRelationMo ordBuyRelationMo = new OrdBuyRelationMo();
-            ordBuyRelationMo.setDownlineOrderDetailId(orderDetail.getId());
-            _log.info("添加结算任务查询订单购买关系的参数为：{}", ordBuyRelationMo);
-            final OrdBuyRelationMo buyRelationResult = buyRelationSvc.getOne(ordBuyRelationMo);
-            _log.info("添加结算任务查询订单购买关系的返回值为：{}", ordBuyRelationMo);
-            if (buyRelationResult != null) {
-                // 根据购买关系查找上家定单详情,定单已签收且定单详情存在且不是退货状态才发起返佣任务
-                _log.info("添加结算任务根据上家订单详情id查询详情信息的参数为：{}", buyRelationResult.getUplineOrderDetailId());
-                final OrdOrderDetailMo uplineDetailResult = orderDetailSvc.getById(buyRelationResult.getUplineOrderDetailId());
-                _log.info("添加结算任务根据上家订单详情id查询详情信息的返回值为：{}", uplineDetailResult);
-                _log.info("添加结算任务根据上家订单id查询订单信息的参数为：{}", buyRelationResult.getUplineOrderId());
-                final OrdOrderMo uplineOrderResult = orderSvc.getById(buyRelationResult.getUplineOrderId());
-                _log.info("添加结算任务根据上家订单id查询订单信息的返回值为：{}", uplineOrderResult);
-                _log.info("订单详情做为下家的购买关系记录：{}", uplineDetailResult);
-                if (uplineDetailResult != null && uplineDetailResult.getReturnState() == 0 && uplineOrderResult.getOrderState() == 4) {
-                    // 获取上线买家商品详情的的下家购买关系记录，如果有2个且都已签收则执行返佣任务
-                    final OrdBuyRelationMo uplineBuyRelationMo = new OrdBuyRelationMo();
-                    uplineBuyRelationMo.setUplineOrderDetailId(buyRelationResult.getUplineOrderDetailId());
-                    uplineBuyRelationMo.setIsSignIn(true);
-                    _log.info("添加结算任务上家购买关系的参数为：{}", uplineBuyRelationMo);
-                    final List<OrdBuyRelationMo> uplineBuyRelationList = buyRelationSvc.list(uplineBuyRelationMo);
-                    _log.info("添加结算任务上家购买关系的返回值为：{}", uplineBuyRelationList);
-                    if (uplineBuyRelationList.size() == 2) {
-                        final String orderIds = buyRelationResult.getUplineOrderId() + "," + uplineBuyRelationList.get(0).getDownlineOrderId() + ","
-                                + uplineBuyRelationList.get(1).getDownlineOrderId();
-                        _log.info("添加结算任务查询订单签收时间的参数为：{}", orderIds);
-                        final List<OrdOrderMo> signTimeList = orderSvc.getOrderSignTime(orderIds);
-                        _log.info("添加结算任务查询订单签收时间的返回值为：{}", signTimeList);
-                        // 订单签收后七天时间戳
-                        final Long receivedTime = signTimeList.get(0).getReceivedTime().getTime() + 86400000 * 7;
-                        // 当前时间戳
-                        final Long thisTimestamp = System.currentTimeMillis();
-                        if (receivedTime >= thisTimestamp) {
-                            final AfcTradeMo tradeMo = new AfcTradeMo();
-                            tradeMo.setAccountId(buyRelationResult.getUplineUserId());
-                            tradeMo.setTradeType((byte) TradeTypeDic.SETTLE_COMMISSION.getCode());
-                            tradeMo.setTradeAmount(orderDetail.getBuyPrice());
-                            tradeMo.setTradeTitle("大卖网络-上家返佣结算");
-                            tradeMo.setOrderId(buyRelationResult.getUplineOrderId().toString());
-                            tradeMo.setOrderDetailId(buyRelationResult.getUplineOrderDetailId().toString());
-                            addAccountTrade(taskMo, orderDetail, tradeMo, now);
-                        }
-                    }
-                }
-            }
-            _log.info("查询定单详情做为上家的购买关系");
-            // 获取该详情下家购买关系，如有2个下家且已签收，并且没有退货则发起结算本家返佣任务
-            final OrdBuyRelationMo downLineRelationParam = new OrdBuyRelationMo();
-            downLineRelationParam.setUplineOrderDetailId(orderDetail.getId());
-            downLineRelationParam.setIsSignIn(true);
-            _log.info("执行返佣结算任务查询订单详情作为上家时的购买关系参数为：{}", downLineRelationParam);
-            final List<OrdBuyRelationMo> downLineBuyRelationList = buyRelationSvc.list(downLineRelationParam);
-            _log.info("执行返佣结算任务查询订单详情作为上家时的购买关系返回值为：{}", String.valueOf(downLineBuyRelationList));
-            if (downLineBuyRelationList.size() == 2) {
-                _log.info("执行返佣结算任务作为上家时查询第一个下家订单详情的参数为：{}", downLineBuyRelationList.get(0).getDownlineOrderDetailId());
-                final OrdOrderDetailMo downLineDetailResult1 = orderDetailSvc.getById(downLineBuyRelationList.get(0).getDownlineOrderDetailId());
-                _log.info("执行返佣结算任务作为上家时查询第一个下家订单详情的返回值为：{}", downLineDetailResult1);
-                _log.info("执行返佣结算任务作为上家时查询第二个下家订单详情的参数为：{}", downLineBuyRelationList.get(1).getDownlineOrderDetailId());
-                final OrdOrderDetailMo downLineDetailResult2 = orderDetailSvc.getById(downLineBuyRelationList.get(1).getDownlineOrderDetailId());
-                _log.info("执行返佣结算任务作为上家时查询第二个下家订单详情的返回值为：{}", downLineDetailResult2);
-                if (downLineDetailResult1 != null && downLineDetailResult2 != null && downLineDetailResult1.getReturnState() == 0 && downLineDetailResult2.getReturnState() == 0) {
-                    final String orderIds = orderDetail.getOrderId() + "," + downLineBuyRelationList.get(0).getDownlineOrderId() + ","
-                            + downLineBuyRelationList.get(1).getDownlineOrderId();
-                    _log.info("添加结算任务查询订单签收时间的参数为：{}", orderIds);
-                    final List<OrdOrderMo> signTimeList = orderSvc.getOrderSignTime(orderIds);
-                    _log.info("添加结算任务查询订单签收时间的返回值为：{}", signTimeList);
-                    // 订单签收后七天时间戳
-                    final Long receivedTime = signTimeList.get(0).getReceivedTime().getTime() + 86400000 * 7;
-                    // 当前时间戳
-                    final Long thisTimestamp = System.currentTimeMillis();
-                    if (receivedTime >= thisTimestamp) {
-                        final AfcTradeMo tradeMo = new AfcTradeMo();
-                        tradeMo.setAccountId(order.getUserId());
-                        tradeMo.setTradeType((byte) TradeTypeDic.SETTLE_COMMISSION.getCode());
-                        tradeMo.setTradeAmount(orderDetail.getBuyPrice());
-                        tradeMo.setTradeTitle("大卖网络-本家返佣结算");
-                    }
-                }
+            _log.info("**********************************************************************");
+            _log.info("* 开始结算返佣");
+            _log.info("**********************************************************************");
+            _log.info("1. 如果本订单详情符合返佣条件，则返佣");
+            handleCommission(orderDetail, order.getUserId(), now);
+            _log.info("2. 如果本订单详情的上家订单详情符合返佣条件，则返佣");
+            final OrdBuyRelationMo uplineBuyRelationConditions = new OrdBuyRelationMo();
+            uplineBuyRelationConditions.setDownlineOrderDetailId(orderDetail.getId());
+            _log.info("获取与上家的购买关系的参数：{}", uplineBuyRelationConditions);
+            final OrdBuyRelationMo uplineBuyRelation = buyRelationSvc.getOne(uplineBuyRelationConditions);
+            if (uplineBuyRelation == null) {
+                _log.info("没有上家");
+            } else {
+                _log.info("获取与上家的购买关系的返回值：{}", uplineBuyRelation);
+                _log.info("获取上家订单详情的参数：上家订单详情ID-{}", uplineBuyRelation.getUplineOrderDetailId());
+                final OrdOrderDetailMo uplineOrderDetail = orderDetailSvc.getById(uplineBuyRelation.getUplineOrderDetailId());
+                _log.info("获取上家订单详情的返回值：{}", uplineOrderDetail);
+                handleCommission(uplineOrderDetail, uplineBuyRelation.getUplineUserId(), now);
             }
         }
+    }
+
+    /**
+     * 处理返佣(订单详情如果符合返佣条件，则返佣)
+     * 
+     * @param orderDetail
+     *            要判断是否返佣的订单详情
+     */
+    private void handleCommission(final OrdOrderDetailMo orderDetail, final Long buyerId, final Date now) {
+        _log.info("处理返佣(订单详情如果符合返佣条件，则返佣): orderDetail-{}", orderDetail);
+        if (orderDetail == null || orderDetail.getCommissionSlot() != 0 //
+                && orderDetail.getReturnState() != ReturnStateDic.NONE.getCode()) {
+            _log.info("订单详情返佣名额不为0/不是未退货状态，未满足返佣条件");
+            return;
+        }
+
+        // 最晚签收时间=当前时间7天前
+        final Date lastTime = new Date(now.getTime() - 86400000 * 7);
+        _log.info("最晚签收时间不得大于{}", lastTime);
+
+        _log.info("统计所有已签收超过7天的上下家订单详情的数量的参数: {}", orderDetail.getId());
+        final int settledCount = buyRelationMapper.countSettledOfRelations(orderDetail.getId(), lastTime, ReturnStateDic.NONE);
+        _log.info("统计所有已签收超过7天的上下家订单详情的数量的返回值: {}", settledCount);
+        if (settledCount < 3) {
+            _log.info("已签收数量不够3个，未满足返佣条件: 数量-{}", settledCount);
+            return;
+        } else if (settledCount > 3) {
+            new RuntimeExceptionX("已签收数量超过3个，数据不正常: 数量-" + settledCount + " orderDetail-" + orderDetail);
+        }
+
+        _log.debug("修改订单详情的返佣状态为已返");
+        final OrdOrderDetailMo modifyOrderDetail = new OrdOrderDetailMo();
+        modifyOrderDetail.setId(orderDetail.getId());
+        modifyOrderDetail.setCommissionState((byte) CommissionStateDic.RETURNED.getCode());
+        orderDetailMapper.updateByPrimaryKey(modifyOrderDetail);
+
+        _log.debug("添加一笔返佣交易");
+        final AfcTradeMo tradeMo = new AfcTradeMo();
+        tradeMo.setAccountId(buyerId);
+        tradeMo.setTradeType((byte) TradeTypeDic.SETTLE_COMMISSION.getCode());
+        tradeMo.setTradeAmount(orderDetail.getBuyPrice());
+        tradeMo.setTradeTitle("大卖网络-拼全返佣金");
+        tradeMo.setOrderId(orderDetail.getOrderId().toString());
+        tradeMo.setOrderDetailId(orderDetail.getId().toString());
+        addAccountTrade(null, orderDetail, tradeMo, now);
     }
 }
