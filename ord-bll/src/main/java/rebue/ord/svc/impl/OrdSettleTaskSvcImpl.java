@@ -396,14 +396,14 @@ public class OrdSettleTaskSvcImpl extends MybatisBaseSvcImpl<OrdSettleTaskMo, ja
             // 结算购买所得积分给买家
             case SETTLE_POINT_TO_BUYER: {
                 _log.info("结算购买所得积分给买家: orderDetail-{}", orderDetail);
-                final BigDecimal points = orderDetail.getBuyPointTotal();
-                if (points == null || points.compareTo(BigDecimal.ZERO) == 0) {
-                    _log.debug("结算购买所得积分给买家时发现返现总额为null或为0，订单详情为：{}", orderDetail);
+                final BigDecimal pointsTotal = orderDetail.getBuyPointTotal();
+                if (pointsTotal == null || pointsTotal.compareTo(BigDecimal.ZERO) == 0) {
+                    _log.debug("结算购买所得积分给买家时发现积分总额为null或为0，订单详情为：{}", orderDetail);
                     continue;
                 }
 
-                if (points.compareTo(BigDecimal.ZERO) < 0) {
-                    throw new RuntimeExceptionX("结算购买所得积分给买家时发现返现总额<0，订单详情为：" + orderDetail);
+                if (pointsTotal.compareTo(BigDecimal.ZERO) < 0) {
+                    throw new RuntimeExceptionX("结算购买所得积分给买家时发现积分总额<0，订单详情为：" + orderDetail);
                 }
 
                 final AddPointTradeTo addPointTradeTo = new AddPointTradeTo();
