@@ -235,7 +235,7 @@ public interface OrdOrderMapper extends MybatisBaseMapper<OrdOrderMo, Long> {
      * @param orderState
      * @return
      */
-    @Select("SELECT  SUM(COST_PRICE * BUY_COUNT) AS notSettle FROM  ORD_ORDER_DETAIL WHERE ORDER_ID IN (SELECT DISTINCT Id FROM ORD_ORDER WHERE  ORDER_STATE  not in (2,3,4)) and SUPPLIER_ID=${supplierId}")
+    @Select("SELECT  SUM(COST_PRICE * BUY_COUNT) AS notSettle FROM  ORD_ORDER_DETAIL WHERE ORDER_ID IN (SELECT DISTINCT Id FROM ORD_ORDER WHERE  ORDER_STATE   in (2,3,4)) and SUPPLIER_ID=${supplierId}")
     OrdSettleRo getNotSettleTotal(@Param("supplierId") Long supplierId);
 
     /**
