@@ -1,10 +1,13 @@
 package rebue.ord.svr.feign;
 
 import org.springframework.cloud.openfeign.FeignClient;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 
 import rebue.ord.mo.OrdOrderMo;
 import rebue.ord.ro.CancellationOfOrderRo;
+import rebue.ord.ro.OrdSettleRo;
 import rebue.ord.ro.OrderSignInRo;
 import rebue.ord.to.OrderSignInTo;
 import rebue.sbs.feign.FeignConfig;
@@ -42,6 +45,14 @@ public interface OrdOrderSvc {
 	 */
 	@PutMapping("/ord/order/ordersignin")
 	OrderSignInRo orderSignIn(OrderSignInTo qo);
+	
+	/**
+	 * 获取供应商待结算和已结算的订单
+	 * @param mo
+	 * @return
+	 */
+    @GetMapping("/ord/order/getSettleTotal")
+    OrdSettleRo getSettleTotal(@RequestParam("supplierId") Long supplierId);
 }
   
 

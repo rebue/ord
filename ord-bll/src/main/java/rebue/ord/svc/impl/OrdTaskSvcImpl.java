@@ -57,6 +57,24 @@ public class OrdTaskSvcImpl extends MybatisBaseSvcImpl<OrdTaskMo, java.lang.Long
         }
         return super.add(mo);
     }
+    
+	/**
+	 * 添加任务，如果重复添加不抛异常，事务不会回滚
+	 */
+	@Override
+	@Transactional(readOnly = false, propagation = Propagation.REQUIRED)
+	public int addEx(OrdTaskMo mo) {
+		_log.info("添加订单任务");
+		// 如果id为空那么自动生成分布式id
+		if (mo.getId() == null || mo.getId() == 0) {
+			mo.setId(_idWorker.getId());
+		}
+		try {
+			return super.add(mo);
+		} catch (DuplicateKeyException e) {
+			return 0;
+		}
+	}
 
     private static final Logger _log = LoggerFactory.getLogger(OrdTaskSvcImpl.class);
 

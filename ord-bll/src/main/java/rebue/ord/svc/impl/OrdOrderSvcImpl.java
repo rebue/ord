@@ -1373,7 +1373,7 @@ public class OrdOrderSvcImpl extends MybatisBaseSvcImpl<OrdOrderMo, java.lang.Lo
                 ordTaskMo.setOrderId(String.valueOf(orderDetail.getOnlineSpecId()));    // 计算首单的任务的订单ID其实是上线规格ID
                 _log.debug("添加计算首单任务的参数为：{}", ordTaskMo);
                 // 添加取消订单任务
-                ordTaskSvc.add(ordTaskMo);
+                ordTaskSvc.addEx(ordTaskMo);
             } catch (final DuplicateKeyException e) {
                 _log.info("已经存在计算首单的任务：onlineSpecId-" + orderDetail.getOnlineSpecId(), e);
             } catch (final Exception e) {
@@ -1544,28 +1544,26 @@ public class OrdOrderSvcImpl extends MybatisBaseSvcImpl<OrdOrderMo, java.lang.Lo
         return PageHelper.startPage(pageNum, pageSize).doSelectPageInfo(() -> _mapper.listOrderSupplier(to));
     }
 
-    /**
-     * 根据组织Id获取未结算或者已经结算的详情的总额
-     */
-    @Override
-    public OrdSettleRo getSettleTotalForOrgId(final OrdOrderMo mo) {
-        _log.info("根据组织Id获取未结算或者已经结算的详情的总额: {}", mo);
-        final OrdSettleRo result = new OrdSettleRo();
-        OrdSettleRo temp = new OrdSettleRo();
-        mo.setOrderState((byte) 4);
-        temp = _mapper.getSettleTotalForOrgId(mo.getDeliverOrgId(), mo.getOrderState());
-        _log.info("根据组织Id获取等待详情的结果: {}", temp);
-        if (temp != null) {
-            result.setNotSettle(temp.getNotSettle());
-        }
-        mo.setOrderState((byte) 5);
-        temp = _mapper.getSettleTotalForOrgId(mo.getDeliverOrgId(), mo.getOrderState());
-        _log.info("根据组织Id获取已经详情的结果: {}", temp);
-        if (temp != null) {
-            result.setAlreadySettle(temp.getNotSettle());
-        }
-        return result;
-    }
+	/**
+	 * 根据组织Id获取未结算或者已经结算的详情的总额
+	 */
+	@Override
+	public OrdSettleRo getSettleTotal(final Long supplierId) {
+		_log.info("根据供应商Id获取未结算或者已经结算的详情的总额: {}", supplierId);
+		final OrdSettleRo result = new OrdSettleRo();
+		OrdSettleRo temp = new OrdSettleRo();
+		temp = _mapper.getNotSettleTotal(supplierId);
+		_log.info("获取供应商等待结算详情的结果: {}", temp);
+		if (temp != null) {
+			result.setNotSettle(temp.getNotSettle());
+		}
+		temp = _mapper.getSettleTotal(supplierId);
+		_log.info("获取供应商已经详情的结果: {}", temp);
+		if (temp != null) {
+			result.setAlreadySettle(temp.getAlreadySettle());
+		}
+		return result;
+	}
 
     @Override
     public PageInfo<OrdOrderRo> listOrderTrade(final ListOrderTo to, final int pageNum, final int pageSize) {

@@ -494,12 +494,12 @@ public class OrdOrderCtrl {
     }
 
     /**
-     * 根据组织Id获取未发货的订单详情的总成本价
+     * 根据供应商Id获取未发货的订单详情的总成本价
      */
     @GetMapping("/ord/order/getSettleTotal")
-    OrdSettleRo getSettleTotal(final OrdOrderMo mo) {
-        _log.info("根据组织Id获取未发货的订单详情的总成本价参数为：{}", mo);
-        return svc.getSettleTotalForOrgId(mo);
+    OrdSettleRo getSettleTotal(@RequestParam("supplierId") final java.lang.Long supplierId) {
+        _log.info("根据供应商Id获取订单详情未结算和已结算的成本总价：{}", supplierId);
+        return svc.getSettleTotal(supplierId);
     }
 
     /**

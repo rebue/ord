@@ -229,15 +229,24 @@ public interface OrdOrderMapper extends MybatisBaseMapper<OrdOrderMo, Long> {
     void updateAmountAfterSplitOrder(@Param("orderId") Long orderId);
 
     /**
-     * 根据组织Id获取结算的详情总额
+     * 根据供应商Id获取未结算的详情总额
      *
      * @param orgId
      * @param orderState
      * @return
      */
-    @Select("SELECT  SUM(COST_PRICE * BUY_COUNT) AS notSettle FROM  ORD_ORDER_DETAIL WHERE ORDER_ID IN (SELECT DISTINCT Id FROM ORD_ORDER WHERE DELIVER_ORG_ID = ${deliverOrgId} AND ORDER_STATE = ${orderState})")
-    OrdSettleRo getSettleTotalForOrgId(@Param("deliverOrgId") Long orgId, @Param("orderState") byte orderState);
+    @Select("SELECT  SUM(COST_PRICE * BUY_COUNT) AS notSettle FROM  ORD_ORDER_DETAIL WHERE ORDER_ID IN (SELECT DISTINCT Id FROM ORD_ORDER WHERE  ORDER_STATE  not in (2,3,4)) and SUPPLIER_ID=${supplierId}")
+    OrdSettleRo getNotSettleTotal(@Param("supplierId") Long supplierId);
 
+    /**
+     * 根据供应商Id获取结算的详情总额
+     *
+     * @param orgId
+     * @param orderState
+     * @return
+     */
+    @Select("SELECT  SUM(COST_PRICE * BUY_COUNT) AS AlreadySettle FROM  ORD_ORDER_DETAIL WHERE ORDER_ID IN (SELECT DISTINCT Id FROM ORD_ORDER WHERE  ORDER_STATE   in (5)) and SUPPLIER_ID=${supplierId}")
+    OrdSettleRo getSettleTotal(@Param("supplierId") Long supplierId);
     /**
      * 根据订单id修改发货组织
      */

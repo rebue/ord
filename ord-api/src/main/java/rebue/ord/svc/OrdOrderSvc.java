@@ -210,11 +210,11 @@ public interface OrdOrderSvc extends BaseSvc<java.lang.Long, OrdOrderMo, OrdOrde
     Ro cancelDelivery(CancelDeliveryTo to);
 
     /**
-     *  获取订单已经结算或者是未结算的详情总成本价
+     *  根据供应商id获取已经结算或者待结算总额
      *  @param order
      *  @return
      */
-    OrdSettleRo getSettleTotalForOrgId(OrdOrderMo order);
+    OrdSettleRo getSettleTotal(Long supplierId);
 
     /**
      *  修改组织
