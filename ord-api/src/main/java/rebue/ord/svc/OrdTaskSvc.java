@@ -2,8 +2,7 @@ package rebue.ord.svc;
 
 import java.util.List;
 
-import org.springframework.transaction.annotation.Propagation;
-import org.springframework.transaction.annotation.Transactional;
+
 
 import rebue.ord.dic.OrderTaskTypeDic;
 import rebue.ord.jo.OrdTaskJo;
