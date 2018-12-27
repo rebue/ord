@@ -661,7 +661,7 @@ public class OrdSettleTaskSvcImpl extends MybatisBaseSvcImpl<OrdSettleTaskMo, ja
 		final OrdOrderDetailMo modifyOrderDetail = new OrdOrderDetailMo();
 		modifyOrderDetail.setId(orderDetail.getId());
 		modifyOrderDetail.setCommissionState((byte) CommissionStateDic.RETURNED.getCode());
-		orderDetailMapper.updateByPrimaryKey(modifyOrderDetail);
+		orderDetailMapper.updateByPrimaryKeySelective(modifyOrderDetail);
 
 		_log.debug("添加一笔返佣交易");
 		final AfcTradeMo tradeMo = new AfcTradeMo();
