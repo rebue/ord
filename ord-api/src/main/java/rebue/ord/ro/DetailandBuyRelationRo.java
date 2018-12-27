@@ -1,7 +1,11 @@
 package rebue.ord.ro;
 
 import java.math.BigDecimal;
+import java.util.Date;
 
+import org.springframework.format.annotation.DateTimeFormat;
+
+import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
 
@@ -46,6 +50,9 @@ public class DetailandBuyRelationRo {
 
 	/** 购买单位 **/
 	private String buyUnit;
+	
+	/**供应商名字**/
+	private String  supplierName;
 
 	/** 退货数量 **/
 	private Integer returnCount;
@@ -53,8 +60,6 @@ public class DetailandBuyRelationRo {
 	/** 退货状态（0：未退货 1：退货中 2：已退货） **/
 	private Byte returnState;
 
-	/**供应商名字**/
-	private String  supplierName;
 	/**
 	 * 版块类型（0：普通，1：全返）
 	 *
@@ -91,7 +96,43 @@ public class DetailandBuyRelationRo {
 	 * 第一条关系来源 关系来源（1：自己匹配自己 2：购买关系 3：注册关系 4：差一人且已有购买关系 5：差两人 6：差一人但没有购买关系）
 	 */
 	private Byte downlineRelationSource1;
-
+	
+    /**
+     * 第一个下家签收时间
+     */
+    @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss")
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd HH:mm:ss", timezone = "GMT+8")
+    private Date              downlineReceivedTime1;
+    
+    /**
+     * 第一个下家的订单编号
+     */
+    private String             downlineOrderCode1;
+    
+    /**
+     * 第二个下家签收时间
+     */
+    @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss")
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd HH:mm:ss", timezone = "GMT+8")
+    private Date              downlineReceivedTime2;
+   
+    /**
+     * 第二个下家的订单编号
+     */
+    private String             downlineOrderCode2;
+    
+    /**
+     * 上家签收时间
+     */
+    @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss")
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd HH:mm:ss", timezone = "GMT+8")
+    private Date              uplineReceivedTime;
+    	
+    /**
+     * 第二个下家的订单编号
+     */
+    private String             uplineOrderCode;
+    
 	/**
 	 * 第二条关系来源 关系来源（1：自己匹配自己 2：购买关系 3：注册关系 4：差一人且已有购买关系 5：差两人 6：差一人但没有购买关系）
 	 */
@@ -128,6 +169,8 @@ public class DetailandBuyRelationRo {
 
 	/** 第二个下家订单上线标题 **/
 	private String downOnlineTitle2;
+	
+	
 	
 	private Boolean isDeliver;
 
