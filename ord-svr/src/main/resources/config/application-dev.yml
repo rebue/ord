@@ -24,5 +24,7 @@ ord:
     platformServiceFeeRatio: 0
     # 完成结算任务执行的延迟时间(单位小时)，须设置在所有结算任务之后
     completeSettleDelay: 0.06
+    # 结算购买积分给买家任务执行的延迟时间(单位小时)
+    settlePointToBuyerDelay: 0.05
     
     

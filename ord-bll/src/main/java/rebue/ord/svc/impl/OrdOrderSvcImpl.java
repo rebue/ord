@@ -340,6 +340,7 @@ public class OrdOrderSvcImpl extends MybatisBaseSvcImpl<OrdOrderMo, java.lang.Lo
             orderDetailMo.setActualAmount(onlineSpecMo.getSalePrice().multiply(BigDecimal.valueOf(orderDetailTo.getBuyCount())));
             orderDetailMo.setBuyUnit(onlineSpecMo.getSaleUnit());
             orderDetailMo.setCostPrice(onlineSpecMo.getCostPrice());
+            orderDetailMo.setBuyPoint(onlineSpecMo.getBuyPoint());
             // 判断是否是测试用户
             if (to.getIsTester()) {
                 orderDetailMo.setSupplierId(testSupplierOrgId);
@@ -357,7 +358,8 @@ public class OrdOrderSvcImpl extends MybatisBaseSvcImpl<OrdOrderMo, java.lang.Lo
             }
             if (OnlineSubjectTypeDic.NORMAL.getCode() == orderDetailMo.getSubjectType()) {
                 orderDetailMo.setCashbackAmount(onlineSpecMo.getCashbackAmount());
-                orderDetailMo.setCashbackTotal(new BigDecimal(String.valueOf(orderDetailTo.getBuyCount())).multiply(onlineSpecMo.getCashbackAmount()));
+                orderDetailMo.setCashbackTotal(BigDecimal.valueOf(orderDetailTo.getBuyCount()).multiply(onlineSpecMo.getCashbackAmount()));
+                orderDetailMo.setBuyPointTotal(onlineSpecMo.getBuyPoint().multiply(BigDecimal.valueOf(orderDetailTo.getBuyCount())));
                 orderDetails.add(orderDetailMo);
             } else if (OnlineSubjectTypeDic.BACK_COMMISSION.getCode() == orderDetailMo.getSubjectType()) {
                 orderDetailMo.setBuyCount(1);
@@ -366,10 +368,10 @@ public class OrdOrderSvcImpl extends MybatisBaseSvcImpl<OrdOrderMo, java.lang.Lo
                 orderDetailMo.setCashbackAmount(BigDecimal.ZERO);
                 orderDetailMo.setCashbackTotal(BigDecimal.ZERO);
                 orderDetailMo.setActualAmount(orderDetailMo.getBuyPrice());
+                orderDetailMo.setBuyPointTotal(onlineSpecMo.getBuyPoint());
                 for (int i = 0; i < orderDetailTo.getBuyCount(); i++) {
                     orderDetails.add(orderDetailMo);
                     orderDetailMo = dozerMapper.map(orderDetailMo, OrdOrderDetailMo.class);
-                    // orderDetailMo.setOrderTimestamp(orderTimestamp++);
                 }
             }
             // 添加要更新的上线规格信息
