@@ -1560,10 +1560,11 @@ public class OrdOrderSvcImpl extends MybatisBaseSvcImpl<OrdOrderMo, java.lang.Lo
 			result.setNotSettle(temp.getNotSettle());
 		}
 		temp = _mapper.getSettleTotal(supplierId);
-		_log.info("获取供应商已经详情的结果: {}", temp);
+		_log.info("获取供应商已经结算详情的结果: {}", temp);
 		if (temp != null) {
 			result.setAlreadySettle(temp.getAlreadySettle());
 		}
+		
 		return result;
 	}
 
