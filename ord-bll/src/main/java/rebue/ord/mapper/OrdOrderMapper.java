@@ -8,6 +8,8 @@ import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
 import org.apache.ibatis.annotations.Select;
 import org.apache.ibatis.annotations.Update;
+
+import rebue.ord.mo.OrdOrderDetailMo;
 import rebue.ord.mo.OrdOrderMo;
 import rebue.ord.ro.OrdSettleRo;
 import rebue.ord.to.ListOrderTo;
@@ -235,7 +237,7 @@ public interface OrdOrderMapper extends MybatisBaseMapper<OrdOrderMo, Long> {
      * @param orderState
      * @return
      */
-    @Select("SELECT  SUM(COST_PRICE * BUY_COUNT) AS notSettle FROM  ORD_ORDER_DETAIL WHERE ORDER_ID IN (SELECT DISTINCT Id FROM ORD_ORDER WHERE  ORDER_STATE   in (2,3,4)) and SUPPLIER_ID=${supplierId}")
+    @Select("SELECT  SUM(COST_PRICE * BUY_COUNT - RETURN_COUNT * COST_PRICE ) AS notSettle FROM  ORD_ORDER_DETAIL WHERE ORDER_ID IN (SELECT DISTINCT Id FROM ORD_ORDER WHERE  ORDER_STATE   in (2,3,4)) and SUPPLIER_ID=${supplierId}")
     OrdSettleRo getNotSettleTotal(@Param("supplierId") Long supplierId);
 
     /**
@@ -245,8 +247,10 @@ public interface OrdOrderMapper extends MybatisBaseMapper<OrdOrderMo, Long> {
      * @param orderState
      * @return
      */
-    @Select("SELECT  SUM(COST_PRICE * BUY_COUNT) AS AlreadySettle FROM  ORD_ORDER_DETAIL WHERE ORDER_ID IN (SELECT DISTINCT Id FROM ORD_ORDER WHERE  ORDER_STATE   in (5)) and SUPPLIER_ID=${supplierId}")
+    @Select("SELECT  SUM(COST_PRICE * BUY_COUNT - RETURN_COUNT * COST_PRICE ) AS AlreadySettle FROM  ORD_ORDER_DETAIL WHERE ORDER_ID IN (SELECT DISTINCT Id FROM ORD_ORDER WHERE  ORDER_STATE   in (5)) and SUPPLIER_ID=${supplierId} ")
     OrdSettleRo getSettleTotal(@Param("supplierId") Long supplierId);
+    
+  
     /**
      * 根据订单id修改发货组织
      */
