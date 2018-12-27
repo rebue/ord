@@ -109,7 +109,7 @@ public interface OrdBuyRelationMapper extends MybatisBaseMapper<OrdBuyRelationMo
      * @return 已签收超过7天的订单详情的数量，如果!=3，不符合返佣条件
      */
     @Select("SELECT " + //
-            "    COUNT(b.*)" + //
+            "    COUNT(b.ID)" + //
             " FROM" + //
             "    ORD_ORDER_DETAIL a" + //
             "        INNER JOIN" + //
