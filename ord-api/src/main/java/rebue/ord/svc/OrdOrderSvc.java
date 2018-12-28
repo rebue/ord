@@ -1,6 +1,5 @@
 package rebue.ord.svc;
 
-import com.github.pagehelper.PageInfo;
 import java.beans.IntrospectionException;
 import java.lang.reflect.InvocationTargetException;
 import java.math.BigDecimal;
@@ -8,8 +7,12 @@ import java.text.ParseException;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
+
+import com.github.pagehelper.PageInfo;
+
 import rebue.afc.msg.PayDoneMsg;
 import rebue.ord.jo.OrdOrderJo;
+import rebue.ord.mo.OrdOrderDetailMo;
 import rebue.ord.mo.OrdOrderMo;
 import rebue.ord.ro.CancellationOfOrderRo;
 import rebue.ord.ro.ModifyOrderRealMoneyRo;
@@ -222,4 +225,8 @@ public interface OrdOrderSvc extends BaseSvc<java.lang.Long, OrdOrderMo, OrdOrde
      *  @return
      */
     Ro modifyOrg(UpdateOrgTo to);
+    
+    
+    List<OrdOrderDetailMo> selectCommission();
+    
 }

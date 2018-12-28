@@ -25,6 +25,7 @@ import com.github.pagehelper.PageInfo;
 import rebue.ord.dic.CancellationOfOrderDic;
 import rebue.ord.dic.OrderSignInDic;
 import rebue.ord.dic.ShipmentConfirmationDic;
+import rebue.ord.mo.OrdOrderDetailMo;
 import rebue.ord.mo.OrdOrderMo;
 import rebue.ord.ro.CancellationOfOrderRo;
 import rebue.ord.ro.ModifyOrderRealMoneyRo;
@@ -510,5 +511,10 @@ public class OrdOrderCtrl {
         _log.info("updateOrg UpdateOrgTo: {}", to);
         final Ro ro = svc.modifyOrg(to);
         return ro;
+    }
+    
+    @GetMapping("/ord/order/commission")
+    List<OrdOrderDetailMo> selectCommission(){
+    	return svc.selectCommission();
     }
 }

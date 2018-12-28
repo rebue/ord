@@ -256,4 +256,22 @@ public interface OrdOrderMapper extends MybatisBaseMapper<OrdOrderMo, Long> {
      */
     @Update("update ORD_ORDER set DELIVER_ORG_ID = #{deliverOrgId,jdbcType=BIGINT} where ID = #{id,jdbcType=BIGINT}")
     int updateOrg(@Param("deliverOrgId") Long deliverOrgId, @Param("id") Long id);
+    
+    
+    @Select("SELECT \n" + 
+    		"    a.*\n" + 
+    		"FROM\n" + 
+    		"    ORD_ORDER_DETAIL a\n" + 
+    		"        INNER JOIN\n" + 
+    		"    ORD_ORDER b ON a.ORDER_ID = b.ID\n" + 
+    		"WHERE\n" + 
+    		"    a.RETURN_STATE = 0\n" + 
+    		"        AND a.SUBJECT_TYPE = 1\n" + 
+    		"        AND a.COMMISSION_SLOT = 0\n" + 
+    		// "        AND a.COMMISSION_STATE != 2\n" + 
+    		"        AND a.ONLINE_TITLE NOT LIKE '%测试%'\n" + 
+    		"        AND b.ORDER_STATE >= 4\n" + 
+    		"        AND DATE_SUB(NOW(), INTERVAL 7 DAY) >= b.RECEIVED_TIME ORDER BY a.ID DESC")
+    List<OrdOrderDetailMo> selectCommission();
+
 }
