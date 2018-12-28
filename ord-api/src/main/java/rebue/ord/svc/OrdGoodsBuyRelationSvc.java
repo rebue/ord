@@ -20,4 +20,11 @@ public interface OrdGoodsBuyRelationSvc extends BaseSvc<java.lang.Long, OrdGoods
      * 获取用户购买关系
      */
     OrdGoodsBuyRelationMo getBuyRelation(OrdGoodsBuyRelationMo mo);
+
+    /**
+     * 重写添加用户商品购买关系（此方法不处理重复添加）
+     * @param mo
+     * @return
+     */
+	int addEx(OrdGoodsBuyRelationMo mo);
 }

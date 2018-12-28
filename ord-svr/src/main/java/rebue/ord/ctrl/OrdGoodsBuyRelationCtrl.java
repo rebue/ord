@@ -47,15 +47,13 @@ public class OrdGoodsBuyRelationCtrl {
 
     /**
      * 添加用户商品购买关系
-     *
-     * @mbg.generated 自动生成，如需修改，请删除本行
      */
     @PostMapping("/ord/goodsbuyrelation")
     Ro add(@RequestBody OrdGoodsBuyRelationMo mo) throws Exception {
         _log.info("add OrdGoodsBuyRelationMo: {}", mo);
         Ro ro = new Ro();
         try {
-            int result = svc.add(mo);
+            int result = svc.addEx(mo);
             if (result == 1) {
                 String msg = "添加成功";
                 _log.info("{}: mo-{}", msg, mo);
