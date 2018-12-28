@@ -56,6 +56,7 @@ public class OrdGoodsBuyRelationSvcImpl
 
 	/**
 	 * 重写添加用户商品购买关系（此方法不处理重复添加）
+	 * 
 	 * @param mo
 	 * @return
 	 */
@@ -67,11 +68,27 @@ public class OrdGoodsBuyRelationSvcImpl
 		if (mo.getId() == null || mo.getId() == 0) {
 			mo.setId(_idWorker.getId());
 		}
-		try {
-			return super.add(mo);
-		} catch (DuplicateKeyException e) {
-			_log.error("重写添加用户商品购买关系（此方法不处理重复添加）出现重复添加，请求的参数为：{}", mo);
+
+		_log.info("重写添加购买关系根据下家id和上线id查询商品购买关系的参数为：{}", mo);
+		OrdGoodsBuyRelationMo goodsBuyRelationMo = _mapper.getByDownlineUserIdAndOnlineId(mo.getDownlineUserId(),
+				mo.getOnlineId());
+		_log.info("重写添加购买关系根据下家id和上线id查询商品购买关系的返回值为：{}", goodsBuyRelationMo);
+		// 判断上家和下家是否存在该商品的购买关系
+		if (goodsBuyRelationMo == null) {
+			try {
+				return super.add(mo);
+			} catch (DuplicateKeyException e) {
+				_log.error("重写添加用户商品购买关系（此方法不处理重复添加）出现重复添加，请求的参数为：{}", mo);
+				return 1;
+			}
+		}
+
+		if (goodsBuyRelationMo.getUplineUserId() == mo.getUplineUserId()) {
+			_log.warn("重写添加用户商品购买关系时发现需要添加的上家和已经存在的上家一致，请求的参数为：{}", mo);
 			return 1;
+		} else {
+			_log.info("重写添加购买关系修改上家id的参数为：uplineUserId={}, id={}", mo.getUplineUserId(), goodsBuyRelationMo.getId());
+			return _mapper.updateGoodsBuyRelation(mo.getUplineUserId(), goodsBuyRelationMo.getId());
 		}
 	}
 
