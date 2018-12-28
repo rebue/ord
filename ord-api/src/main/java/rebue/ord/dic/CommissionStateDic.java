@@ -62,8 +62,12 @@ public enum CommissionStateDic implements EnumBase {
 
     @Override
     public int getCode() {
-        // TODO Auto-generated method stub
         return code;
+    }
+
+    @Override
+    public String getName() {
+        return name();
     }
 
 }

@@ -9,22 +9,23 @@ import rebue.wheel.baseintf.EnumBase;
 
 /**
  * 退货类型
+ * 
  * @author lbl
  *
  */
 public enum ReturnTypeDic implements EnumBase {
 
-	/**
-	 * 仅退款
-	 */
-	ONLY_REFUND(1),
-	
-	/**
-	 * 退货并退款
-	 */
-	RETURN_AND_REFUND(2);
-	
-	/**
+    /**
+     * 仅退款
+     */
+    ONLY_REFUND(1),
+
+    /**
+     * 退货并退款
+     */
+    RETURN_AND_REFUND(2);
+
+    /**
      * 枚举的所有项，注意这个变量是静态单例的
      */
     private static Map<Integer, EnumBase> valueMap;
@@ -63,4 +64,10 @@ public enum ReturnTypeDic implements EnumBase {
         // TODO Auto-generated method stub
         return code;
     }
+
+    @Override
+    public String getName() {
+        return name();
+    }
+
 }

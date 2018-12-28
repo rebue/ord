@@ -71,4 +71,9 @@ public enum ReturnStateDic implements EnumBase {
         return code;
     }
 
+    @Override
+    public String getName() {
+        return name();
+    }
+
 }
