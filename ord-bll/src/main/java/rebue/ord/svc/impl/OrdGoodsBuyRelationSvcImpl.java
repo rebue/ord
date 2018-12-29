@@ -1,5 +1,6 @@
 package rebue.ord.svc.impl;
 
+import java.util.Date;
 import java.util.Map;
 import java.util.Map.Entry;
 
@@ -50,6 +51,8 @@ public class OrdGoodsBuyRelationSvcImpl extends MybatisBaseSvcImpl<OrdGoodsBuyRe
 
         _log.debug("先删除旧关系");
         _mapper.deleteByDownlineUserIdAndOnlineId(mo.getDownlineUserId(), mo.getOnlineId());
+
+        mo.setCreateTime(new Date());
 
         _log.debug("再添加新关系");
         // 如果id为空那么自动生成分布式id
