@@ -235,7 +235,7 @@ public class OrdOrderSvcImpl extends MybatisBaseSvcImpl<OrdOrderMo, java.lang.Lo
             _log.error(msg);
             return false;
         }
-        _log.debug("订单信息经过检查，可以启动开始结算的任务: {}", order);
+        _log.debug("订单信息经过检查，可以进行结算: {}", order);
         return true;
     }
 
