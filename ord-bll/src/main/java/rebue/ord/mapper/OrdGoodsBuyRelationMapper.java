@@ -110,7 +110,7 @@ public interface OrdGoodsBuyRelationMapper extends MybatisBaseMapper<OrdGoodsBuy
      * 根据下家和上线id删除已存在购买关系
      */
     @Delete("DELETE FROM ORD_GOODS_BUY_RELATION where DOWNLINE_USER_ID=#{downlineUserId,jdbcType=BIGINT} and ONLINE_ID=#{onlineId,jdbcType=BIGINT}")
-    OrdGoodsBuyRelationMo deleteByDownlineUserIdAndOnlineId(@Param("downlineUserId") Long downlineUserId, @Param("onlineId") Long onlineId);
+    int deleteByDownlineUserIdAndOnlineId(@Param("downlineUserId") Long downlineUserId, @Param("onlineId") Long onlineId);
 
     /**
      * 根据id修改上家id
