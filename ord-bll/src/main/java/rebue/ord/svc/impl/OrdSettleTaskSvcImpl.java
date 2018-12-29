@@ -521,8 +521,13 @@ public class OrdSettleTaskSvcImpl extends MybatisBaseSvcImpl<OrdSettleTaskMo, ja
                 final String msg = "不能识别的结算任务类型";
                 _log.error("{}: {}", msg, taskMo.getSubTaskType());
                 throw new RuntimeException(msg);
+            } // end switch
+            try {
+                Thread.sleep(1);
+            } catch (final InterruptedException e) {
+                throw new RuntimeExceptionX("系统中断");
             }
-        }
+        } // end for
     }
 
     /**
