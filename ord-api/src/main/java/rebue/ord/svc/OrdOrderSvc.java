@@ -8,6 +8,9 @@ import java.text.ParseException;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
+
+import org.springframework.web.bind.annotation.RequestParam;
+
 import rebue.afc.msg.PayDoneMsg;
 import rebue.ord.jo.OrdOrderJo;
 import rebue.ord.mo.OrdOrderMo;
@@ -222,4 +225,11 @@ public interface OrdOrderSvc extends BaseSvc<java.lang.Long, OrdOrderMo, OrdOrde
      *  @return
      */
     Ro modifyOrg(UpdateOrgTo to);
+    
+    /**
+     * 根据用户id来获取已支付，已发货，已签收的订单详情待全返金额
+     * @param userId
+     * @return
+     */
+    BigDecimal getCommissionTotal(@RequestParam("userId") final java.lang.Long userId);
 }

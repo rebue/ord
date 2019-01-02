@@ -256,4 +256,25 @@ public interface OrdOrderMapper extends MybatisBaseMapper<OrdOrderMo, Long> {
      */
     @Update("update ORD_ORDER set DELIVER_ORG_ID = #{deliverOrgId,jdbcType=BIGINT} where ID = #{id,jdbcType=BIGINT}")
     int updateOrg(@Param("deliverOrgId") Long deliverOrgId, @Param("id") Long id);
+    /**
+     * 根据用户id来获取已支付，已发货，已签收的订单详情待全返金额
+     * @param userId
+     * @return
+     */
+    @Select("SELECT \n" + 
+    		"    SUM(BUY_PRICE * (BUY_COUNT - RETURN_COUNT))\n" + 
+    		"FROM\n" + 
+    		"    ord.ORD_ORDER_DETAIL\n" + 
+    		"WHERE\n" + 
+    		"    ORDER_ID IN (SELECT \n" + 
+    		"            id\n" + 
+    		"        FROM\n" + 
+    		"            ord.ORD_ORDER \n" + 
+    		"        WHERE\n" + 
+    		"            USER_ID = #{userId,jdbcType=BIGINT}\n" + 
+    		"                AND order_State IN (2 , 3, 4))\n" + 
+    		"        AND COMMISSION_STATE IN (0 , 1)\n" + 
+    		"        AND SUBJECT_TYPE = 1\n" + 
+    		"        AND RETURN_STATE != 2")
+    BigDecimal getCommissionTotal(@Param("userId") Long userId);
 }

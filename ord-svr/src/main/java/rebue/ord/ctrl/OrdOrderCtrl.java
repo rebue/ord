@@ -2,6 +2,7 @@ package rebue.ord.ctrl;
 
 import java.beans.IntrospectionException;
 import java.lang.reflect.InvocationTargetException;
+import java.math.BigDecimal;
 import java.text.ParseException;
 import java.util.List;
 import java.util.Map;
@@ -511,4 +512,15 @@ public class OrdOrderCtrl {
         final Ro ro = svc.modifyOrg(to);
         return ro;
     }
+    
+    /**
+     * 根据用户id来获取已支付，已发货，已签收的订单详情待全返金额
+     */
+    @GetMapping("/ord/order/commissionTotal")
+    BigDecimal getCommissionTotal(@RequestParam("userId") final java.lang.Long userId){
+        _log.info("根据用户id获待全返金额getCommissionTotal userId: {}", userId);
+
+    	return svc.getCommissionTotal(userId);
+    }
+    
 }

@@ -1598,4 +1598,9 @@ public class OrdOrderSvcImpl extends MybatisBaseSvcImpl<OrdOrderMo, java.lang.Lo
         ro.setMsg("修改成功");
         return ro;
     }
+
+	@Override
+	public BigDecimal getCommissionTotal(Long userId) {
+		return _mapper.getCommissionTotal(userId);
+	}
 }
