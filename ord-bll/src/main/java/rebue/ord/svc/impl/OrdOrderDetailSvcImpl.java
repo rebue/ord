@@ -261,6 +261,9 @@ public class OrdOrderDetailSvcImpl extends BaseSvcImpl<java.lang.Long, OrdOrderD
                     if (ordOrderMo != null && ordOrderMo.getReceivedTime() != null) {
                         _log.info("设置第一个下家签收时间： {}", ordOrderMo.getReceivedTime());
                         item.setDownlineReceivedTime1(ordOrderMo.getReceivedTime());
+                    }
+                    //设置第一个下家订单编号
+                    if(ordOrderMo !=null && ordOrderMo.getOrderCode() !=null) {
                         item.setDownlineOrderCode1(ordOrderMo.getOrderCode());
                     }
                 } else {
@@ -274,8 +277,10 @@ public class OrdOrderDetailSvcImpl extends BaseSvcImpl<java.lang.Long, OrdOrderD
                     _log.info("设置第二个下家签收时间： {}", ordOrderMo.getReceivedTime());
                     if (ordOrderMo != null && ordOrderMo.getReceivedTime() != null) {
                         item.setDownlineReceivedTime2(ordOrderMo.getReceivedTime());
+                    }
+                    //设置第二个下家订单编号
+                    if(ordOrderMo != null && ordOrderMo.getOrderCode() !=null) {
                         item.setDownlineOrderCode2(ordOrderMo.getOrderCode());
-
                     }
                 }
                 _log.info("开始获取下家信息结束+++++++++++++++++++++++");
@@ -295,6 +300,9 @@ public class OrdOrderDetailSvcImpl extends BaseSvcImpl<java.lang.Long, OrdOrderD
                 // 设置上家的订单签收时间
                 if (ordOrderMo != null && ordOrderMo.getReceivedTime() != null) {
                     item.setUplineReceivedTime(ordOrderMo.getReceivedTime());
+                }
+                //设置上家订单编号
+                if(ordOrderMo != null && ordOrderMo.getOrderCode() != null ) {
                     item.setUplineOrderCode(ordOrderMo.getOrderCode());
                 }
 
