@@ -629,6 +629,13 @@ public class OrdReturnSvcImpl extends MybatisBaseSvcImpl<OrdReturnMo, java.lang.
 			_log.info("该定单详情下家购买关系为空");
 		} else {
 			for (int i = 0; i < buyRelationResult1.size(); i++) {
+				_log.info("删除购买关系：" + buyRelationResult1.get(i).getId());
+				final int delResult = ordBuyRelationSvc.del(buyRelationResult1.get(i).getId());
+				if (delResult != 1) {
+					_log.info("删除购买关系失败：" + buyRelationResult1.get(i).getId());
+					throw new RuntimeException("删除购买关系失败");
+				}
+				
 				_log.info("重新匹配该定单详情下家购买关系，购买关系ID：" + buyRelationResult1.get(i).getId());
 				_log.info("全返商品添加购买关系");
 				final long userId = buyRelationResult1.get(i).getDownlineUserId();
@@ -642,12 +649,7 @@ public class OrdReturnSvcImpl extends MybatisBaseSvcImpl<OrdReturnMo, java.lang.
 				final String matchBuyRelationResult = ordBuyRelationSvc.matchBuyRelation(userId, onlineId, buyPrice,
 						downLineDetailId, downLineOrderId, orderTimestamp);
 				_log.info(matchBuyRelationResult);
-				_log.info("删除购买关系：" + buyRelationResult1.get(i).getId());
-				final int delResult = ordBuyRelationSvc.del(buyRelationResult1.get(i).getId());
-				if (delResult != 1) {
-					_log.info("删除购买关系失败：" + buyRelationResult1.get(i).getId());
-					throw new RuntimeException("删除购买关系失败");
-				}
+
 			}
 		}
 		if ((newActualAmount.compareTo(BigDecimal.ZERO) == 0)
