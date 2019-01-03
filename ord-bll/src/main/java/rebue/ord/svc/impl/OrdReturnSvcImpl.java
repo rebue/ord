@@ -624,6 +624,7 @@ public class OrdReturnSvcImpl extends MybatisBaseSvcImpl<OrdReturnMo, java.lang.
 		final OrdBuyRelationMo buyRelationParamMo1 = new OrdBuyRelationMo();
 		buyRelationParamMo1.setUplineOrderDetailId(detail.getId());
 		final List<OrdBuyRelationMo> buyRelationResult1 = ordBuyRelationSvc.list(buyRelationParamMo1);
+		_log.info("获取该定单详情下家购买关系结果为：List<OrdBuyRelationMo>-{}",buyRelationResult1.toString());
 		if (buyRelationResult1.size() == 0) {
 			_log.info("该定单详情下家购买关系为空");
 		} else {
@@ -636,6 +637,8 @@ public class OrdReturnSvcImpl extends MybatisBaseSvcImpl<OrdReturnMo, java.lang.
 				final long downLineDetailId = buyRelationResult1.get(i).getDownlineOrderDetailId();
 				final long downLineOrderId = buyRelationResult1.get(i).getDownlineOrderId();
 				final long orderTimestamp = detail.getOrderTimestamp();
+				_log.info("全返商品添加购买关系参数为:userId-{},onlineId-{},buyPrice-{},downLineDetailId-{},downLineOrderId-{},orderTimestamp-{}",
+						userId,onlineId,buyPrice,downLineDetailId,downLineOrderId,orderTimestamp);
 				final String matchBuyRelationResult = ordBuyRelationSvc.matchBuyRelation(userId, onlineId, buyPrice,
 						downLineDetailId, downLineOrderId, orderTimestamp);
 				_log.info(matchBuyRelationResult);
