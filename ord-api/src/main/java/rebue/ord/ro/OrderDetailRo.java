@@ -83,4 +83,14 @@ public class OrderDetailRo {
 	 * 购买关系
 	 */
 	private List<OrdBuyRelationRo> ordBuyRelation;
+
+	/**
+	 * 购买积分
+	 */
+	private BigDecimal buyPoint;
+
+	/**
+	 * 购买总积分
+	 */
+	private BigDecimal buyPointTotal;
 }
