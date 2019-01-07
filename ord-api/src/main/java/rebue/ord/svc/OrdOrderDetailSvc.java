@@ -3,9 +3,13 @@ package rebue.ord.svc;
 import java.math.BigDecimal;
 import java.util.List;
 import java.util.Map;
+
+import com.github.pagehelper.PageInfo;
+
 import rebue.ord.jo.OrdOrderDetailJo;
 import rebue.ord.mo.OrdOrderDetailMo;
 import rebue.ord.ro.DetailandBuyRelationRo;
+import rebue.ord.ro.WaitingBuyPointByUserIdListRo;
 import rebue.ord.to.UpdateOrgTo;
 import rebue.robotech.svc.BaseSvc;
 
@@ -118,4 +122,20 @@ public interface OrdOrderDetailSvc extends BaseSvc<java.lang.Long, OrdOrderDetai
      * 修改组织
      */
     int modifyOrg(UpdateOrgTo to);
+
+    /**
+     * 根据用户id计算待入账的积分
+     * @param userId
+     * @return
+     */
+	BigDecimal countWaitingBuyPointByUserId(Long userId);
+
+	/**
+	 * 获取用户待入积分
+	 * @param userId
+	 * @param pageNum
+	 * @param pageSize
+	 * @return
+	 */
+	PageInfo<WaitingBuyPointByUserIdListRo> waitingBuyPointByUserIdList(Long userId, Integer pageNum, Integer pageSize);
 }

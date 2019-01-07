@@ -28,7 +28,7 @@ public class OrdOrderDetailTests {
      *
      *  @mbg.generated 自动生成，如需修改，请删除本行
      */
-    @Test
+//    @Test
     public void testCrud() throws IOException, ReflectiveOperationException {
         OrdOrderDetailMo mo = null;
         for (int i = 0; i < 20; i++) {
@@ -61,5 +61,11 @@ public class OrdOrderDetailTests {
         Assert.assertEquals(ResultDic.SUCCESS, deleteRo.getResult());
     }
 
-    private final String hostUrl = "http://127.0.0.1:9009";
+    private final String hostUrl = "http://127.0.0.1:20180";
+    
+    @Test
+    public void countWaitingBuyPointByUserIdTest() throws IOException {
+    	String point = OkhttpUtils.get(hostUrl + "/ord/detailList/countwaitingbuypoint?userId=525616558689484801");
+    	System.out.println(point);
+    }
 }

@@ -93,4 +93,9 @@ public class OrderDetailRo {
 	 * 购买总积分
 	 */
 	private BigDecimal buyPointTotal;
+
+	/**
+	 * 支付顺序
+	 */
+	private Byte paySeq;
 }

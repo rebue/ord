@@ -1019,5 +1019,37 @@
 		<include refid="Base_Column_List" />
 		from ORD_ORDER_DETAIL where ORDER_ID=#{orderId,jdbcType=BIGINT}
 	</select>
-
+	
+	<!-- 根据用户id计算待入账的积分 -->
+	<select id="countWaitingBuyPointByUserId" parameterType="java.lang.Long" resultType="java.math.BigDecimal">
+		SELECT 
+		    SUM(a.BUY_POINT_TOTAL) AS buyPointTotal
+		FROM
+		    ORD_ORDER_DETAIL a
+		        INNER JOIN
+		    ORD_ORDER b ON a.ORDER_ID = b.ID
+		WHERE
+		    a.RETURN_STATE IN (0 , 3)
+		        AND a.SUBJECT_TYPE = 1
+		        AND b.ORDER_STATE IN (2 , 3, 4)
+		        AND b.USER_ID = #{userId,jdbcType=BIGINT}
+	</select>
+	
+	<!-- 获取待入积分列表 -->
+	<select id="selectWaitingBuyPointByUserId" parameterType="java.lang.Long" resultType="rebue.ord.ro.WaitingBuyPointByUserIdListRo">
+		SELECT 
+		    b.ORDER_CODE AS orderCode,
+		    a.ONLINE_TITLE AS onlineTitle,
+		    a.SPEC_NAME AS specName,
+		    IFNULL(a.BUY_POINT_TOTAL, 0) AS buyPointTotal
+		FROM
+		    ORD_ORDER_DETAIL a
+		        INNER JOIN
+		    ORD_ORDER b ON a.ORDER_ID = b.ID
+		WHERE
+		    a.RETURN_STATE IN (0 , 3)
+		        AND a.SUBJECT_TYPE = 1
+		        AND b.ORDER_STATE IN (2 , 3, 4)
+		        AND b.USER_ID = #{userId,jdbcType=BIGINT}
+	</select>
 </mapper>

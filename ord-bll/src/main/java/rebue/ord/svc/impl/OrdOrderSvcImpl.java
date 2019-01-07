@@ -604,8 +604,9 @@ public class OrdOrderSvcImpl extends MybatisBaseSvcImpl<OrdOrderMo, java.lang.Lo
 					orderDetailRo.setCashbackTotal(orderDetailMo.getCashbackTotal());
 					orderDetailRo.setCashbackCommissionSlot(orderDetailMo.getCommissionSlot());
 					orderDetailRo.setCashbackCommissionState(orderDetailMo.getCommissionState());
-					orderDetailRo.setBuyPoint(orderDetailMo.getBuyPoint());
-					orderDetailRo.setBuyPointTotal(orderDetailMo.getBuyPointTotal());
+					orderDetailRo.setBuyPoint(orderDetailMo.getBuyPoint() == null ? BigDecimal.ZERO : orderDetailMo.getBuyPoint());
+					orderDetailRo.setBuyPointTotal(orderDetailMo.getBuyPointTotal() == null ? BigDecimal.ZERO : orderDetailMo.getBuyPointTotal());
+					orderDetailRo.setPaySeq(orderDetailMo.getPaySeq());
 					orderDetailRoList.add(orderDetailRo);
 				}
 				hm.put("items", orderDetailRoList);

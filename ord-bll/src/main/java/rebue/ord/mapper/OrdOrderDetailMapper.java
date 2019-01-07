@@ -12,6 +12,7 @@ import org.apache.ibatis.annotations.Update;
 import rebue.ord.dic.OrderStateDic;
 import rebue.ord.dic.ReturnStateDic;
 import rebue.ord.mo.OrdOrderDetailMo;
+import rebue.ord.ro.WaitingBuyPointByUserIdListRo;
 import rebue.robotech.mapper.MybatisBaseMapper;
 
 @Mapper
@@ -231,4 +232,17 @@ public interface OrdOrderDetailMapper extends MybatisBaseMapper<OrdOrderDetailMo
             "    ID = #{id} AND PAY_SEQ != 1")
     void setFirstPaySeq(@Param("id") Long id);
 
+    /**
+     *  根据用户id计算待入账的积分
+     * @param userId
+     * @return
+     */
+    BigDecimal countWaitingBuyPointByUserId(Long userId);
+    
+    /**
+     * 获取待入积分列表
+     * @param userId
+     * @return
+     */
+    List<WaitingBuyPointByUserIdListRo> selectWaitingBuyPointByUserId(Long userId);
 }
