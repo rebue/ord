@@ -247,4 +247,14 @@ public class OrdOrderDetailCtrl {
 		_log.info("获取用户待入积分的返回值为：{}", result);
 		return result;
 	}
+	
+	/**
+	 * 计算首单购买
+	 * @param onlineSpecId
+	 */
+	/*@PutMapping("/ord/detail/calcfirstbuy")
+	void calcFirstBuy(@RequestParam("onlineSpecId") Long onlineSpecId) {
+		_log.info("计算首单购买的参数为：{}", onlineSpecId);
+		svc.calcFirstBuy(onlineSpecId);
+	}*/
 }

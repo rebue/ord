@@ -63,9 +63,15 @@ public class OrdOrderDetailTests {
 
     private final String hostUrl = "http://127.0.0.1:20180";
     
-    @Test
+//    @Test
     public void countWaitingBuyPointByUserIdTest() throws IOException {
     	String point = OkhttpUtils.get(hostUrl + "/ord/detailList/countwaitingbuypoint?userId=525616558689484801");
     	System.out.println(point);
+    }
+    
+    @Test
+    public void calcFirstBuyTest() throws IOException {
+    	String result = OkhttpUtils.put(hostUrl + "/ord/detail/calcfirstbuy?onlineSpecId=553095137820016642");
+    	System.out.println(result);
     }
 }

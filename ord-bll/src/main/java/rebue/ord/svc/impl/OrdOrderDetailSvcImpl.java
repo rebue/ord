@@ -18,6 +18,7 @@ import org.springframework.transaction.annotation.Transactional;
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
 
+import rebue.onl.svr.feign.OnlOnlineSpecSvc;
 import rebue.ord.dao.OrdOrderDetailDao;
 import rebue.ord.dic.OrderStateDic;
 import rebue.ord.dic.OrderTaskTypeDic;
@@ -35,7 +36,9 @@ import rebue.ord.svc.OrdOrderDetailSvc;
 import rebue.ord.svc.OrdOrderSvc;
 import rebue.ord.svc.OrdTaskSvc;
 import rebue.ord.to.UpdateOrgTo;
+import rebue.robotech.dic.ResultDic;
 import rebue.robotech.dic.TaskExecuteStateDic;
+import rebue.robotech.ro.Ro;
 import rebue.robotech.svc.impl.BaseSvcImpl;
 import rebue.suc.mo.SucUserMo;
 import rebue.suc.ro.SucOrgRo;
@@ -78,22 +81,18 @@ public class OrdOrderDetailSvcImpl
 		return super.add(mo);
 	}
 
-	/**
-	 */
 	@Resource
 	private SucUserSvc sucUserSvc;
-
 	@Resource
 	private OrdBuyRelationSvc selfSvc;
-
 	@Resource
 	private SucOrgSvc sucOrgSvc;
-
 	@Resource
 	private OrdTaskSvc ordTaskSvc;
-
 	@Resource
 	private OrdOrderSvc ordOrderSvc;
+	@Resource
+	private OnlOnlineSpecSvc onlOnlineSpecSvc;
 
 	/**
 	 * 修改订单详情的退货情况(根据订单详情ID、已退货数量、旧的返现金总额，修改退货总数、返现金总额以及退货状态)
@@ -413,6 +412,11 @@ public class OrdOrderDetailSvcImpl
 				OrderStateDic.PAID);
 		if (orderDetailMo == null) {
 			_log.warn("未发现有已经支付的订单详情，可能已退货: onlineSpecId-{}", onlineSpecId);
+			Ro ro = onlOnlineSpecSvc.modifyIsHaveFirstOrderById(onlineSpecId, false);
+			_log.info("计算首单购买修改是否已有首单的返回值为：{}", ro);
+			if (ro.getResult() != ResultDic.SUCCESS) {
+				throw new RuntimeException("修改是否已有首单失败");
+			}
 			return;
 		}
 
@@ -451,6 +455,12 @@ public class OrdOrderDetailSvcImpl
 			_log.debug("添加计算首单任务的参数为：{}", ordTaskMo);
 			// 添加取消订单任务
 			ordTaskSvc.add(ordTaskMo);
+		}
+		
+		Ro ro = onlOnlineSpecSvc.modifyIsHaveFirstOrderById(onlineSpecId, true);
+		_log.info("计算首单购买修改是否已有首单的返回值为：{}", ro);
+		if (ro.getResult() != ResultDic.SUCCESS) {
+			throw new RuntimeException("修改是否已有首单失败");
 		}
 	}
 
