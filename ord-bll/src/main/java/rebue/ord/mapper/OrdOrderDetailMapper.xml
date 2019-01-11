@@ -739,7 +739,7 @@
 	<update id="updateCommissionSlotForBuyRelation" parameterType="rebue.ord.mo.OrdOrderDetailMo">
 		UPDATE ORD_ORDER_DETAIL SET COMMISSION_SLOT = #{commissionSlot,jdbcType=TINYINT} 
 		<if test="commissionState != null and commissionState != '' ">
-			,ood.COMMISSION_STATE = #{commissionState,jdbcType=TINYINT}
+			,COMMISSION_STATE = #{commissionState,jdbcType=TINYINT}
 		</if>
 		WHERE ID = #{id,jdbcType=BIGINT}
 		AND COMMISSION_SLOT = ${commissionSlot}+1
