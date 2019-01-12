@@ -245,4 +245,21 @@ public interface OrdOrderDetailMapper extends MybatisBaseMapper<OrdOrderDetailMo
      * @return
      */
     List<WaitingBuyPointByUserIdListRo> selectWaitingBuyPointByUserId(Long userId);
+    
+    /**
+     * 根据上线id修改发货组织和上线组织
+     * @param mo
+     * @return
+     */
+    @Update("UPDATE \n" + 
+    		"    ord.ORD_ORDER_DETAIL a ,\n" + 
+    		"    ord.ORD_ORDER b\n" + 
+    		"SET \n" + 
+    		"    a.SUPPLIER_ID =  #{supplierId,jdbcType=BIGINT},\n" + 
+    		"    a.DELIVER_ORG_ID = #{deliverOrgId,jdbcType=BIGINT}\n" + 
+    		"WHERE\n" + 
+    		"b.ID=a.ORDER_ID and\n" + 
+    		"    b.ORDER_STATE IN (1,2,3,4)\n" + 
+    		"        AND a.ONLINE_ID =  #{onlineId,jdbcType=BIGINT} ")
+	 int modifyDeliverAndSupplierByOnlineid(@Param("supplierId") Long supplierId,@Param("deliverOrgId") Long deliverOrgId,@Param("onlineId") Long onlineId );
 }

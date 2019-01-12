@@ -257,4 +257,18 @@ public class OrdOrderDetailCtrl {
 		_log.info("计算首单购买的参数为：{}", onlineSpecId);
 		svc.calcFirstBuy(onlineSpecId);
 	}*/
+	
+	/**
+	 * 根据上线id修改订单详情供应商和发货组织
+	 * @param mo
+	 * @return
+	 */
+	@PutMapping("/ord/modifyDeliverAndSupplierByOnlineid")
+	int modifyDeliverAndSupplierByOnlineid(@RequestParam("supplierId") Long supplierId,@RequestParam("deliverOrgId") Long deliverOrgId,@RequestParam("onlineId") Long onlineId) {
+		_log.info("根据上线id修改订单详情供应商和发货组织参数为：supplierId()-{},deliverOrgId()-{},onlineId()-{}",supplierId,deliverOrgId,onlineId);
+		int result=svc.modifyDeliverAndSupplierByOnlineid(supplierId,deliverOrgId,onlineId);
+		_log.info("根据上线id修改订单详情供应商和发货组织结果为：result-{}",result);
+		return result;
+
+	}
 }

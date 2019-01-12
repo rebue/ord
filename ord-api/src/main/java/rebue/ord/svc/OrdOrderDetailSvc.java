@@ -138,4 +138,11 @@ public interface OrdOrderDetailSvc extends BaseSvc<java.lang.Long, OrdOrderDetai
 	 * @return
 	 */
 	PageInfo<WaitingBuyPointByUserIdListRo> waitingBuyPointByUserIdList(Long userId, Integer pageNum, Integer pageSize);
+	
+	/**
+	 * 根据上线id修改订单详情供应商和发货组织
+	 * @param mo
+	 * @return
+	 */
+	 int modifyDeliverAndSupplierByOnlineid(Long supplierId,Long deliverOrgId,Long onlineId);
 }

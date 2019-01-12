@@ -487,4 +487,12 @@ public class OrdOrderDetailSvcImpl
 		_log.info("获取用户待入积分列表信息的参数为：userId-{}; pageNum-{}, pageSize-{}", userId, pageNum, pageSize);
 		return PageHelper.startPage(pageNum, pageSize).doSelectPageInfo(() -> _mapper.selectWaitingBuyPointByUserId(userId));
 	}
+	
+	/**
+	 * 根据上线id修改订单详情供应商和发货组织
+	 */
+	@Override
+	public int modifyDeliverAndSupplierByOnlineid(Long supplierId,Long deliverOrgId,Long onlineId) {
+		return _mapper.modifyDeliverAndSupplierByOnlineid(supplierId,deliverOrgId,onlineId);
+	}
 }

@@ -1052,7 +1052,7 @@
 		UPDATE ORD_ORDER SET ORDER_STATE = 3,SEND_OP_ID =
 		#{sendOpId,jdbcType=BIGINT}, SEND_TIME =
 		#{sendTime,jdbcType=TIMESTAMP}
-		WHERE ID=#{id,jdbcType=BIGINT}
+		WHERE ID=#{id,jdbcType=BIGINT} AND ORDER_STATE=2
 	</update>
 
 	<!-- 确认发货并设置快递公司 -->
