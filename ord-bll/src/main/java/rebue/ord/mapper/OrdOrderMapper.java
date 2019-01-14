@@ -201,10 +201,7 @@ public interface OrdOrderMapper extends MybatisBaseMapper<OrdOrderMo, Long> {
      */
     List<OrdOrderMo> listOrderSupplier(ListOrderTo to);
 
-    /**
-     * 供应商分页查询订单交易信息
-     */
-    List<OrdOrderMo> listOrderTrade(ListOrderTo to);
+
 
     /**
      * 修改收件人信息

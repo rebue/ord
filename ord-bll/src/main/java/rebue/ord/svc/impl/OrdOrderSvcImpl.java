@@ -1609,14 +1609,7 @@ public class OrdOrderSvcImpl extends MybatisBaseSvcImpl<OrdOrderMo, java.lang.Lo
 		return result;
 	}
 
-	@Override
-	public PageInfo<OrdOrderRo> listOrderTrade(final ListOrderTo to, final int pageNum, final int pageSize) {
-		_log.info("获取订单的参数为: {}", to);
-		_log.info("orderList: ro-{}; pageNum-{}; pageSize-{}", to, pageNum, pageSize);
-		final PageInfo<OrdOrderRo> result = PageHelper.startPage(pageNum, pageSize)
-				.doSelectPageInfo(() -> _mapper.listOrderTrade(to));
-		return result;
-	}
+
 
 	/**
 	 * 修改组织

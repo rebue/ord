@@ -166,10 +166,7 @@ public interface OrdOrderSvc extends BaseSvc<java.lang.Long, OrdOrderMo, OrdOrde
      */
     PageInfo<OrdOrderRo> SupplierlistOrder(ListOrderTo to, int pageNum, int pageSize);
 
-    /**
-     * 供应商分页查询订单d订单交易
-     */
-    PageInfo<OrdOrderRo> listOrderTrade(ListOrderTo to, int pageNum, int pageSize);
+
 
     /**
      * 修改收件人信息

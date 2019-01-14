@@ -184,39 +184,6 @@ public class OrdOrderCtrl {
         return result;
     }
 
-    /**
-     * 供应商查询订单交易信息列表，
-     *
-     * @mbg.overrideByMethodName
-     */
-    @GetMapping("/ord/order/supplier/listOrderTrade")
-    PageInfo<OrdOrderRo> listTrade(final ListOrderTo to, @RequestParam(value = "pageNum", required = false) Integer pageNum,
-            @RequestParam(value = "pageSize", required = false) Integer pageSize, final HttpServletRequest req) throws ParseException {
-        if (pageNum == null) {
-            pageNum = 1;
-        }
-        if (pageSize == null) {
-            pageSize = 5;
-        }
-        _log.info("list ListOrderTo:" + to + ", pageNum = " + pageNum + ", pageSize = " + pageSize);
-        if (pageSize > 50) {
-            final String msg = "pageSize不能大于50";
-            _log.error(msg);
-            throw new IllegalArgumentException(msg);
-        }
-        if (!isDebug) {
-            final Long orgId = (Long) JwtUtils.getJwtAdditionItemInCookie(req, "orgId");
-            if (orgId == null) {
-                return new PageInfo<>();
-            }
-            to.setOrgId(orgId);
-        }
-        _log.info("当前用户的组织ID: {}", to.getOrgId());
-        // 查询订单
-        final PageInfo<OrdOrderRo> result = svc.listOrderTrade(to, pageNum, pageSize);
-        _log.info("result: " + result.getList());
-        return result;
-    }
 
     /**
      * 修改订单实际金额信息 2018年4月12日14:51:59
