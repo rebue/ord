@@ -944,8 +944,14 @@
 		<if test="realMoney != null">
 			and REAL_MONEY = #{realMoney,jdbcType=DECIMAL}
 		</if>
-		<if test="orderState != null">
-			and ORDER_STATE = #{orderState,jdbcType=TINYINT}
+		<if test="orderState == 4">
+			and ORDER_STATE = in(2,3,4)
+		</if>
+		<if test="orderState == 3">
+			and ORDER_STATE = in(3)
+		</if>
+		<if test="orderState == 1">
+			and ORDER_STATE = in(1)
 		</if>
 		<if test="userId != null">
 			and USER_ID = #{userId,jdbcType=BIGINT}
@@ -1253,7 +1259,7 @@
 		ORD_ORDER_DETAIL b ON a.ID =
 		b.ORDER_ID
 		<where>
-			and a.DELIVER_ORG_ID=#{orgId}
+			and a.DELIVER_ORG_ID=#{orgId}  and a.ORDER_STATE not in(-1,1)
 			<if test="id != null">
 				and a.ID = #{id,jdbcType=BIGINT},
 			</if>
@@ -1294,7 +1300,7 @@
 		ORD_ORDER_DETAIL b ON a.ID =
 		b.ORDER_ID
 		<where>
-			and a.DELIVER_ORG_ID=#{orgId} and a.ORDER_STATE not in (1,2,3)
+			and a.DELIVER_ORG_ID=#{orgId} and a.ORDER_STATE not in(1,2,3)
 			<if test="id != null">
 				and a.ID = #{id,jdbcType=BIGINT},
 			</if>
