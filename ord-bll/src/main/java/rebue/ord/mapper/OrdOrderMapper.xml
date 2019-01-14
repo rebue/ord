@@ -945,13 +945,13 @@
 			and REAL_MONEY = #{realMoney,jdbcType=DECIMAL}
 		</if>
 		<if test="orderState == 4">
-			and ORDER_STATE = in(2,3,4)
+			and ORDER_STATE  in(2,3,4)
 		</if>
 		<if test="orderState == 3">
-			and ORDER_STATE = in(3)
+			and ORDER_STATE  in(3)
 		</if>
 		<if test="orderState == 1">
-			and ORDER_STATE = in(1)
+			and ORDER_STATE  in(1)
 		</if>
 		<if test="userId != null">
 			and USER_ID = #{userId,jdbcType=BIGINT}
