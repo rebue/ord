@@ -451,7 +451,7 @@ public class OrdOrderDetailSvcImpl
 			ordTaskMo.setExecuteState((byte) TaskExecuteStateDic.NONE.getCode());
 			ordTaskMo.setExecutePlanTime(executePlanTime);
 			ordTaskMo.setTaskType((byte) OrderTaskTypeDic.CALC_FIRST_BUY.getCode());
-			ordTaskMo.setOrderId(String.valueOf(orderDetailMo.getId())); // 计算首单的任务的订单ID其实是上线规格ID
+			ordTaskMo.setOrderId(String.valueOf(onlineSpecId)); // 计算首单的任务的订单ID其实是上线规格ID
 			_log.debug("添加计算首单任务的参数为：{}", ordTaskMo);
 			// 添加取消订单任务
 			ordTaskSvc.add(ordTaskMo);
