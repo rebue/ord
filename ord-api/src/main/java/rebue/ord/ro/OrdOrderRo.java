@@ -368,7 +368,10 @@ public class OrdOrderRo {
      */
     private String deliverOrgName;
     
-
+    /**
+     * 购买总成本价格
+     */
+   private  BigDecimal costPriveTotal;
     
     
 }
