@@ -551,6 +551,10 @@ public class OrdReturnSvcImpl extends MybatisBaseSvcImpl<OrdReturnMo, java.lang.
 			ro.setMsg(msg);
 			return ro;
 		}
+		
+		// 真实购买数量 = 购买数量 - 订单退货总数
+		Integer realBuyCount = detail.getBuyCount() - returnTotal;
+		
 		// 退货数量为空，则表示仅退款，不为空，则表示退货退款
 		if (to.getReturnNum() != null && to.getReturnNum() > 0) {
 			// 之前的返现金总额
@@ -558,7 +562,7 @@ public class OrdReturnSvcImpl extends MybatisBaseSvcImpl<OrdReturnMo, java.lang.
 					: detail.getCashbackTotal();
 			// 退货后的返现金总额 = 返现金额 * (购买数量 - 退货总数)
 			final BigDecimal newCashbackTotal = detail.getCashbackAmount()
-					.multiply(BigDecimal.valueOf(detail.getBuyCount() - returnTotal));
+					.multiply(BigDecimal.valueOf(realBuyCount));
 			_log.info(
 					"同意退款修改返现总额和退货数量的参数为：id={}, oldCashbackTotal={}, newCashbackTotal={}, returnedCount={}, returnTotal={}",
 					to.getOrderDetailId(), oldCashbackTotal, newCashbackTotal, returnedCount, returnTotal);
@@ -570,11 +574,15 @@ public class OrdReturnSvcImpl extends MybatisBaseSvcImpl<OrdReturnMo, java.lang.
 				throw new RuntimeException("修改退货数量出错");
 			}
 		}
-		_log.info("同意退款修改订单详情实际金额和退货状态的参数为：订单详情id-{}，新的实际金额-{}，旧的实际金额-{}", to.getOrderDetailId(),
-				detail.getActualAmount().subtract(currentRefundTotal), detail.getActualAmount());
+		
+		// 真实购买总积分
+		BigDecimal realBuyPointTotal = detail.getBuyPoint().multiply(BigDecimal.valueOf(realBuyCount));
+		
+		_log.info("同意退款修改订单详情实际金额和退货状态的参数为：订单详情id-{}，新的实际金额-{}，旧的实际金额-{}, 新的购买总积分-{}", to.getOrderDetailId(),
+				detail.getActualAmount().subtract(currentRefundTotal), detail.getActualAmount(), realBuyPointTotal);
 		final int modifyActualAmountResult = orderDetailSvc.modifyActualAmountANDReturnState(to.getOrderDetailId(),
 				detail.getActualAmount().subtract(currentRefundTotal), detail.getActualAmount(), returnState,
-				detail.getReturnState());
+				detail.getReturnState(), realBuyPointTotal);
 		_log.info("同意退款修改订单详情实际金额和退货状态的返回值为：{}", modifyActualAmountResult);
 		if (modifyActualAmountResult != 1) {
 			_log.info("同意退款修改订单详情实际金额和退货状态出现错误，退货id为：{}", to.getReturnId());
@@ -582,9 +590,6 @@ public class OrdReturnSvcImpl extends MybatisBaseSvcImpl<OrdReturnMo, java.lang.
 		}
 		// 修改退货单
 		final Date now = new Date();
-		//
-		//
-		//
 		_log.info("确认退款修改退货单的参数为：本次退款总额-{} 扣除补偿金额-{} 操作人ID-{} 操作时间-{} 退货ID-{}", currentRefundTotal,
 				to.getRefundCompensation(), to.getOpId(), now, to.getReturnId());
 		final int //

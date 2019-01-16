@@ -2,6 +2,8 @@ package rebue.ord.test;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.io.IOException;
+import java.math.BigDecimal;
+
 import org.junit.Assert;
 import org.junit.Test;
 import rebue.ord.mo.OrdOrderDetailMo;
@@ -10,6 +12,7 @@ import rebue.robotech.ro.IdRo;
 import rebue.robotech.ro.Ro;
 import rebue.wheel.OkhttpUtils;
 import rebue.wheel.RandomEx;
+import rebue.wheel.idworker.IdWorker3;
 
 /**
  * 订单详情
@@ -69,9 +72,21 @@ public class OrdOrderDetailTests {
     	System.out.println(point);
     }
     
-    @Test
+//    @Test
     public void calcFirstBuyTest() throws IOException {
     	String result = OkhttpUtils.put(hostUrl + "/ord/detail/calcfirstbuy?onlineSpecId=553095137820016642");
+    	System.out.println(result);
+    }
+    
+    // @Test
+    public void oldPointList() throws IOException {
+    	String result = OkhttpUtils.get(hostUrl + "/ord/detail/oldpointlist");
+    	System.out.println(result);
+    }
+    
+    @Test
+    public void compensatePoint() throws IOException {
+    	String result = OkhttpUtils.get(hostUrl + "/ord/detail/compensatepoint");
     	System.out.println(result);
     }
 }

@@ -95,7 +95,7 @@ public interface OrdOrderDetailSvc extends BaseSvc<java.lang.Long, OrdOrderDetai
      * @param returnedState
      * @return
      */
-    int modifyActualAmountANDReturnState(Long id, BigDecimal newActualAmount, BigDecimal oldActualAmount, Byte returnState, Byte returnedState);
+    int modifyActualAmountANDReturnState(Long id, BigDecimal newActualAmount, BigDecimal oldActualAmount, Byte returnState, Byte returnedState, BigDecimal realBuyPointTotal);
 
     /**
      * 根据id修改供应商id
@@ -145,4 +145,9 @@ public interface OrdOrderDetailSvc extends BaseSvc<java.lang.Long, OrdOrderDetai
 	 * @return
 	 */
 	 int modifyDeliverAndSupplierByOnlineid(Long supplierId,Long deliverOrgId,Long onlineId);
+
+	 /**
+	 * 补偿双倍积分
+	 */
+	void compensatePoint();
 }

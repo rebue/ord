@@ -1055,4 +1055,32 @@
 		        AND b.ORDER_STATE IN (2 , 3, 4)
 		        AND b.USER_ID = #{userId,jdbcType=BIGINT}
 	</select>
+	
+	<!-- 查询所有旧订单的积分 -->
+	<select id="selectOldPoint" resultType="rebue.ord.mo.OrdOrderDetailMo">
+		SELECT 
+		    a.USER_ID,
+		    a.ORDER_ID,
+		    a.ID,
+		    a.ONLINE_ID,
+		    a.ONLINE_TITLE,
+		    a.SPEC_NAME,
+		    a.BUY_PRICE,
+		    a.COST_PRICE,
+		    a.BUY_COUNT,
+		    CASE
+		        WHEN (a.BUY_PRICE / 2 - a.COST_PRICE) * 2 &lt; 1 THEN 2
+		        WHEN (a.BUY_PRICE / 2 - a.COST_PRICE) * 2 &gt; 1 THEN ROUND(a.BUY_PRICE / 2 - a.COST_PRICE) * 2
+		        ELSE 2
+		    END AS BUY_POINT
+		FROM
+		    ord.ORD_ORDER_DETAIL a
+		    inner join ord.ORD_ORDER b on a.ORDER_ID=b.ID
+		WHERE
+		    a.BUY_POINT IS NULL AND a.SUBJECT_TYPE = 1
+		        AND a.RETURN_STATE != 2
+		        AND a.ONLINE_TITLE NOT LIKE '%测试%'
+		        and b.ORDER_STATE > 1
+	</select>
+	
 </mapper>

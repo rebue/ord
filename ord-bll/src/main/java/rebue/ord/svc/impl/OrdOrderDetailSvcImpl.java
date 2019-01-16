@@ -36,6 +36,9 @@ import rebue.ord.svc.OrdOrderDetailSvc;
 import rebue.ord.svc.OrdOrderSvc;
 import rebue.ord.svc.OrdTaskSvc;
 import rebue.ord.to.UpdateOrgTo;
+import rebue.pnt.dic.PointLogTypeDic;
+import rebue.pnt.svr.feign.PntPointSvc;
+import rebue.pnt.to.AddPointTradeTo;
 import rebue.robotech.dic.ResultDic;
 import rebue.robotech.dic.TaskExecuteStateDic;
 import rebue.robotech.ro.Ro;
@@ -93,6 +96,8 @@ public class OrdOrderDetailSvcImpl
 	private OrdOrderSvc ordOrderSvc;
 	@Resource
 	private OnlOnlineSpecSvc onlOnlineSpecSvc;
+	@Resource
+	private PntPointSvc pntPointSvc;
 
 	/**
 	 * 修改订单详情的退货情况(根据订单详情ID、已退货数量、旧的返现金总额，修改退货总数、返现金总额以及退货状态)
@@ -127,11 +132,11 @@ public class OrdOrderDetailSvcImpl
 	@Override
 	@Transactional(readOnly = false, propagation = Propagation.REQUIRED)
 	public int modifyActualAmountANDReturnState(final Long id, final BigDecimal newActualAmount,
-			final BigDecimal oldActualAmount, final Byte returnState, final Byte returnedState) {
-		_log.info("修改订单详情实际金额的参数为：详情id-{}，新的实际金额-{}，旧的实际金额-{}, 新的退货状态-{}, 旧的退货状态-{}", id, newActualAmount,
-				oldActualAmount, returnState, returnedState);
+			final BigDecimal oldActualAmount, final Byte returnState, final Byte returnedState, BigDecimal realBuyPointTotal) {
+		_log.info("修改订单详情实际金额的参数为：详情id-{}，新的实际金额-{}，旧的实际金额-{}, 新的退货状态-{}, 旧的退货状态-{}, 新的总积分-{}", id, newActualAmount,
+				oldActualAmount, returnState, returnedState, realBuyPointTotal);
 		return _mapper.updateActualAmountANDReturnState(id, newActualAmount, oldActualAmount, returnState,
-				returnedState);
+				returnedState, realBuyPointTotal);
 	}
 
 	/**
@@ -494,5 +499,35 @@ public class OrdOrderDetailSvcImpl
 	@Override
 	public int modifyDeliverAndSupplierByOnlineid(Long supplierId,Long deliverOrgId,Long onlineId) {
 		return _mapper.modifyDeliverAndSupplierByOnlineid(supplierId,deliverOrgId,onlineId);
+	}
+	
+	/**
+	 * 补偿双倍积分
+	 */
+	@Override
+	public void compensatePoint() {
+		_log.info("开始补偿双倍积分");
+		List<OrdOrderDetailMo> oldPointList = _mapper.selectOldPoint();
+		_log.info("补偿双倍积分获取到需要补偿的积分列表参数为：{}", String.valueOf(oldPointList));
+		for (OrdOrderDetailMo ordOrderDetailMo : oldPointList) {
+			System.out.println(ordOrderDetailMo);
+			
+			int updateBuyPointByIdResult = _mapper.updateBuyPointById(ordOrderDetailMo.getId(), ordOrderDetailMo.getBuyPoint(), ordOrderDetailMo.getBuyPoint());
+			_log.info("补偿双倍积分修改订单详情积分的返回值为：{}", updateBuyPointByIdResult);
+			if (updateBuyPointByIdResult != 1) {
+				_log.error("补偿双倍积分修改订单详情积分出现错误，请求的参数为：{}", ordOrderDetailMo);
+				return;
+			}
+			
+			AddPointTradeTo to = new AddPointTradeTo();
+			to.setAccountId(ordOrderDetailMo.getUserId());
+			to.setPointLogType((byte) PointLogTypeDic.RECHARGE.getCode());
+			to.setChangedTitile("大卖网络-积分充值");
+			to.setChangedDetail("补偿购买商品：" + ordOrderDetailMo.getOnlineTitle() + ",规格为：" + ordOrderDetailMo.getSpecName() + "的积分");
+			to.setOrderId(ordOrderDetailMo.getOrderId());
+			to.setOrderDetailId(ordOrderDetailMo.getId());
+			to.setChangedPoint(ordOrderDetailMo.getBuyPoint());
+			pntPointSvc.addPointTrade(to);
+		}
 	}
 }

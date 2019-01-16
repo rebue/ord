@@ -115,9 +115,9 @@ public interface OrdOrderDetailMapper extends MybatisBaseMapper<OrdOrderDetailMo
      * @param oldActualAmount
      * @return
      */
-    @Update("update ORD_ORDER_DETAIL set ACTUAL_AMOUNT=#{newActualAmount,jdbcType=DECIMAL}, RETURN_STATE = #{returnState,jdbcType=TINYINT} where ID=#{id,jdbcType=BIGINT} and ACTUAL_AMOUNT=#{oldActualAmount,jdbcType=DECIMAL} and RETURN_STATE = #{returnedState,jdbcType=TINYINT}")
+    @Update("update ORD_ORDER_DETAIL set ACTUAL_AMOUNT=#{newActualAmount,jdbcType=DECIMAL}, RETURN_STATE = #{returnState,jdbcType=TINYINT}, BUY_POINT_TOTAL=#{realBuyPointTotal,jdbcType=DECIMAL} where ID=#{id,jdbcType=BIGINT} and ACTUAL_AMOUNT=#{oldActualAmount,jdbcType=DECIMAL} and RETURN_STATE = #{returnedState,jdbcType=TINYINT}")
     int updateActualAmountANDReturnState(@Param("id") Long id, @Param("newActualAmount") BigDecimal newActualAmount, @Param("oldActualAmount") BigDecimal oldActualAmount,
-            @Param("returnState") Byte returnState, @Param("returnedState") Byte returnedState);
+            @Param("returnState") Byte returnState, @Param("returnedState") Byte returnedState, @Param("realBuyPointTotal") BigDecimal realBuyPointTotal);
 
     int updateCashbackSlot(OrdOrderDetailMo mo);
 
@@ -262,4 +262,20 @@ public interface OrdOrderDetailMapper extends MybatisBaseMapper<OrdOrderDetailMo
     		"    b.ORDER_STATE IN (1,2,3,4)\n" + 
     		"        AND a.ONLINE_ID =  #{onlineId,jdbcType=BIGINT} ")
 	 int modifyDeliverAndSupplierByOnlineid(@Param("supplierId") Long supplierId,@Param("deliverOrgId") Long deliverOrgId,@Param("onlineId") Long onlineId );
+    
+    /**
+                  *  查询所有旧订单的积分
+     * @return
+     */
+    List<OrdOrderDetailMo> selectOldPoint();
+    
+    /**
+     * 根据id修改积分
+     * @param id
+     * @param buyPoint
+     * @param buyPointTotal
+     * @return
+     */
+    @Update("update ORD_ORDER_DETAIL set BUY_POINT=#{buyPoint,jdbcType=DECIMAL}, BUY_POINT_TOTAL=#{buyPointTotal,jdbcType=DECIMAL} where ID=#{id,jdbcType=BIGINT} and BUY_POINT is null")
+    int updateBuyPointById(@Param("id") Long id, @Param("buyPoint") BigDecimal buyPoint, @Param("buyPointTotal") BigDecimal buyPointTotal);
 }

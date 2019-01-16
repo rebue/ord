@@ -269,6 +269,13 @@ public class OrdOrderDetailCtrl {
 		int result=svc.modifyDeliverAndSupplierByOnlineid(supplierId,deliverOrgId,onlineId);
 		_log.info("根据上线id修改订单详情供应商和发货组织结果为：result-{}",result);
 		return result;
-
 	}
+	
+	/**
+	 * 补偿双倍积分
+	 */
+	/*
+	 * @GetMapping("/ord/detail/compensatepoint") void compensatePoint() {
+	 * svc.compensatePoint(); }
+	 */
 }
