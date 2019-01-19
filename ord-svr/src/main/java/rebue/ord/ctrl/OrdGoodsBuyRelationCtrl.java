@@ -1,6 +1,7 @@
 package rebue.ord.ctrl;
 
 import java.util.Date;
+import java.util.List;
 
 import javax.annotation.Resource;
 
@@ -193,5 +194,16 @@ public class OrdGoodsBuyRelationCtrl {
     void exportGoodsBuyRelation() {
         _log.info("开始获取商品购买关系，时间：{}", new Date());
         svc.exportGoodsBuyRelation();
+    }
+    
+    /**
+		查询某个商品购买关系是否存在
+     */
+    @GetMapping("/ord/goodsbuyrelation/listExistRelation")
+    List<OrdGoodsBuyRelationMo> ListExistRelation(final OrdGoodsBuyRelationMo mo){
+        _log.info("查询某个商品购买关系是否存在 参数为：{}", mo);
+        List<OrdGoodsBuyRelationMo> result=svc.list(mo);
+        _log.info("查询某个商品购买关系是否存在 结果为：{}", result);
+        return result;
     }
 }
