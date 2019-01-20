@@ -200,7 +200,7 @@ public class OrdGoodsBuyRelationCtrl {
 		查询某个商品购买关系是否存在
      */
     @GetMapping("/ord/goodsbuyrelation/listExistRelation")
-    List<OrdGoodsBuyRelationMo> ListExistRelation(final OrdGoodsBuyRelationMo mo){
+    List<OrdGoodsBuyRelationMo> ListExistRelation(@RequestBody final OrdGoodsBuyRelationMo mo){
         _log.info("查询某个商品购买关系是否存在 参数为：{}", mo);
         List<OrdGoodsBuyRelationMo> result=svc.list(mo);
         _log.info("查询某个商品购买关系是否存在 结果为：{}", result);

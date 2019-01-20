@@ -365,6 +365,9 @@ public class OrdOrderSvcImpl extends MybatisBaseSvcImpl<OrdOrderMo, java.lang.Lo
 						onlineSpecMo.getBuyPoint().multiply(BigDecimal.valueOf(orderDetailTo.getBuyCount())));
 				orderDetails.add(orderDetailMo);
 			} else if (OnlineSubjectTypeDic.BACK_COMMISSION.getCode() == orderDetailMo.getSubjectType()) {
+				if(orderDetailTo.getInviteId() !=null) {
+					orderDetailMo.setInviteId(orderDetailTo.getInviteId());
+				}
 				orderDetailMo.setBuyCount(1);
 				orderDetailMo.setCommissionSlot((byte) 2);
 				orderDetailMo.setCommissionState((byte) CommissionStateDic.MATCHING.getCode());
@@ -1231,14 +1234,9 @@ public class OrdOrderSvcImpl extends MybatisBaseSvcImpl<OrdOrderMo, java.lang.Lo
 	}
 
 	/**
-	 * 处理订单支付完成的通知 
-	 * 1. 根据支付订单ID获取所有订单(如果没有找到，退款) 
-	 * 2. 判断通知回来的支付金额是否和订单中记录的实际交易金额相同(如果不同，退款) 
-	 * 3. 取消订单自动取消任务 
-	 * 4. 按不同发货组织拆单，并重新计算拆单后的订单实际交易金额 
-	 * 5. 根据支付订单ID修改订单状态为已支付 
-	 * 6. 添加首单计算的任务 
-	 * 7. 匹配购买关系
+	 * 处理订单支付完成的通知 1. 根据支付订单ID获取所有订单(如果没有找到，退款) 2.
+	 * 判断通知回来的支付金额是否和订单中记录的实际交易金额相同(如果不同，退款) 3. 取消订单自动取消任务 4.
+	 * 按不同发货组织拆单，并重新计算拆单后的订单实际交易金额 5. 根据支付订单ID修改订单状态为已支付 6. 添加首单计算的任务 7. 匹配购买关系
 	 */
 	@Override
 	@Transactional(readOnly = false, propagation = Propagation.REQUIRED)
@@ -1260,7 +1258,7 @@ public class OrdOrderSvcImpl extends MybatisBaseSvcImpl<OrdOrderMo, java.lang.Lo
 			return true;
 		}
 		_log.debug("根据支付订单ID获取所有订单的结果: {}", orders);
-		
+
 		_log.info("2. 判断订单状态并计算订单总额(所有订单中记录的实际交易金额之和)");
 		BigDecimal orderTotal = BigDecimal.ZERO;
 		for (final OrdOrderMo order : orders) {
@@ -1268,7 +1266,7 @@ public class OrdOrderSvcImpl extends MybatisBaseSvcImpl<OrdOrderMo, java.lang.Lo
 				return true;
 			}
 			orderTotal = orderTotal.add(order.getRealMoney());
-			
+
 		}
 		_log.debug("计算订单总额的结果是: {}", orderTotal);
 
@@ -1416,8 +1414,24 @@ public class OrdOrderSvcImpl extends MybatisBaseSvcImpl<OrdOrderMo, java.lang.Lo
 					final long downLineDetailId = orderDetail.getId();
 					final long downLineOrderId = orderDetail.getOrderId();
 					final long orderTimestamp = orderDetail.getOrderTimestamp();
-					final String matchBuyRelationResult = ordBuyRelationSvc.matchBuyRelation(userId, onlineId, buyPrice,
-							downLineDetailId, downLineOrderId, orderTimestamp);
+					String matchBuyRelationResult = "";
+					_log.debug("该条详情邀请人id为：{}", orderDetail.getInviteId());
+					if (orderDetail.getInviteId() == null ) {
+						_log.debug("邀请人id等于null，按照匹配规则匹配：InviteId-{}",orderDetail.getInviteId());
+						matchBuyRelationResult = ordBuyRelationSvc.matchBuyRelation(userId, onlineId, buyPrice,
+								downLineDetailId, downLineOrderId, orderTimestamp);
+					} else {
+						_log.debug("邀请人id不等于null，优先匹配给邀请人：InviteId-{}",orderDetail.getInviteId());
+						final boolean getAndUpdateBuyRelationByInvite = ordBuyRelationSvc
+								.getAndUpdateBuyRelationByPromote(userId, onlineId, buyPrice, downLineDetailId,
+										downLineOrderId);
+						_log.debug("优先匹配给邀请人的结果为：{}", getAndUpdateBuyRelationByInvite);
+						if (getAndUpdateBuyRelationByInvite == false) {
+							matchBuyRelationResult = ordBuyRelationSvc.matchBuyRelation(userId, onlineId, buyPrice,
+									downLineDetailId, downLineOrderId, orderTimestamp);
+						}
+					}
+
 					_log.debug(matchBuyRelationResult);
 				}
 			} catch (final Exception e) {

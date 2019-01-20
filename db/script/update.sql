@@ -168,5 +168,5 @@ alter table ORD_BUY_RELATION add unique key AK_DOWNLINE_ORDER_DETAIL (DOWNLINE_O
 
 -- ------------------------------------------------------- 上面的已更新到线上 2018.12.24 ----------------------------------------------------
 
-
+alter table ORD_ORDER_DETAIL add INVITE_ID  bigint comment '邀请人ID';
 

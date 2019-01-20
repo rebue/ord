@@ -34,6 +34,15 @@ public class OrdOrderDetailMo implements Serializable {
     private Long orderId;
 
     /**
+     *    上线规格ID(限购时获取用户购买数量时使用)
+     *
+     *    数据库字段: ORD_ORDER_DETAIL.ONLINE_SPEC_ID
+     *
+     *    @mbg.generated 自动生成，如需修改，请删除本行
+     */
+    private Long onlineSpecId;
+
+    /**
      *    上线ID
      *
      *    数据库字段: ORD_ORDER_DETAIL.ONLINE_ID
@@ -59,6 +68,15 @@ public class OrdOrderDetailMo implements Serializable {
      *    @mbg.generated 自动生成，如需修改，请删除本行
      */
     private Long productSpecId;
+
+    /**
+     *    下单时间戳(用于排序识别详情的先后顺序)
+     *
+     *    数据库字段: ORD_ORDER_DETAIL.ORDER_TIMESTAMP
+     *
+     *    @mbg.generated 自动生成，如需修改，请删除本行
+     */
+    private Long orderTimestamp;
 
     /**
      *    版块类型（0：普通，1：全返）
@@ -106,6 +124,24 @@ public class OrdOrderDetailMo implements Serializable {
     private String specName;
 
     /**
+     *    是否结算给买家
+     *
+     *    数据库字段: ORD_ORDER_DETAIL.IS_SETTLE_BUYER
+     *
+     *    @mbg.generated 自动生成，如需修改，请删除本行
+     */
+    private Boolean isSettleBuyer;
+
+    /**
+     *    实际成交金额
+     *
+     *    数据库字段: ORD_ORDER_DETAIL.ACTUAL_AMOUNT
+     *
+     *    @mbg.generated 自动生成，如需修改，请删除本行
+     */
+    private BigDecimal actualAmount;
+
+    /**
      *    购买数量(实际数量=购买数量-退货数量)
      *
      *    数据库字段: ORD_ORDER_DETAIL.BUY_COUNT
@@ -113,6 +149,15 @@ public class OrdOrderDetailMo implements Serializable {
      *    @mbg.generated 自动生成，如需修改，请删除本行
      */
     private Integer buyCount;
+
+    /**
+     *    退货数量
+     *
+     *    数据库字段: ORD_ORDER_DETAIL.RETURN_COUNT
+     *
+     *    @mbg.generated 自动生成，如需修改，请删除本行
+     */
+    private Integer returnCount;
 
     /**
      *    购买价格（单价）
@@ -131,6 +176,33 @@ public class OrdOrderDetailMo implements Serializable {
      *    @mbg.generated 自动生成，如需修改，请删除本行
      */
     private BigDecimal costPrice;
+
+    /**
+     *    购买积分
+     *
+     *    数据库字段: ORD_ORDER_DETAIL.BUY_POINT
+     *
+     *    @mbg.generated 自动生成，如需修改，请删除本行
+     */
+    private BigDecimal buyPoint;
+
+    /**
+     *    购买总积分
+     *
+     *    数据库字段: ORD_ORDER_DETAIL.BUY_POINT_TOTAL
+     *
+     *    @mbg.generated 自动生成，如需修改，请删除本行
+     */
+    private BigDecimal buyPointTotal;
+
+    /**
+     *    支付顺序
+     *
+     *    数据库字段: ORD_ORDER_DETAIL.PAY_SEQ
+     *
+     *    @mbg.generated 自动生成，如需修改，请删除本行
+     */
+    private Byte paySeq;
 
     /**
      *    供应商ID
@@ -158,15 +230,6 @@ public class OrdOrderDetailMo implements Serializable {
      *    @mbg.generated 自动生成，如需修改，请删除本行
      */
     private BigDecimal cashbackAmount;
-
-    /**
-     *    退货数量
-     *
-     *    数据库字段: ORD_ORDER_DETAIL.RETURN_COUNT
-     *
-     *    @mbg.generated 自动生成，如需修改，请删除本行
-     */
-    private Integer returnCount;
 
     /**
      *    返现总额(返现总额=返现金额 * (购买数量-退货数量)
@@ -205,24 +268,6 @@ public class OrdOrderDetailMo implements Serializable {
     private Long userId;
 
     /**
-     *    是否结算给买家
-     *
-     *    数据库字段: ORD_ORDER_DETAIL.IS_SETTLE_BUYER
-     *
-     *    @mbg.generated 自动生成，如需修改，请删除本行
-     */
-    private Boolean isSettleBuyer;
-
-    /**
-     *    实际成交金额
-     *
-     *    数据库字段: ORD_ORDER_DETAIL.ACTUAL_AMOUNT
-     *
-     *    @mbg.generated 自动生成，如需修改，请删除本行
-     */
-    private BigDecimal actualAmount;
-
-    /**
      *    是否已发货
      *
      *    数据库字段: ORD_ORDER_DETAIL.IS_DELIVERED
@@ -232,49 +277,13 @@ public class OrdOrderDetailMo implements Serializable {
     private Boolean isDelivered;
 
     /**
-     *    上线规格ID(限购时获取用户购买数量时使用)
+     *    邀请人ID
      *
-     *    数据库字段: ORD_ORDER_DETAIL.ONLINE_SPEC_ID
-     *
-     *    @mbg.generated 自动生成，如需修改，请删除本行
-     */
-    private Long onlineSpecId;
-
-    /**
-     *    下单时间戳(用于排序识别详情的先后顺序)
-     *
-     *    数据库字段: ORD_ORDER_DETAIL.ORDER_TIMESTAMP
+     *    数据库字段: ORD_ORDER_DETAIL.INVITE_ID
      *
      *    @mbg.generated 自动生成，如需修改，请删除本行
      */
-    private Long orderTimestamp;
-
-    /**
-     *    购买积分
-     *
-     *    数据库字段: ORD_ORDER_DETAIL.BUY_POINT
-     *
-     *    @mbg.generated 自动生成，如需修改，请删除本行
-     */
-    private BigDecimal buyPoint;
-
-    /**
-     *    购买总积分
-     *
-     *    数据库字段: ORD_ORDER_DETAIL.BUY_POINT_TOTAL
-     *
-     *    @mbg.generated 自动生成，如需修改，请删除本行
-     */
-    private BigDecimal buyPointTotal;
-
-    /**
-     *    支付顺序
-     *
-     *    数据库字段: ORD_ORDER_DETAIL.PAY_SEQ
-     *
-     *    @mbg.generated 自动生成，如需修改，请删除本行
-     */
-    private Byte paySeq;
+    private Long inviteId;
 
     /**
      *    @mbg.generated 自动生成，如需修改，请删除本行
@@ -323,6 +332,28 @@ public class OrdOrderDetailMo implements Serializable {
      */
     public void setOrderId(Long orderId) {
         this.orderId = orderId;
+    }
+
+    /**
+     *    上线规格ID(限购时获取用户购买数量时使用)
+     *
+     *    数据库字段: ORD_ORDER_DETAIL.ONLINE_SPEC_ID
+     *
+     *    @mbg.generated 自动生成，如需修改，请删除本行
+     */
+    public Long getOnlineSpecId() {
+        return onlineSpecId;
+    }
+
+    /**
+     *    上线规格ID(限购时获取用户购买数量时使用)
+     *
+     *    数据库字段: ORD_ORDER_DETAIL.ONLINE_SPEC_ID
+     *
+     *    @mbg.generated 自动生成，如需修改，请删除本行
+     */
+    public void setOnlineSpecId(Long onlineSpecId) {
+        this.onlineSpecId = onlineSpecId;
     }
 
     /**
@@ -389,6 +420,28 @@ public class OrdOrderDetailMo implements Serializable {
      */
     public void setProductSpecId(Long productSpecId) {
         this.productSpecId = productSpecId;
+    }
+
+    /**
+     *    下单时间戳(用于排序识别详情的先后顺序)
+     *
+     *    数据库字段: ORD_ORDER_DETAIL.ORDER_TIMESTAMP
+     *
+     *    @mbg.generated 自动生成，如需修改，请删除本行
+     */
+    public Long getOrderTimestamp() {
+        return orderTimestamp;
+    }
+
+    /**
+     *    下单时间戳(用于排序识别详情的先后顺序)
+     *
+     *    数据库字段: ORD_ORDER_DETAIL.ORDER_TIMESTAMP
+     *
+     *    @mbg.generated 自动生成，如需修改，请删除本行
+     */
+    public void setOrderTimestamp(Long orderTimestamp) {
+        this.orderTimestamp = orderTimestamp;
     }
 
     /**
@@ -502,6 +555,50 @@ public class OrdOrderDetailMo implements Serializable {
     }
 
     /**
+     *    是否结算给买家
+     *
+     *    数据库字段: ORD_ORDER_DETAIL.IS_SETTLE_BUYER
+     *
+     *    @mbg.generated 自动生成，如需修改，请删除本行
+     */
+    public Boolean getIsSettleBuyer() {
+        return isSettleBuyer;
+    }
+
+    /**
+     *    是否结算给买家
+     *
+     *    数据库字段: ORD_ORDER_DETAIL.IS_SETTLE_BUYER
+     *
+     *    @mbg.generated 自动生成，如需修改，请删除本行
+     */
+    public void setIsSettleBuyer(Boolean isSettleBuyer) {
+        this.isSettleBuyer = isSettleBuyer;
+    }
+
+    /**
+     *    实际成交金额
+     *
+     *    数据库字段: ORD_ORDER_DETAIL.ACTUAL_AMOUNT
+     *
+     *    @mbg.generated 自动生成，如需修改，请删除本行
+     */
+    public BigDecimal getActualAmount() {
+        return actualAmount;
+    }
+
+    /**
+     *    实际成交金额
+     *
+     *    数据库字段: ORD_ORDER_DETAIL.ACTUAL_AMOUNT
+     *
+     *    @mbg.generated 自动生成，如需修改，请删除本行
+     */
+    public void setActualAmount(BigDecimal actualAmount) {
+        this.actualAmount = actualAmount;
+    }
+
+    /**
      *    购买数量(实际数量=购买数量-退货数量)
      *
      *    数据库字段: ORD_ORDER_DETAIL.BUY_COUNT
@@ -521,6 +618,28 @@ public class OrdOrderDetailMo implements Serializable {
      */
     public void setBuyCount(Integer buyCount) {
         this.buyCount = buyCount;
+    }
+
+    /**
+     *    退货数量
+     *
+     *    数据库字段: ORD_ORDER_DETAIL.RETURN_COUNT
+     *
+     *    @mbg.generated 自动生成，如需修改，请删除本行
+     */
+    public Integer getReturnCount() {
+        return returnCount;
+    }
+
+    /**
+     *    退货数量
+     *
+     *    数据库字段: ORD_ORDER_DETAIL.RETURN_COUNT
+     *
+     *    @mbg.generated 自动生成，如需修改，请删除本行
+     */
+    public void setReturnCount(Integer returnCount) {
+        this.returnCount = returnCount;
     }
 
     /**
@@ -565,6 +684,72 @@ public class OrdOrderDetailMo implements Serializable {
      */
     public void setCostPrice(BigDecimal costPrice) {
         this.costPrice = costPrice;
+    }
+
+    /**
+     *    购买积分
+     *
+     *    数据库字段: ORD_ORDER_DETAIL.BUY_POINT
+     *
+     *    @mbg.generated 自动生成，如需修改，请删除本行
+     */
+    public BigDecimal getBuyPoint() {
+        return buyPoint;
+    }
+
+    /**
+     *    购买积分
+     *
+     *    数据库字段: ORD_ORDER_DETAIL.BUY_POINT
+     *
+     *    @mbg.generated 自动生成，如需修改，请删除本行
+     */
+    public void setBuyPoint(BigDecimal buyPoint) {
+        this.buyPoint = buyPoint;
+    }
+
+    /**
+     *    购买总积分
+     *
+     *    数据库字段: ORD_ORDER_DETAIL.BUY_POINT_TOTAL
+     *
+     *    @mbg.generated 自动生成，如需修改，请删除本行
+     */
+    public BigDecimal getBuyPointTotal() {
+        return buyPointTotal;
+    }
+
+    /**
+     *    购买总积分
+     *
+     *    数据库字段: ORD_ORDER_DETAIL.BUY_POINT_TOTAL
+     *
+     *    @mbg.generated 自动生成，如需修改，请删除本行
+     */
+    public void setBuyPointTotal(BigDecimal buyPointTotal) {
+        this.buyPointTotal = buyPointTotal;
+    }
+
+    /**
+     *    支付顺序
+     *
+     *    数据库字段: ORD_ORDER_DETAIL.PAY_SEQ
+     *
+     *    @mbg.generated 自动生成，如需修改，请删除本行
+     */
+    public Byte getPaySeq() {
+        return paySeq;
+    }
+
+    /**
+     *    支付顺序
+     *
+     *    数据库字段: ORD_ORDER_DETAIL.PAY_SEQ
+     *
+     *    @mbg.generated 自动生成，如需修改，请删除本行
+     */
+    public void setPaySeq(Byte paySeq) {
+        this.paySeq = paySeq;
     }
 
     /**
@@ -631,28 +816,6 @@ public class OrdOrderDetailMo implements Serializable {
      */
     public void setCashbackAmount(BigDecimal cashbackAmount) {
         this.cashbackAmount = cashbackAmount;
-    }
-
-    /**
-     *    退货数量
-     *
-     *    数据库字段: ORD_ORDER_DETAIL.RETURN_COUNT
-     *
-     *    @mbg.generated 自动生成，如需修改，请删除本行
-     */
-    public Integer getReturnCount() {
-        return returnCount;
-    }
-
-    /**
-     *    退货数量
-     *
-     *    数据库字段: ORD_ORDER_DETAIL.RETURN_COUNT
-     *
-     *    @mbg.generated 自动生成，如需修改，请删除本行
-     */
-    public void setReturnCount(Integer returnCount) {
-        this.returnCount = returnCount;
     }
 
     /**
@@ -744,50 +907,6 @@ public class OrdOrderDetailMo implements Serializable {
     }
 
     /**
-     *    是否结算给买家
-     *
-     *    数据库字段: ORD_ORDER_DETAIL.IS_SETTLE_BUYER
-     *
-     *    @mbg.generated 自动生成，如需修改，请删除本行
-     */
-    public Boolean getIsSettleBuyer() {
-        return isSettleBuyer;
-    }
-
-    /**
-     *    是否结算给买家
-     *
-     *    数据库字段: ORD_ORDER_DETAIL.IS_SETTLE_BUYER
-     *
-     *    @mbg.generated 自动生成，如需修改，请删除本行
-     */
-    public void setIsSettleBuyer(Boolean isSettleBuyer) {
-        this.isSettleBuyer = isSettleBuyer;
-    }
-
-    /**
-     *    实际成交金额
-     *
-     *    数据库字段: ORD_ORDER_DETAIL.ACTUAL_AMOUNT
-     *
-     *    @mbg.generated 自动生成，如需修改，请删除本行
-     */
-    public BigDecimal getActualAmount() {
-        return actualAmount;
-    }
-
-    /**
-     *    实际成交金额
-     *
-     *    数据库字段: ORD_ORDER_DETAIL.ACTUAL_AMOUNT
-     *
-     *    @mbg.generated 自动生成，如需修改，请删除本行
-     */
-    public void setActualAmount(BigDecimal actualAmount) {
-        this.actualAmount = actualAmount;
-    }
-
-    /**
      *    是否已发货
      *
      *    数据库字段: ORD_ORDER_DETAIL.IS_DELIVERED
@@ -810,113 +929,25 @@ public class OrdOrderDetailMo implements Serializable {
     }
 
     /**
-     *    上线规格ID(限购时获取用户购买数量时使用)
+     *    邀请人ID
      *
-     *    数据库字段: ORD_ORDER_DETAIL.ONLINE_SPEC_ID
+     *    数据库字段: ORD_ORDER_DETAIL.INVITE_ID
      *
      *    @mbg.generated 自动生成，如需修改，请删除本行
      */
-    public Long getOnlineSpecId() {
-        return onlineSpecId;
+    public Long getInviteId() {
+        return inviteId;
     }
 
     /**
-     *    上线规格ID(限购时获取用户购买数量时使用)
+     *    邀请人ID
      *
-     *    数据库字段: ORD_ORDER_DETAIL.ONLINE_SPEC_ID
-     *
-     *    @mbg.generated 自动生成，如需修改，请删除本行
-     */
-    public void setOnlineSpecId(Long onlineSpecId) {
-        this.onlineSpecId = onlineSpecId;
-    }
-
-    /**
-     *    下单时间戳(用于排序识别详情的先后顺序)
-     *
-     *    数据库字段: ORD_ORDER_DETAIL.ORDER_TIMESTAMP
+     *    数据库字段: ORD_ORDER_DETAIL.INVITE_ID
      *
      *    @mbg.generated 自动生成，如需修改，请删除本行
      */
-    public Long getOrderTimestamp() {
-        return orderTimestamp;
-    }
-
-    /**
-     *    下单时间戳(用于排序识别详情的先后顺序)
-     *
-     *    数据库字段: ORD_ORDER_DETAIL.ORDER_TIMESTAMP
-     *
-     *    @mbg.generated 自动生成，如需修改，请删除本行
-     */
-    public void setOrderTimestamp(Long orderTimestamp) {
-        this.orderTimestamp = orderTimestamp;
-    }
-
-    /**
-     *    购买积分
-     *
-     *    数据库字段: ORD_ORDER_DETAIL.BUY_POINT
-     *
-     *    @mbg.generated 自动生成，如需修改，请删除本行
-     */
-    public BigDecimal getBuyPoint() {
-        return buyPoint;
-    }
-
-    /**
-     *    购买积分
-     *
-     *    数据库字段: ORD_ORDER_DETAIL.BUY_POINT
-     *
-     *    @mbg.generated 自动生成，如需修改，请删除本行
-     */
-    public void setBuyPoint(BigDecimal buyPoint) {
-        this.buyPoint = buyPoint;
-    }
-
-    /**
-     *    购买总积分
-     *
-     *    数据库字段: ORD_ORDER_DETAIL.BUY_POINT_TOTAL
-     *
-     *    @mbg.generated 自动生成，如需修改，请删除本行
-     */
-    public BigDecimal getBuyPointTotal() {
-        return buyPointTotal;
-    }
-
-    /**
-     *    购买总积分
-     *
-     *    数据库字段: ORD_ORDER_DETAIL.BUY_POINT_TOTAL
-     *
-     *    @mbg.generated 自动生成，如需修改，请删除本行
-     */
-    public void setBuyPointTotal(BigDecimal buyPointTotal) {
-        this.buyPointTotal = buyPointTotal;
-    }
-
-    /**
-     *    支付顺序
-     *
-     *    数据库字段: ORD_ORDER_DETAIL.PAY_SEQ
-     *
-     *    @mbg.generated 自动生成，如需修改，请删除本行
-     */
-    public Byte getPaySeq() {
-        return paySeq;
-    }
-
-    /**
-     *    支付顺序
-     *
-     *    数据库字段: ORD_ORDER_DETAIL.PAY_SEQ
-     *
-     *    @mbg.generated 自动生成，如需修改，请删除本行
-     */
-    public void setPaySeq(Byte paySeq) {
-        this.paySeq = paySeq;
+    public void setInviteId(Long inviteId) {
+        this.inviteId = inviteId;
     }
 
     /**
@@ -930,33 +961,34 @@ public class OrdOrderDetailMo implements Serializable {
         sb.append("Hash = ").append(hashCode());
         sb.append(", id=").append(id);
         sb.append(", orderId=").append(orderId);
+        sb.append(", onlineSpecId=").append(onlineSpecId);
         sb.append(", onlineId=").append(onlineId);
         sb.append(", productId=").append(productId);
         sb.append(", productSpecId=").append(productSpecId);
+        sb.append(", orderTimestamp=").append(orderTimestamp);
         sb.append(", subjectType=").append(subjectType);
         sb.append(", commissionSlot=").append(commissionSlot);
         sb.append(", commissionState=").append(commissionState);
         sb.append(", onlineTitle=").append(onlineTitle);
         sb.append(", specName=").append(specName);
+        sb.append(", isSettleBuyer=").append(isSettleBuyer);
+        sb.append(", actualAmount=").append(actualAmount);
         sb.append(", buyCount=").append(buyCount);
+        sb.append(", returnCount=").append(returnCount);
         sb.append(", buyPrice=").append(buyPrice);
         sb.append(", costPrice=").append(costPrice);
+        sb.append(", buyPoint=").append(buyPoint);
+        sb.append(", buyPointTotal=").append(buyPointTotal);
+        sb.append(", paySeq=").append(paySeq);
         sb.append(", supplierId=").append(supplierId);
         sb.append(", deliverOrgId=").append(deliverOrgId);
         sb.append(", cashbackAmount=").append(cashbackAmount);
-        sb.append(", returnCount=").append(returnCount);
         sb.append(", cashbackTotal=").append(cashbackTotal);
         sb.append(", buyUnit=").append(buyUnit);
         sb.append(", returnState=").append(returnState);
         sb.append(", userId=").append(userId);
-        sb.append(", isSettleBuyer=").append(isSettleBuyer);
-        sb.append(", actualAmount=").append(actualAmount);
         sb.append(", isDelivered=").append(isDelivered);
-        sb.append(", onlineSpecId=").append(onlineSpecId);
-        sb.append(", orderTimestamp=").append(orderTimestamp);
-        sb.append(", buyPoint=").append(buyPoint);
-        sb.append(", buyPointTotal=").append(buyPointTotal);
-        sb.append(", paySeq=").append(paySeq);
+        sb.append(", inviteId=").append(inviteId);
         sb.append(", serialVersionUID=").append(serialVersionUID);
         sb.append("]");
         return sb.toString();

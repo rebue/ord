@@ -34,5 +34,10 @@ public class OrderDetailTo {
      * 购物车ID
      */
     private Long    cartId;
+    
+    /**
+     * 邀请人id
+     */
+    private Long  inviteId;
 
 }
