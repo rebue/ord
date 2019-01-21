@@ -229,7 +229,7 @@ public interface OrdOrderDetailMapper extends MybatisBaseMapper<OrdOrderDetailMo
             " SET " + //
             "    PAY_SEQ = 1" + //
             " WHERE" + //
-            "    ID = #{id} AND PAY_SEQ != 1")
+            "    ID = #{id} AND (PAY_SEQ != 1 OR PAY_SEQ is null)")
     void setFirstPaySeq(@Param("id") Long id);
 
     /**
