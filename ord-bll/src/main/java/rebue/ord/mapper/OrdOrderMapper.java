@@ -269,7 +269,7 @@ public interface OrdOrderMapper extends MybatisBaseMapper<OrdOrderMo, Long> {
     		"            ord.ORD_ORDER \n" + 
     		"        WHERE\n" + 
     		"            USER_ID = #{userId,jdbcType=BIGINT}\n" + 
-    		"                AND order_State IN (2 , 3, 4))\n" + 
+    		"                AND order_State > 1 )\n" + 
     		"        AND COMMISSION_STATE IN (0 , 1)\n" + 
     		"        AND SUBJECT_TYPE = 1\n" + 
     		"        AND RETURN_STATE != 2")

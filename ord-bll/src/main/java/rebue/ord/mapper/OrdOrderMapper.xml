@@ -945,7 +945,7 @@
 			and REAL_MONEY = #{realMoney,jdbcType=DECIMAL}
 		</if>
 		<if test="orderState == 4">
-			and ORDER_STATE  in(2,3,4)
+			and ORDER_STATE  > 1
 		</if>
 		<if test="orderState == 3">
 			and ORDER_STATE  in(3)
