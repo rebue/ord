@@ -1,6 +1,6 @@
 /*==============================================================*/
 /* DBMS name:      MySQL 5.0                                    */
-/* Created on:     2018/12/24 16:10:36                          */
+/* Created on:     2019/1/22 15:03:29                           */
 /*==============================================================*/
 
 
@@ -56,11 +56,12 @@ create table ORD_BUY_RELATION
    DOWNLINE_USER_ID     bigint not null comment '下家用户ID',
    DOWNLINE_ORDER_ID    bigint not null comment '下家订单ID',
    DOWNLINE_ORDER_DETAIL_ID bigint not null comment '下家订单详情ID',
-   IS_SIGN_IN           bool not null default false comment '下家是否已签收',
+   IS_SIGN_IN           bool not null default false comment '下家是否已签收
+            @deprecated',
    RELATION_SOURCE      tinyint not null comment '关系来源（1：自己匹配自己  2：购买关系  3：注册关系  4：差一人且已有购买关系  5：差两人  6：差一人但没有购买关系）',
    primary key (ID),
-   unique key AK_UPLINE_AND_DOWNLINE_ORDER_DETAIL (UPLINE_ORDER_DETAIL_ID, DOWNLINE_ORDER_DETAIL_ID),
-   unique key AK_DOWNLINE_ORDER_DETAIL (DOWNLINE_ORDER_DETAIL_ID)
+   key AK_UPLINE_AND_DOWNLINE_ORDER_DETAIL (UPLINE_ORDER_DETAIL_ID, DOWNLINE_ORDER_DETAIL_ID),
+   key AK_DOWNLINE_ORDER_DETAIL (DOWNLINE_ORDER_DETAIL_ID)
 );
 
 alter table ORD_BUY_RELATION comment '订单购买关系';
@@ -76,7 +77,7 @@ create table ORD_GOODS_BUY_RELATION
    ONLINE_ID            bigint not null comment '上线ID',
    CREATE_TIME          datetime not null comment '创建时间',
    primary key (ID),
-   unique key AK_UPLINE_DOWNLINE_USER_AND_ONLINE_AND_SALE_PRICE (UPLINE_USER_ID, DOWNLINE_USER_ID, ONLINE_ID)
+   key AK_UPLINE_DOWNLINE_USER_AND_ONLINE_AND_SALE_PRICE (UPLINE_USER_ID, DOWNLINE_USER_ID, ONLINE_ID)
 );
 
 alter table ORD_GOODS_BUY_RELATION comment '用户商品购买关系';
@@ -143,7 +144,7 @@ create table ORD_ORDER
    RECEIVED_OP_ID       bigint comment '签收人',
    CANCEL_REASON        varchar(300) comment '作废原因',
    primary key (ID),
-   unique key AK_ORDER_CODE (ORDER_CODE)
+   key AK_ORDER_CODE (ORDER_CODE)
 );
 
 alter table ORD_ORDER comment '订单信息';
@@ -183,7 +184,7 @@ create table ORD_ORDER_DETAIL
    USER_ID              bigint not null comment '用户ID',
    IS_DELIVERED         bool comment '是否已发货',
    primary key (ID),
-   unique key AK_PAY_SEQ (PAY_SEQ)
+   unique key AK_PAY_SEQ_AND_ONLINE_SPEC_ID (PAY_SEQ, ONLINE_SPEC_ID)
 );
 
 alter table ORD_ORDER_DETAIL comment '订单详情';
@@ -198,7 +199,7 @@ create table ORD_ORDER_DETAIL_DELIVER
    ORDER_DETAIL_ID      bigint not null comment '订单详情ID',
    LOGISTIC_ID          bigint not null comment '物流订单ID',
    primary key (ID),
-   unique key AK_ORDER_AND_ORDER_DETAIL_AND_LOGISTIC_ID (ORDER_ID, ORDER_DETAIL_ID, LOGISTIC_ID)
+   key AK_ORDER_AND_ORDER_DETAIL_AND_LOGISTIC_ID (ORDER_ID, ORDER_DETAIL_ID, LOGISTIC_ID)
 );
 
 alter table ORD_ORDER_DETAIL_DELIVER comment '订单详情发货信息';
@@ -265,7 +266,7 @@ create table ORD_TASK
    SUB_TASK_TYPE        tinyint default -1 comment '子任务类型',
    ORDER_ID             varchar(150) not null comment '订单ID(销售订单ID)',
    primary key (ID),
-   unique key AK_TASK_TYPE_AND_SUB_TASK_TYPE_AND_ORDER (TASK_TYPE, SUB_TASK_TYPE, ORDER_ID)
+   key AK_TASK_TYPE_AND_SUB_TASK_TYPE_AND_ORDER (TASK_TYPE, SUB_TASK_TYPE, ORDER_ID)
 );
 
 alter table ORD_TASK comment '订单任务';

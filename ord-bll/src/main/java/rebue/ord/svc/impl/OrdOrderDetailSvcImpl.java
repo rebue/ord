@@ -415,6 +415,7 @@ public class OrdOrderDetailSvcImpl
 		_log.debug("获取首单购买的订单详情");
 		final OrdOrderDetailMo orderDetailMo = _mapper.getFirstBuyDetail(onlineSpecId, ReturnStateDic.RETURNED,
 				OrderStateDic.PAID);
+		
 		if (orderDetailMo == null) {
 			_log.warn("未发现有已经支付的订单详情，可能已退货: onlineSpecId-{}", onlineSpecId);
 			Ro ro = onlOnlineSpecSvc.modifyIsHaveFirstOrderById(onlineSpecId, false);
@@ -431,14 +432,14 @@ public class OrdOrderDetailSvcImpl
 		}
 
 		_log.debug("清除旧的首单的支付顺序标志");
-		_mapper.clearPaySeqOfFirst();
+		_mapper.clearPaySeqOfFirst(onlineSpecId);
 
 		_log.debug("设置新的首单的支付顺序标志");
 		_mapper.setFirstPaySeq(orderDetailMo.getId());
 
 		// TODO 查找是否有结算积分的子任务，如果有则添加结算首单积分的子任务
 		OrdTaskMo ordTaskMo = new OrdTaskMo();
-		ordTaskMo.setOrderId(orderDetailMo.getId().toString());
+		ordTaskMo.setOrderId(onlineSpecId.toString());
 		ordTaskMo.setTaskType((byte) OrderTaskTypeDic.CALC_FIRST_BUY.getCode());
 		_log.info("计算首单购买查询结算首单积分任务的参数为：{}", ordTaskMo);
 		final OrdTaskMo taskMo = ordTaskSvc.getOne(ordTaskMo);

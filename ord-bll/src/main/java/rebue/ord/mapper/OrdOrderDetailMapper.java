@@ -216,8 +216,8 @@ public interface OrdOrderDetailMapper extends MybatisBaseMapper<OrdOrderDetailMo
             " SET " + //
             "    PAY_SEQ = NULL" + //
             " WHERE" + //
-            "    PAY_SEQ = 1")
-    void clearPaySeqOfFirst();
+            "    ONLINE_SPEC_ID = #{onlineSpecId,jdbcType=BIGINT} and PAY_SEQ = 1")
+    void clearPaySeqOfFirst(@Param("onlineSpecId") Long onlineSpecId);
 
     /**
      * 设置新的首单的支付顺序标志
