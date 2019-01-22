@@ -490,4 +490,15 @@ public class OrdOrderCtrl {
     	return svc.getCommissionTotal(userId);
     }
     
+    /**
+     *根据组织id查询未发货订单的总数
+     * @param deliverOrgId
+     * @return
+     */
+    @GetMapping("/ord/order/unshipments")
+    BigDecimal getUnshipmentsByDeliverOrgId(@RequestParam("deliverOrgId") final java.lang.Long deliverOrgId){
+        _log.info("根据组织id查询未发货订单总数的参数 deliverOrgId: {}", deliverOrgId);
+    	return svc.getUnshipmentsByDeliverOrgId(deliverOrgId);
+    }
+    
 }

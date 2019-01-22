@@ -229,4 +229,11 @@ public interface OrdOrderSvc extends BaseSvc<java.lang.Long, OrdOrderMo, OrdOrde
      * @return
      */
     BigDecimal getCommissionTotal(@RequestParam("userId") final java.lang.Long userId);
+    
+    /**
+     * 根据组织id获取未发货的订单数
+     * @param deliverOrgId
+     * @return
+     */
+    public BigDecimal getUnshipmentsByDeliverOrgId(@RequestParam("deliverOrgId") final java.lang.Long deliverOrgId);
 }
