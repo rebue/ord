@@ -1652,4 +1652,12 @@ public class OrdOrderSvcImpl extends MybatisBaseSvcImpl<OrdOrderMo, java.lang.Lo
 	public BigDecimal getCommissionTotal(Long userId) {
 		return _mapper.getCommissionTotal(userId);
 	}
+	
+	/**
+     * 根据组织id获取未发货的订单数
+	 */
+	@Override
+	public BigDecimal getUnshipmentsByDeliverOrgId(Long deliverOrgId) {
+		return _mapper.getUnshipmentsByDeliverOrgId(deliverOrgId);
+	}
 }
