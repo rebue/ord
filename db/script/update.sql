@@ -171,3 +171,10 @@ alter table ORD_BUY_RELATION add unique key AK_DOWNLINE_ORDER_DETAIL (DOWNLINE_O
 alter table ORD_ORDER_DETAIL add INVITE_ID  bigint comment '邀请人ID';
 -- ------------------------------------------------------- 上面的已更新到线上 2019.01.21 ----------------------------------------------------
 
+
+alter table ord.ORD_ORDER_DETAIL					drop					key AK_PAY_SEQU;
+alter table ord.ORD_ORDER_DETAIL add unique key AK_PAY_SEQ_AND_ONLINE_SPEC_ID (PAY_SEQ, ONLINE_SPEC_ID);
+-- ------------------------------------------------------- 上面的已更新到线上 2019.1.22 ----------------------------------------------------
+
+
+
