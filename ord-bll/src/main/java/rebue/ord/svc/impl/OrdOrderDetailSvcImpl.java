@@ -18,6 +18,7 @@ import org.springframework.transaction.annotation.Transactional;
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
 
+import damai.pnt.dic.PointLogTypeDic;
 import rebue.onl.svr.feign.OnlOnlineSpecSvc;
 import rebue.ord.dao.OrdOrderDetailDao;
 import rebue.ord.dic.OrderStateDic;
@@ -36,7 +37,6 @@ import rebue.ord.svc.OrdOrderDetailSvc;
 import rebue.ord.svc.OrdOrderSvc;
 import rebue.ord.svc.OrdTaskSvc;
 import rebue.ord.to.UpdateOrgTo;
-import rebue.pnt.dic.PointLogTypeDic;
 import rebue.pnt.svr.feign.PntPointSvc;
 import rebue.pnt.to.AddPointTradeTo;
 import rebue.robotech.dic.ResultDic;

@@ -14,6 +14,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
+import damai.pnt.dic.PointLogTypeDic;
 import rebue.afc.dic.TradeTypeDic;
 import rebue.afc.mo.AfcPlatformTradeMo;
 import rebue.afc.mo.AfcTradeMo;
@@ -38,7 +39,6 @@ import rebue.ord.svc.OrdOrderDetailSvc;
 import rebue.ord.svc.OrdOrderSvc;
 import rebue.ord.svc.OrdSettleTaskSvc;
 import rebue.ord.svc.OrdTaskSvc;
-import rebue.pnt.dic.PointLogTypeDic;
 import rebue.pnt.svr.feign.PntPointSvc;
 import rebue.pnt.to.AddPointTradeTo;
 import rebue.robotech.dic.TaskExecuteStateDic;

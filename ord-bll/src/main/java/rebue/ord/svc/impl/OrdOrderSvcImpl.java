@@ -365,7 +365,7 @@ public class OrdOrderSvcImpl extends MybatisBaseSvcImpl<OrdOrderMo, java.lang.Lo
 						onlineSpecMo.getBuyPoint().multiply(BigDecimal.valueOf(orderDetailTo.getBuyCount())));
 				orderDetails.add(orderDetailMo);
 			} else if (OnlineSubjectTypeDic.BACK_COMMISSION.getCode() == orderDetailMo.getSubjectType()) {
-				if(orderDetailTo.getInviteId() !=null) {
+				if (orderDetailTo.getInviteId() != null) {
 					orderDetailMo.setInviteId(orderDetailTo.getInviteId());
 				}
 				orderDetailMo.setBuyCount(1);
@@ -607,8 +607,10 @@ public class OrdOrderSvcImpl extends MybatisBaseSvcImpl<OrdOrderMo, java.lang.Lo
 					orderDetailRo.setCashbackTotal(orderDetailMo.getCashbackTotal());
 					orderDetailRo.setCashbackCommissionSlot(orderDetailMo.getCommissionSlot());
 					orderDetailRo.setCashbackCommissionState(orderDetailMo.getCommissionState());
-					orderDetailRo.setBuyPoint(orderDetailMo.getBuyPoint() == null ? BigDecimal.ZERO : orderDetailMo.getBuyPoint());
-					orderDetailRo.setBuyPointTotal(orderDetailMo.getBuyPointTotal() == null ? BigDecimal.ZERO : orderDetailMo.getBuyPointTotal());
+					orderDetailRo.setBuyPoint(
+							orderDetailMo.getBuyPoint() == null ? BigDecimal.ZERO : orderDetailMo.getBuyPoint());
+					orderDetailRo.setBuyPointTotal(orderDetailMo.getBuyPointTotal() == null ? BigDecimal.ZERO
+							: orderDetailMo.getBuyPointTotal());
 					orderDetailRo.setPaySeq(orderDetailMo.getPaySeq());
 					orderDetailRoList.add(orderDetailRo);
 				}
@@ -1416,12 +1418,12 @@ public class OrdOrderSvcImpl extends MybatisBaseSvcImpl<OrdOrderMo, java.lang.Lo
 					final long orderTimestamp = orderDetail.getOrderTimestamp();
 					String matchBuyRelationResult = "";
 					_log.debug("该条详情邀请人id为：{}", orderDetail.getInviteId());
-					if (orderDetail.getInviteId() == null ) {
-						_log.debug("邀请人id等于null，按照匹配规则匹配：InviteId-{}",orderDetail.getInviteId());
+					if (orderDetail.getInviteId() == null) {
+						_log.debug("邀请人id等于null，按照匹配规则匹配：InviteId-{}", orderDetail.getInviteId());
 						matchBuyRelationResult = ordBuyRelationSvc.matchBuyRelation(userId, onlineId, buyPrice,
 								downLineDetailId, downLineOrderId, orderTimestamp);
 					} else {
-						_log.debug("邀请人id不等于null，优先匹配给邀请人：InviteId-{}",orderDetail.getInviteId());
+						_log.debug("邀请人id不等于null，优先匹配给邀请人：InviteId-{}", orderDetail.getInviteId());
 						final boolean getAndUpdateBuyRelationByInvite = ordBuyRelationSvc
 								.getAndUpdateBuyRelationByPromote(userId, onlineId, buyPrice, downLineDetailId,
 										downLineOrderId);
@@ -1623,8 +1625,6 @@ public class OrdOrderSvcImpl extends MybatisBaseSvcImpl<OrdOrderMo, java.lang.Lo
 		return result;
 	}
 
-
-
 	/**
 	 * 修改组织
 	 */
@@ -1652,12 +1652,24 @@ public class OrdOrderSvcImpl extends MybatisBaseSvcImpl<OrdOrderMo, java.lang.Lo
 	public BigDecimal getCommissionTotal(Long userId) {
 		return _mapper.getCommissionTotal(userId);
 	}
-	
+
 	/**
-     * 根据组织id获取未发货的订单数
+	 * 根据组织id获取未发货的订单数
 	 */
 	@Override
 	public BigDecimal getUnshipmentsByDeliverOrgId(Long deliverOrgId) {
 		return _mapper.getUnshipmentsByDeliverOrgId(deliverOrgId);
+	}
+
+	/**
+	 * 根据用户和时间查询已经签收的订单
+	 * 
+	 * @param mo
+	 * @return
+	 */
+	@Override
+	public List<OrdOrderMo> havePaidOrderByUserAndTimeList(OrdOrderMo mo) {
+		_log.info("根据用户和时间查询已经签收的订单的参数为：{}", mo);
+		return _mapper.selectHavePaidOrderByUserAndTime(mo);
 	}
 }

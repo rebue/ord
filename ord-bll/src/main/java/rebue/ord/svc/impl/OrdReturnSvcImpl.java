@@ -3,6 +3,9 @@ package rebue.ord.svc.impl;
 import com.github.dozermapper.core.Mapper;
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
+
+import damai.pnt.dic.PointLogTypeDic;
+
 import java.beans.BeanInfo;
 import java.beans.IntrospectionException;
 import java.beans.Introspector;
@@ -54,7 +57,6 @@ import rebue.ord.to.AgreeReturnTo;
 import rebue.ord.to.OrdOrderReturnTo;
 import rebue.ord.to.ReceivedAndRefundedTo;
 import rebue.ord.to.RejectReturnTo;
-import rebue.pnt.dic.PointLogTypeDic;
 import rebue.pnt.svr.feign.PntPointSvc;
 import rebue.pnt.to.AddPointTradeTo;
 import rebue.robotech.dic.ResultDic;

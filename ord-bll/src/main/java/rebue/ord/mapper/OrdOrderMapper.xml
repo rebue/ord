@@ -1328,4 +1328,17 @@
 		</set>
 		where ID = #{id,jdbcType=BIGINT} and ORDER_STATE=2
 	</update>
+	
+	<!-- 根据用户和时间查询已经签收的订单 -->
+	<select id="selectHavePaidOrderByUserAndTime" parameterType="rebue.ord.mo.OrdOrderMo" resultMap="BaseResultMap">
+		SELECT 
+		    <include refid="Base_Column_List" />
+		FROM
+		    ORD_ORDER
+		WHERE
+		    ORDER_STATE > 1
+		        AND USER_ID = #{userId,jdbcType=BIGINT}
+		        AND RECEIVED_TIME &gt;= #{receivedTime,jdbcType=TIMESTAMP}
+		ORDER BY PAY_TIME DESC
+	</select>
 </mapper>

@@ -282,4 +282,11 @@ public interface OrdOrderMapper extends MybatisBaseMapper<OrdOrderMo, Long> {
      */
     @Select("select count(order_state) from ord.ORD_ORDER  where deliver_org_id=#{deliverOrgId,jdbcType=BIGINT} and order_state=2")
     BigDecimal getUnshipmentsByDeliverOrgId(@Param("deliverOrgId") Long deliverOrgId);
+    
+    /**
+     * 根据用户和时间查询已经签收的订单
+     * @param mo
+     * @return
+     */
+    List<OrdOrderMo> selectHavePaidOrderByUserAndTime(OrdOrderMo mo);
 }

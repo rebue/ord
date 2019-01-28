@@ -236,4 +236,12 @@ public interface OrdOrderSvc extends BaseSvc<java.lang.Long, OrdOrderMo, OrdOrde
      * @return
      */
     public BigDecimal getUnshipmentsByDeliverOrgId(@RequestParam("deliverOrgId") final java.lang.Long deliverOrgId);
+
+	/**
+	 * 根据用户和时间查询已经支付的订单
+	 * 
+	 * @param mo
+	 * @return
+	 */
+	List<OrdOrderMo> havePaidOrderByUserAndTimeList(OrdOrderMo mo);
 }

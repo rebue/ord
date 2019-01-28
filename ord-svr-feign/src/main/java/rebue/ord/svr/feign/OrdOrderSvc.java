@@ -1,5 +1,7 @@
 package rebue.ord.svr.feign;
 
+import java.util.List;
+
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PutMapping;
@@ -53,6 +55,15 @@ public interface OrdOrderSvc {
 	 */
     @GetMapping("/ord/order/getSettleTotal")
     OrdSettleRo getSettleTotal(@RequestParam("supplierId") Long supplierId);
+    
+    /**
+	 * 根据用户和时间查询已经支付的订单
+	 * 
+	 * @param mo
+	 * @return
+	 */
+	@GetMapping("/ord/order/havepaidorderbyuserandtime")
+	List<OrdOrderMo> havePaidOrderByUserAndTimeList(OrdOrderMo mo);
 }
   
 
