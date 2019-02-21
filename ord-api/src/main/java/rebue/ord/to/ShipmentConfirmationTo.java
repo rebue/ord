@@ -1,7 +1,6 @@
 package rebue.ord.to;
 
 import java.math.BigDecimal;
-import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
@@ -13,7 +12,6 @@ import com.fasterxml.jackson.annotation.JsonInclude.Include;
 
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
-import rebue.ord.mo.OrdOrderDetailMo;
 
 @Data
 @JsonInclude(Include.NON_NULL)
@@ -183,22 +181,17 @@ public class ShipmentConfirmationTo {
      */
     private String orderDetail;
     /**
-     * 当前订单被选择发货的订单详情
+     * 当前订单被选择发货的订单详情Id
      */
-    private ArrayList<OrdOrderDetailMo> selectDetaile;
+    private List<Long> selectDetailId;
     
     /**
-     * 当前订单的所有未发货的订单详情
+     * 当前订单的所有未发货的订单详情Id
      */
-    private List<OrdOrderDetailMo> allDetaile;
+    private List<Long> allDetaileId;
 
     /**
      * 判断是首次发货还是添加新物流单号
      */
     private boolean first;
-    
-    /**
-     * 判断是否是将订单中每个详情作为一个包裹。
-     */
-    private boolean split;
 }
