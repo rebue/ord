@@ -514,17 +514,18 @@ public class OrdOrderCtrl {
 	 * @return
 	 */
 	@GetMapping("/ord/order/havepaidorderbyuserandtime")
-	List<OrdOrderMo> havePaidOrderByUserAndTimeList(@RequestParam("userId") Long userId, @RequestParam("receivedTime") Date receivedTime) {
+	List<OrdOrderMo> havePaidOrderByUserAndTimeList(@RequestParam("userId") Long userId,
+			@RequestParam("receivedTime") Date receivedTime) {
 		_log.info("根据用户和时间查询已经支付的订单的请求参数为：userId-{}, receivedTime-{}", userId, receivedTime);
 		OrdOrderMo mo = new OrdOrderMo();
 		mo.setUserId(userId);
 		mo.setReceivedTime(receivedTime);
 		return svc.havePaidOrderByUserAndTimeList(mo);
 	}
-	
+
 	@PutMapping("/ord/order/splitPackageDeliver")
-	 ShipmentConfirmationRo splitPackageDeliver(@RequestBody ShipmentConfirmationTo mo) {
-			_log.info("将订单中的每个详情发一个包裹并发货的参数为：{}", mo);
-			return svc.splitPackageDeliver(mo);
-		}
+	ShipmentConfirmationRo splitPackageDeliver(@RequestBody ShipmentConfirmationTo mo) {
+		_log.info("将订单中的每个详情发一个包裹并发货的参数为：{}", mo);
+		return svc.splitPackageDeliver(mo);
+	}
 }
