@@ -16,10 +16,10 @@
 	<modules>
 		<module>ord-gen</module>
 		<module>ord-api</module>
-		<module>ord-bll</module>
+ 		<module>ord-bll</module> 
 		<module>ord-svr</module>
 		<module>ord-svr-feign</module>
-		<module>ord-scheduler-svr</module>
+		<module>ord-scheduler-svr</module> 
 	</modules>
 
 	<dependencyManagement>

@@ -6,7 +6,7 @@ server:
 eureka:
   client:
     service-url:
-      defaultZone: http://127.0.0.1:8761/eureka/
+      defaultZone: http://192.168.1.201:8761/eureka/
 
 logging:
   config: classpath:config/log4j2.xml
@@ -17,14 +17,14 @@ logging:
 
 spring:
   rabbitmq:
-      host: 127.0.0.1
+      host: 192.168.1.201
       port: 5672
       username: guest
       password: guest
   datasource:
-    url: jdbc:mysql://127.0.0.1:3306/ord?useUnicode=true&characterEncoding=utf-8&allowMultiQueries=true
-    username: root
-    password: root
+    url: jdbc:mysql://192.168.1.201:3306/ord?useUnicode=true&characterEncoding=utf-8&allowMultiQueries=true
+    username: ord
+    password: ord
   redis:
     # 最大实例数
     maxTotal: 100
@@ -37,7 +37,7 @@ spring:
     # 集群类型 (Single,RedisCluster)
     clusterType: Single
     # Single类型需要配置连接Redis的host和port
-    host: 127.0.0.1
+    host: 192.168.1.201
     port: 6379
   
 
