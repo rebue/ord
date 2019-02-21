@@ -1339,6 +1339,6 @@
 		    ORDER_STATE > 1
 		        AND USER_ID = #{userId,jdbcType=BIGINT}
 		        AND RECEIVED_TIME &gt;= #{receivedTime,jdbcType=TIMESTAMP}
-		ORDER BY PAY_TIME DESC
+		ORDER BY RECEIVED_TIME DESC
 	</select>
 </mapper>

@@ -1,5 +1,6 @@
 package rebue.ord.svr.feign;
 
+import java.util.Date;
 import java.util.List;
 
 import org.springframework.cloud.openfeign.FeignClient;
@@ -63,7 +64,7 @@ public interface OrdOrderSvc {
 	 * @return
 	 */
 	@GetMapping("/ord/order/havepaidorderbyuserandtime")
-	List<OrdOrderMo> havePaidOrderByUserAndTimeList(OrdOrderMo mo);
+	List<OrdOrderMo> havePaidOrderByUserAndTimeList(@RequestParam("userId") Long userId, @RequestParam("receivedTime") Date receivedTime);
 }
   
 

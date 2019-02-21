@@ -4,6 +4,7 @@ import java.beans.IntrospectionException;
 import java.lang.reflect.InvocationTargetException;
 import java.math.BigDecimal;
 import java.text.ParseException;
+import java.util.Date;
 import java.util.List;
 import java.util.Map;
 
@@ -513,8 +514,11 @@ public class OrdOrderCtrl {
 	 * @return
 	 */
 	@GetMapping("/ord/order/havepaidorderbyuserandtime")
-	List<OrdOrderMo> havePaidOrderByUserAndTimeList(OrdOrderMo mo) {
-		_log.info("根据用户和时间查询已经支付的订单的请求参数为：{}", mo);
+	List<OrdOrderMo> havePaidOrderByUserAndTimeList(@RequestParam("userId") Long userId, @RequestParam("receivedTime") Date receivedTime) {
+		_log.info("根据用户和时间查询已经支付的订单的请求参数为：userId-{}, receivedTime-{}", userId, receivedTime);
+		OrdOrderMo mo = new OrdOrderMo();
+		mo.setUserId(userId);
+		mo.setReceivedTime(receivedTime);
 		return svc.havePaidOrderByUserAndTimeList(mo);
 	}
 	
