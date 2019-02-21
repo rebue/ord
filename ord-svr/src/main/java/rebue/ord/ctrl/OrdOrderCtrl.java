@@ -517,4 +517,10 @@ public class OrdOrderCtrl {
 		_log.info("根据用户和时间查询已经支付的订单的请求参数为：{}", mo);
 		return svc.havePaidOrderByUserAndTimeList(mo);
 	}
+	
+	@PutMapping("/ord/order/splitPackageDeliver")
+	 ShipmentConfirmationRo splitPackageDeliver(@RequestBody ShipmentConfirmationTo mo) {
+			_log.info("将订单中的每个详情发一个包裹并发货的参数为：{}", mo);
+			return svc.splitPackageDeliver(mo);
+		}
 }

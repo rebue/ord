@@ -244,4 +244,12 @@ public interface OrdOrderSvc extends BaseSvc<java.lang.Long, OrdOrderMo, OrdOrde
 	 * @return
 	 */
 	List<OrdOrderMo> havePaidOrderByUserAndTimeList(OrdOrderMo mo);
+	
+	/**
+	 * 将订单中的每个详情分成一个包裹发货
+	 * @param mo
+	 * @return
+	 */
+    ShipmentConfirmationRo  splitPackageDeliver(ShipmentConfirmationTo mo);
+	
 }
