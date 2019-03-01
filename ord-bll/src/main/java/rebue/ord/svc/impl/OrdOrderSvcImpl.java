@@ -65,6 +65,7 @@ import rebue.ord.mo.OrdOrderDetailDeliverMo;
 import rebue.ord.mo.OrdOrderDetailMo;
 import rebue.ord.mo.OrdOrderMo;
 import rebue.ord.mo.OrdTaskMo;
+import rebue.ord.ro.BulkShipmentRo;
 import rebue.ord.ro.CancellationOfOrderRo;
 import rebue.ord.ro.ModifyOrderRealMoneyRo;
 import rebue.ord.ro.OrdBuyRelationRo;
@@ -83,6 +84,7 @@ import rebue.ord.svc.OrdOrderSvc;
 import rebue.ord.svc.OrdReturnSvc;
 import rebue.ord.svc.OrdSettleTaskSvc;
 import rebue.ord.svc.OrdTaskSvc;
+import rebue.ord.to.BulkShipmentTo;
 import rebue.ord.to.CancelDeliveryTo;
 import rebue.ord.to.ListOrderTo;
 import rebue.ord.to.OrderDetailTo;
@@ -1721,5 +1723,236 @@ public class OrdOrderSvcImpl extends MybatisBaseSvcImpl<OrdOrderMo, java.lang.Lo
 		return _mapper.selectHavePaidOrderByUserAndTime(mo);
 	}
 	
+	/**
+	 * 批量发货并打印
+	 */
+	@Override
+	public BulkShipmentRo bulkShipment(BulkShipmentTo qo) {
+		final BulkShipmentRo shipmentRo = new BulkShipmentRo();
+		List<String> batchPrinting = new ArrayList<String>();
+		OrdOrderMo[] ordOrderMos = qo.getReceiver();
+		for (OrdOrderMo mo : ordOrderMos) {
+			// 获取订单的订单详情
+			List<OrdOrderDetailMo> list = new ArrayList<OrdOrderDetailMo>();
+			list = orderDetailSvc.listByOrderId(mo.getId());
+			
+			//订单状态为2(未发货)先修改订单状态再调用快递鸟打印电子面单,订单状态为3(已发货)则直接调用快递鸟打印电子面单
+			if (mo.getOrderState() == 2) {
+				// 添加签收任务
+				final Date date = new Date();
+				mo.setSendTime(date);
+				final Calendar calendar = Calendar.getInstance();
+				calendar.setTime(date);
+				calendar.add(Calendar.HOUR, signinOrderTime);
+				final Date executePlanTime = calendar.getTime();
+				final OrdTaskMo ordTaskMo = new OrdTaskMo();
+				ordTaskMo.setOrderId(String.valueOf(mo.getId()));
+				ordTaskMo.setTaskType((byte) 2);
+				ordTaskMo.setExecutePlanTime(executePlanTime);
+				ordTaskMo.setExecuteState((byte) 0);
+
+				_log.info("添加签收任务的参数：{}", ordTaskMo);
+				final int taskAddResult = ordTaskSvc.add(ordTaskMo);
+				_log.info("添加签收任务返回的返回值：{}", taskAddResult);
+				if (taskAddResult != 1) {
+					_log.error("确认发货添加签收任务时出错，订单编号为：{}", mo.getOrderCode());
+					throw new RuntimeException("添加签收任务出错");
+				}
+
+				// 整理订单详情
+				String orderDetails = "";
+				Map<String, String> map = new HashMap<String, String>();
+				Map<String, Integer> detailMap = new HashMap<String, Integer>();
+				for (OrdOrderDetailMo ordorderdetailmo : list) {
+					String online = ordorderdetailmo.getOnlineId() + "-" + ordorderdetailmo.getOnlineSpecId();
+					if (map.containsKey(online)) {
+						String orderDetail = map.get(online);
+						Integer value = detailMap.get(orderDetail);
+						detailMap.put(orderDetail, value + 1);
+					} else {
+						String orderDetail = ordorderdetailmo.getOnlineTitle() + "-" + ordorderdetailmo.getSpecName();
+						map.put(online, orderDetail);
+						detailMap.put(orderDetail, 1);
+					}
+				}
+				for (String detailKey : detailMap.keySet()) {
+					Integer detailValue = detailMap.get(detailKey);
+					orderDetails = detailKey + "*" + detailValue + ";";
+				}
+
+				// 调用快递鸟打印电子面单
+				final EOrderTo eoderTo = new EOrderTo();
+				eoderTo.setShipperId(qo.getShipperId());
+				eoderTo.setShipperCode(qo.getShipperCode());
+				eoderTo.setOrderId(mo.getId());
+				eoderTo.setOrderDetail(orderDetails);
+				eoderTo.setOrderTitle(mo.getOrderTitle());
+				eoderTo.setReceiverName(mo.getReceiverName());
+				eoderTo.setReceiverProvince(mo.getReceiverProvince());
+				eoderTo.setReceiverCity(mo.getReceiverCity());
+				eoderTo.setReceiverExpArea(mo.getReceiverExpArea());
+				eoderTo.setReceiverAddress(mo.getReceiverAddress());
+				eoderTo.setReceiverPostCode(mo.getReceiverPostCode());
+				eoderTo.setReceiverTel(mo.getReceiverTel());
+				eoderTo.setReceiverMobile(mo.getReceiverMobile());
+				eoderTo.setSenderName(qo.getSenderName());
+				eoderTo.setSenderMobile(qo.getSenderMobile());
+				eoderTo.setSenderTel(qo.getSenderTel());
+				eoderTo.setSenderProvince(qo.getSenderProvince());
+				eoderTo.setSenderCity(qo.getSenderCity());
+				eoderTo.setSenderAddress(qo.getSenderAddress());
+				eoderTo.setSenderExpArea(qo.getSenderExpArea());
+				eoderTo.setSenderPostCode(qo.getSenderPostCode());
+				eoderTo.setOrgId(qo.getOrgId());
+				_log.info("调用快递电子面单的参数为：{}", eoderTo);
+				final EOrderRo eOrderRo = kdiSvc.eorder(eoderTo);
+				_log.info("调用快递电子面单的返回值为：{}", eOrderRo);
+				if (eOrderRo.getResult().getCode() == -1) {
+					_log.error("调用快递电子面单出现参数错误");
+					throw new RuntimeException("调用快递电子面单参数错误");
+				}
+				if (eOrderRo.getResult().getCode() == -2) {
+					_log.error("重复调用快递电子面单");
+					throw new RuntimeException("该订单已发货");
+				}
+				if (eOrderRo.getResult().getCode() == -3) {
+					_log.error("调用快递电子面单失败");
+					throw new RuntimeException("调用快递电子面单失败");
+				}
+				_log.info("调用快递电子面单成功，返回值为：{}", eOrderRo);
+				// 获取订单详情id的集合
+				List<Long> selectDetailId = new ArrayList<Long>();
+				for (OrdOrderDetailMo ordorderdetailmo : list) {
+					selectDetailId.add(ordorderdetailmo.getId());
+				}
+				// 根据快递电子面单返回的logisticId和selectDtailId和orderId来添加物流发货表和修改每条详情的发货状态
+				for (final Long detailId : selectDetailId) {
+					_log.info("根据当前订单详情循环插入发货表和修改订单详情发货状态开始-------------------------------");
+					final OrdOrderDetailDeliverMo ooddmo = new OrdOrderDetailDeliverMo();
+					ooddmo.setLogisticId(eOrderRo.getLogisticId());
+					ooddmo.setOrderId(mo.getId());
+					ooddmo.setOrderDetailId(detailId);
+					_log.info("添加发货表的参数：{}", ooddmo);
+					int result = ordOrderDetailDeliverSvc.add(ooddmo);
+					_log.info("添加发货表的结果为：{}", result);
+					if (result != 1) {
+						_log.error("添加发货表失败");
+						throw new RuntimeException("添加发货表失败");
+					}
+					// 修改每条详情的发货状态
+					result = 0;
+					final OrdOrderDetailMo oodMo = new OrdOrderDetailMo();
+					oodMo.setId(detailId);
+					oodMo.setIsDelivered(true);
+					_log.info("修改订单详情发货状态的参数为：{}", oodMo);
+					result = orderDetailSvc.modify(oodMo);
+					_log.info("修改订单详情发货状态结果为：{}", result);
+					if (result != 1) {
+						_log.error("添加订单详情发货状态失败");
+						throw new RuntimeException("修改订单详情发货状态失败");
+					}
+				}
+				_log.info("根据当前订单详情循环插入发货表和修改订单详情发货状态结束++++++++++++++++++++++++++++++++");
+				if (eOrderRo.getFailReason() == null) {
+					batchPrinting.add(eOrderRo.getPrintPage());
+					shipmentRo.setMsg("批量发货成功");
+					shipmentRo.setResult(ShipmentConfirmationDic.SUCCESS);
+				} else {
+					return shipmentRo;
+				}
+
+				// 修改订单状态
+				_log.info("确认发货并修改订单状态，参数为:{}", mo);
+				final int modifyResult = _mapper.shipmentConfirmation(mo);
+				if (modifyResult != 1) {
+					_log.info("确认发货并修改订单状态失败，返回值为：{}", modifyResult);
+					throw new RuntimeException("添加发货表失败");
+				}
+				_log.info("确认发货并修改订单状态成功，返回值为：{}", modifyResult);
+
+			} else {
+				// 整理订单详情
+				String orderDetails = "";
+				Map<String, String> map = new HashMap<String, String>();
+				Map<String, Integer> detailMap = new HashMap<String, Integer>();
+				for (OrdOrderDetailMo ordorderdetailmo : list) {
+					String online = ordorderdetailmo.getOnlineId() + "-" + ordorderdetailmo.getOnlineSpecId();
+					if (map.containsKey(online)) {
+						String orderDetail = map.get(online);
+						Integer value = detailMap.get(orderDetail);
+						detailMap.put(orderDetail, value + 1);
+					} else {
+						String orderDetail = ordorderdetailmo.getOnlineTitle() + "-" + ordorderdetailmo.getSpecName();
+						map.put(online, orderDetail);
+						detailMap.put(orderDetail, 1);
+					}
+				}
+				for (String detailKey : detailMap.keySet()) {
+					Integer detailValue = detailMap.get(detailKey);
+					orderDetails = detailKey + "*" + detailValue + ";";
+				}
+				// 调用快递鸟打印电子面单
+				final EOrderTo eoderTo = new EOrderTo();
+				eoderTo.setShipperId(qo.getShipperId());
+				eoderTo.setShipperCode(qo.getShipperCode());
+				eoderTo.setOrderId(mo.getId());
+				eoderTo.setOrderDetail(orderDetails);
+				eoderTo.setOrderTitle(mo.getOrderTitle());
+				eoderTo.setReceiverName(mo.getReceiverName());
+				eoderTo.setReceiverProvince(mo.getReceiverProvince());
+				eoderTo.setReceiverCity(mo.getReceiverCity());
+				eoderTo.setReceiverExpArea(mo.getReceiverExpArea());
+				eoderTo.setReceiverAddress(mo.getReceiverAddress());
+				eoderTo.setReceiverPostCode(mo.getReceiverPostCode());
+				eoderTo.setReceiverTel(mo.getReceiverTel());
+				eoderTo.setReceiverMobile(mo.getReceiverMobile());
+				eoderTo.setSenderName(qo.getSenderName());
+				eoderTo.setSenderMobile(qo.getSenderMobile());
+				eoderTo.setSenderTel(qo.getSenderTel());
+				eoderTo.setSenderProvince(qo.getSenderProvince());
+				eoderTo.setSenderCity(qo.getSenderCity());
+				eoderTo.setSenderAddress(qo.getSenderAddress());
+				eoderTo.setSenderExpArea(qo.getSenderExpArea());
+				eoderTo.setSenderPostCode(qo.getSenderPostCode());
+				eoderTo.setOrgId(qo.getOrgId());
+				_log.info("调用快递电子面单的参数为：{}", eoderTo);
+				final EOrderRo eOrderRo = kdiSvc.eorder(eoderTo);
+				_log.info("调用快递电子面单的返回值为：{}", eOrderRo);
+				if (eOrderRo.getResult().getCode() == -1) {
+					_log.error("调用快递电子面单出现参数错误");
+					throw new RuntimeException("调用快递电子面单参数错误");
+				}
+				if (eOrderRo.getResult().getCode() == -2) {
+					_log.error("重复调用快递电子面单");
+					throw new RuntimeException("该订单已发货");
+				}
+				if (eOrderRo.getResult().getCode() == -3) {
+					_log.error("调用快递电子面单失败");
+					throw new RuntimeException("调用快递电子面单失败");
+				}
+				_log.info("调用快递电子面单成功，返回值为：{}", eOrderRo);
+				
+				if (eOrderRo.getFailReason() == null) {
+					batchPrinting.add(eOrderRo.getPrintPage());
+					shipmentRo.setMsg("批量发货成功");
+					shipmentRo.setResult(ShipmentConfirmationDic.SUCCESS);
+				} else {
+					return shipmentRo;
+				}
+			}
+			// 整理批量打印的页面
+			String printPage = "";
+			if (shipmentRo.getResult() == ShipmentConfirmationDic.SUCCESS) {
+				for (int i = 0; i < batchPrinting.size(); i++) {
+					if (i != 0) {
+						printPage += "<br><div style=\"page-break-after:always\"></div>\n\r";
+					}
+					printPage += batchPrinting.get(i);
+				}
+			}
+			shipmentRo.setPrintPage(printPage);
+		}
+		return shipmentRo;
+	}
 
 }

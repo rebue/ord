@@ -28,6 +28,7 @@ import rebue.ord.dic.CancellationOfOrderDic;
 import rebue.ord.dic.OrderSignInDic;
 import rebue.ord.dic.ShipmentConfirmationDic;
 import rebue.ord.mo.OrdOrderMo;
+import rebue.ord.ro.BulkShipmentRo;
 import rebue.ord.ro.CancellationOfOrderRo;
 import rebue.ord.ro.ModifyOrderRealMoneyRo;
 import rebue.ord.ro.OrdOrderRo;
@@ -37,6 +38,7 @@ import rebue.ord.ro.OrderSignInRo;
 import rebue.ord.ro.SetUpExpressCompanyRo;
 import rebue.ord.ro.ShipmentConfirmationRo;
 import rebue.ord.svc.OrdOrderSvc;
+import rebue.ord.to.BulkShipmentTo;
 import rebue.ord.to.CancelDeliveryTo;
 import rebue.ord.to.ListOrderTo;
 import rebue.ord.to.OrderSignInTo;
@@ -470,6 +472,42 @@ public class OrdOrderCtrl {
 		mo.setReceivedTime(receivedTime);
 		return svc.havePaidOrderByUserAndTimeList(mo);
 	}
-
+	
+	/**
+	 * 批量发货
+	 * @param qo
+	 * @return
+	 */
+	@SuppressWarnings("finally")
+	@PutMapping("/ord/order/bulkShipment")
+	BulkShipmentRo bulkShipment(@RequestBody final BulkShipmentTo qo) {
+		BulkShipmentRo bulkShipmentRo=new BulkShipmentRo();
+		_log.info("批量打印快递面单的参数为：qo-{}",qo);		
+		try {
+			bulkShipmentRo = svc.bulkShipment(qo);
+			_log.info("批量打印的返回值为：{}", bulkShipmentRo);
+		}catch (final RuntimeException e) {
+			final String msg = e.getMessage();
+			if (msg.equals("调用快递电子面单参数错误")) {
+				bulkShipmentRo.setResult(ShipmentConfirmationDic.PARAN_ERROR);
+				bulkShipmentRo.setMsg(msg);
+				_log.error(msg);
+			} else if (msg.equals("该订单已发货")) {
+				bulkShipmentRo.setResult(ShipmentConfirmationDic.ORDER_ALREADY_SHIPMENTS);
+				bulkShipmentRo.setMsg(msg);
+				_log.error(msg);
+			} else if (msg.equals("调用快递电子面单失败")) {
+				bulkShipmentRo.setResult(ShipmentConfirmationDic.INVOKE_ERROR);
+				bulkShipmentRo.setMsg(msg);
+				_log.error(msg);
+			} else {
+				bulkShipmentRo.setResult(ShipmentConfirmationDic.ERROR);
+				bulkShipmentRo.setMsg("确认发货失败");
+				_log.error(msg);
+			}
+		}finally {
+			return bulkShipmentRo;
+		}
+	}
 
 }

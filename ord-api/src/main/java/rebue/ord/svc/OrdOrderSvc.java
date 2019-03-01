@@ -14,6 +14,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import rebue.afc.msg.PayDoneMsg;
 import rebue.ord.jo.OrdOrderJo;
 import rebue.ord.mo.OrdOrderMo;
+import rebue.ord.ro.BulkShipmentRo;
 import rebue.ord.ro.CancellationOfOrderRo;
 import rebue.ord.ro.ModifyOrderRealMoneyRo;
 import rebue.ord.ro.OrdOrderRo;
@@ -22,6 +23,7 @@ import rebue.ord.ro.OrderRo;
 import rebue.ord.ro.OrderSignInRo;
 import rebue.ord.ro.SetUpExpressCompanyRo;
 import rebue.ord.ro.ShipmentConfirmationRo;
+import rebue.ord.to.BulkShipmentTo;
 import rebue.ord.to.CancelDeliveryTo;
 import rebue.ord.to.ListOrderTo;
 import rebue.ord.to.OrderSignInTo;
@@ -253,4 +255,10 @@ public interface OrdOrderSvc extends BaseSvc<java.lang.Long, OrdOrderMo, OrdOrde
      */
     ShipmentConfirmationRo deliverForMergeIsTrueAndSplitIsFalse( ShipmentConfirmationTo to);
 	
+    /**
+	 * 批量发货并打印
+	 * @param qo
+	 * @return
+	 */
+    BulkShipmentRo bulkShipment(BulkShipmentTo qo);
 }
