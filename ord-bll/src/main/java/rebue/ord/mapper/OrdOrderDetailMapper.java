@@ -12,6 +12,7 @@ import org.apache.ibatis.annotations.Update;
 import rebue.ord.dic.OrderStateDic;
 import rebue.ord.dic.ReturnStateDic;
 import rebue.ord.mo.OrdOrderDetailMo;
+import rebue.ord.ro.OrdOrderDetailRo;
 import rebue.ord.ro.WaitingBuyPointByUserIdListRo;
 import rebue.robotech.mapper.MybatisBaseMapper;
 
@@ -278,4 +279,12 @@ public interface OrdOrderDetailMapper extends MybatisBaseMapper<OrdOrderDetailMo
      */
     @Update("update ORD_ORDER_DETAIL set BUY_POINT=#{buyPoint,jdbcType=DECIMAL}, BUY_POINT_TOTAL=#{buyPointTotal,jdbcType=DECIMAL} where ID=#{id,jdbcType=BIGINT} and BUY_POINT is null")
     int updateBuyPointById(@Param("id") Long id, @Param("buyPoint") BigDecimal buyPoint, @Param("buyPointTotal") BigDecimal buyPointTotal);
+    
+    /**
+     * 根据订单id获取详情和物流id
+     * @param orderId
+     * @return
+     */
+    @Select(" select a.*,b.LOGISTIC_ID from ORD_ORDER_DETAIL a left join ORD_ORDER_DETAIL_DELIVER b on a.id=b.ORDER_DETAIL_ID where a.ORDER_ID=#{orderId,jdbcType=BIGINT}")
+    List<OrdOrderDetailRo> listDetailAndlogisticCodeByOrderId(@Param("orderId")Long orderId);
 }

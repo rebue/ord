@@ -58,7 +58,7 @@
 			<dependency>
 				<groupId>com.github.rebue.kdi</groupId>
 				<artifactId>kdi-svr-feign</artifactId>
-				<version>1.0.8</version>
+				<version>1.0.9</version>
 			</dependency>
 			<dependency>
 				<groupId>com.github.rebue.afc</groupId>
@@ -68,7 +68,7 @@
 			<dependency>
 				<groupId>com.github.rebue.kdi</groupId>
 				<artifactId>kdi-api</artifactId>
-				<version>1.0.8</version>
+				<version>1.0.9</version>
 			</dependency>
 			<dependency>
 				<groupId>com.github.rebue.pnt</groupId>

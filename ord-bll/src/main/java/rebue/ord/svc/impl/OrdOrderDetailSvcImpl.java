@@ -19,6 +19,8 @@ import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
 
 import damai.pnt.dic.PointLogTypeDic;
+import rebue.kdi.ro.KdiLogisticRo;
+import rebue.kdi.svr.feign.KdiSvc;
 import rebue.onl.svr.feign.OnlOnlineSpecSvc;
 import rebue.ord.dao.OrdOrderDetailDao;
 import rebue.ord.dic.OrderStateDic;
@@ -31,6 +33,7 @@ import rebue.ord.mo.OrdOrderDetailMo;
 import rebue.ord.mo.OrdOrderMo;
 import rebue.ord.mo.OrdTaskMo;
 import rebue.ord.ro.DetailandBuyRelationRo;
+import rebue.ord.ro.OrdOrderDetailRo;
 import rebue.ord.ro.WaitingBuyPointByUserIdListRo;
 import rebue.ord.svc.OrdBuyRelationSvc;
 import rebue.ord.svc.OrdOrderDetailSvc;
@@ -98,6 +101,9 @@ public class OrdOrderDetailSvcImpl
 	private OnlOnlineSpecSvc onlOnlineSpecSvc;
 	@Resource
 	private PntPointSvc pntPointSvc;
+	
+	@Resource
+	private KdiSvc kdiSvc;
 
 	/**
 	 * 修改订单详情的退货情况(根据订单详情ID、已退货数量、旧的返现金总额，修改退货总数、返现金总额以及退货状态)
@@ -530,5 +536,28 @@ public class OrdOrderDetailSvcImpl
 			to.setChangedPoint(ordOrderDetailMo.getBuyPoint());
 			pntPointSvc.addPointTrade(to);
 		}
+	}
+	
+	/**
+	 * 根据订单id获取订单详情信息和物流编号
+	 */
+	@Override
+	public List<OrdOrderDetailRo> listDetailAndlogisticCodeByOrderId(Long orderId) {
+		List<OrdOrderDetailRo> result = _mapper.listDetailAndlogisticCodeByOrderId(orderId);
+		_log.info("根据订单id获取订单详情信息和物流id的返回值为：{}", result);
+		for (OrdOrderDetailRo ordOrderDetailRo : result) {
+			if (ordOrderDetailRo.getLogisticId() != null) {
+				_log.info("开始获取物流单号----------------------------------");
+				_log.info("获取物流单号参数为：{}", ordOrderDetailRo);
+				KdiLogisticRo logisticRo = kdiSvc.getLogisticById(ordOrderDetailRo.getLogisticId());
+				_log.info("获取物流单号结果为：{}", logisticRo);
+				if (logisticRo != null) {
+					ordOrderDetailRo.setLogisticCode(logisticRo.getRecord().getLogisticCode());
+				}
+				_log.info("结束获取物流单号+++++++++++++++++++++++++++++++++++");
+			}
+
+		}
+		return result;
 	}
 }

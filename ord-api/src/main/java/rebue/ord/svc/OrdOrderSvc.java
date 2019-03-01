@@ -90,9 +90,9 @@ public interface OrdOrderSvc extends BaseSvc<java.lang.Long, OrdOrderMo, OrdOrde
      * @return
      * @date 2018年4月13日 下午6:19:09
      */
-    ShipmentConfirmationRo shipmentConfirmation(ShipmentConfirmationTo mo);
+    ShipmentConfirmationRo deliver(ShipmentConfirmationTo mo);
 
-    ShipmentConfirmationRo shipmentAndGetTrace(ShipmentConfirmationTo to);
+    ShipmentConfirmationRo deliverAndGetTrace(ShipmentConfirmationTo to);
 
     /**
      * 订单签收 Title: orderSignIn Description:
@@ -245,11 +245,12 @@ public interface OrdOrderSvc extends BaseSvc<java.lang.Long, OrdOrderMo, OrdOrde
 	 */
 	List<OrdOrderMo> havePaidOrderByUserAndTimeList(OrdOrderMo mo);
 	
-	/**
-	 * 将订单中的每个详情分成一个包裹发货
-	 * @param mo
-	 * @return
-	 */
-    ShipmentConfirmationRo  splitPackageDeliver(ShipmentConfirmationTo mo);
+    
+    /**
+     * 第一种发货方式 Merge=True Split=false
+     * @param to
+     * @return
+     */
+    ShipmentConfirmationRo deliverForMergeIsTrueAndSplitIsFalse( ShipmentConfirmationTo to);
 	
 }

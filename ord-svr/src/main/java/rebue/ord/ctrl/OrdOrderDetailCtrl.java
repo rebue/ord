@@ -7,6 +7,7 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.List;
 import javax.annotation.Resource;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.dao.DuplicateKeyException;
@@ -19,6 +20,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import rebue.ord.mo.OrdOrderDetailMo;
 import rebue.ord.ro.DetailandBuyRelationRo;
+import rebue.ord.ro.OrdOrderDetailRo;
 import rebue.ord.ro.WaitingBuyPointByUserIdListRo;
 import rebue.ord.svc.OrdOrderDetailSvc;
 import rebue.robotech.dic.ResultDic;
@@ -278,4 +280,15 @@ public class OrdOrderDetailCtrl {
 	 * @GetMapping("/ord/detail/compensatepoint") void compensatePoint() {
 	 * svc.compensatePoint(); }
 	 */
+	
+	/**
+	 * 根据订单id获取物流信息和物流id
+	 * @param orderId
+	 * @return
+	 */
+	@GetMapping("/ord/listDetailAndlogisticCodeByOrderId")
+	List<OrdOrderDetailRo> listDetailAndlogisticCodeByOrderId(Long orderId){
+		_log.info("：根据订单id获取物流信息和物流idorderId-{}",orderId);
+		return svc.listDetailAndlogisticCodeByOrderId(orderId);
+	}
 }
