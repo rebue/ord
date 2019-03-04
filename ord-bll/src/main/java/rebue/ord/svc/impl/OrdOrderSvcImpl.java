@@ -842,7 +842,7 @@ public class OrdOrderSvcImpl extends MybatisBaseSvcImpl<OrdOrderMo, java.lang.Lo
 		// 第一种发货方式
 		if (to.isMerge() == true && to.isSplit() == false) {
 			confirmationRo = deliverForMergeIsTrueAndSplitIsFalse(to);
-			_log.info("第一种发货方式的返回值：{}",confirmationRo);
+			_log.info("第一种发货方式的返回值：{}", confirmationRo);
 		}
 
 		// 根据没有当前订单详情的所有未发货详情Id和当前被选择的详情Id长度是否相等来决定是否修改订单状态为已发货。
@@ -971,7 +971,7 @@ public class OrdOrderSvcImpl extends MybatisBaseSvcImpl<OrdOrderMo, java.lang.Lo
 		confirmationRo.setMsg("确认发货成功");
 		return confirmationRo;
 	}
-	
+
 	/**
 	 * 
 	 * 发货 第一种发货方式（默认）： merge=true split=false
@@ -1038,7 +1038,7 @@ public class OrdOrderSvcImpl extends MybatisBaseSvcImpl<OrdOrderMo, java.lang.Lo
 		confirmationRo.setFailReason(callKdiNiaoAndaddTaskRo.getFailReason());
 		return confirmationRo;
 	}
-	
+
 	/**
 	 * 调用快递鸟且添加签收任务
 	 * 
@@ -1117,8 +1117,6 @@ public class OrdOrderSvcImpl extends MybatisBaseSvcImpl<OrdOrderMo, java.lang.Lo
 
 		return eOrderRo;
 	}
-	
-	
 
 	/**
 	 * 订单签收
@@ -1722,7 +1720,7 @@ public class OrdOrderSvcImpl extends MybatisBaseSvcImpl<OrdOrderMo, java.lang.Lo
 		_log.info("根据用户和时间查询已经签收的订单的参数为：{}", mo);
 		return _mapper.selectHavePaidOrderByUserAndTime(mo);
 	}
-	
+
 	/**
 	 * 批量发货并打印
 	 */
@@ -1735,8 +1733,8 @@ public class OrdOrderSvcImpl extends MybatisBaseSvcImpl<OrdOrderMo, java.lang.Lo
 			// 获取订单的订单详情
 			List<OrdOrderDetailMo> list = new ArrayList<OrdOrderDetailMo>();
 			list = orderDetailSvc.listByOrderId(mo.getId());
-			
-			//订单状态为2(未发货)先修改订单状态再调用快递鸟打印电子面单,订单状态为3(已发货)则直接调用快递鸟打印电子面单
+
+			// 订单状态为2(未发货)先修改订单状态再调用快递鸟打印电子面单,订单状态为3(已发货)则直接调用快递鸟打印电子面单
 			if (mo.getOrderState() == 2) {
 				// 添加签收任务
 				final Date date = new Date();
@@ -1777,7 +1775,7 @@ public class OrdOrderSvcImpl extends MybatisBaseSvcImpl<OrdOrderMo, java.lang.Lo
 				}
 				for (String detailKey : detailMap.keySet()) {
 					Integer detailValue = detailMap.get(detailKey);
-					orderDetails = detailKey + "*" + detailValue + ";";
+					orderDetails += detailKey + "*" + detailValue + ";";
 				}
 
 				// 调用快递鸟打印电子面单
@@ -1889,7 +1887,7 @@ public class OrdOrderSvcImpl extends MybatisBaseSvcImpl<OrdOrderMo, java.lang.Lo
 				}
 				for (String detailKey : detailMap.keySet()) {
 					Integer detailValue = detailMap.get(detailKey);
-					orderDetails = detailKey + "*" + detailValue + ";";
+					orderDetails += detailKey + "*" + detailValue + ";";
 				}
 				// 调用快递鸟打印电子面单
 				final EOrderTo eoderTo = new EOrderTo();
@@ -1931,7 +1929,7 @@ public class OrdOrderSvcImpl extends MybatisBaseSvcImpl<OrdOrderMo, java.lang.Lo
 					throw new RuntimeException("调用快递电子面单失败");
 				}
 				_log.info("调用快递电子面单成功，返回值为：{}", eOrderRo);
-				
+
 				if (eOrderRo.getFailReason() == null) {
 					batchPrinting.add(eOrderRo.getPrintPage());
 					shipmentRo.setMsg("批量发货成功");
