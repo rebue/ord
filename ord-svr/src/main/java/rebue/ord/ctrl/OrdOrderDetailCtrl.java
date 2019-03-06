@@ -281,14 +281,5 @@ public class OrdOrderDetailCtrl {
 	 * svc.compensatePoint(); }
 	 */
 	
-	/**
-	 * 根据订单id获取物流信息和物流id
-	 * @param orderId
-	 * @return
-	 */
-	@GetMapping("/ord/listDetailAndlogisticCodeByOrderId")
-	List<OrdOrderDetailRo> listDetailAndlogisticCodeByOrderId(Long orderId){
-		_log.info("：根据订单id获取物流信息和物流idorderId-{}",orderId);
-		return svc.listDetailAndlogisticCodeByOrderId(orderId);
-	}
+
 }

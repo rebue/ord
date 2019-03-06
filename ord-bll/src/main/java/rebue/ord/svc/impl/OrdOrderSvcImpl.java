@@ -86,6 +86,7 @@ import rebue.ord.svc.OrdSettleTaskSvc;
 import rebue.ord.svc.OrdTaskSvc;
 import rebue.ord.to.BulkShipmentTo;
 import rebue.ord.to.CancelDeliveryTo;
+import rebue.ord.to.DeliverAndGetTraceTo;
 import rebue.ord.to.ListOrderTo;
 import rebue.ord.to.OrderDetailTo;
 import rebue.ord.to.OrderSignInTo;
@@ -831,10 +832,10 @@ public class OrdOrderSvcImpl extends MybatisBaseSvcImpl<OrdOrderMo, java.lang.Lo
 		ShipmentConfirmationRo confirmationRo = new ShipmentConfirmationRo();
 		_log.info("发货的参数为：{}", to);
 
-		// 判断是否是已经支付状态
-		if (to.getOrderState() != 2) {
+		// 判断是否是已经支付状态或者待收货状态
+		if (to.getOrderState() != 2 && to.getOrderState() != 3) {
 			confirmationRo.setResult(ShipmentConfirmationDic.ERROR);
-			confirmationRo.setMsg("订单不是已支付状态，不能发货");
+			confirmationRo.setMsg("订单不是已支付或者待收货状态，不能发货或添加物流订单");
 			_log.info("订单的状态为：{}", to.getOrderState());
 			return confirmationRo;
 		}
@@ -845,115 +846,38 @@ public class OrdOrderSvcImpl extends MybatisBaseSvcImpl<OrdOrderMo, java.lang.Lo
 			_log.info("第一种发货方式的返回值：{}", confirmationRo);
 		}
 
-		// 根据没有当前订单详情的所有未发货详情Id和当前被选择的详情Id长度是否相等来决定是否修改订单状态为已发货。
-		if (to.getAllDetaile().size() == to.getSelectDetaile().size()) {
-			_log.debug("需要修改订单状态，订单所有未发货详情等于被选择的详情：AllDetaileId长度-{}, SelectDetailId长度-{}", to.getAllDetaile().size(),
-					to.getSelectDetaile().size());
-			OrdOrderMo ordOrderMo = new OrdOrderMo();
-			final Date date = new Date();
-			ordOrderMo.setSendOpId(to.getSendOpId());
-			ordOrderMo.setSendTime(date);
-			ordOrderMo.setId(to.getId());
-			_log.info("确认发货并修改订单状态，参数为：{}", ordOrderMo);
-			final int result = _mapper.shipmentConfirmation(ordOrderMo);
-			if (result != 1) {
-				_log.info("确认发货并修改订单状态失败，返回值为：{}", result);
-				throw new RuntimeException("添加发货表失败");
-			}
-			_log.info("确认发货并修改订单状态成功，返回值为：{}", result);
-		} else {
-			_log.info("不需要要修改订单状态，订单所有未发货详情不等于被选择的详情：AllDetaile长度-{}, SelectDetaile长度-{}", to.getAllDetaile().size(),
-					to.getSelectDetaile().size());
-			_log.info("确认发货成功");
+		// 第二种发货方式
+		if (to.isMerge() == true && to.isSplit() == true) {
+			confirmationRo = deliverForMergeIsTrueAndSplitIsTrue(to);
+			_log.info("第二种发货方式的返回值：{}", confirmationRo);
 		}
-		return confirmationRo;
-	}
 
-	/**
-	 * 确认发货并获取物流轨迹
-	 */
-	@Override
-	public ShipmentConfirmationRo deliverAndGetTrace(final ShipmentConfirmationTo to) {
-		final ShipmentConfirmationRo confirmationRo = new ShipmentConfirmationRo();
-		final OrdOrderMo mo = dozerMapper.map(to, OrdOrderMo.class);
-		// 添加签收任务
-		final Date date = new Date();
-		mo.setSendTime(date);
-		final Calendar calendar = Calendar.getInstance();
-		calendar.setTime(date);
-		calendar.add(Calendar.HOUR, signinOrderTime);
-		final Date executePlanTime = calendar.getTime();
-		final OrdTaskMo ordTaskMo = new OrdTaskMo();
-		ordTaskMo.setOrderId(String.valueOf(mo.getId()));
-		ordTaskMo.setTaskType((byte) 2);
-		// 先查询任务是否已经存在
-		_log.info("查看签收任务是否存在的参数为：{}", ordTaskMo);
-		final List<OrdTaskMo> ordTaskList = ordTaskSvc.list(ordTaskMo);
-		_log.info("查看签收任务是否存在的结果为：{}", ordTaskList);
-		if (ordTaskList.size() == 0) {
-			ordTaskMo.setExecutePlanTime(executePlanTime);
-			ordTaskMo.setExecuteState((byte) 0);
-			_log.info("确认发货添加签收任务的参数为：{}", ordTaskMo);
-			final int taskAddResult = ordTaskSvc.add(ordTaskMo);
-			_log.info("确认发货添加签收任务的返回值为：{}", taskAddResult);
-			if (taskAddResult != 1) {
-				_log.error("确认发货添加签收任务时出错，订单编号为：{}", mo.getOrderCode());
-				throw new RuntimeException("添加签收任务出错");
-			}
-		} else {
-			_log.info("确认发货添加签收任务已经存在，orderId为：{}", ordTaskMo.getOrderId());
+		// 第三中种发货方式
+		if (to.isMerge() == false && to.isSplit() == false) {
+			confirmationRo = deliverForMergeIsFalseAndSplitIsFalse(to);
+			_log.info("第二种发货方式的返回值：{}", confirmationRo);
 		}
-		// 添加物流信息
-		final AddKdiLogisticTo addKdiLogisticTo = dozerMapper.map(to, AddKdiLogisticTo.class);
-		addKdiLogisticTo.setEntryType((byte) 2);
-		addKdiLogisticTo.setOrderId(to.getId());
-		addKdiLogisticTo.setLogisticId(_idWorker.getId());
-		_log.info("添加物流信息参数为：{}", addKdiLogisticTo);
-		final KdiLogisticRo entryResult = kdiSvc.entryLogistics(addKdiLogisticTo);
-		_log.info("添加物流信息结果为：{}", entryResult);
-		if (entryResult.getResult() != 1) {
-			_log.error("添加物流信息出错，订单编号为：{}", mo.getOrderCode());
-			throw new RuntimeException("添加物流信息出错");
+
+		// 第四种发货方式
+		if (to.isMerge() == false && to.isSplit() == true) {
+			confirmationRo = deliverForMergeIsFalseAndSplitIsTrue(to);
+			_log.info("第二种发货方式的返回值：{}", confirmationRo);
 		}
-		// 根据logisticId和selectDtailId和orderId来添加物流发货表和修改每条详情的发货状态
-		for (int i = 0; i < to.getSelectDetaile().size(); i++) {
-			_log.info("根据当前订单详情循环插入发货表和修改订单详情发货状态开始-------------------------------");
-			final OrdOrderDetailDeliverMo ooddmo = new OrdOrderDetailDeliverMo();
-			ooddmo.setLogisticId(addKdiLogisticTo.getLogisticId());
-			ooddmo.setOrderId(to.getId());
-			ooddmo.setOrderDetailId(to.getSelectDetaile().get(i).getId());
-			_log.info("添加发货表的参数：{}", ooddmo);
-			int result = ordOrderDetailDeliverSvc.add(ooddmo);
-			_log.info("添加发货表的结果为：{}", result);
-			if (result != 1) {
-				_log.error("添加发货表失败");
-				throw new RuntimeException("添加发货表失败");
-			}
-			// 判断是否是首次发货还是添加物流单号,不是首次不用修改状态
-			if (to.isFirst()) {
-				// 修改每条详情的发货状态
-				result = 0;
-				final OrdOrderDetailMo oodMo = new OrdOrderDetailMo();
-				oodMo.setId(to.getSelectDetaile().get(i).getId());
-				oodMo.setIsDelivered(true);
-				_log.info("修改订单详情发货状态的参数为：{}", oodMo);
-				result = orderDetailSvc.modify(oodMo);
-				_log.info("修改订单详情发货状态结果为：{}", result);
-				if (result != 1) {
-					_log.error("添加订单详情发货状态失败");
-					throw new RuntimeException("修改订单详情发货状态失败");
-				}
-			}
-			_log.info("根据当前订单详情循环插入发货表和修改订单详情发货状态结束++++++++++++++++++++++++++++++++");
-		}
-		// 判断是首次订阅还是重新订阅,不是首次不用修改订单状态
+
 		if (to.isFirst()) {
+			_log.info("首次发货，需要判断是否修改订单状态 first: {}", to.isFirst());
+
 			// 根据没有当前订单详情的所有未发货详情Id和当前被选择的详情Id长度是否相等来决定是否修改订单状态为已发货。
 			if (to.getAllDetaile().size() == to.getSelectDetaile().size()) {
 				_log.debug("需要修改订单状态，订单所有未发货详情等于被选择的详情：AllDetaileId长度-{}, SelectDetailId长度-{}",
 						to.getAllDetaile().size(), to.getSelectDetaile().size());
-				_log.info("确认发货并修改订单状态，参数为：{}", mo);
-				final int result = _mapper.shipmentConfirmation(mo);
+				OrdOrderMo ordOrderMo = new OrdOrderMo();
+				final Date date = new Date();
+				ordOrderMo.setSendOpId(to.getSendOpId());
+				ordOrderMo.setSendTime(date);
+				ordOrderMo.setId(to.getId());
+				_log.info("确认发货并修改订单状态，参数为：{}", ordOrderMo);
+				final int result = _mapper.shipmentConfirmation(ordOrderMo);
 				if (result != 1) {
 					_log.info("确认发货并修改订单状态失败，返回值为：{}", result);
 					throw new RuntimeException("添加发货表失败");
@@ -965,12 +889,455 @@ public class OrdOrderSvcImpl extends MybatisBaseSvcImpl<OrdOrderMo, java.lang.Lo
 				_log.info("确认发货成功");
 			}
 		} else {
-			_log.info("确认发货成功");
+			_log.info("不是首次发货，不需要判断是否修改订单状态 first: {}", to.isFirst());
 		}
-		confirmationRo.setResult(ShipmentConfirmationDic.SUCCESS);
-		confirmationRo.setMsg("确认发货成功");
 		return confirmationRo;
 	}
+
+	/**
+	 * 获取物流轨迹 ：
+	 * 
+	 * 第一种获取方式 merge=true split=false（默认）需要上线id，上线规格id，将该订单下上线id和规格id等于传过去的发一个包裹。
+	 * 
+	 * 第二种获取方式 merge=true split=true 需要上线id，上线规格id，有多少个详情传过去就发多少个包裹。
+	 * 
+	 * 第三种获取方式 merge=false split=false 需要详情，将选择的详情发一个包裹
+	 * 
+	 * 第四种获取方式 merge=false split=true 需要详情，将选择的详情分别发一个包裹。
+	 */
+	@Override
+	public Ro deliverAndGetTrace(final DeliverAndGetTraceTo to) {
+		final Ro deliverAndGetTraceRo = new Ro();
+		// 判断是否是已经支付状态待收货状态
+		if (to.getOrderState() != 2 && to.getOrderState() != 3) {
+			deliverAndGetTraceRo.setResult(ResultDic.FAIL);
+			deliverAndGetTraceRo.setMsg("订单不是已支付或者待收货状态，不能发货或添加物流订单");
+			_log.info("订单的状态为：{}", to.getOrderState());
+			return deliverAndGetTraceRo;
+		}
+
+		// 第一种订阅方式
+		if (to.isMerge() == true && to.isSplit() == false) {
+			Ro getTraceRo = getTraceForMergeIsTrueAndSplitIsFalse(to);
+			_log.info("第一种订阅方式的返回值：{}", getTraceRo);
+		}
+
+		// 第二种订阅方式
+		if (to.isMerge() == true && to.isSplit() == true) {
+			Ro getTraceRo = getTraceForMergeIsTrueAndSplitIsTrue(to);
+			_log.info("第二种订阅方式的返回值：{}", getTraceRo);
+		}
+
+		// 第三种订阅方式
+		if (to.isMerge() == false && to.isSplit() == false) {
+			Ro getTraceRo = getTraceForMergeIsFalseAndSplitIsFalse(to);
+			_log.info("第三种订阅方式的返回值：{}", getTraceRo);
+		}
+
+		// 第四种订阅方式
+		if (to.isMerge() == false && to.isSplit() == true) {
+			Ro getTraceRo = getTraceForMergeIsFalseAndSplitIsTrue(to);
+			_log.info("第四种订阅方式的返回值：{}", getTraceRo);
+		}
+
+		if (to.isFirst()) {
+			_log.info("首次订阅，需要判断是否修改订单状态 first: {}", to.isFirst());
+
+			// 根据没有当前订单详情的所有未发货详情Id和当前被选择的详情Id长度是否相等来决定是否修改订单状态为已发货。
+			if (to.getAllDetaile().size() == to.getSelectDetaile().size()) {
+				_log.debug("需要修改订单状态，订单所有未发货详情等于被选择的详情：AllDetaileId长度-{}, SelectDetailId长度-{}",
+						to.getAllDetaile().size(), to.getSelectDetaile().size());
+				OrdOrderMo ordOrderMo = new OrdOrderMo();
+				final Date date = new Date();
+				ordOrderMo.setSendOpId(to.getSendOpId());
+				ordOrderMo.setSendTime(date);
+				ordOrderMo.setId(to.getId());
+				_log.info("确认发货并修改订单状态，参数为：{}", ordOrderMo);
+				final int result = _mapper.shipmentConfirmation(ordOrderMo);
+				if (result != 1) {
+					_log.info("确认发货并修改订单状态失败，返回值为：{}", result);
+					throw new RuntimeException("添加发货表失败");
+				}
+				_log.info("确认发货并修改订单状态成功，返回值为：{}", result);
+			} else {
+				_log.info("不需要要修改订单状态，订单所有未发货详情不等于被选择的详情：AllDetaile长度-{}, SelectDetaile长度-{}",
+						to.getAllDetaile().size(), to.getSelectDetaile().size());
+				_log.info("确认发货成功");
+			}
+		} else {
+			_log.info("不是首次订阅，不需要判断是否修改订单状态 first: {}", to.isFirst());
+		}
+
+		deliverAndGetTraceRo.setResult(ResultDic.SUCCESS);
+		deliverAndGetTraceRo.setMsg("确认发货成功");
+		return deliverAndGetTraceRo;
+	}
+	
+	/**
+	 * 第一种获取轨迹方式（默认）： merge=true split=false
+	 * 需要上线id，上线规格id，将该订单下上线id和规格id等于传过去的发一个包裹。
+	 */
+	@Override
+	@Transactional(readOnly = false, propagation = Propagation.REQUIRED)
+	public Ro getTraceForMergeIsTrueAndSplitIsFalse(DeliverAndGetTraceTo to) {
+		_log.info("第一种订阅方式 merge=true split=false ");
+		Ro getTrace = new Ro();
+
+		// 录入并添加签收任务
+		// 设置物流id，提前设置是因为下面发货表需要用到且需要关辆，所有在这里设置并传过去就不用在录入的时候返回回来
+		to.setLogisticId(_idWorker.getId());
+		_log.info("参数为 ：{}", to);
+
+		String orderTitle = "";
+
+		// 插入发货表和修改详情
+		for (int i = 0; i < to.getSelectDetaile().size(); i++) {
+			_log.info("开始根据上线id和上线规格id修改详情状态和插入发货表开始----------------------");
+			// 循环当前订单下的所有详情
+			OrdOrderDetailMo orderDetailMo = new OrdOrderDetailMo();
+			orderDetailMo.setOrderId(to.getId());
+			orderDetailMo.setOnlineId(to.getSelectDetaile().get(i).getOnlineId());
+			orderDetailMo.setOnlineSpecId(to.getSelectDetaile().get(i).getOnlineSpecId());
+			_log.info("获取订单id,上线id，上线规格id获取详情的参数：{}", orderDetailMo);
+			List<OrdOrderDetailMo> detailResult = orderDetailSvc.list(orderDetailMo);
+			_log.info("获取订单id,上线id，上线规格id获取详情的结果为：{}", detailResult);
+			orderTitle += detailResult.get(0).getOnlineTitle() + detailResult.get(0).getSpecName() + "x"
+					+ detailResult.size();
+
+			// 修改详情的发货状态 和插入到发货表
+			for (OrdOrderDetailMo ordOrderDetailMo2 : detailResult) {
+				if (to.isFirst()) {
+					_log.info("首次订阅，需要修改详情 first: {}", to.isFirst());
+					// 修改详情的发货状态
+					_log.info("修改订单详情发货状态的参数是：orderId：{}，onlineId：{}，onlineSpecId：{}", to.getId(),
+							ordOrderDetailMo2.getOnlineId(), ordOrderDetailMo2.getOnlineSpecId());
+					int updateResult = orderDetailSvc.updateIsDeliver(to.getId(), ordOrderDetailMo2.getOnlineId(),
+							ordOrderDetailMo2.getOnlineSpecId());
+					_log.info("修改结果是 {}", updateResult);
+					if (updateResult < 1) {
+						_log.error("修改订单详情发货状态失败");
+						throw new RuntimeException("修改订单详情发货状态失败");
+					}
+					_log.info("修改订单详情成功");
+				} else {
+					_log.info("不是首次订阅，不需要修改详情 first: {}", to.isFirst());
+				}
+				// 插入到发货表
+				final OrdOrderDetailDeliverMo ooddmo = new OrdOrderDetailDeliverMo();
+				ooddmo.setLogisticId(to.getLogisticId());
+				ooddmo.setOrderId(to.getId());
+				ooddmo.setOrderDetailId(ordOrderDetailMo2.getId());
+				_log.info("添加发货表的参数：{}", ooddmo);
+				int result = ordOrderDetailDeliverSvc.add(ooddmo);
+				_log.info("添加发货表的结果：{}", result);
+				if (result != 1) {
+					_log.error("添加发货表失败");
+					throw new RuntimeException("添加发货表失败");
+				}
+			}
+
+			_log.info("开始根据上线id和上线规格id修改详情状态和插入发货表结束+++++++++++++++++++++++");
+		}
+
+		// 设置物流编号和订单标题（orderTitle）
+		to.setLogisticCode(to.getLogisticCodeArr().get(0));
+		to.setOrderTitle(orderTitle);
+		KdiLogisticRo KdiLogisticRo = new KdiLogisticRo();
+		try {
+			KdiLogisticRo = callTraceAndaddTask(to);
+		} catch (RuntimeException e) {
+			throw new RuntimeException("录入并添加签收任务失败");
+		}
+
+		_log.info("录入并添加签收任务的返回值为：{}", KdiLogisticRo);
+
+		getTrace.setMsg("发货成功");
+		getTrace.setResult(ResultDic.SUCCESS);
+		return getTrace;
+	}
+	
+	/**
+	 * 第二种获取方式 merge=true split=true 需要上线id，上线规格id，有多少个详情传过去就发多少个包裹。
+	 */
+	@Override
+	@Transactional(readOnly = false, propagation = Propagation.REQUIRED)
+	public Ro getTraceForMergeIsTrueAndSplitIsTrue(DeliverAndGetTraceTo to) {
+		_log.info("第二种订阅方式 merge=true split=true ");
+		_log.info("参数为 ：{}", to);
+		Ro getTrace = new Ro();
+
+		// 插入发货表和修改详情
+		for (int i = 0; i < to.getSelectDetaile().size(); i++) {
+			_log.info("开始根据上线id和上线规格id修改详情状态和插入发货表开始----------------------");
+
+			// 循环当前订单下的所有详情
+			OrdOrderDetailMo orderDetailMo = new OrdOrderDetailMo();
+			orderDetailMo.setOrderId(to.getId());
+			orderDetailMo.setOnlineId(to.getSelectDetaile().get(i).getOnlineId());
+			orderDetailMo.setOnlineSpecId(to.getSelectDetaile().get(i).getOnlineSpecId());
+			_log.info("获取订单id,上线id，上线规格id获取详情的参数：{}", orderDetailMo);
+			List<OrdOrderDetailMo> detailResult = orderDetailSvc.list(orderDetailMo);
+			_log.info("获取订单id,上线id，上线规格id获取详情的结果为：{}", detailResult);
+
+			// 设置物流id，提前设置是因为下面发货表需要用到且需要关联，所有在这里设置并传过去就不用在录入的时候返回回来
+			to.setLogisticId(_idWorker.getId());
+
+			// 设置订单标题，也就是orderTitle
+			to.setOrderTitle(detailResult.get(0).getOnlineTitle() + detailResult.get(0).getSpecName() + "x"
+					+ detailResult.size());
+
+			// 设置物流标号，因为和选择的详情一样长，所有选择i
+			to.setLogisticCode(to.getLogisticCodeArr().get(i));
+			KdiLogisticRo KdiLogisticRo = new KdiLogisticRo();
+			try {
+				KdiLogisticRo = callTraceAndaddTask(to);
+			} catch (RuntimeException e) {
+				throw new RuntimeException("录入并添加签收任务失败");
+			}
+			_log.info("录入并添加签收任务的返回值为：{}", KdiLogisticRo);
+
+			// 修改详情的发货状态 和插入到发货表
+			for (OrdOrderDetailMo ordOrderDetailMo2 : detailResult) {
+				if (to.isFirst()) {
+					_log.info("首次订阅，需要修改详情 first: {}", to.isFirst());
+					// 修改详情的发货状态
+					_log.info("修改订单详情发货状态的参数是：orderId：{}，onlineId：{}，onlineSpecId：{}", to.getId(),
+							ordOrderDetailMo2.getOnlineId(), ordOrderDetailMo2.getOnlineSpecId());
+					int updateResult = orderDetailSvc.updateIsDeliver(to.getId(), ordOrderDetailMo2.getOnlineId(),
+							ordOrderDetailMo2.getOnlineSpecId());
+					_log.info("修改结果是 {}", updateResult);
+					if (updateResult < 1) {
+						_log.error("修改订单详情发货状态失败");
+						throw new RuntimeException("修改订单详情发货状态失败");
+					}
+					_log.info("修改订单详情成功");
+				} else {
+					_log.info("不是首次订阅，不需要修改详情 first: {}", to.isFirst());
+				}
+				// 插入到发货表
+				final OrdOrderDetailDeliverMo ooddmo = new OrdOrderDetailDeliverMo();
+				ooddmo.setLogisticId(to.getLogisticId());
+				ooddmo.setOrderId(to.getId());
+				ooddmo.setOrderDetailId(ordOrderDetailMo2.getId());
+				_log.info("添加发货表的参数：{}", ooddmo);
+				int result = ordOrderDetailDeliverSvc.add(ooddmo);
+				_log.info("添加发货表的结果：{}", result);
+				if (result != 1) {
+					_log.error("添加发货表失败");
+					throw new RuntimeException("添加发货表失败");
+				}
+			}
+
+		}
+		getTrace.setMsg("发货成功");
+		getTrace.setResult(ResultDic.SUCCESS);
+		return getTrace;
+	}
+	
+	/**
+	 * 	 第三种获取方式 merge=false split=false 需要详情，将选择的详情发一个包裹
+	 */
+	@Override
+	@Transactional(readOnly = false, propagation = Propagation.REQUIRED)
+	public Ro getTraceForMergeIsFalseAndSplitIsFalse(DeliverAndGetTraceTo to) {
+		_log.info("第三种订阅方式 merge=false split=false ");
+		_log.info("参数为 ：{}", to);
+		Ro getTrace = new Ro();
+		
+		// 提前设置物流id，提前设置是因为下面发货表需要用到且需要关辆，所有在这里设置并传过去就不用在录入的时候返回回来
+		to.setLogisticId(_idWorker.getId());
+		
+		//设置订单标题，也就是orderTitle
+		String orderTitle="";
+		//循环修改详情和插入发货表
+		for (int i = 0; i < to.getSelectDetaile().size(); i++) {
+			_log.info("第三种发货方式循环开始---------------------");
+			orderTitle+=to.getSelectDetaile().get(i).getOnlineTitle()+"等";
+			
+			if (to.isFirst()) {
+				_log.info("首次订阅，需要修改详情 first: {}", to.isFirst());
+			// 修改详情的发货状态
+			OrdOrderDetailMo modifyDetailMo=new OrdOrderDetailMo();
+			modifyDetailMo.setId(to.getSelectDetaile().get(i).getId());
+			modifyDetailMo.setIsDelivered(true);
+			_log.info("修改订单详情发货状态的参数是：modifyDetailMo：{}", modifyDetailMo);
+			int updateResult = orderDetailSvc.modify(modifyDetailMo);
+			_log.info("修改结果是 {}", updateResult);
+			if (updateResult < 1) {
+				_log.error("修改订单详情发货状态失败");
+				throw new RuntimeException("修改订单详情发货状态失败");
+			}
+			_log.info("修改订单详情成功");
+			} else {
+				_log.info("不是首次订阅，不需要修改详情 first: {}", to.isFirst());
+			}
+			
+			// 插入到发货表
+			final OrdOrderDetailDeliverMo ooddmo = new OrdOrderDetailDeliverMo();
+			ooddmo.setLogisticId(to.getLogisticId());
+			ooddmo.setOrderId(to.getId());
+			ooddmo.setOrderDetailId(to.getSelectDetaile().get(i).getId());
+			_log.info("添加发货表的参数：{}", ooddmo);
+			int result = ordOrderDetailDeliverSvc.add(ooddmo);
+			_log.info("添加发货表的结果：{}", result);
+			if (result != 1) {
+				_log.error("添加发货表失败");
+				throw new RuntimeException("添加发货表失败");
+			}
+			_log.info("添加发货表成功");
+
+			_log.info("第三种发货方式循环结束++++++++++++++++++++++");
+		}
+		
+		//设置物流编号和订单标题（orderTitle）和调用物流
+		to.setLogisticCode(to.getLogisticCodeArr().get(0));
+		to.setOrderTitle(orderTitle);
+		KdiLogisticRo KdiLogisticRo=new KdiLogisticRo();
+		try {
+			KdiLogisticRo = callTraceAndaddTask(to);
+		} catch (RuntimeException e) {
+			throw new RuntimeException("录入并添加签收任务失败");
+		}
+
+		_log.info("录入并添加签收任务的返回值为：{}", KdiLogisticRo);
+		
+		getTrace.setMsg("发货成功");
+		getTrace.setResult(ResultDic.SUCCESS);
+		return getTrace;
+	}
+	
+	/**
+	 * 第四种获取方式 merge=false split=true 需要详情，将选择的详情分别发一个包裹。
+	 */
+	@Override
+	@Transactional(readOnly = false, propagation = Propagation.REQUIRED)
+	public Ro getTraceForMergeIsFalseAndSplitIsTrue(DeliverAndGetTraceTo to) {
+		_log.info("第四种订阅方式 merge=false split=true ");
+		_log.info("参数为 ：{}", to);
+		Ro getTrace = new Ro();
+
+		// 循环修改详情和插入发货表
+		for (int i = 0; i < to.getSelectDetaile().size(); i++) {
+			_log.info("第四种获取方式循环开始---------------------");
+
+			// 设置订单标题，也就是orderTitle
+			to.setOrderTitle(to.getSelectDetaile().get(i).getOnlineTitle() + to.getSelectDetaile().get(i).getSpecName()
+					+ "x" + to.getSelectDetaile().size());
+
+			// 提前设置物流id，提前设置是因为下面发货表需要用到且需要关联，所有在这里设置并传过去就不用在录入的时候返回回来
+			to.setLogisticId(_idWorker.getId());
+
+			// 设置物流编号，因为和选择的详情一样长，所有选择i
+			to.setLogisticCode(to.getLogisticCodeArr().get(i));
+			KdiLogisticRo KdiLogisticRo = new KdiLogisticRo();
+			try {
+				KdiLogisticRo = callTraceAndaddTask(to);
+			} catch (RuntimeException e) {
+				throw new RuntimeException("录入并添加签收任务失败");
+			}
+			_log.info("录入并添加签收任务的返回值为：{}", KdiLogisticRo);
+
+			if (to.isFirst()) {
+				_log.info("首次订阅，需要修改详情 first: {}", to.isFirst());
+				// 修改详情的发货状态
+				OrdOrderDetailMo modifyDetailMo = new OrdOrderDetailMo();
+				modifyDetailMo.setId(to.getSelectDetaile().get(i).getId());
+				modifyDetailMo.setIsDelivered(true);
+				_log.info("修改订单详情发货状态的参数是：modifyDetailMo：{}", modifyDetailMo);
+				int updateResult = orderDetailSvc.modify(modifyDetailMo);
+				_log.info("修改结果是 {}", updateResult);
+				if (updateResult < 1) {
+					_log.error("修改订单详情发货状态失败");
+					throw new RuntimeException("修改订单详情发货状态失败");
+				}
+				_log.info("修改订单详情成功");
+			} else {
+				_log.info("不是首次订阅，不需要修改详情 first: {}", to.isFirst());
+			}
+
+			// 插入到发货表
+			final OrdOrderDetailDeliverMo ooddmo = new OrdOrderDetailDeliverMo();
+			ooddmo.setLogisticId(to.getLogisticId());
+			ooddmo.setOrderId(to.getId());
+			ooddmo.setOrderDetailId(to.getSelectDetaile().get(i).getId());
+			_log.info("添加发货表的参数：{}", ooddmo);
+			int result = ordOrderDetailDeliverSvc.add(ooddmo);
+			_log.info("添加发货表的结果：{}", result);
+			if (result != 1) {
+				_log.error("添加发货表失败");
+				throw new RuntimeException("添加发货表失败");
+			}
+			_log.info("添加发货表成功");
+			_log.info("第四种发货方式循环开始++++++++++++++++++++++");
+		}
+
+		getTrace.setMsg("发货成功");
+		getTrace.setResult(ResultDic.SUCCESS);
+		return getTrace;
+	}
+
+
+	
+	
+	/**
+	 * 录入订单并订阅轨迹并添加签收任务
+	 * 
+	 * @param to
+	 * @return
+	 */
+	@Override
+	@Transactional(readOnly = false, propagation = Propagation.REQUIRED)
+	public KdiLogisticRo callTraceAndaddTask(DeliverAndGetTraceTo to) {
+		_log.info("录入订单并订阅轨迹并添加签收任务参数为：{}", to);
+		final OrdOrderMo mo = dozerMapper.map(to, OrdOrderMo.class);
+		if (to.isFirst()) {
+			_log.info("首次录入，需要判断是否添加签收任务：isFirst {}", to.isFirst());
+
+			// 添加签收任务
+			final Date date = new Date();
+			mo.setSendTime(date);
+			final Calendar calendar = Calendar.getInstance();
+			calendar.setTime(date);
+			calendar.add(Calendar.HOUR, signinOrderTime);
+			final Date executePlanTime = calendar.getTime();
+			final OrdTaskMo ordTaskMo = new OrdTaskMo();
+			ordTaskMo.setOrderId(String.valueOf(mo.getId()));
+			ordTaskMo.setTaskType((byte) 2);
+			// 先查询任务是否已经存在
+			_log.info("查看签收任务是否存在的参数为：{}", ordTaskMo);
+			final List<OrdTaskMo> ordTaskList = ordTaskSvc.list(ordTaskMo);
+			_log.info("查看签收任务是否存在的结果为：{}", ordTaskList);
+			if (ordTaskList.size() == 0) {
+				ordTaskMo.setExecutePlanTime(executePlanTime);
+				ordTaskMo.setExecuteState((byte) 0);
+				_log.info("确认发货添加签收任务的参数为：{}", ordTaskMo);
+				final int taskAddResult = ordTaskSvc.add(ordTaskMo);
+				_log.info("确认发货添加签收任务的返回值为：{}", taskAddResult);
+				if (taskAddResult != 1) {
+					_log.error("确认发货添加签收任务时出错，订单编号为：{}", mo.getOrderCode());
+					throw new RuntimeException("添加签收任务出错");
+				}
+			} else {
+				_log.info("确认发货添加签收任务已经存在，orderId为：{}", ordTaskMo.getOrderId());
+			}
+		} else {
+			_log.info("不是首次录入，不需要判断是否添加签收任务：isFirst {}", to.isFirst());
+		}
+		// 添加物流信息
+		final AddKdiLogisticTo addKdiLogisticTo = dozerMapper.map(to, AddKdiLogisticTo.class);
+		addKdiLogisticTo.setEntryType((byte) 2);
+		addKdiLogisticTo.setOrderId(to.getId());
+		addKdiLogisticTo.setLogisticId(to.getLogisticId());
+		_log.info("添加物流信息参数为：{}", addKdiLogisticTo);
+		final KdiLogisticRo entryResult = kdiSvc.entryLogistics(addKdiLogisticTo);
+		_log.info("添加物流信息结果为：{}", entryResult);
+		if (entryResult.getResult() != 1) {
+			_log.error("添加物流信息出错，订单编号为：{}", mo.getOrderCode());
+			throw new RuntimeException("添加物流信息出错");
+		}
+		return entryResult;
+	}
+	
 
 	/**
 	 * 
@@ -981,54 +1348,60 @@ public class OrdOrderSvcImpl extends MybatisBaseSvcImpl<OrdOrderMo, java.lang.Lo
 	@Override
 	@Transactional(readOnly = false, propagation = Propagation.REQUIRED)
 	public ShipmentConfirmationRo deliverForMergeIsTrueAndSplitIsFalse(final ShipmentConfirmationTo to) {
+		_log.info("第一种发货方式 merge=true split=false ");
+		_log.info("参数为 ：{}", to);
 		final ShipmentConfirmationRo confirmationRo = new ShipmentConfirmationRo();
+
 		// 添加签收任务并调用快递鸟
 		EOrderRo callKdiNiaoAndaddTaskRo = callKdiNiaoAndaddTask(to);
-
-		// 循环当前订单下的所有详情
-		OrdOrderDetailMo orderDetailMo = new OrdOrderDetailMo();
-		orderDetailMo.setOrderId(to.getId());
-		_log.info("获取订单详情的参数：{}", orderDetailMo);
-		List<OrdOrderDetailMo> detailResult = orderDetailSvc.list(orderDetailMo);
-		_log.info("获取订单详情的结果为：{}", detailResult);
-		for (OrdOrderDetailMo ordOrderDetailMo1 : detailResult) {
+		_log.info("调用快递鸟的返回值为：{}", callKdiNiaoAndaddTaskRo);
+		for (OrdOrderDetailMo ordOrderDetailMo : to.getSelectDetaile()) {
 			_log.info("开始根据上线id和上线规格id修改详情状态和插入发货表开始----------------------");
-			for (OrdOrderDetailMo OrdOrderDetailMo2 : to.getSelectDetaile()) {
-				if (ordOrderDetailMo1.getOnlineId() == OrdOrderDetailMo2.getOnlineId()
-						&& ordOrderDetailMo1.getOnlineSpecId() == OrdOrderDetailMo2.getOnlineSpecId()) {
-					_log.info("是同一个详情");
-					_log.info("ordOrderDetailMo1.getOnlineId(): {}", ordOrderDetailMo1.getOnlineId());
-					_log.info("OrdOrderDetailMo2.getOnlineId(): {}", OrdOrderDetailMo2.getOnlineId());
-					_log.info("ordOrderDetailMo1.getOnlineSpecId() :{}", ordOrderDetailMo1.getOnlineSpecId());
-					_log.info("OrdOrderDetailMo2.getOnlineSpecId() :{}", OrdOrderDetailMo2.getOnlineSpecId());
+
+			// 循环当前订单下的所有详情
+			OrdOrderDetailMo orderDetailMo = new OrdOrderDetailMo();
+			orderDetailMo.setOrderId(to.getId());
+			orderDetailMo.setOnlineId(ordOrderDetailMo.getOnlineId());
+			orderDetailMo.setOnlineSpecId(ordOrderDetailMo.getOnlineSpecId());
+			_log.info("获取订单id,上线id，上线规格id获取详情的参数：{}", orderDetailMo);
+			List<OrdOrderDetailMo> detailResult = orderDetailSvc.list(orderDetailMo);
+			_log.info("获取订单id,上线id，上线规格id获取详情的结果为：{}", detailResult);
+
+			// 修改详情的发货状态 和插入到发货表
+			for (OrdOrderDetailMo ordOrderDetailMo2 : detailResult) {
+				if (to.isFirst()) {
+					_log.info("是首次发货，需要修改订单详情状态 to.isFirst()：{}", to.isFirst());
 
 					// 修改详情的发货状态
-					OrdOrderDetailMo modifyMo = new OrdOrderDetailMo();
-					modifyMo.setId(ordOrderDetailMo1.getId());
-					modifyMo.setIsDelivered(true);
-					_log.info("修改订单详情的参数为：{}", modifyMo);
-					if (orderDetailSvc.modify(modifyMo) != 1) {
+					_log.info("修改订单详情发货状态的参数是：orderId：{}，onlineId：{}，onlineSpecId：{}", to.getId(),
+							ordOrderDetailMo2.getOnlineId(), ordOrderDetailMo2.getOnlineSpecId());
+					int updateResult = orderDetailSvc.updateIsDeliver(to.getId(), ordOrderDetailMo2.getOnlineId(),
+							ordOrderDetailMo2.getOnlineSpecId());
+					_log.info("修改结果是 {}", updateResult);
+					if (updateResult < 1) {
 						_log.error("修改订单详情发货状态失败");
 						throw new RuntimeException("修改订单详情发货状态失败");
 					}
 					_log.info("修改订单详情成功");
-
-					// 插入到发货表
-					final OrdOrderDetailDeliverMo ooddmo = new OrdOrderDetailDeliverMo();
-					ooddmo.setLogisticId(callKdiNiaoAndaddTaskRo.getLogisticId());
-					ooddmo.setOrderId(to.getId());
-					ooddmo.setOrderDetailId(ordOrderDetailMo1.getId());
-					_log.info("添加发货表的参数：{}", ooddmo);
-					int result = ordOrderDetailDeliverSvc.add(ooddmo);
-					_log.info("添加发货表的结果：{}", result);
-					if (result != 1) {
-						_log.error("添加发货表失败");
-						throw new RuntimeException("添加发货表失败");
-					}
+				} else {
+					_log.info("不是首次发货，不需要修改订单详情状态 to.isFirst()：{}", to.isFirst());
+				}
+				// 插入到发货表
+				final OrdOrderDetailDeliverMo ooddmo = new OrdOrderDetailDeliverMo();
+				ooddmo.setLogisticId(callKdiNiaoAndaddTaskRo.getLogisticId());
+				ooddmo.setOrderId(to.getId());
+				ooddmo.setOrderDetailId(ordOrderDetailMo2.getId());
+				_log.info("添加发货表的参数：{}", ooddmo);
+				int result = ordOrderDetailDeliverSvc.add(ooddmo);
+				_log.info("添加发货表的结果：{}", result);
+				if (result != 1) {
+					_log.error("添加发货表失败");
+					throw new RuntimeException("添加发货表失败");
 				}
 			}
 			_log.info("开始根据上线id和上线规格id修改详情状态和插入发货表结束+++++++++++++++++++++++");
 		}
+
 		_log.info("第一种发货方式成功。。。。。。。。。。。。。");
 		confirmationRo.setResult(ShipmentConfirmationDic.SUCCESS);
 		confirmationRo.setMsg("确认发货成功");
@@ -1040,38 +1413,276 @@ public class OrdOrderSvcImpl extends MybatisBaseSvcImpl<OrdOrderMo, java.lang.Lo
 	}
 
 	/**
+	 * 第二种发货方式 merge=true split=true 需要上线id，上线规格id，有多少个详情传过去就发多少个包裹。
+	 */
+	@Override
+	@Transactional(readOnly = false, propagation = Propagation.REQUIRED)
+	public ShipmentConfirmationRo deliverForMergeIsTrueAndSplitIsTrue(ShipmentConfirmationTo to) {
+		_log.info("第二种发货方式 merge=true split=true ");
+		_log.info("参数为 ：{}", to);
+		final ShipmentConfirmationRo confirmationRo = new ShipmentConfirmationRo();
+
+		// 声明要拼接返回的打印页面
+		String printPage = "";
+		// 用来判断是否是第一次循环，是的话不用设置加上打印页面
+		int i = 0;
+
+		// 循环调用快递鸟
+		for (OrdOrderDetailMo OrdOrderDetailMo : to.getSelectDetaile()) {
+			_log.info("第二种发货方式循环开始----------------------");
+			// 获取当前上线id和上线规格id的详情
+			OrdOrderDetailMo orderDetailMo = new OrdOrderDetailMo();
+			orderDetailMo.setOrderId(to.getId());
+			orderDetailMo.setOnlineId(OrdOrderDetailMo.getOnlineId());
+			orderDetailMo.setOnlineSpecId(OrdOrderDetailMo.getOnlineSpecId());
+			_log.info("获取订单详情的参数：{}", orderDetailMo);
+			List<OrdOrderDetailMo> detailResult = orderDetailSvc.list(orderDetailMo);
+			_log.info("获取订单详情的结果为：{}", detailResult);
+
+			// 拼接发货备注(也就是orderDetail)，先判断是否有留言
+			if (to.getOrderMessages() != null) {
+				to.setOrderDetail(to.getOrderMessages() + "," + detailResult.get(0).getOnlineTitle() + "."
+						+ detailResult.get(0).getSpecName() + "x" + detailResult.size());
+			} else {
+				to.setOrderDetail(detailResult.get(0).getOnlineTitle() + "." + detailResult.get(0).getSpecName() + "x"
+						+ detailResult.size());
+			}
+
+			// 添加签收任务并调用快递鸟
+			EOrderRo callKdiNiaoAndaddTaskRo = callKdiNiaoAndaddTask(to);
+
+			// 修改详情的发货状态和插入到发货表
+			for (OrdOrderDetailMo ordOrderDetailMo2 : detailResult) {
+				// 修改详情的发货状态
+				if (to.isFirst()) {
+					_log.info("是首次发货，需要修改订单详情状态 to.isFirst()：{}", to.isFirst());
+
+					_log.info("修改订单详情发货状态的参数是：orderId：{}，onlineId：{}，onlineSpecId：{}", to.getId(),
+							ordOrderDetailMo2.getOnlineId(), ordOrderDetailMo2.getOnlineSpecId());
+					int updateResult = orderDetailSvc.updateIsDeliver(to.getId(), ordOrderDetailMo2.getOnlineId(),
+							ordOrderDetailMo2.getOnlineSpecId());
+					_log.info("修改结果是 {}", updateResult);
+					if (updateResult < 1) {
+						_log.error("修改订单详情发货状态失败");
+						throw new RuntimeException("修改订单详情发货状态失败");
+					}
+					_log.info("修改订单详情成功");
+				} else {
+					_log.info("不是首次发货，不需要修改订单详情状态 to.isFirst()：{}", to.isFirst());
+				}
+				// 插入到发货表
+				final OrdOrderDetailDeliverMo ooddmo = new OrdOrderDetailDeliverMo();
+				ooddmo.setLogisticId(callKdiNiaoAndaddTaskRo.getLogisticId());
+				ooddmo.setOrderId(to.getId());
+				ooddmo.setOrderDetailId(ordOrderDetailMo2.getId());
+				_log.info("添加发货表的参数：{}", ooddmo);
+				int result = ordOrderDetailDeliverSvc.add(ooddmo);
+				_log.info("添加发货表的结果：{}", result);
+				if (result != 1) {
+					_log.error("添加发货表失败");
+					throw new RuntimeException("添加发货表失败");
+				}
+				_log.info("添加发货表成功");
+			}
+			// 拼接打印页面,第一页不用加，否则会多一张空白页面在前面
+			if (i > 0) {
+				printPage += "<br><div style=\"page-break-after:always\"></div>\n\r";
+			}
+			printPage += callKdiNiaoAndaddTaskRo.getPrintPage();
+			i += 1;
+
+			_log.info("第二种发货方式循环结束+++++++++++++++");
+		}
+		_log.info("第二种发货方式成功。。。。。。。。。。。。。");
+		confirmationRo.setResult(ShipmentConfirmationDic.SUCCESS);
+		confirmationRo.setMsg("确认发货成功");
+		confirmationRo.setPrintPage(printPage);
+		return confirmationRo;
+	}
+	
+	/**
+	 * 第三种发货方式 merge=false split=false 需要详情，将选择的详情发一个包裹,且根据详情id修改发货状态
+	 */
+	@Override
+	@Transactional(readOnly = false, propagation = Propagation.REQUIRED)
+	public ShipmentConfirmationRo deliverForMergeIsFalseAndSplitIsFalse(ShipmentConfirmationTo to) {
+		_log.info("第三种发货方式 merge=false split=false ");
+		_log.info("参数为 ：{}", to);
+		final ShipmentConfirmationRo confirmationRo = new ShipmentConfirmationRo();
+
+		// 添加签收任务并调用快递鸟
+		EOrderRo callKdiNiaoAndaddTaskRo = callKdiNiaoAndaddTask(to);
+		_log.info("调用快递鸟的返回值为：{}", callKdiNiaoAndaddTaskRo);
+
+		// 循环修改订单详情的状态和插入发到发货表
+		for (OrdOrderDetailMo OrdOrderDetailMo : to.getSelectDetaile()) {
+			_log.info("第三种发货方式循环开始----------------------");
+
+			if (to.isFirst()) {
+				_log.info("是首次发货，需要修改订单详情状态 to.isFirst()：{}", to.isFirst());
+				
+				// 修改详情的发货状态
+				OrdOrderDetailMo modifyDetailMo = new OrdOrderDetailMo();
+				modifyDetailMo.setId(OrdOrderDetailMo.getId());
+				modifyDetailMo.setIsDelivered(true);
+				_log.info("修改订单详情发货状态的参数是：modifyDetailMo：{}", modifyDetailMo);
+				int updateResult = orderDetailSvc.modify(modifyDetailMo);
+				_log.info("修改结果是 {}", updateResult);
+				if (updateResult < 1) {
+					_log.error("修改订单详情发货状态失败");
+					throw new RuntimeException("修改订单详情发货状态失败");
+				}
+				_log.info("修改订单详情成功");
+			} else {
+				_log.info("不是首次发货，不需要修改订单详情状态 to.isFirst()：{}", to.isFirst());
+			}
+			// 插入到发货表
+			final OrdOrderDetailDeliverMo ooddmo = new OrdOrderDetailDeliverMo();
+			ooddmo.setLogisticId(callKdiNiaoAndaddTaskRo.getLogisticId());
+			ooddmo.setOrderId(to.getId());
+			ooddmo.setOrderDetailId(OrdOrderDetailMo.getId());
+			_log.info("添加发货表的参数：{}", ooddmo);
+			int result = ordOrderDetailDeliverSvc.add(ooddmo);
+			_log.info("添加发货表的结果：{}", result);
+			if (result != 1) {
+				_log.error("添加发货表失败");
+				throw new RuntimeException("添加发货表失败");
+			}
+			_log.info("添加发货表成功");
+
+			_log.info("第三种发货方式循环结束++++++++++++++++++++++");
+		}
+
+		confirmationRo.setResult(ShipmentConfirmationDic.SUCCESS);
+		confirmationRo.setMsg("确认发货成功");
+		confirmationRo.setLogisticId(callKdiNiaoAndaddTaskRo.getLogisticId());
+		confirmationRo.setLogisticCode(callKdiNiaoAndaddTaskRo.getLogisticCode());
+		confirmationRo.setPrintPage(callKdiNiaoAndaddTaskRo.getPrintPage());
+		confirmationRo.setFailReason(callKdiNiaoAndaddTaskRo.getFailReason());
+		return confirmationRo;
+	}
+	
+	/**
+	 * 第四种发货方式 merge=false split=true 需要详情，将选择的详情分别发一个包裹。
+	 */
+	@Override
+	@Transactional(readOnly = false, propagation = Propagation.REQUIRED)
+	public ShipmentConfirmationRo deliverForMergeIsFalseAndSplitIsTrue(ShipmentConfirmationTo to) {
+		_log.info("第四种发货方式 merge=false split=true ");
+		_log.info("参数为 ：{}", to);
+		final ShipmentConfirmationRo confirmationRo = new ShipmentConfirmationRo();
+
+		// 声明要拼接返回的打印页面
+		String printPage = "";
+		// 用来判断是否是第一次循环，是的话不用设置加上打印页面
+		int i = 0;
+
+		// 调用快递鸟，并修改订单详情的状态和插入发到发货表
+		for (OrdOrderDetailMo OrdOrderDetailMo : to.getSelectDetaile()) {
+
+			// 拼接发货备注(也就是orderDetail)
+			if (to.getOrderMessages() != null) {
+				to.setOrderDetail(to.getOrderMessages() + "," + OrdOrderDetailMo.getOnlineTitle() + "."
+						+ OrdOrderDetailMo.getSpecName() + "x" + OrdOrderDetailMo.getBuyCount());
+
+			} else {
+				to.setOrderDetail(OrdOrderDetailMo.getOnlineTitle() + "." + OrdOrderDetailMo.getSpecName() + "x"
+						+ OrdOrderDetailMo.getBuyCount());
+
+			}
+
+			// 添加签收任务并调用快递鸟
+			EOrderRo callKdiNiaoAndaddTaskRo = callKdiNiaoAndaddTask(to);
+			_log.info("调用快递鸟的结果是 ：{}", callKdiNiaoAndaddTaskRo);
+
+			if (to.isFirst()) {
+				_log.info("是首次发货，需要修改订单详情状态 to.isFirst()：{}", to.isFirst());
+				// 修改详情的发货状态
+				OrdOrderDetailMo modifyDetailMo = new OrdOrderDetailMo();
+				modifyDetailMo.setId(OrdOrderDetailMo.getId());
+				modifyDetailMo.setIsDelivered(true);
+				_log.info("修改订单详情发货状态的参数是：modifyDetailMo：{}", modifyDetailMo);
+				int updateResult = orderDetailSvc.modify(modifyDetailMo);
+				_log.info("修改结果是 {}", updateResult);
+				if (updateResult < 1) {
+					_log.error("修改订单详情发货状态失败");
+					throw new RuntimeException("修改订单详情发货状态失败");
+				}
+				_log.info("修改订单详情成功");
+			} else {
+				_log.info("不是首次发货，不需要修改订单详情状态 to.isFirst()：{}", to.isFirst());
+			}
+
+			// 插入到发货表
+			final OrdOrderDetailDeliverMo ooddmo = new OrdOrderDetailDeliverMo();
+			ooddmo.setLogisticId(callKdiNiaoAndaddTaskRo.getLogisticId());
+			ooddmo.setOrderId(to.getId());
+			ooddmo.setOrderDetailId(OrdOrderDetailMo.getId());
+			_log.info("添加发货表的参数：{}", ooddmo);
+			int result = ordOrderDetailDeliverSvc.add(ooddmo);
+			_log.info("添加发货表的结果：{}", result);
+			if (result != 1) {
+				_log.error("添加发货表失败");
+				throw new RuntimeException("添加发货表失败");
+			}
+			_log.info("添加发货表成功");
+
+			// 拼接打印页面,第一页不用加，否则会多一张空白页面在前面
+			if (i > 0) {
+				printPage += "<br><div style=\"page-break-after:always\"></div>\n\r";
+			}
+			printPage += callKdiNiaoAndaddTaskRo.getPrintPage();
+			i += 1;
+		}
+
+		_log.info("第四种发货方式成功。。。。。。。。。。。。。");
+		confirmationRo.setResult(ShipmentConfirmationDic.SUCCESS);
+		confirmationRo.setMsg("确认发货成功");
+		confirmationRo.setPrintPage(printPage);
+		return confirmationRo;
+	}
+
+	/*
 	 * 调用快递鸟且添加签收任务
 	 * 
 	 * @return
 	 */
-	EOrderRo callKdiNiaoAndaddTask(final ShipmentConfirmationTo to) {
+	@Override
+	@Transactional(readOnly = false, propagation = Propagation.REQUIRED)
+	public EOrderRo callKdiNiaoAndaddTask(final ShipmentConfirmationTo to) {
 		// 添加签收任务
 		final OrdOrderMo mo = dozerMapper.map(to, OrdOrderMo.class);
-		final Date date = new Date();
-		mo.setSendTime(date);
-		final Calendar calendar = Calendar.getInstance();
-		calendar.setTime(date);
-		calendar.add(Calendar.HOUR, signinOrderTime);
-		final Date executePlanTime = calendar.getTime();
-		final OrdTaskMo ordTaskMo = new OrdTaskMo();
-		ordTaskMo.setOrderId(String.valueOf(mo.getId()));
-		ordTaskMo.setTaskType((byte) 2);
-		// 先查询任务是否已经存在
-		_log.info("查看签收任务是否存在的参数为：{}", ordTaskMo);
-		final List<OrdTaskMo> ordTaskList = ordTaskSvc.list(ordTaskMo);
-		_log.info("查看签收任务是否存在的结果为：{}", ordTaskList);
-		if (ordTaskList.size() == 0) {
-			ordTaskMo.setExecutePlanTime(executePlanTime);
-			ordTaskMo.setExecuteState((byte) 0);
-			_log.info("确认发货添加签收任务的参数为：{}", ordTaskMo);
-			final int taskAddResult = ordTaskSvc.add(ordTaskMo);
-			_log.info("确认发货添加签收任务的返回值为：{}", taskAddResult);
-			if (taskAddResult != 1) {
-				_log.error("确认发货添加签收任务时出错，订单编号为：{}", mo.getOrderCode());
-				throw new RuntimeException("添加签收任务出错");
+
+		if (to.isFirst()) {
+			_log.info("是首次发货，需要判断是否添加签收任务 to.isFirst()：{}", to.isFirst());
+			final Date date = new Date();
+			mo.setSendTime(date);
+			final Calendar calendar = Calendar.getInstance();
+			calendar.setTime(date);
+			calendar.add(Calendar.HOUR, signinOrderTime);
+			final Date executePlanTime = calendar.getTime();
+			final OrdTaskMo ordTaskMo = new OrdTaskMo();
+			ordTaskMo.setOrderId(String.valueOf(mo.getId()));
+			ordTaskMo.setTaskType((byte) 2);
+			// 先查询任务是否已经存在
+			_log.info("查看签收任务是否存在的参数为：{}", ordTaskMo);
+			final List<OrdTaskMo> ordTaskList = ordTaskSvc.list(ordTaskMo);
+			_log.info("查看签收任务是否存在的结果为：{}", ordTaskList);
+			if (ordTaskList.size() == 0) {
+				ordTaskMo.setExecutePlanTime(executePlanTime);
+				ordTaskMo.setExecuteState((byte) 0);
+				_log.info("确认发货添加签收任务的参数为：{}", ordTaskMo);
+				final int taskAddResult = ordTaskSvc.add(ordTaskMo);
+				_log.info("确认发货添加签收任务的返回值为：{}", taskAddResult);
+				if (taskAddResult != 1) {
+					_log.error("确认发货添加签收任务时出错，订单编号为：{}", mo.getOrderCode());
+					throw new RuntimeException("添加签收任务出错");
+				}
+			} else {
+				_log.info("确认发货添加签收任务已经存在，orderId为：{}", ordTaskMo.getOrderId());
 			}
 		} else {
-			_log.info("确认发货添加签收任务已经存在，orderId为：{}", ordTaskMo.getOrderId());
+			_log.info("不是首次发货，不需要判断是否添加签收任务 to.isFirst()：{}", to.isFirst());
 		}
 
 		// 调用快递鸟打印电子面单

@@ -152,8 +152,18 @@ public interface OrdOrderDetailSvc extends BaseSvc<java.lang.Long, OrdOrderDetai
 	 */
 	void compensatePoint();
 	
-	/**
-	 * 根据订单发id获取详情信息和物流id
-	 */
-	List<OrdOrderDetailRo> listDetailAndlogisticCodeByOrderId(Long orderId);
+
+	
+    /**
+     * 根据订单id，上线id，规格id去修改订单状态
+     *
+     * @param orderId
+     *            订单id
+     * @param onlineId
+     *            上线id
+     * @param onlineSpecId
+     *            规格id
+     * @return
+     */
+    int updateIsDeliver(Long orderId, Long onlineId, Long onlineSpecId);
 }

@@ -280,11 +280,15 @@ public interface OrdOrderDetailMapper extends MybatisBaseMapper<OrdOrderDetailMo
     @Update("update ORD_ORDER_DETAIL set BUY_POINT=#{buyPoint,jdbcType=DECIMAL}, BUY_POINT_TOTAL=#{buyPointTotal,jdbcType=DECIMAL} where ID=#{id,jdbcType=BIGINT} and BUY_POINT is null")
     int updateBuyPointById(@Param("id") Long id, @Param("buyPoint") BigDecimal buyPoint, @Param("buyPointTotal") BigDecimal buyPointTotal);
     
+  
     /**
-     * 根据订单id获取详情和物流id
+     * 根据订单id，上线id，上线规格id修改详情的发货状态
      * @param orderId
+     * @param onlineId
+     * @param onlineSpecId
      * @return
      */
-    @Select(" select a.*,b.LOGISTIC_ID from ORD_ORDER_DETAIL a left join ORD_ORDER_DETAIL_DELIVER b on a.id=b.ORDER_DETAIL_ID where a.ORDER_ID=#{orderId,jdbcType=BIGINT}")
-    List<OrdOrderDetailRo> listDetailAndlogisticCodeByOrderId(@Param("orderId")Long orderId);
+    @Update("UPDATE ORD_ORDER_DETAIL SET IS_DELIVERED=true  WHERE  ORDER_ID =#{orderId,jdbcType=BIGINT} and ONLINE_ID =#{onlineId,jdbcType=BIGINT} and ONLINE_SPEC_ID= #{onlineSpecId,jdbcType=BIGINT} ")
+    int updateIsDeliver(@Param("orderId") Long orderId, @Param("onlineId") Long onlineId, @Param("onlineSpecId") Long onlineSpecId);
+
 }

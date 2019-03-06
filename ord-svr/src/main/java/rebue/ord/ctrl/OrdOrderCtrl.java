@@ -40,6 +40,7 @@ import rebue.ord.ro.ShipmentConfirmationRo;
 import rebue.ord.svc.OrdOrderSvc;
 import rebue.ord.to.BulkShipmentTo;
 import rebue.ord.to.CancelDeliveryTo;
+import rebue.ord.to.DeliverAndGetTraceTo;
 import rebue.ord.to.ListOrderTo;
 import rebue.ord.to.OrderSignInTo;
 import rebue.ord.to.OrderTo;
@@ -323,34 +324,12 @@ public class OrdOrderCtrl {
 	}
 
 	/**
-	 * 订阅轨迹（原先是供应商发货）
+	 * 订阅轨迹发货
 	 */
-	@SuppressWarnings("finally")
-	@PutMapping("/ord/order/sendBySupplier")
-	ShipmentConfirmationRo sendBySupplier(@RequestBody final ShipmentConfirmationTo qo) {
-		_log.info("订阅轨迹的参数为：{}", qo);
-		ShipmentConfirmationRo confirmationRo = new ShipmentConfirmationRo();
-		try {
-			confirmationRo = svc.deliverAndGetTrace(qo);
-			_log.info("订阅的返回值为：{}", confirmationRo);
-		} catch (final RuntimeException e) {
-			final String msg = e.getMessage();
-			if (msg.equals("参数错误")) {
-				confirmationRo.setResult(ShipmentConfirmationDic.PARAN_ERROR);
-				confirmationRo.setMsg(msg);
-				_log.error(msg);
-			} else if (msg.equals("该订单已发货")) {
-				confirmationRo.setResult(ShipmentConfirmationDic.ORDER_ALREADY_SHIPMENTS);
-				confirmationRo.setMsg(msg);
-				_log.error(msg);
-			} else {
-				confirmationRo.setResult(ShipmentConfirmationDic.ERROR);
-				confirmationRo.setMsg("确认发货失败");
-				_log.error(msg);
-			}
-		} finally {
-			return confirmationRo;
-		}
+	@PutMapping("/ord/order/getTraceAndDeliver")
+	Ro deliverAndGetTrace(@RequestBody final DeliverAndGetTraceTo to) {
+		_log.info("订阅轨迹的参数为：{}", to);
+		return svc.deliverAndGetTrace(to);
 	}
 
 	/**

@@ -1,16 +1,25 @@
 package rebue.ord.svc.impl;
 
 
+import java.util.ArrayList;
+import java.util.List;
+
+import javax.annotation.Resource;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
+import rebue.kdi.ro.KdiLogisticRo;
+import rebue.kdi.svr.feign.KdiSvc;
 import rebue.ord.mapper.OrdOrderDetailDeliverMapper;
 import rebue.ord.mo.OrdOrderDetailDeliverMo;
+import rebue.ord.mo.OrdOrderDetailMo;
+import rebue.ord.ro.OrderdetaildeliverRo;
 import rebue.ord.svc.OrdOrderDetailDeliverSvc;
-
+import rebue.ord.svc.OrdOrderDetailSvc;
 import rebue.robotech.svc.impl.MybatisBaseSvcImpl;
 
 /**
@@ -31,6 +40,13 @@ import rebue.robotech.svc.impl.MybatisBaseSvcImpl;
 @Service
 public class OrdOrderDetailDeliverSvcImpl extends MybatisBaseSvcImpl<OrdOrderDetailDeliverMo, java.lang.Long, OrdOrderDetailDeliverMapper> implements OrdOrderDetailDeliverSvc {
 	
+	
+	@Resource
+	private OrdOrderDetailSvc ordOrderDetailSvc;
+	
+	
+	@Resource
+	private KdiSvc kdiSvc;
     /**
      * @mbg.generated 自动生成，如需修改，请删除本行
      */
@@ -49,5 +65,38 @@ public class OrdOrderDetailDeliverSvcImpl extends MybatisBaseSvcImpl<OrdOrderDet
         }
         return super.add(mo);
     }
+    
+	@Override
+	public List<OrderdetaildeliverRo> listOrderdetaildeliver(Long orderId) {
+		List<OrderdetaildeliverRo> ListDeliverRo=new ArrayList<OrderdetaildeliverRo>();
+
+		OrdOrderDetailDeliverMo mo=new OrdOrderDetailDeliverMo();
+		mo.setOrderId(orderId);
+    	_log.info("根据订单id获取订单详情发货信息的参数是： {}",orderId);
+    	List<OrdOrderDetailDeliverMo> deliverMo=super.list(mo);
+    	_log.info("根据订单id获取订单详情发货信息的结果是： {}",deliverMo);
+    	for (OrdOrderDetailDeliverMo ordOrderDetailDeliverMo : deliverMo) {
+    		OrderdetaildeliverRo deliverRo=new OrderdetaildeliverRo();
+    		deliverRo.setId(ordOrderDetailDeliverMo.getId());
+        	_log.info("循环获取订单详情和物流信息开始：--------------------------");
+        	_log.info("根据详情id订单详情的参数是： {}",ordOrderDetailDeliverMo.getOrderDetailId());
+        	OrdOrderDetailMo detailMo=ordOrderDetailSvc.getById(ordOrderDetailDeliverMo.getOrderDetailId());
+        	_log.info("根据详情id订单详情的结果是： {}",detailMo);
+        	if(detailMo !=null) {
+        		deliverRo.setOnlineTitle(detailMo.getOnlineTitle());
+        	}
+        	_log.info("根据物流id获取物流单号的参数是： {}",ordOrderDetailDeliverMo.getLogisticId());
+			KdiLogisticRo logisticRo = kdiSvc.getLogisticById(ordOrderDetailDeliverMo.getLogisticId());
+        	_log.info("根据物流id获取物流单号的结果是： {}",logisticRo);
+        	if(logisticRo !=null) {
+        		deliverRo.setLogisticCode(logisticRo.getRecord().getLogisticCode());
+        	}
+        	
+        	_log.info("循环获取订单详情和物流信息结束：++++++++++++++++++++++++++");
+        	ListDeliverRo.add(deliverRo);
+		}
+
+		return ListDeliverRo;
+	}
 
 }

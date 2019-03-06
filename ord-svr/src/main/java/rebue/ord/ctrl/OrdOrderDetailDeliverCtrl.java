@@ -2,6 +2,7 @@ package rebue.ord.ctrl;
 
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.List;
 
 import javax.annotation.Resource;
 
@@ -19,6 +20,7 @@ import org.springframework.web.bind.annotation.RestController;
 import com.github.pagehelper.PageInfo;
 
 import rebue.ord.mo.OrdOrderDetailDeliverMo;
+import rebue.ord.ro.OrderdetaildeliverRo;
 import rebue.ord.svc.OrdOrderDetailDeliverSvc;
 import rebue.robotech.dic.ResultDic;
 import rebue.robotech.ro.Ro;
@@ -187,5 +189,12 @@ public class OrdOrderDetailDeliverCtrl {
         _log.info("get OrdOrderDetailDeliverMo by id: " + id);
         return svc.getById(id);
     }
-
+    
+    /**
+     * 获取发货表和物流信息和详情信息
+     */
+    @GetMapping("/ord/listOrderdetaildeliver")
+    List<OrderdetaildeliverRo> listOrderdetaildeliver(@RequestParam("orderId") final java.lang.Long orderId) {
+    	return svc.listOrderdetaildeliver(orderId);
+    }
 }

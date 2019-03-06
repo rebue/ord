@@ -12,6 +12,8 @@ import java.util.Map;
 import org.springframework.web.bind.annotation.RequestParam;
 
 import rebue.afc.msg.PayDoneMsg;
+import rebue.kdi.ro.EOrderRo;
+import rebue.kdi.ro.KdiLogisticRo;
 import rebue.ord.jo.OrdOrderJo;
 import rebue.ord.mo.OrdOrderMo;
 import rebue.ord.ro.BulkShipmentRo;
@@ -25,6 +27,7 @@ import rebue.ord.ro.SetUpExpressCompanyRo;
 import rebue.ord.ro.ShipmentConfirmationRo;
 import rebue.ord.to.BulkShipmentTo;
 import rebue.ord.to.CancelDeliveryTo;
+import rebue.ord.to.DeliverAndGetTraceTo;
 import rebue.ord.to.ListOrderTo;
 import rebue.ord.to.OrderSignInTo;
 import rebue.ord.to.OrderTo;
@@ -86,15 +89,22 @@ public interface OrdOrderSvc extends BaseSvc<java.lang.Long, OrdOrderMo, OrdOrde
     SetUpExpressCompanyRo setUpExpressCompany(OrdOrderMo mo);
 
     /**
-     * 本店发货 Title: sendAndPrint Description:
+     * 发货
      *
      * @param mo
      * @return
      * @date 2018年4月13日 下午6:19:09
      */
     ShipmentConfirmationRo deliver(ShipmentConfirmationTo mo);
+    
+    /**
+     * 调用快递鸟并发货
+     * @param to
+     * @return
+     */
+	public EOrderRo callKdiNiaoAndaddTask(final ShipmentConfirmationTo to);
+    
 
-    ShipmentConfirmationRo deliverAndGetTrace(ShipmentConfirmationTo to);
 
     /**
      * 订单签收 Title: orderSignIn Description:
@@ -254,6 +264,70 @@ public interface OrdOrderSvc extends BaseSvc<java.lang.Long, OrdOrderMo, OrdOrde
      * @return
      */
     ShipmentConfirmationRo deliverForMergeIsTrueAndSplitIsFalse( ShipmentConfirmationTo to);
+    
+    /**
+     * 第二种发货方式 Merge=True Split=true
+     * @param to
+     * @return
+     */
+    ShipmentConfirmationRo deliverForMergeIsTrueAndSplitIsTrue( ShipmentConfirmationTo to);
+    
+    /**
+     * 第三种发货方式 Merge=false Split=false
+     * @param to
+     * @return
+     */
+    ShipmentConfirmationRo deliverForMergeIsFalseAndSplitIsFalse( ShipmentConfirmationTo to);
+    
+    /**
+     * 第四种发货方式 Merge=false Split=true
+     * @param to
+     * @return
+     */
+    ShipmentConfirmationRo deliverForMergeIsFalseAndSplitIsTrue( ShipmentConfirmationTo to);
+    
+    /**
+     * 发货并获取物流轨迹
+     * @param to
+     * @return
+     */
+    Ro deliverAndGetTrace(DeliverAndGetTraceTo to);
+    
+    /**
+     * 订阅物流轨迹并录入
+     * @param to
+     * @return
+     */
+	KdiLogisticRo callTraceAndaddTask(DeliverAndGetTraceTo to);
+	
+	
+    /**
+     * 第一种订阅方式 Merge=True Split=false
+     * @param to
+     * @return
+     */
+    Ro getTraceForMergeIsTrueAndSplitIsFalse( DeliverAndGetTraceTo to);
+    
+    /**
+     * 第二种订阅方式 Merge=True Split=true
+     * @param to
+     * @return
+     */
+    Ro getTraceForMergeIsTrueAndSplitIsTrue( DeliverAndGetTraceTo to);
+    
+    /**
+     * 第三种订阅方式 Merge=false Split=false
+     * @param to
+     * @return
+     */
+    Ro getTraceForMergeIsFalseAndSplitIsFalse( DeliverAndGetTraceTo to);
+    
+    /**
+     * 第四种订阅方式 Merge=false Split=true
+     * @param to
+     * @return
+     */
+    Ro getTraceForMergeIsFalseAndSplitIsTrue( DeliverAndGetTraceTo to);
 	
     /**
 	 * 批量发货并打印

@@ -538,26 +538,9 @@ public class OrdOrderDetailSvcImpl
 		}
 	}
 	
-	/**
-	 * 根据订单id获取订单详情信息和物流编号
-	 */
 	@Override
-	public List<OrdOrderDetailRo> listDetailAndlogisticCodeByOrderId(Long orderId) {
-		List<OrdOrderDetailRo> result = _mapper.listDetailAndlogisticCodeByOrderId(orderId);
-		_log.info("根据订单id获取订单详情信息和物流id的返回值为：{}", result);
-		for (OrdOrderDetailRo ordOrderDetailRo : result) {
-			if (ordOrderDetailRo.getLogisticId() != null) {
-				_log.info("开始获取物流单号----------------------------------");
-				_log.info("获取物流单号参数为：{}", ordOrderDetailRo);
-				KdiLogisticRo logisticRo = kdiSvc.getLogisticById(ordOrderDetailRo.getLogisticId());
-				_log.info("获取物流单号结果为：{}", logisticRo);
-				if (logisticRo != null) {
-					ordOrderDetailRo.setLogisticCode(logisticRo.getRecord().getLogisticCode());
-				}
-				_log.info("结束获取物流单号+++++++++++++++++++++++++++++++++++");
-			}
-
-		}
-		return result;
+	public int updateIsDeliver(Long OrderId, Long onlineId, Long onlineSpecId) {
+		_log.info("根据订单id上线id规格id修改订单详情的发货状态参数为：{},{},{}",OrderId,onlineId,onlineSpecId);
+		return _mapper.updateIsDeliver(OrderId, onlineId, onlineSpecId);
 	}
 }
