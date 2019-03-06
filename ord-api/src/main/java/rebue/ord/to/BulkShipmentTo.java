@@ -15,6 +15,11 @@ public class BulkShipmentTo {
 	 * 订单ID
 	 */
 	private OrdOrderMo[] receiver;
+	
+	/**
+	 * 物流订单号
+	 */
+	private Long expressNumber;
 	/**
 	 * 快递公司ID
 	 */

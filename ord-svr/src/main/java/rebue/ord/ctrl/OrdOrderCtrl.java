@@ -451,21 +451,22 @@ public class OrdOrderCtrl {
 		mo.setReceivedTime(receivedTime);
 		return svc.havePaidOrderByUserAndTimeList(mo);
 	}
-	
+
 	/**
 	 * 批量发货
+	 * 
 	 * @param qo
 	 * @return
 	 */
 	@SuppressWarnings("finally")
 	@PutMapping("/ord/order/bulkShipment")
 	BulkShipmentRo bulkShipment(@RequestBody final BulkShipmentTo qo) {
-		BulkShipmentRo bulkShipmentRo=new BulkShipmentRo();
-		_log.info("批量打印快递面单的参数为：qo-{}",qo);		
+		BulkShipmentRo bulkShipmentRo = new BulkShipmentRo();
+		_log.info("批量打印快递面单的参数为：qo-{}", qo);
 		try {
 			bulkShipmentRo = svc.bulkShipment(qo);
 			_log.info("批量打印的返回值为：{}", bulkShipmentRo);
-		}catch (final RuntimeException e) {
+		} catch (final RuntimeException e) {
 			final String msg = e.getMessage();
 			if (msg.equals("调用快递电子面单参数错误")) {
 				bulkShipmentRo.setResult(ShipmentConfirmationDic.PARAN_ERROR);
@@ -484,7 +485,41 @@ public class OrdOrderCtrl {
 				bulkShipmentRo.setMsg("确认发货失败");
 				_log.error(msg);
 			}
-		}finally {
+		} finally {
+			return bulkShipmentRo;
+		}
+	}
+
+	/**
+	 * 批量订阅并发货
+	 * 
+	 * @param qo
+	 * @return
+	 */
+	@SuppressWarnings("finally")
+	@PutMapping("/ord/order/bulkSubscription")
+	BulkShipmentRo bulkSubscription(@RequestBody final BulkShipmentTo qo) {
+		_log.info("订阅轨迹的参数为：{}", qo);
+		BulkShipmentRo bulkShipmentRo = new BulkShipmentRo();
+		try {
+			bulkShipmentRo = svc.bulkSubscription(qo);
+			_log.info("订阅的返回值为：{}", bulkShipmentRo);
+		} catch (final RuntimeException e) {
+			final String msg = e.getMessage();
+			if (msg.equals("参数错误")) {
+				bulkShipmentRo.setResult(ShipmentConfirmationDic.PARAN_ERROR);
+				bulkShipmentRo.setMsg(msg);
+				_log.error(msg);
+			} else if (msg.equals("该订单已发货")) {
+				bulkShipmentRo.setResult(ShipmentConfirmationDic.ORDER_ALREADY_SHIPMENTS);
+				bulkShipmentRo.setMsg(msg);
+				_log.error(msg);
+			} else {
+				bulkShipmentRo.setResult(ShipmentConfirmationDic.ERROR);
+				bulkShipmentRo.setMsg("确认发货失败");
+				_log.error(msg);
+			}
+		} finally {
 			return bulkShipmentRo;
 		}
 	}

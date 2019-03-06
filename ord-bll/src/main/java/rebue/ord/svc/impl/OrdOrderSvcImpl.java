@@ -972,7 +972,7 @@ public class OrdOrderSvcImpl extends MybatisBaseSvcImpl<OrdOrderMo, java.lang.Lo
 		deliverAndGetTraceRo.setMsg("确认发货成功");
 		return deliverAndGetTraceRo;
 	}
-	
+
 	/**
 	 * 第一种获取轨迹方式（默认）： merge=true split=false
 	 * 需要上线id，上线规格id，将该订单下上线id和规格id等于传过去的发一个包裹。
@@ -1055,7 +1055,7 @@ public class OrdOrderSvcImpl extends MybatisBaseSvcImpl<OrdOrderMo, java.lang.Lo
 		getTrace.setResult(ResultDic.SUCCESS);
 		return getTrace;
 	}
-	
+
 	/**
 	 * 第二种获取方式 merge=true split=true 需要上线id，上线规格id，有多少个详情传过去就发多少个包裹。
 	 */
@@ -1133,9 +1133,9 @@ public class OrdOrderSvcImpl extends MybatisBaseSvcImpl<OrdOrderMo, java.lang.Lo
 		getTrace.setResult(ResultDic.SUCCESS);
 		return getTrace;
 	}
-	
+
 	/**
-	 * 	 第三种获取方式 merge=false split=false 需要详情，将选择的详情发一个包裹
+	 * 第三种获取方式 merge=false split=false 需要详情，将选择的详情发一个包裹
 	 */
 	@Override
 	@Transactional(readOnly = false, propagation = Propagation.REQUIRED)
@@ -1143,35 +1143,35 @@ public class OrdOrderSvcImpl extends MybatisBaseSvcImpl<OrdOrderMo, java.lang.Lo
 		_log.info("第三种订阅方式 merge=false split=false ");
 		_log.info("参数为 ：{}", to);
 		Ro getTrace = new Ro();
-		
+
 		// 提前设置物流id，提前设置是因为下面发货表需要用到且需要关辆，所有在这里设置并传过去就不用在录入的时候返回回来
 		to.setLogisticId(_idWorker.getId());
-		
-		//设置订单标题，也就是orderTitle
-		String orderTitle="";
-		//循环修改详情和插入发货表
+
+		// 设置订单标题，也就是orderTitle
+		String orderTitle = "";
+		// 循环修改详情和插入发货表
 		for (int i = 0; i < to.getSelectDetaile().size(); i++) {
 			_log.info("第三种发货方式循环开始---------------------");
-			orderTitle+=to.getSelectDetaile().get(i).getOnlineTitle()+"等";
-			
+			orderTitle += to.getSelectDetaile().get(i).getOnlineTitle() + "等";
+
 			if (to.isFirst()) {
 				_log.info("首次订阅，需要修改详情 first: {}", to.isFirst());
-			// 修改详情的发货状态
-			OrdOrderDetailMo modifyDetailMo=new OrdOrderDetailMo();
-			modifyDetailMo.setId(to.getSelectDetaile().get(i).getId());
-			modifyDetailMo.setIsDelivered(true);
-			_log.info("修改订单详情发货状态的参数是：modifyDetailMo：{}", modifyDetailMo);
-			int updateResult = orderDetailSvc.modify(modifyDetailMo);
-			_log.info("修改结果是 {}", updateResult);
-			if (updateResult < 1) {
-				_log.error("修改订单详情发货状态失败");
-				throw new RuntimeException("修改订单详情发货状态失败");
-			}
-			_log.info("修改订单详情成功");
+				// 修改详情的发货状态
+				OrdOrderDetailMo modifyDetailMo = new OrdOrderDetailMo();
+				modifyDetailMo.setId(to.getSelectDetaile().get(i).getId());
+				modifyDetailMo.setIsDelivered(true);
+				_log.info("修改订单详情发货状态的参数是：modifyDetailMo：{}", modifyDetailMo);
+				int updateResult = orderDetailSvc.modify(modifyDetailMo);
+				_log.info("修改结果是 {}", updateResult);
+				if (updateResult < 1) {
+					_log.error("修改订单详情发货状态失败");
+					throw new RuntimeException("修改订单详情发货状态失败");
+				}
+				_log.info("修改订单详情成功");
 			} else {
 				_log.info("不是首次订阅，不需要修改详情 first: {}", to.isFirst());
 			}
-			
+
 			// 插入到发货表
 			final OrdOrderDetailDeliverMo ooddmo = new OrdOrderDetailDeliverMo();
 			ooddmo.setLogisticId(to.getLogisticId());
@@ -1188,11 +1188,11 @@ public class OrdOrderSvcImpl extends MybatisBaseSvcImpl<OrdOrderMo, java.lang.Lo
 
 			_log.info("第三种发货方式循环结束++++++++++++++++++++++");
 		}
-		
-		//设置物流编号和订单标题（orderTitle）和调用物流
+
+		// 设置物流编号和订单标题（orderTitle）和调用物流
 		to.setLogisticCode(to.getLogisticCodeArr().get(0));
 		to.setOrderTitle(orderTitle);
-		KdiLogisticRo KdiLogisticRo=new KdiLogisticRo();
+		KdiLogisticRo KdiLogisticRo = new KdiLogisticRo();
 		try {
 			KdiLogisticRo = callTraceAndaddTask(to);
 		} catch (RuntimeException e) {
@@ -1200,12 +1200,12 @@ public class OrdOrderSvcImpl extends MybatisBaseSvcImpl<OrdOrderMo, java.lang.Lo
 		}
 
 		_log.info("录入并添加签收任务的返回值为：{}", KdiLogisticRo);
-		
+
 		getTrace.setMsg("发货成功");
 		getTrace.setResult(ResultDic.SUCCESS);
 		return getTrace;
 	}
-	
+
 	/**
 	 * 第四种获取方式 merge=false split=true 需要详情，将选择的详情分别发一个包裹。
 	 */
@@ -1276,9 +1276,6 @@ public class OrdOrderSvcImpl extends MybatisBaseSvcImpl<OrdOrderMo, java.lang.Lo
 		return getTrace;
 	}
 
-
-	
-	
 	/**
 	 * 录入订单并订阅轨迹并添加签收任务
 	 * 
@@ -1337,7 +1334,6 @@ public class OrdOrderSvcImpl extends MybatisBaseSvcImpl<OrdOrderMo, java.lang.Lo
 		}
 		return entryResult;
 	}
-	
 
 	/**
 	 * 
@@ -1499,7 +1495,7 @@ public class OrdOrderSvcImpl extends MybatisBaseSvcImpl<OrdOrderMo, java.lang.Lo
 		confirmationRo.setPrintPage(printPage);
 		return confirmationRo;
 	}
-	
+
 	/**
 	 * 第三种发货方式 merge=false split=false 需要详情，将选择的详情发一个包裹,且根据详情id修改发货状态
 	 */
@@ -1520,7 +1516,7 @@ public class OrdOrderSvcImpl extends MybatisBaseSvcImpl<OrdOrderMo, java.lang.Lo
 
 			if (to.isFirst()) {
 				_log.info("是首次发货，需要修改订单详情状态 to.isFirst()：{}", to.isFirst());
-				
+
 				// 修改详情的发货状态
 				OrdOrderDetailMo modifyDetailMo = new OrdOrderDetailMo();
 				modifyDetailMo.setId(OrdOrderDetailMo.getId());
@@ -1561,7 +1557,7 @@ public class OrdOrderSvcImpl extends MybatisBaseSvcImpl<OrdOrderMo, java.lang.Lo
 		confirmationRo.setFailReason(callKdiNiaoAndaddTaskRo.getFailReason());
 		return confirmationRo;
 	}
-	
+
 	/**
 	 * 第四种发货方式 merge=false split=true 需要详情，将选择的详情分别发一个包裹。
 	 */
@@ -2560,6 +2556,210 @@ public class OrdOrderSvcImpl extends MybatisBaseSvcImpl<OrdOrderMo, java.lang.Lo
 				}
 			}
 			shipmentRo.setPrintPage(printPage);
+		}
+		return shipmentRo;
+	}
+
+	/**
+	 * 批量订阅并发货
+	 */
+	@Override
+	public BulkShipmentRo bulkSubscription(BulkShipmentTo qo) {
+		final BulkShipmentRo shipmentRo = new BulkShipmentRo();
+		List<String> batchPrinting = new ArrayList<String>();
+		OrdOrderMo[] ordOrderMos = qo.getReceiver();
+		for (OrdOrderMo mo : ordOrderMos) {
+			// 获取订单的订单详情
+			List<OrdOrderDetailMo> list = new ArrayList<OrdOrderDetailMo>();
+			list = orderDetailSvc.listByOrderId(mo.getId());
+
+			// 订单状态为2(未发货)先修改订单状态再添加物流信息,订单状态为3(已发货)则直接添加物流信息
+			if (mo.getOrderState() == 2) {
+				// 添加签收任务
+				final Date date = new Date();
+				mo.setSendTime(date);
+				final Calendar calendar = Calendar.getInstance();
+				calendar.setTime(date);
+				calendar.add(Calendar.HOUR, signinOrderTime);
+				final Date executePlanTime = calendar.getTime();
+				final OrdTaskMo ordTaskMo = new OrdTaskMo();
+				ordTaskMo.setOrderId(String.valueOf(mo.getId()));
+				ordTaskMo.setTaskType((byte) 2);
+				ordTaskMo.setExecutePlanTime(executePlanTime);
+				ordTaskMo.setExecuteState((byte) 0);
+
+				_log.info("添加签收任务的参数：{}", ordTaskMo);
+				final int taskAddResult = ordTaskSvc.add(ordTaskMo);
+				_log.info("添加签收任务返回的返回值：{}", taskAddResult);
+				if (taskAddResult != 1) {
+					_log.error("确认发货添加签收任务时出错，订单编号为：{}", mo.getOrderCode());
+					throw new RuntimeException("添加签收任务出错");
+				}
+				// 整理订单详情
+				String orderDetails = "";
+				Map<String, String> map = new HashMap<String, String>();
+				Map<String, Integer> detailMap = new HashMap<String, Integer>();
+				for (OrdOrderDetailMo ordorderdetailmo : list) {
+					String online = ordorderdetailmo.getOnlineId() + "-" + ordorderdetailmo.getOnlineSpecId();
+					if (map.containsKey(online)) {
+						String orderDetail = map.get(online);
+						Integer value = detailMap.get(orderDetail);
+						detailMap.put(orderDetail, value + 1);
+					} else {
+						String orderDetail = ordorderdetailmo.getOnlineTitle() + "-" + ordorderdetailmo.getSpecName();
+						map.put(online, orderDetail);
+						detailMap.put(orderDetail, 1);
+					}
+				}
+				for (String detailKey : detailMap.keySet()) {
+					Integer detailValue = detailMap.get(detailKey);
+					orderDetails += detailKey + "*" + detailValue + ";";
+				}
+				// 添加物流信息
+				final AddKdiLogisticTo addKdiLogisticTo = new AddKdiLogisticTo();
+				addKdiLogisticTo.setShipperId(qo.getShipperId());
+				addKdiLogisticTo.setShipperCode(qo.getShipperCode());
+				addKdiLogisticTo.setOrderId(mo.getId());
+				addKdiLogisticTo.setOrderTitle(orderDetails);
+				addKdiLogisticTo.setReceiverName(mo.getReceiverName());
+				addKdiLogisticTo.setReceiverProvince(mo.getReceiverProvince());
+				addKdiLogisticTo.setReceiverCity(mo.getReceiverCity());
+				addKdiLogisticTo.setReceiverExpArea(mo.getReceiverExpArea());
+				addKdiLogisticTo.setReceiverAddress(mo.getReceiverAddress());
+				addKdiLogisticTo.setReceiverPostCode(mo.getReceiverPostCode());
+				addKdiLogisticTo.setReceiverTel(mo.getReceiverTel());
+				addKdiLogisticTo.setReceiverMobile(mo.getReceiverMobile());
+				addKdiLogisticTo.setSenderName(qo.getSenderName());
+				addKdiLogisticTo.setSenderMobile(qo.getSenderMobile());
+				addKdiLogisticTo.setSenderTel(qo.getSenderTel());
+				addKdiLogisticTo.setSenderProvince(qo.getSenderProvince());
+				addKdiLogisticTo.setSenderCity(qo.getSenderCity());
+				addKdiLogisticTo.setSenderAddress(qo.getSenderAddress());
+				addKdiLogisticTo.setSenderExpArea(qo.getSenderExpArea());
+				addKdiLogisticTo.setSenderPostCode(qo.getSenderPostCode());
+				addKdiLogisticTo.setOrgId(qo.getOrgId());
+				addKdiLogisticTo.setEntryType((byte) 2);
+				addKdiLogisticTo.setOrderId(mo.getId());
+				addKdiLogisticTo.setLogisticId(_idWorker.getId());
+				addKdiLogisticTo.setLogisticCode(qo.getExpressNumber() + "");
+				_log.info("添加物流信息参数为:{}", addKdiLogisticTo);
+				final KdiLogisticRo entryResult = kdiSvc.entryLogistics(addKdiLogisticTo);
+				_log.info("添加物流信息的结果为:{}", entryResult);
+				if (entryResult.getResult() != 1) {
+					_log.error("添加物流信息出错，订单编号为：{}", mo.getOrderCode());
+					throw new RuntimeException("添加物流信息出错");
+				}
+				// 获取订单详情id的集合
+				List<Long> selectDetaiLId = new ArrayList<Long>();
+				for (OrdOrderDetailMo ordOrderDetailMo : list) {
+					selectDetaiLId.add(ordOrderDetailMo.getId());
+				}
+				// 根据logisticId、selectDtailId和orderId来添加物流发货表和修改每条详情的发货状态
+				for (final Long detailId : selectDetaiLId) {
+					_log.info("根据当前订单详情循环插入发货表和修改订单详情发货状态开始-------------------------------");
+					final OrdOrderDetailDeliverMo ooddmo = new OrdOrderDetailDeliverMo();
+					ooddmo.setLogisticId(addKdiLogisticTo.getLogisticId());
+					ooddmo.setOrderId(mo.getId());
+					ooddmo.setOrderDetailId(detailId);
+					_log.info("添加发货表的参数：{}", ooddmo);
+					int result = ordOrderDetailDeliverSvc.add(ooddmo);
+					_log.info("添加发货表的结果为：{}", result);
+					if (result != 1) {
+						_log.error("添加发货表失败");
+						throw new RuntimeException("添加发货表失败");
+					}
+					// 修改每条详情的发货状态
+					result = 0;
+					final OrdOrderDetailMo oodMo = new OrdOrderDetailMo();
+					oodMo.setId(detailId);
+					oodMo.setIsDelivered(true);
+					_log.info("修改订单详情发货状态的参数为：{}", oodMo);
+					result = orderDetailSvc.modify(oodMo);
+					_log.info("修改订单详情发货状态结果为：{}", result);
+					if (result != 1) {
+						_log.error("添加订单详情发货状态失败");
+						throw new RuntimeException("修改订单详情发货状态失败");
+					}
+				}
+				_log.info("根据当前订单详情循环插入发货表和修改订单详情发货状态结束++++++++++++++++++++++++++++++++");
+				if (entryResult.getResult() == 1) {
+					shipmentRo.setMsg("批量订阅并发货成功");
+					shipmentRo.setResult(ShipmentConfirmationDic.SUCCESS);
+				} else {
+					return shipmentRo;
+				}
+
+				// 修改订单状态
+				_log.info("确认发货并修改订单状态，参数为:{}", mo);
+				final int modifyResult = _mapper.shipmentConfirmation(mo);
+				if (modifyResult != 1) {
+					_log.info("确认发货并修改订单状态失败，返回值为：{}", modifyResult);
+					throw new RuntimeException("添加发货表失败");
+				}
+				_log.info("确认发货并修改订单状态成功，返回值为：{}", modifyResult);
+
+			} else {
+				// 整理订单详情
+				String orderDetails = "";
+				Map<String, String> map = new HashMap<String, String>();
+				Map<String, Integer> detailMap = new HashMap<String, Integer>();
+				for (OrdOrderDetailMo ordorderdetailmo : list) {
+					String online = ordorderdetailmo.getOnlineId() + "-" + ordorderdetailmo.getOnlineSpecId();
+					if (map.containsKey(online)) {
+						String orderDetail = map.get(online);
+						Integer value = detailMap.get(orderDetail);
+						detailMap.put(orderDetail, value + 1);
+					} else {
+						String orderDetail = ordorderdetailmo.getOnlineTitle() + "-" + ordorderdetailmo.getSpecName();
+						map.put(online, orderDetail);
+						detailMap.put(orderDetail, 1);
+					}
+				}
+				for (String detailKey : detailMap.keySet()) {
+					Integer detailValue = detailMap.get(detailKey);
+					orderDetails += detailKey + "*" + detailValue + ";";
+				}
+				// 添加物流信息
+				final AddKdiLogisticTo addKdiLogisticTo = new AddKdiLogisticTo();
+				addKdiLogisticTo.setShipperId(qo.getShipperId());
+				addKdiLogisticTo.setShipperCode(qo.getShipperCode());
+				addKdiLogisticTo.setOrderId(mo.getId());
+				addKdiLogisticTo.setOrderTitle(orderDetails);
+				addKdiLogisticTo.setReceiverName(mo.getReceiverName());
+				addKdiLogisticTo.setReceiverProvince(mo.getReceiverProvince());
+				addKdiLogisticTo.setReceiverCity(mo.getReceiverCity());
+				addKdiLogisticTo.setReceiverExpArea(mo.getReceiverExpArea());
+				addKdiLogisticTo.setReceiverAddress(mo.getReceiverAddress());
+				addKdiLogisticTo.setReceiverPostCode(mo.getReceiverPostCode());
+				addKdiLogisticTo.setReceiverTel(mo.getReceiverTel());
+				addKdiLogisticTo.setReceiverMobile(mo.getReceiverMobile());
+				addKdiLogisticTo.setSenderName(qo.getSenderName());
+				addKdiLogisticTo.setSenderMobile(qo.getSenderMobile());
+				addKdiLogisticTo.setSenderTel(qo.getSenderTel());
+				addKdiLogisticTo.setSenderProvince(qo.getSenderProvince());
+				addKdiLogisticTo.setSenderCity(qo.getSenderCity());
+				addKdiLogisticTo.setSenderAddress(qo.getSenderAddress());
+				addKdiLogisticTo.setSenderExpArea(qo.getSenderExpArea());
+				addKdiLogisticTo.setSenderPostCode(qo.getSenderPostCode());
+				addKdiLogisticTo.setOrgId(qo.getOrgId());
+				addKdiLogisticTo.setEntryType((byte) 2);
+				addKdiLogisticTo.setOrderId(mo.getId());
+				addKdiLogisticTo.setLogisticId(_idWorker.getId());
+				addKdiLogisticTo.setLogisticCode(qo.getExpressNumber() + "");
+				_log.info("添加物流信息参数为:{}", addKdiLogisticTo);
+				final KdiLogisticRo entryResult = kdiSvc.entryLogistics(addKdiLogisticTo);
+				_log.info("添加物流信息的结果为:{}", entryResult);
+				if (entryResult.getResult() != 1) {
+					_log.error("添加物流信息出错，订单编号为：{}", mo.getOrderCode());
+					throw new RuntimeException("添加物流信息出错");
+				}
+				if (entryResult.getResult() == 1) {
+					shipmentRo.setMsg("批量订阅并发货成功");
+					shipmentRo.setResult(ShipmentConfirmationDic.SUCCESS);
+				} else {
+					return shipmentRo;
+				}
+			}
 		}
 		return shipmentRo;
 	}
