@@ -2566,7 +2566,6 @@ public class OrdOrderSvcImpl extends MybatisBaseSvcImpl<OrdOrderMo, java.lang.Lo
 	@Override
 	public BulkShipmentRo bulkSubscription(BulkShipmentTo qo) {
 		final BulkShipmentRo shipmentRo = new BulkShipmentRo();
-		List<String> batchPrinting = new ArrayList<String>();
 		OrdOrderMo[] ordOrderMos = qo.getReceiver();
 		for (OrdOrderMo mo : ordOrderMos) {
 			// 获取订单的订单详情
