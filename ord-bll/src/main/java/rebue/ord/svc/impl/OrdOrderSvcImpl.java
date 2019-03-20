@@ -2353,16 +2353,25 @@ public class OrdOrderSvcImpl extends MybatisBaseSvcImpl<OrdOrderMo, java.lang.Lo
 				final OrdTaskMo ordTaskMo = new OrdTaskMo();
 				ordTaskMo.setOrderId(String.valueOf(mo.getId()));
 				ordTaskMo.setTaskType((byte) 2);
-				ordTaskMo.setExecutePlanTime(executePlanTime);
-				ordTaskMo.setExecuteState((byte) 0);
-
-				_log.info("添加签收任务的参数：{}", ordTaskMo);
-				final int taskAddResult = ordTaskSvc.add(ordTaskMo);
-				_log.info("添加签收任务返回的返回值：{}", taskAddResult);
-				if (taskAddResult != 1) {
-					_log.error("确认发货添加签收任务时出错，订单编号为：{}", mo.getOrderCode());
-					throw new RuntimeException("添加签收任务出错");
+				
+				// 先查询任务是否已经存在
+				_log.info("查看签收任务是否存在的参数为：{}", ordTaskMo);
+				final List<OrdTaskMo> ordTaskList = ordTaskSvc.list(ordTaskMo);
+				_log.info("查看签收任务是否存在的结果为：{}", ordTaskList);
+				if (ordTaskList.size() == 0) {
+					ordTaskMo.setExecuteState((byte) 0);
+					ordTaskMo.setExecutePlanTime(executePlanTime);
+					_log.info("添加签收任务的参数：{}", ordTaskMo);
+					final int taskAddResult = ordTaskSvc.add(ordTaskMo);
+					_log.info("添加签收任务返回的返回值：{}", taskAddResult);
+					if (taskAddResult != 1) {
+						_log.error("确认发货添加签收任务时出错，订单编号为：{}", mo.getOrderCode());
+						throw new RuntimeException("添加签收任务出错");
+					}
+				} else {
+					_log.info("确认发货添加签收任务已经存在，orderId为：{}", ordTaskMo.getOrderId());
 				}
+				
 
 				// 整理订单详情
 				String orderDetails = "";
@@ -2574,6 +2583,8 @@ public class OrdOrderSvcImpl extends MybatisBaseSvcImpl<OrdOrderMo, java.lang.Lo
 
 			// 订单状态为2(未发货)先修改订单状态再添加物流信息,订单状态为3(已发货)则直接添加物流信息
 			if (mo.getOrderState() == 2) {
+
+				
 				// 添加签收任务
 				final Date date = new Date();
 				mo.setSendTime(date);
@@ -2584,16 +2595,26 @@ public class OrdOrderSvcImpl extends MybatisBaseSvcImpl<OrdOrderMo, java.lang.Lo
 				final OrdTaskMo ordTaskMo = new OrdTaskMo();
 				ordTaskMo.setOrderId(String.valueOf(mo.getId()));
 				ordTaskMo.setTaskType((byte) 2);
-				ordTaskMo.setExecutePlanTime(executePlanTime);
-				ordTaskMo.setExecuteState((byte) 0);
-
-				_log.info("添加签收任务的参数：{}", ordTaskMo);
-				final int taskAddResult = ordTaskSvc.add(ordTaskMo);
-				_log.info("添加签收任务返回的返回值：{}", taskAddResult);
-				if (taskAddResult != 1) {
-					_log.error("确认发货添加签收任务时出错，订单编号为：{}", mo.getOrderCode());
-					throw new RuntimeException("添加签收任务出错");
+				
+				// 先查询任务是否已经存在
+				_log.info("查看签收任务是否存在的参数为：{}", ordTaskMo);
+				final List<OrdTaskMo> ordTaskList = ordTaskSvc.list(ordTaskMo);
+				_log.info("查看签收任务是否存在的结果为：{}", ordTaskList);
+				if (ordTaskList.size() == 0) {
+					ordTaskMo.setExecuteState((byte) 0);
+					ordTaskMo.setExecutePlanTime(executePlanTime);
+					_log.info("添加签收任务的参数：{}", ordTaskMo);
+					final int taskAddResult = ordTaskSvc.add(ordTaskMo);
+					_log.info("添加签收任务返回的返回值：{}", taskAddResult);
+					if (taskAddResult != 1) {
+						_log.error("确认发货添加签收任务时出错，订单编号为：{}", mo.getOrderCode());
+						throw new RuntimeException("添加签收任务出错");
+					}
+				} else {
+					_log.info("确认发货添加签收任务已经存在，orderId为：{}", ordTaskMo.getOrderId());
 				}
+				
+				
 				// 整理订单详情
 				String orderDetails = "";
 				Map<String, String> map = new HashMap<String, String>();
