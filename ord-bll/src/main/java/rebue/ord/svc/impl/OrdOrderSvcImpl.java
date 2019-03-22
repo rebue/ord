@@ -1728,6 +1728,7 @@ public class OrdOrderSvcImpl extends MybatisBaseSvcImpl<OrdOrderMo, java.lang.Lo
 	/**
 	 * 订单签收
 	 */
+	@SuppressWarnings("deprecation")
 	@Override
 	@Transactional(readOnly = false, propagation = Propagation.REQUIRED)
 	public OrderSignInRo orderSignIn(final OrderSignInTo to) {

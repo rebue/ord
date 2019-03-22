@@ -2,8 +2,6 @@ package rebue.ord.test;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.io.IOException;
-import java.math.BigDecimal;
-
 import org.junit.Assert;
 import org.junit.Test;
 import rebue.ord.mo.OrdOrderDetailMo;
@@ -12,7 +10,6 @@ import rebue.robotech.ro.IdRo;
 import rebue.robotech.ro.Ro;
 import rebue.wheel.OkhttpUtils;
 import rebue.wheel.RandomEx;
-import rebue.wheel.idworker.IdWorker3;
 
 /**
  * 订单详情

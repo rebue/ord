@@ -286,6 +286,15 @@ public class OrdOrderDetailMo implements Serializable {
     private Long inviteId;
 
     /**
+     *    备注
+     *
+     *    数据库字段: ORD_ORDER_DETAIL.REMARK
+     *
+     *    @mbg.generated 自动生成，如需修改，请删除本行
+     */
+    private String remark;
+
+    /**
      *    @mbg.generated 自动生成，如需修改，请删除本行
      */
     private static final long serialVersionUID = 1L;
@@ -951,6 +960,28 @@ public class OrdOrderDetailMo implements Serializable {
     }
 
     /**
+     *    备注
+     *
+     *    数据库字段: ORD_ORDER_DETAIL.REMARK
+     *
+     *    @mbg.generated 自动生成，如需修改，请删除本行
+     */
+    public String getRemark() {
+        return remark;
+    }
+
+    /**
+     *    备注
+     *
+     *    数据库字段: ORD_ORDER_DETAIL.REMARK
+     *
+     *    @mbg.generated 自动生成，如需修改，请删除本行
+     */
+    public void setRemark(String remark) {
+        this.remark = remark;
+    }
+
+    /**
      *    @mbg.generated 自动生成，如需修改，请删除本行
      */
     @Override
@@ -989,6 +1020,7 @@ public class OrdOrderDetailMo implements Serializable {
         sb.append(", userId=").append(userId);
         sb.append(", isDelivered=").append(isDelivered);
         sb.append(", inviteId=").append(inviteId);
+        sb.append(", remark=").append(remark);
         sb.append(", serialVersionUID=").append(serialVersionUID);
         sb.append("]");
         return sb.toString();

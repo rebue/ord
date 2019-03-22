@@ -19,7 +19,6 @@ import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
 
 import damai.pnt.dic.PointLogTypeDic;
-import rebue.kdi.ro.KdiLogisticRo;
 import rebue.kdi.svr.feign.KdiSvc;
 import rebue.onl.svr.feign.OnlOnlineSpecSvc;
 import rebue.ord.dao.OrdOrderDetailDao;
@@ -33,7 +32,6 @@ import rebue.ord.mo.OrdOrderDetailMo;
 import rebue.ord.mo.OrdOrderMo;
 import rebue.ord.mo.OrdTaskMo;
 import rebue.ord.ro.DetailandBuyRelationRo;
-import rebue.ord.ro.OrdOrderDetailRo;
 import rebue.ord.ro.WaitingBuyPointByUserIdListRo;
 import rebue.ord.svc.OrdBuyRelationSvc;
 import rebue.ord.svc.OrdOrderDetailSvc;

@@ -9,7 +9,6 @@ import com.github.pagehelper.PageInfo;
 import rebue.ord.jo.OrdOrderDetailJo;
 import rebue.ord.mo.OrdOrderDetailMo;
 import rebue.ord.ro.DetailandBuyRelationRo;
-import rebue.ord.ro.OrdOrderDetailRo;
 import rebue.ord.ro.WaitingBuyPointByUserIdListRo;
 import rebue.ord.to.UpdateOrgTo;
 import rebue.robotech.svc.BaseSvc;

@@ -8,8 +8,6 @@ import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-
 import rebue.ord.dic.SettleTaskExecuteStateDic;
 import rebue.ord.dic.SettleTypeDic;
 import rebue.ord.mo.OrdSettleTaskMo;
@@ -22,9 +20,7 @@ public class OrdSettleTaskTest {
 
 	private final String hostUrl = "http://localhost:20180";
 
-	private final ObjectMapper _objectMapper = new ObjectMapper();
-
-//	@Test
+	//	@Test
 	public void addTest() throws IOException {
 		// 立即执行的时间
 		final Date now = new Date();

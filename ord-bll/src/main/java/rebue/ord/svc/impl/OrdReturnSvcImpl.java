@@ -74,6 +74,7 @@ import rebue.robotech.svc.impl.MybatisBaseSvcImpl;
  *
  * @mbg.generated 自动生成的注释，如需修改本注释，请删除本行
  */
+@SuppressWarnings("deprecation")
 @Transactional(readOnly = true, propagation = Propagation.SUPPORTS)
 @Service
 public class OrdReturnSvcImpl extends MybatisBaseSvcImpl<OrdReturnMo, java.lang.Long, OrdReturnMapper>
