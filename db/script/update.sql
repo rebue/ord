@@ -176,5 +176,5 @@ alter table ord.ORD_ORDER_DETAIL					drop					key AK_PAY_SEQU;
 alter table ord.ORD_ORDER_DETAIL add unique key AK_PAY_SEQ_AND_ONLINE_SPEC_ID (PAY_SEQ, ONLINE_SPEC_ID);
 -- ------------------------------------------------------- 上面的已更新到线上 2019.1.22 ----------------------------------------------------
 
-
+alter table ORD_ORDER_DETAIL add REMARK               varchar(60) comment '备注';
 
