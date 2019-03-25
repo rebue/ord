@@ -906,6 +906,7 @@ public class OrdOrderSvcImpl extends MybatisBaseSvcImpl<OrdOrderMo, java.lang.Lo
 	 * 第四种获取方式 merge=false split=true 需要详情，将选择的详情分别发一个包裹。
 	 */
 	@Override
+	@Transactional(readOnly = false, propagation = Propagation.REQUIRED)
 	public Ro deliverAndGetTrace(final DeliverAndGetTraceTo to) {
 		final Ro deliverAndGetTraceRo = new Ro();
 		// 判断是否是已经支付状态待收货状态
@@ -2333,6 +2334,7 @@ public class OrdOrderSvcImpl extends MybatisBaseSvcImpl<OrdOrderMo, java.lang.Lo
 	 * 批量发货并打印
 	 */
 	@Override
+	@Transactional(readOnly = false, propagation = Propagation.REQUIRED)
 	public BulkShipmentRo bulkShipment(BulkShipmentTo qo) {
 		final BulkShipmentRo shipmentRo = new BulkShipmentRo();
 		List<String> batchPrinting = new ArrayList<String>();
@@ -2574,6 +2576,7 @@ public class OrdOrderSvcImpl extends MybatisBaseSvcImpl<OrdOrderMo, java.lang.Lo
 	 * 批量订阅并发货
 	 */
 	@Override
+	@Transactional(readOnly = false, propagation = Propagation.REQUIRED)
 	public BulkShipmentRo bulkSubscription(BulkShipmentTo qo) {
 		final BulkShipmentRo shipmentRo = new BulkShipmentRo();
 		OrdOrderMo[] ordOrderMos = qo.getReceiver();

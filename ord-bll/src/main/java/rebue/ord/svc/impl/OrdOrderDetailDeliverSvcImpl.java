@@ -88,7 +88,7 @@ public class OrdOrderDetailDeliverSvcImpl extends MybatisBaseSvcImpl<OrdOrderDet
         	_log.info("根据物流id获取物流单号的参数是： {}",ordOrderDetailDeliverMo.getLogisticId());
 			KdiLogisticRo logisticRo = kdiSvc.getLogisticById(ordOrderDetailDeliverMo.getLogisticId());
         	_log.info("根据物流id获取物流单号的结果是： {}",logisticRo);
-        	if(logisticRo !=null) {
+        	if(logisticRo.getResult() !=-1) {
         		deliverRo.setLogisticCode(logisticRo.getRecord().getLogisticCode());
         	}
         	
