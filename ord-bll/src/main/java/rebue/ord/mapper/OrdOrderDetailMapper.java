@@ -186,8 +186,9 @@ public interface OrdOrderDetailMapper extends MybatisBaseMapper<OrdOrderDetailMo
     "        WHERE" + // 
     "            c.ONLINE_SPEC_ID = #{onlineSpecId}" + // 
     "                AND c.RETURN_STATE != #{returned}" + // 
-    "                AND d.ORDER_STATE > #{paid})" + // 
-    "        AND b.ORDER_STATE > #{paid}" + "        AND a.RETURN_STATE != #{returned}" + " LIMIT 1")
+    "                AND d.ORDER_STATE >= #{paid})" + // 
+    "        AND b.ORDER_STATE >= #{paid}" + //
+    "        AND a.RETURN_STATE != #{returned}" + " LIMIT 1")
     OrdOrderDetailMo getFirstBuyDetail(@Param("onlineSpecId") Long onlineSpecId, @Param("returned") ReturnStateDic returned, @Param("paid") OrderStateDic paid);
 
     /**
@@ -200,7 +201,9 @@ public interface OrdOrderDetailMapper extends MybatisBaseMapper<OrdOrderDetailMo
     Update(// 
     "UPDATE ORD_ORDER_DETAIL " + // 
     " SET " + // 
-    "    PAY_SEQ = NULL" + " WHERE" + "    ONLINE_SPEC_ID = #{onlineSpecId,jdbcType=BIGINT} and PAY_SEQ = 1")
+    "    PAY_SEQ = NULL" +//
+    " WHERE" + //
+    "    ONLINE_SPEC_ID = #{onlineSpecId,jdbcType=BIGINT} and PAY_SEQ = 1")
     void clearPaySeqOfFirst(@Param("onlineSpecId") Long onlineSpecId);
 
     /**
@@ -213,7 +216,9 @@ public interface OrdOrderDetailMapper extends MybatisBaseMapper<OrdOrderDetailMo
     Update(// 
     "UPDATE ORD_ORDER_DETAIL " + // 
     " SET " + // 
-    "    PAY_SEQ = 1" + " WHERE" + "    ID = #{id} AND (PAY_SEQ != 1 OR PAY_SEQ is null)")
+    "    PAY_SEQ = 1" + //
+    " WHERE" + //
+    "    ID = #{id} AND (PAY_SEQ != 1 OR PAY_SEQ is null)")
     void setFirstPaySeq(@Param("id") Long id);
 
     /**

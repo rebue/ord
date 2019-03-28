@@ -2051,8 +2051,8 @@ public class OrdOrderSvcImpl extends MybatisBaseSvcImpl<OrdOrderMo, java.lang.Lo
 				ordTaskMo.setTaskType((byte) OrderTaskTypeDic.CALC_FIRST_BUY.getCode());
 				ordTaskMo.setOrderId(String.valueOf(orderDetail.getOnlineSpecId())); // 计算首单的任务的订单ID其实是上线规格ID
 				_log.debug("添加计算首单任务的参数为：{}", ordTaskMo);
-				// 添加取消订单任务
-				ordTaskSvc.addEx(ordTaskMo);
+				// 添加计算首单任务
+				ordTaskSvc.add(ordTaskMo);
 			} catch (final DuplicateKeyException e) {
 				_log.info("已经存在计算首单的任务：onlineSpecId-" + orderDetail.getOnlineSpecId(), e);
 			} catch (final Exception e) {

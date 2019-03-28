@@ -442,30 +442,30 @@ public class OrdOrderDetailSvcImpl
 		_mapper.setFirstPaySeq(orderDetailMo.getId());
 
 		// TODO 查找是否有结算积分的子任务，如果有则添加结算首单积分的子任务
-		OrdTaskMo ordTaskMo = new OrdTaskMo();
-		ordTaskMo.setOrderId(onlineSpecId.toString());
-		ordTaskMo.setTaskType((byte) OrderTaskTypeDic.CALC_FIRST_BUY.getCode());
-		_log.info("计算首单购买查询结算首单积分任务的参数为：{}", ordTaskMo);
-		final OrdTaskMo taskMo = ordTaskSvc.getOne(ordTaskMo);
-		_log.info("计算首单购买查询结算首单积分任务的参数为：{}", taskMo);
-		if (taskMo == null) {
-			_log.debug("添加计算首单的任务: orderDetail-{}", orderDetailMo);
-			_log.debug("设置计算首单任务的执行时间为1分钟后执行");
-			final Calendar calendar = Calendar.getInstance();
-			calendar.setTime(new Date());
-			calendar.add(Calendar.MINUTE, 1);
-			final Date executePlanTime = calendar.getTime();
-			_log.debug("计算首单任务的执行时间为: {}", executePlanTime);
-			_log.debug("准备添加计算首单的任务");
-			ordTaskMo = new OrdTaskMo();
-			ordTaskMo.setExecuteState((byte) TaskExecuteStateDic.NONE.getCode());
-			ordTaskMo.setExecutePlanTime(executePlanTime);
-			ordTaskMo.setTaskType((byte) OrderTaskTypeDic.CALC_FIRST_BUY.getCode());
-			ordTaskMo.setOrderId(String.valueOf(onlineSpecId)); // 计算首单的任务的订单ID其实是上线规格ID
-			_log.debug("添加计算首单任务的参数为：{}", ordTaskMo);
-			// 添加取消订单任务
-			ordTaskSvc.add(ordTaskMo);
-		}
+//		OrdTaskMo ordTaskMo = new OrdTaskMo();
+//		ordTaskMo.setOrderId(onlineSpecId.toString());
+//		ordTaskMo.setTaskType((byte) OrderTaskTypeDic.CALC_FIRST_BUY.getCode());
+//		_log.info("计算首单购买查询结算首单积分任务的参数为：{}", ordTaskMo);
+//		final OrdTaskMo taskMo = ordTaskSvc.getOne(ordTaskMo);
+//		_log.info("计算首单购买查询结算首单积分任务的参数为：{}", taskMo);
+//		if (taskMo == null) {
+//			_log.debug("添加计算首单的任务: orderDetail-{}", orderDetailMo);
+//			_log.debug("设置计算首单任务的执行时间为1分钟后执行");
+//			final Calendar calendar = Calendar.getInstance();
+//			calendar.setTime(new Date());
+//			calendar.add(Calendar.MINUTE, 1);
+//			final Date executePlanTime = calendar.getTime();
+//			_log.debug("计算首单任务的执行时间为: {}", executePlanTime);
+//			_log.debug("准备添加计算首单的任务");
+//			ordTaskMo = new OrdTaskMo();
+//			ordTaskMo.setExecuteState((byte) TaskExecuteStateDic.NONE.getCode());
+//			ordTaskMo.setExecutePlanTime(executePlanTime);
+//			ordTaskMo.setTaskType((byte) OrderTaskTypeDic.CALC_FIRST_BUY.getCode());
+//			ordTaskMo.setOrderId(String.valueOf(onlineSpecId)); // 计算首单的任务的订单ID其实是上线规格ID
+//			_log.debug("添加计算首单任务的参数为：{}", ordTaskMo);
+//			// 添加取消订单任务
+//			ordTaskSvc.add(ordTaskMo);
+//		}
 		
 		Ro ro = onlOnlineSpecSvc.modifyIsHaveFirstOrderById(onlineSpecId, true);
 		_log.info("计算首单购买修改是否已有首单的返回值为：{}", ro);
