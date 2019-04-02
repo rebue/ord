@@ -251,6 +251,7 @@ public class OrdBuyRelationSvcImpl extends MybatisBaseSvcImpl<OrdBuyRelationMo, 
 
     /**
      * 根据邀请购买规则匹配购买关系
+     * 1：根据商品购买关系，获取上家用户是否还有符合规则的商品(上线id相同，价格相同。)
      */
     @Override
     @Transactional(readOnly = false, propagation = Propagation.REQUIRED)
@@ -279,7 +280,7 @@ public class OrdBuyRelationSvcImpl extends MybatisBaseSvcImpl<OrdBuyRelationMo, 
             _log.info("获取到的购买关系为空");
             return false;
         }
-        // 根据产品上线ID查找购买关系用户的购买记录，看是否有符合要求的订单详情记录
+        // 根据产品上线ID和商品购买关系查找上家用户的购买记录，看是否有符合要求的订单详情记录
         final Map<String, Object> map = new HashMap<>();
         map.put("id", downLineDetailId);
         map.put("onlineId", onlineId);

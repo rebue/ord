@@ -1,0 +1,22 @@
+SET SQL_SAFE_UPDATES = 0;
+UPDATE onl.ONL_ONLINE_SPEC a,
+    ORD_ORDER_DETAIL b 
+SET 
+    b.ONLINE_SPEC_ID = a.id
+WHERE
+    a.ONLINE_ID = b.ONLINE_ID
+        AND a.ONLINE_SPEC = b.SPEC_NAME;
+
+SET SQL_SAFE_UPDATES = 1;
+
+本应有1142条数据，修改了1061条数据，剩余81，是因为有三个商品规格名称被修改过了。
+
+
+select * from ORD_ORDER_DETAIL  where  ONLINE_SPEC_ID=0;
+执行上面语句可以看到
+
+【突尼斯】软籽石榴4斤/3斤   3条数据
+【卡拉卡拉】红血橙9斤      77条数据 
+【菌包】4个多品种菌包任选送100ml喷瓶  1条数据
+
+2019-03-29

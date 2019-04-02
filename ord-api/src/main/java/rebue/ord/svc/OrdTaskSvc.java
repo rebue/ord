@@ -18,10 +18,10 @@ import rebue.robotech.svc.BaseSvc;
  */
 public interface OrdTaskSvc extends BaseSvc<java.lang.Long, OrdTaskMo, OrdTaskJo> {
 
-//	/**
-//	 * 添加任务，如果重复添加不抛异常，事务不会回滚
-//	 */
-//	int addEx(OrdTaskMo mo);
+	/**
+	 * 添加任务，如果重复添加不抛异常，事务不会回滚
+	 */
+	int addEx(OrdTaskMo mo);
 
 	/**
 	 * } 根据订单任务状态和任务类型获取订单任务ID列表

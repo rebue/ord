@@ -188,7 +188,7 @@ public interface OrdOrderDetailMapper extends MybatisBaseMapper<OrdOrderDetailMo
     "                AND c.RETURN_STATE != #{returned}" + // 
     "                AND d.ORDER_STATE >= #{paid})" + // 
     "        AND b.ORDER_STATE >= #{paid}" + //
-    "        AND a.RETURN_STATE != #{returned}" + " LIMIT 1")
+    "        AND a.RETURN_STATE != #{returned} AND a.ONLINE_SPEC_ID= #{onlineSpecId} " + " LIMIT 1")
     OrdOrderDetailMo getFirstBuyDetail(@Param("onlineSpecId") Long onlineSpecId, @Param("returned") ReturnStateDic returned, @Param("paid") OrderStateDic paid);
 
     /**
