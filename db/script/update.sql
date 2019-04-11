@@ -178,4 +178,7 @@ alter table ord.ORD_ORDER_DETAIL add unique key AK_PAY_SEQ_AND_ONLINE_SPEC_ID (P
 
 alter table ORD_ORDER_DETAIL add REMARK               varchar(60) comment '备注';
 -- ------------------------------------------------------- 上面的已更新到线上 2019.1.25 ----------------------------------------------------
+ALTER TABLE ORD_ORDER_DETAIL ADD UNIQUE ORDER_TIMESTAMP_ONLINE_SPEC_ID (ORDER_TIMESTAMP,ONLINE_SPEC_ID);
+
+-- ------------------------------------------------------- 上面的已更新到线上 2019.04.11 ----------------------------------------------------
 

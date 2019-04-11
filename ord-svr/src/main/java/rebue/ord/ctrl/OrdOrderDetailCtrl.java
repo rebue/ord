@@ -208,7 +208,7 @@ public class OrdOrderDetailCtrl {
 	List<OrdOrderDetailMo> listAll(final OrdOrderDetailMo mo) {
 		_log.info("获取订单详情参数为: {}" + mo);
 		List<OrdOrderDetailMo> result = svc.list(mo);
-		_log.info("获取订单详情结果为: {}" + mo);
+		_log.info("获取订单详情结果为: {}" + result);
 		return result;
 	}
 

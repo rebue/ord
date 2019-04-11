@@ -2,7 +2,12 @@ package rebue.ord;
 
 import java.io.IOException;
 import java.util.LinkedList;
+import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
+
+import javax.annotation.Resource;
 
 import org.junit.Assert;
 import org.junit.Test;
@@ -10,8 +15,13 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.github.dozermapper.core.Mapper;
 
+import rebue.ord.mo.OrdOrderDetailMo;
+import rebue.ord.mo.OrdOrderMo;
 import rebue.ord.ro.OrderRo;
+import rebue.ord.svc.OrdOrderDetailSvc;
+import rebue.ord.svc.OrdOrderSvc;
 import rebue.ord.to.OrderDetailTo;
 import rebue.ord.to.OrderTo;
 import rebue.robotech.dic.ResultDic;
@@ -26,8 +36,8 @@ public class OrdOrderTests {
 
     private final String        hostUrl       = "http://localhost:20180";
 
-    private final ObjectMapper  _objectMapper = new ObjectMapper();
 
+    private ObjectMapper _objectMapper     = new ObjectMapper();
     /**
      * 测试下单
      */
@@ -133,11 +143,42 @@ public class OrdOrderTests {
         return ro;
     }
 
-    @Test
+  //  @Test
     public void modifyPayOrderIdTest() throws IOException {
         final String orderId = "520129105039982599";
         _log.info("修改支付订单Id的参数为: {}", orderId);
         final String results = OkhttpUtils.put(hostUrl + "/ord/order/modifypayorderid?id=" + orderId);
         _log.info("修改支付订单id的返回值为: {}", results);
     }
+    
+	@Resource
+	private OrdOrderDetailSvc svc;
+	
+	@Resource
+	private Mapper dozerMapper;
+	
+	@Test
+    public void updateOrderTime() throws IOException {
+        _log.info("修改订单详情下单时间戳");
+    	String url=hostUrl+"/ord/detailList";
+    	
+		Map<String, Object> map = new HashMap<String, Object>();  
+    	 map.put("orderTimestamp", 0L);
+    	//	List<OrdOrderDetailMo> result = _objectMapper.readValue(OkhttpUtils.get(url), List.class);
+
+    	OrdOrderDetailMo[] result = _objectMapper.readValue(OkhttpUtils.get(hostUrl + "/ord/detailList",map), OrdOrderDetailMo[].class);
+    	Long i=0l ;
+    	 url=hostUrl+"/ord/orderdetail";
+    	for (OrdOrderDetailMo DetailMo : result) {
+    		 _log.info("订单下单时间戳为0的详情: {}", DetailMo);
+    		 i++;
+    		 OrdOrderDetailMo modify=new OrdOrderDetailMo();
+    		 modify.setId(DetailMo.getId());
+    		 modify.setOrderTimestamp(i);
+    		String ro=OkhttpUtils.putByJsonParams(url,modify);
+    		_log.info("修改详情的结果为: {}", ro);
+         }
+    }
+	
+	
 }
