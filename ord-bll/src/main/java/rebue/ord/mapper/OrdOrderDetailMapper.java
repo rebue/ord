@@ -171,7 +171,7 @@ public interface OrdOrderDetailMapper extends MybatisBaseMapper<OrdOrderDetailMo
     @// 
     Select(// 
     "SELECT " + // 
-    "    a.ID, a.PAY_SEQ" + // 
+    "    a.ID,a.ORDER_ID,a.RETURN_COUNT,a.BUY_COUNT,a.COST_PRICE,a.PAY_SEQ" + // 
     " FROM" + // 
     "    ORD_ORDER_DETAIL a" + // 
     "        INNER JOIN" + // 

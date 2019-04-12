@@ -6,6 +6,7 @@ import org.junit.Test;
 
 import rebue.ord.to.AddReturnTo;
 import rebue.ord.to.AgreeReturnTo;
+import rebue.ord.to.OrdOrderReturnTo;
 import rebue.ord.to.ReceivedAndRefundedTo;
 import rebue.wheel.OkhttpUtils;
 
@@ -46,8 +47,8 @@ public class OrdReturnTest {
 //	@Test
 	public void agreeToReturnTest() throws IOException {
 		AgreeReturnTo to = new AgreeReturnTo();
-		to.setId(542126533406490624L);
-		to.setReviewOpId(520469568947224576L);
+		to.setId(562075656935047168L);
+		to.setReviewOpId(560723287034822657L);
 		String result = OkhttpUtils.postByJsonParams(hostUrl + "/ord/return/agreereturn", to);
 		System.out.println(result);
 	}
@@ -56,7 +57,7 @@ public class OrdReturnTest {
 	 * 已收到货并退款测试
 	 * @throws IOException
 	 */
-	@Test
+	////@Test
 	public void receivedAndRefundedTest() throws IOException {
 		ReceivedAndRefundedTo to = new ReceivedAndRefundedTo();
 		to.setId(542126533406490624L);
@@ -65,6 +66,29 @@ public class OrdReturnTest {
 		to.setRefundAmount(new BigDecimal("10"));
 		to.setReturnCompensationToSeller(new BigDecimal("0"));
 		String result = OkhttpUtils.postByJsonParams(hostUrl + "/ord/return/receivedandrefunded", to);
+		System.out.println(result);
+	}
+	
+	
+			
+	/**
+	 * 已收到货并退款测试
+	 * @throws IOException
+	 */
+	@Test
+	public void agreeRefundTest() throws IOException {
+		OrdOrderReturnTo to = new OrdOrderReturnTo();
+		to.setIsAutoCalcRefund(true);
+		to.setOrderId(562064779313807361L);
+		to.setOrderDetailId(562064779414470656L);
+		to.setReturnId(562075656935047168L);
+		to.setReturnNum(1);
+		to.setOpId(560723287034822657L);
+		to.setIp("12345678");
+		to.setRefundAmount(new BigDecimal("0.1"));
+		to.setRefundAmount1(new BigDecimal("0.1"));
+		to.setRefundAmount2(new BigDecimal("0.1"));
+		String result = OkhttpUtils.postByJsonParams(hostUrl + "/ord/return/agreetoarefund", to);
 		System.out.println(result);
 	}
 }

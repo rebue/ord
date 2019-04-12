@@ -1,36 +1,27 @@
 package rebue.ord.svc.impl;
-
 import java.math.BigDecimal;
 import java.util.ArrayList;
-import java.util.Calendar;
-import java.util.Date;
 import java.util.List;
 import java.util.Map;
-
 import javax.annotation.Resource;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
-
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
-
 import damai.pnt.dic.PointLogTypeDic;
 import rebue.kdi.svr.feign.KdiSvc;
 import rebue.onl.svr.feign.OnlOnlineSpecSvc;
 import rebue.ord.dao.OrdOrderDetailDao;
 import rebue.ord.dic.OrderStateDic;
-import rebue.ord.dic.OrderTaskTypeDic;
 import rebue.ord.dic.ReturnStateDic;
 import rebue.ord.jo.OrdOrderDetailJo;
 import rebue.ord.mapper.OrdOrderDetailMapper;
 import rebue.ord.mo.OrdBuyRelationMo;
 import rebue.ord.mo.OrdOrderDetailMo;
 import rebue.ord.mo.OrdOrderMo;
-import rebue.ord.mo.OrdTaskMo;
 import rebue.ord.ro.DetailandBuyRelationRo;
 import rebue.ord.ro.WaitingBuyPointByUserIdListRo;
 import rebue.ord.svc.OrdBuyRelationSvc;
@@ -41,7 +32,6 @@ import rebue.ord.to.UpdateOrgTo;
 import rebue.pnt.svr.feign.PntPointSvc;
 import rebue.pnt.to.AddPointTradeTo;
 import rebue.robotech.dic.ResultDic;
-import rebue.robotech.dic.TaskExecuteStateDic;
 import rebue.robotech.ro.Ro;
 import rebue.robotech.svc.impl.BaseSvcImpl;
 import rebue.suc.mo.SucUserMo;
@@ -419,7 +409,8 @@ public class OrdOrderDetailSvcImpl
 		_log.debug("获取首单购买的订单详情");
 		final OrdOrderDetailMo orderDetailMo = _mapper.getFirstBuyDetail(onlineSpecId, ReturnStateDic.RETURNED,
 				OrderStateDic.PAID);
-		
+		_log.debug("获取首单购买的订单详情结果 {}",orderDetailMo);
+
 		if (orderDetailMo == null) {
 			_log.warn("未发现有已经支付的订单详情，可能已退货: onlineSpecId-{}", onlineSpecId);
 			Ro ro = onlOnlineSpecSvc.modifyIsHaveFirstOrderById(onlineSpecId, false);
@@ -440,32 +431,27 @@ public class OrdOrderDetailSvcImpl
 
 		_log.debug("设置新的首单的支付顺序标志");
 		_mapper.setFirstPaySeq(orderDetailMo.getId());
+		
+		_log.debug("查询该订单是否已经结算，如果已经结算就添加首单积分交易");
+		_log.debug("查询该订单是否已经结算的参数为 {}",orderDetailMo.getOrderId());
+		final OrdOrderMo ordOrderMo = ordOrderSvc.getById(orderDetailMo.getOrderId());
+		_log.debug("查询该订单是否已经结算的返回值为 {}",ordOrderMo);
+		if(ordOrderMo.getOrderState()==5) {
 
-		// TODO 查找是否有结算积分的子任务，如果有则添加结算首单积分的子任务
-//		OrdTaskMo ordTaskMo = new OrdTaskMo();
-//		ordTaskMo.setOrderId(onlineSpecId.toString());
-//		ordTaskMo.setTaskType((byte) OrderTaskTypeDic.CALC_FIRST_BUY.getCode());
-//		_log.info("计算首单购买查询结算首单积分任务的参数为：{}", ordTaskMo);
-//		final OrdTaskMo taskMo = ordTaskSvc.getOne(ordTaskMo);
-//		_log.info("计算首单购买查询结算首单积分任务的参数为：{}", taskMo);
-//		if (taskMo == null) {
-//			_log.debug("添加计算首单的任务: orderDetail-{}", orderDetailMo);
-//			_log.debug("设置计算首单任务的执行时间为1分钟后执行");
-//			final Calendar calendar = Calendar.getInstance();
-//			calendar.setTime(new Date());
-//			calendar.add(Calendar.MINUTE, 1);
-//			final Date executePlanTime = calendar.getTime();
-//			_log.debug("计算首单任务的执行时间为: {}", executePlanTime);
-//			_log.debug("准备添加计算首单的任务");
-//			ordTaskMo = new OrdTaskMo();
-//			ordTaskMo.setExecuteState((byte) TaskExecuteStateDic.NONE.getCode());
-//			ordTaskMo.setExecutePlanTime(executePlanTime);
-//			ordTaskMo.setTaskType((byte) OrderTaskTypeDic.CALC_FIRST_BUY.getCode());
-//			ordTaskMo.setOrderId(String.valueOf(onlineSpecId)); // 计算首单的任务的订单ID其实是上线规格ID
-//			_log.debug("添加计算首单任务的参数为：{}", ordTaskMo);
-//			// 添加取消订单任务
-//			ordTaskSvc.add(ordTaskMo);
-//		}
+            final AddPointTradeTo addPointTradeTo = new AddPointTradeTo();
+            addPointTradeTo.setPointLogType((byte) PointLogTypeDic.ORDER_SETTLE_FIRST_BUY.getCode());
+            addPointTradeTo.setChangedTitile("大卖网-商品首单购买奖励积分(订单已经结算却成为首单)");
+            addPointTradeTo.setAccountId(ordOrderMo.getUserId());
+            addPointTradeTo.setOrderDetailId(orderDetailMo.getId());
+            addPointTradeTo.setOrderId(ordOrderMo.getId());
+			_log.debug("成本价格{},购买数量{},退货数量{}",orderDetailMo.getCostPrice(),orderDetailMo.getBuyCount(),orderDetailMo.getReturnCount());
+           
+			// 首单购买奖励积分 = 成本价 * 实际购买数量
+            addPointTradeTo.setChangedPoint(orderDetailMo.getCostPrice().multiply(BigDecimal.valueOf(orderDetailMo.getBuyCount() - orderDetailMo.getReturnCount())));
+            _log.debug("添加一笔新的积分记录: 商品首单购买奖励积分结算买家: addPointTradeTo-{}", addPointTradeTo);
+            pntPointSvc.addPointTrade(addPointTradeTo);
+		}
+
 		
 		Ro ro = onlOnlineSpecSvc.modifyIsHaveFirstOrderById(onlineSpecId, true);
 		_log.info("计算首单购买修改是否已有首单的返回值为：{}", ro);
