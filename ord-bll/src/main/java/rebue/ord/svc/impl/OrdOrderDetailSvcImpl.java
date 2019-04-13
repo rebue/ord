@@ -422,6 +422,7 @@ public class OrdOrderDetailSvcImpl
 		}
 
 		if (orderDetailMo.getPaySeq() != null && orderDetailMo.getPaySeq() == 1) {
+			
 			_log.info("首单购买已经设置正确，无需修改");
 			return;
 		}
@@ -431,6 +432,13 @@ public class OrdOrderDetailSvcImpl
 
 		_log.debug("设置新的首单的支付顺序标志");
 		_mapper.setFirstPaySeq(orderDetailMo.getId());
+		
+		
+		Ro ro = onlOnlineSpecSvc.modifyIsHaveFirstOrderById(onlineSpecId, true);
+		_log.info("计算首单购买修改是否已有首单的返回值为：{}", ro);
+		if (ro.getResult() != ResultDic.SUCCESS) {
+			throw new RuntimeException("修改是否已有首单失败");
+		}
 		
 		_log.debug("查询该订单是否已经结算，如果已经结算就添加首单积分交易");
 		_log.debug("查询该订单是否已经结算的参数为 {}",orderDetailMo.getOrderId());
@@ -452,12 +460,6 @@ public class OrdOrderDetailSvcImpl
             pntPointSvc.addPointTrade(addPointTradeTo);
 		}
 
-		
-		Ro ro = onlOnlineSpecSvc.modifyIsHaveFirstOrderById(onlineSpecId, true);
-		_log.info("计算首单购买修改是否已有首单的返回值为：{}", ro);
-		if (ro.getResult() != ResultDic.SUCCESS) {
-			throw new RuntimeException("修改是否已有首单失败");
-		}
 	}
 
 	/**
