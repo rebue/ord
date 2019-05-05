@@ -524,4 +524,31 @@ public class OrdOrderCtrl {
 		}
 	}
 
+	/**
+	 * 转移订单
+	 * 
+	 * @param orderId   订单id
+	 * @param newUserId 新用户id
+	 * @param oldUserId 旧用户id
+	 * @return
+	 * @throws ParseException
+	 * @throws NumberFormatException
+	 */
+	@GetMapping("/ord/order/shift")
+	Ro shiftOrder(@RequestParam("orderId") Long orderId, @RequestParam("oldUserId") Long oldUserId,
+			HttpServletRequest req) throws NumberFormatException, ParseException {
+		_log.info("转移订单的请求参数为：orderId-{}, oldUserId-{}", orderId, oldUserId);
+		Long loginId = 520469568947224576L;
+		if (!isDebug) {
+			loginId = JwtUtils.getJwtUserIdInCookie(req);
+		}
+		final Ro ro = new Ro();
+		if (loginId == null) {
+			ro.setResult(ResultDic.FAIL);
+			ro.setMsg("您未登录，请登录后再试。。。");
+			return ro;
+		}
+
+		return svc.shiftOrder(orderId, loginId, oldUserId);
+	}
 }

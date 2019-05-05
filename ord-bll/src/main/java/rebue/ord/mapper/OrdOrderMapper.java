@@ -288,4 +288,13 @@ public interface OrdOrderMapper extends MybatisBaseMapper<OrdOrderMo, Long> {
      * @return
      */
     List<OrdOrderMo> selectHavePaidOrderByUserAndTime(OrdOrderMo mo);
+    
+    /**
+     * 修改订单用户id
+     * @param id 订单id
+     * @param newUserId 新的用户id
+     * @param oldUserId 旧的用户id
+     */
+    @Update("update ORD_ORDER set USER_ID=#{newUserId,jdbcType=BIGINT} where USER_ID=#{oldUserId,jdbcType=BIGINT} and id=#{id,jdbcType=BIGINT}")
+    int updateUserIdByIdAndUserId(Long id, Long newUserId, Long oldUserId);
 }

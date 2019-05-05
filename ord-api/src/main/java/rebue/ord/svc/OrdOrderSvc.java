@@ -347,4 +347,14 @@ public interface OrdOrderSvc extends BaseSvc<java.lang.Long, OrdOrderMo, OrdOrde
 	 * @return
 	 */
 	BulkShipmentRo bulkSubscription(BulkShipmentTo qo);
+
+	/**
+	 * 转移订单
+	 * 
+	 * @param orderId   订单id
+	 * @param newUserId 新用户id
+	 * @param oldUserId 旧用户id
+	 * @return
+	 */
+	Ro shiftOrder(Long orderId, Long newUserId, Long oldUserId);
 }

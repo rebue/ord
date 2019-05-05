@@ -245,7 +245,7 @@ public class OrdOrderSvcImpl extends MybatisBaseSvcImpl<OrdOrderMo, java.lang.Lo
 		final OrderRo ro = new OrderRo();
 		_log.info("用户下单的参数为：{}", to);
 		_log.debug("检查参数的正确性");
-		if (to.getAddrId() == null || to.getDetails() == null || to.getDetails().isEmpty()) {
+		if (to.getDetails() == null || to.getDetails().isEmpty()) {
 			final String msg = "参数错误";
 			_log.error("{}:{}", msg, "没有传入用户收货地址/订单详情");
 			ro.setResult(ResultDic.PARAM_ERROR);
@@ -259,6 +259,9 @@ public class OrdOrderSvcImpl extends MybatisBaseSvcImpl<OrdOrderMo, java.lang.Lo
 		final Map<Long, List<OrdOrderDetailMo>> onlineOrgs = new LinkedHashMap<>();
 		// 要更新的上线规格列表
 		final List<UpdateOnlineSpecAfterOrderTo> specList = new ArrayList<>();
+		// 是否线下（如果为线下店铺时，默认不发布到平台）
+		boolean isBelowOnline = false;
+
 		_log.debug("遍历订单详情");
 		for (final OrderDetailTo orderDetailTo : to.getDetails()) {
 			_log.debug("根据上线ID获取上线信息");
@@ -286,6 +289,8 @@ public class OrdOrderSvcImpl extends MybatisBaseSvcImpl<OrdOrderMo, java.lang.Lo
 				// 将获取到的上线信息放入Map中
 				onlines.put(orderDetailTo.getOnlineId(), onlineMo);
 			}
+			isBelowOnline = onlineMo.getIsBelowOnline();
+
 			_log.debug("根据上线规格ID获取上线规格信息");
 			final OnlOnlineSpecMo onlineSpecMo = onlOnlineSpecSvc.getById(orderDetailTo.getOnlineSpecId());
 			if (onlineSpecMo == null) {
@@ -390,11 +395,14 @@ public class OrdOrderSvcImpl extends MybatisBaseSvcImpl<OrdOrderMo, java.lang.Lo
 		_log.debug("通过地址ID获取地址详细信息");
 		final OrdAddrMo addrMo = ordAddrSvc.getById(to.getAddrId());
 		if (addrMo == null) {
-			final String msg = "找不到下单的收货地址信息";
-			_log.error("{}: addrId-{}", msg, to.getAddrId());
-			ro.setResult(ResultDic.PARAM_ERROR);
-			ro.setMsg(msg);
-			return ro;
+			// 如果不是线下店铺的商品则必须要填收货地址
+			if (isBelowOnline == false) {
+				final String msg = "找不到下单的收货地址信息";
+				_log.error("{}: addrId-{}", msg, to.getAddrId());
+				ro.setResult(ResultDic.PARAM_ERROR);
+				ro.setMsg(msg);
+				return ro;
+			}
 		}
 		_log.info("获取用户收货地址信息为：{}", addrMo);
 		final Date now = new Date();
@@ -434,15 +442,20 @@ public class OrdOrderSvcImpl extends MybatisBaseSvcImpl<OrdOrderMo, java.lang.Lo
 			if (!StringUtils.isBlank(orderMessages)) {
 				orderMo.setOrderMessages(orderMessages);
 			}
-			// 收件人信息
-			orderMo.setReceiverName(addrMo.getReceiverName());
-			orderMo.setReceiverMobile(addrMo.getReceiverMobile());
-			orderMo.setReceiverProvince(addrMo.getReceiverProvince());
-			orderMo.setReceiverCity(addrMo.getReceiverCity());
-			orderMo.setReceiverExpArea(addrMo.getReceiverExpArea());
-			orderMo.setReceiverAddress(addrMo.getReceiverAddress());
-			orderMo.setReceiverPostCode(addrMo.getReceiverPostCode());
-			orderMo.setReceiverTel(addrMo.getReceiverTel());
+
+			// 如果收货地址为null，则说明该商品为线下店铺的商品
+			if (addrMo != null) {
+				// 收件人信息
+				orderMo.setReceiverName(addrMo.getReceiverName());
+				orderMo.setReceiverMobile(addrMo.getReceiverMobile());
+				orderMo.setReceiverProvince(addrMo.getReceiverProvince());
+				orderMo.setReceiverCity(addrMo.getReceiverCity());
+				orderMo.setReceiverExpArea(addrMo.getReceiverExpArea());
+				orderMo.setReceiverAddress(addrMo.getReceiverAddress());
+				orderMo.setReceiverPostCode(addrMo.getReceiverPostCode());
+				orderMo.setReceiverTel(addrMo.getReceiverTel());
+			}
+
 			orderMo.setOrderTitle("大卖网络-购买商品");
 			_log.info("添加订单信息的参数为：{}", orderMo);
 			// 添加订单信息
@@ -2356,7 +2369,7 @@ public class OrdOrderSvcImpl extends MybatisBaseSvcImpl<OrdOrderMo, java.lang.Lo
 				final OrdTaskMo ordTaskMo = new OrdTaskMo();
 				ordTaskMo.setOrderId(String.valueOf(mo.getId()));
 				ordTaskMo.setTaskType((byte) 2);
-				
+
 				// 先查询任务是否已经存在
 				_log.info("查看签收任务是否存在的参数为：{}", ordTaskMo);
 				final List<OrdTaskMo> ordTaskList = ordTaskSvc.list(ordTaskMo);
@@ -2374,7 +2387,6 @@ public class OrdOrderSvcImpl extends MybatisBaseSvcImpl<OrdOrderMo, java.lang.Lo
 				} else {
 					_log.info("确认发货添加签收任务已经存在，orderId为：{}", ordTaskMo.getOrderId());
 				}
-				
 
 				// 整理订单详情
 				String orderDetails = "";
@@ -2588,7 +2600,6 @@ public class OrdOrderSvcImpl extends MybatisBaseSvcImpl<OrdOrderMo, java.lang.Lo
 			// 订单状态为2(未发货)先修改订单状态再添加物流信息,订单状态为3(已发货)则直接添加物流信息
 			if (mo.getOrderState() == 2) {
 
-				
 				// 添加签收任务
 				final Date date = new Date();
 				mo.setSendTime(date);
@@ -2599,7 +2610,7 @@ public class OrdOrderSvcImpl extends MybatisBaseSvcImpl<OrdOrderMo, java.lang.Lo
 				final OrdTaskMo ordTaskMo = new OrdTaskMo();
 				ordTaskMo.setOrderId(String.valueOf(mo.getId()));
 				ordTaskMo.setTaskType((byte) 2);
-				
+
 				// 先查询任务是否已经存在
 				_log.info("查看签收任务是否存在的参数为：{}", ordTaskMo);
 				final List<OrdTaskMo> ordTaskList = ordTaskSvc.list(ordTaskMo);
@@ -2617,8 +2628,7 @@ public class OrdOrderSvcImpl extends MybatisBaseSvcImpl<OrdOrderMo, java.lang.Lo
 				} else {
 					_log.info("确认发货添加签收任务已经存在，orderId为：{}", ordTaskMo.getOrderId());
 				}
-				
-				
+
 				// 整理订单详情
 				String orderDetails = "";
 				Map<String, String> map = new HashMap<String, String>();
@@ -2788,4 +2798,72 @@ public class OrdOrderSvcImpl extends MybatisBaseSvcImpl<OrdOrderMo, java.lang.Lo
 		return shipmentRo;
 	}
 
+	/**
+	 * 转移订单
+	 * 
+	 * @param orderId   订单id
+	 * @param newUserId 新用户id
+	 * @param oldUserId 旧用户id
+	 * @return
+	 */
+	@Override
+	@Transactional(readOnly = false, propagation = Propagation.REQUIRED)
+	public Ro shiftOrder(Long orderId, Long newUserId, Long oldUserId) {
+		_log.info("转移订单的参数为：orderId-{}, newUserId-{}, oldUserId-{}", orderId, newUserId, oldUserId);
+
+		Ro ro = new Ro();
+		if (orderId == null || newUserId == null) {
+			_log.error("转移订单时发现orderId/userId为null, 请求的参数为：orderId-{}, newUserId-{}, oldUserId-{}", orderId, newUserId,
+					oldUserId);
+			ro.setResult(ResultDic.PARAM_ERROR);
+			ro.setMsg("参数错误");
+			return ro;
+		}
+
+		// 根据订单id查询订单信息
+		OrdOrderMo ordOrderMo = thisSvc.getById(orderId);
+		_log.info("转移订单根据订单id查询订单信息的返回值为：{}", ordOrderMo);
+
+		if (ordOrderMo == null) {
+			_log.error("转移订单查询订单信息时没有发现订单信息，请求的参数为：orderId-{}, newUserId-{}, oldUserId-{}", orderId, newUserId,
+					oldUserId);
+			ro.setResult(ResultDic.FAIL);
+			ro.setMsg("没有发现该订单");
+			return ro;
+		}
+
+		// 如果订单状态不等于已下单（待支付）则不允许转移订单
+		if (ordOrderMo.getOrderState() != OrderStateDic.ORDERED.getCode()) {
+			_log.error("转移订单时发现该订单不处于已下单（待支付）状态，请求的参数为：orderId-{}， newUserId-{}, oldUserId-{}", orderId, newUserId,
+					oldUserId);
+			ro.setResult(ResultDic.FAIL);
+			ro.setMsg("该订单已支付或已取消");
+			return ro;
+		}
+
+		// 是否存在该用户
+		Boolean isExistUser = sucUserSvc.exist(newUserId);
+		_log.info("转移订单判断新用户是否存在的返回值为：{}", isExistUser);
+		if (!isExistUser) {
+			_log.error("转移订单判断新用户是否存在时发现新的用户不存在，请求的参数为：orderId-{}， newUserId-{}, oldUserId-{}", orderId, newUserId,
+					oldUserId);
+			ro.setResult(ResultDic.FAIL);
+			ro.setMsg("您的账号不存在");
+			return ro;
+		}
+
+		int updateUserIdByIdAndUserIdResult = _mapper.updateUserIdByIdAndUserId(orderId, newUserId, oldUserId);
+		_log.info("转移订单的返回值为：{}", updateUserIdByIdAndUserIdResult);
+		if (updateUserIdByIdAndUserIdResult != 1) {
+			_log.error("转移订单时出现错误，请求的参数为：orderId-{}， newUserId-{}, oldUserId-{}", orderId, newUserId, oldUserId);
+			ro.setResult(ResultDic.FAIL);
+			ro.setMsg("操作出现异常");
+			return ro;
+		}
+
+		_log.error("转移订单成功，请求的参数为：orderId-{}， newUserId-{}, oldUserId-{}", orderId, newUserId, oldUserId);
+		ro.setResult(ResultDic.SUCCESS);
+		ro.setMsg("转移成功");
+		return ro;
+	}
 }
