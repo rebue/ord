@@ -2808,24 +2808,26 @@ public class OrdOrderSvcImpl extends MybatisBaseSvcImpl<OrdOrderMo, java.lang.Lo
 	 */
 	@Override
 	@Transactional(readOnly = false, propagation = Propagation.REQUIRED)
-	public Ro shiftOrder(Long orderId, Long newUserId, Long oldUserId) {
-		_log.info("转移订单的参数为：orderId-{}, newUserId-{}, oldUserId-{}", orderId, newUserId, oldUserId);
+	public Ro shiftOrder(Long payOrderId, Long newUserId, Long oldUserId) {
+		_log.info("转移订单的参数为：payOrderId-{}, newUserId-{}, oldUserId-{}", payOrderId, newUserId, oldUserId);
 
 		Ro ro = new Ro();
-		if (orderId == null || newUserId == null) {
-			_log.error("转移订单时发现orderId/userId为null, 请求的参数为：orderId-{}, newUserId-{}, oldUserId-{}", orderId, newUserId,
+		if (payOrderId == null || newUserId == null) {
+			_log.error("转移订单时发现orderId/userId为null, 请求的参数为：payOrderId-{}, newUserId-{}, oldUserId-{}", payOrderId, newUserId,
 					oldUserId);
 			ro.setResult(ResultDic.PARAM_ERROR);
 			ro.setMsg("参数错误");
 			return ro;
 		}
-
+		
+		OrdOrderMo orderMo = new OrdOrderMo();
+		orderMo.setPayOrderId(payOrderId);
 		// 根据订单id查询订单信息
-		OrdOrderMo ordOrderMo = thisSvc.getById(orderId);
+		OrdOrderMo ordOrderMo = thisSvc.getOne(orderMo);
 		_log.info("转移订单根据订单id查询订单信息的返回值为：{}", ordOrderMo);
 
 		if (ordOrderMo == null) {
-			_log.error("转移订单查询订单信息时没有发现订单信息，请求的参数为：orderId-{}, newUserId-{}, oldUserId-{}", orderId, newUserId,
+			_log.error("转移订单查询订单信息时没有发现订单信息，请求的参数为：payOrderId-{}, newUserId-{}, oldUserId-{}", payOrderId, newUserId,
 					oldUserId);
 			ro.setResult(ResultDic.FAIL);
 			ro.setMsg("没有发现该订单");
@@ -2834,7 +2836,7 @@ public class OrdOrderSvcImpl extends MybatisBaseSvcImpl<OrdOrderMo, java.lang.Lo
 
 		// 如果订单状态不等于已下单（待支付）则不允许转移订单
 		if (ordOrderMo.getOrderState() != OrderStateDic.ORDERED.getCode()) {
-			_log.error("转移订单时发现该订单不处于已下单（待支付）状态，请求的参数为：orderId-{}， newUserId-{}, oldUserId-{}", orderId, newUserId,
+			_log.error("转移订单时发现该订单不处于已下单（待支付）状态，请求的参数为：payOrderId-{}， newUserId-{}, oldUserId-{}", payOrderId, newUserId,
 					oldUserId);
 			ro.setResult(ResultDic.FAIL);
 			ro.setMsg("该订单已支付或已取消");
@@ -2845,23 +2847,23 @@ public class OrdOrderSvcImpl extends MybatisBaseSvcImpl<OrdOrderMo, java.lang.Lo
 		Boolean isExistUser = sucUserSvc.exist(newUserId);
 		_log.info("转移订单判断新用户是否存在的返回值为：{}", isExistUser);
 		if (!isExistUser) {
-			_log.error("转移订单判断新用户是否存在时发现新的用户不存在，请求的参数为：orderId-{}， newUserId-{}, oldUserId-{}", orderId, newUserId,
+			_log.error("转移订单判断新用户是否存在时发现新的用户不存在，请求的参数为：payOrderId-{}， newUserId-{}, oldUserId-{}", payOrderId, newUserId,
 					oldUserId);
 			ro.setResult(ResultDic.FAIL);
 			ro.setMsg("您的账号不存在");
 			return ro;
 		}
 
-		int updateUserIdByIdAndUserIdResult = _mapper.updateUserIdByIdAndUserId(orderId, newUserId, oldUserId);
+		int updateUserIdByIdAndUserIdResult = _mapper.updateUserIdByIdAndUserId(payOrderId, newUserId, oldUserId);
 		_log.info("转移订单的返回值为：{}", updateUserIdByIdAndUserIdResult);
 		if (updateUserIdByIdAndUserIdResult != 1) {
-			_log.error("转移订单时出现错误，请求的参数为：orderId-{}， newUserId-{}, oldUserId-{}", orderId, newUserId, oldUserId);
+			_log.error("转移订单时出现错误，请求的参数为：payOrderId-{}， newUserId-{}, oldUserId-{}", payOrderId, newUserId, oldUserId);
 			ro.setResult(ResultDic.FAIL);
 			ro.setMsg("操作出现异常");
 			return ro;
 		}
 
-		_log.error("转移订单成功，请求的参数为：orderId-{}， newUserId-{}, oldUserId-{}", orderId, newUserId, oldUserId);
+		_log.error("转移订单成功，请求的参数为：payOrderId-{}， newUserId-{}, oldUserId-{}", payOrderId, newUserId, oldUserId);
 		ro.setResult(ResultDic.SUCCESS);
 		ro.setMsg("转移成功");
 		return ro;

@@ -535,7 +535,7 @@ public class OrdOrderCtrl {
 	 * @throws NumberFormatException
 	 */
 	@GetMapping("/ord/order/shift")
-	Ro shiftOrder(@RequestParam("orderId") Long orderId, @RequestParam("oldUserId") Long oldUserId,
+	Ro shiftOrder(@RequestParam("payOrderId") Long orderId, @RequestParam("userId") Long oldUserId,
 			HttpServletRequest req) throws NumberFormatException, ParseException {
 		_log.info("转移订单的请求参数为：orderId-{}, oldUserId-{}", orderId, oldUserId);
 		Long loginId = 520469568947224576L;
