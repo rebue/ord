@@ -289,7 +289,7 @@ public class OrdOrderSvcImpl extends MybatisBaseSvcImpl<OrdOrderMo, java.lang.Lo
 				// 将获取到的上线信息放入Map中
 				onlines.put(orderDetailTo.getOnlineId(), onlineMo);
 			}
-			isBelowOnline = onlineMo.getIsBelowOnline();
+			isBelowOnline = onlineMo.getIsBelow();
 
 			_log.debug("根据上线规格ID获取上线规格信息");
 			final OnlOnlineSpecMo onlineSpecMo = onlOnlineSpecSvc.getById(orderDetailTo.getOnlineSpecId());
@@ -396,7 +396,7 @@ public class OrdOrderSvcImpl extends MybatisBaseSvcImpl<OrdOrderMo, java.lang.Lo
 		final OrdAddrMo addrMo = ordAddrSvc.getById(to.getAddrId());
 		if (addrMo == null) {
 			// 如果不是线下店铺的商品则必须要填收货地址
-			if (isBelowOnline == false) {
+			if (isBelowOnline == true) {
 				final String msg = "找不到下单的收货地址信息";
 				_log.error("{}: addrId-{}", msg, to.getAddrId());
 				ro.setResult(ResultDic.PARAM_ERROR);
