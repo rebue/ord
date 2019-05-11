@@ -24,6 +24,7 @@ import rebue.ord.ro.OrdSettleRo;
 import rebue.ord.ro.OrderRo;
 import rebue.ord.ro.OrderSignInRo;
 import rebue.ord.ro.SetUpExpressCompanyRo;
+import rebue.ord.ro.ShiftOrderRo;
 import rebue.ord.ro.ShipmentConfirmationRo;
 import rebue.ord.to.BulkShipmentTo;
 import rebue.ord.to.CancelDeliveryTo;
@@ -351,10 +352,10 @@ public interface OrdOrderSvc extends BaseSvc<java.lang.Long, OrdOrderMo, OrdOrde
 	/**
 	 * 转移订单
 	 * 
-	 * @param orderId   订单id
-	 * @param newUserId 新用户id
-	 * @param oldUserId 旧用户id
+	 * @param payOrderId 支付订单id
+	 * @param newUserId  新用户id
+	 * @param oldUserId  旧用户id
 	 * @return
 	 */
-	Ro shiftOrder(Long orderId, Long newUserId, Long oldUserId);
+	ShiftOrderRo shiftOrder(Long payOrderId, Long newUserId, Long oldUserId);
 }

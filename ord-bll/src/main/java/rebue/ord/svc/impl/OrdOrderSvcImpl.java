@@ -75,6 +75,7 @@ import rebue.ord.ro.OrderDetailRo;
 import rebue.ord.ro.OrderRo;
 import rebue.ord.ro.OrderSignInRo;
 import rebue.ord.ro.SetUpExpressCompanyRo;
+import rebue.ord.ro.ShiftOrderRo;
 import rebue.ord.ro.ShipmentConfirmationRo;
 import rebue.ord.svc.OrdAddrSvc;
 import rebue.ord.svc.OrdBuyRelationSvc;
@@ -2808,10 +2809,10 @@ public class OrdOrderSvcImpl extends MybatisBaseSvcImpl<OrdOrderMo, java.lang.Lo
 	 */
 	@Override
 	@Transactional(readOnly = false, propagation = Propagation.REQUIRED)
-	public Ro shiftOrder(Long payOrderId, Long newUserId, Long oldUserId) {
+	public ShiftOrderRo shiftOrder(Long payOrderId, Long newUserId, Long oldUserId) {
 		_log.info("转移订单的参数为：payOrderId-{}, newUserId-{}, oldUserId-{}", payOrderId, newUserId, oldUserId);
 
-		Ro ro = new Ro();
+		ShiftOrderRo ro = new ShiftOrderRo();
 		if (payOrderId == null || newUserId == null) {
 			_log.error("转移订单时发现orderId/userId为null, 请求的参数为：payOrderId-{}, newUserId-{}, oldUserId-{}", payOrderId, newUserId,
 					oldUserId);
@@ -2864,6 +2865,7 @@ public class OrdOrderSvcImpl extends MybatisBaseSvcImpl<OrdOrderMo, java.lang.Lo
 		}
 
 		_log.error("转移订单成功，请求的参数为：payOrderId-{}， newUserId-{}, oldUserId-{}", payOrderId, newUserId, oldUserId);
+		ro.setRealMoney(ordOrderMo.getRealMoney());
 		ro.setResult(ResultDic.SUCCESS);
 		ro.setMsg("转移成功");
 		return ro;

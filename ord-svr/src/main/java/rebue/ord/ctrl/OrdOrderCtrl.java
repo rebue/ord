@@ -36,6 +36,7 @@ import rebue.ord.ro.OrdSettleRo;
 import rebue.ord.ro.OrderRo;
 import rebue.ord.ro.OrderSignInRo;
 import rebue.ord.ro.SetUpExpressCompanyRo;
+import rebue.ord.ro.ShiftOrderRo;
 import rebue.ord.ro.ShipmentConfirmationRo;
 import rebue.ord.svc.OrdOrderSvc;
 import rebue.ord.to.BulkShipmentTo;
@@ -527,7 +528,7 @@ public class OrdOrderCtrl {
 	/**
 	 * 转移订单
 	 * 
-	 * @param orderId   订单id
+	 * @param orderId   支付订单id
 	 * @param newUserId 新用户id
 	 * @param oldUserId 旧用户id
 	 * @return
@@ -535,20 +536,9 @@ public class OrdOrderCtrl {
 	 * @throws NumberFormatException
 	 */
 	@GetMapping("/ord/order/shift")
-	Ro shiftOrder(@RequestParam("payOrderId") Long orderId, @RequestParam("userId") Long oldUserId,
-			HttpServletRequest req) throws NumberFormatException, ParseException {
-		_log.info("转移订单的请求参数为：orderId-{}, oldUserId-{}", orderId, oldUserId);
-		Long loginId = 520469568947224576L;
-		if (!isDebug) {
-			loginId = JwtUtils.getJwtUserIdInCookie(req);
-		}
-		final Ro ro = new Ro();
-		if (loginId == null) {
-			ro.setResult(ResultDic.FAIL);
-			ro.setMsg("您未登录，请登录后再试。。。");
-			return ro;
-		}
-
-		return svc.shiftOrder(orderId, loginId, oldUserId);
+	ShiftOrderRo shiftOrder(@RequestParam("payOrderId") Long payOrderId, @RequestParam("oldUserId") Long oldUserId,
+			@RequestParam("newUserId") Long newUserId) throws NumberFormatException, ParseException {
+		_log.info("转移订单的请求参数为：payOrderId-{}, oldUserId-{}, newUserId-{}", payOrderId, oldUserId, newUserId);
+		return svc.shiftOrder(payOrderId, newUserId, oldUserId);
 	}
 }
