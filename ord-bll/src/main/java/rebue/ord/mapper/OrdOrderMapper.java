@@ -295,4 +295,12 @@ public interface OrdOrderMapper extends MybatisBaseMapper<OrdOrderMo, Long> {
 	@Update("update ORD_ORDER set USER_ID=#{newUserId,jdbcType=BIGINT} where USER_ID=#{oldUserId,jdbcType=BIGINT} and PAY_ORDER_ID=#{payOrderId,jdbcType=BIGINT}")
 	int updateUserIdByIdAndUserId(@Param("payOrderId") Long payOrderId, @Param("newUserId") Long newUserId,
 			@Param("oldUserId") Long oldUserId);
+	
+	/**
+	 * 根据用户id查询订单状态不为退货和未支付（ORDER_STATE为-1和1）且支付时间为最新的订单信息
+	 * @param userId 用户id
+	 * @return
+	 */
+	@Select("SELECT * FROM ORD_ORDER WHERE USER_ID=#{userId,jdbcType=BIGINT} AND ORDER_STATE > 1 ORDER BY PAY_TIME DESC LIMIT 1")	
+	OrdOrderMo getLatestOneByUserId(@Param("userId") Long userId);
 }

@@ -2814,13 +2814,13 @@ public class OrdOrderSvcImpl extends MybatisBaseSvcImpl<OrdOrderMo, java.lang.Lo
 
 		ShiftOrderRo ro = new ShiftOrderRo();
 		if (payOrderId == null || newUserId == null) {
-			_log.error("转移订单时发现orderId/userId为null, 请求的参数为：payOrderId-{}, newUserId-{}, oldUserId-{}", payOrderId, newUserId,
-					oldUserId);
+			_log.error("转移订单时发现orderId/userId为null, 请求的参数为：payOrderId-{}, newUserId-{}, oldUserId-{}", payOrderId,
+					newUserId, oldUserId);
 			ro.setResult(ResultDic.PARAM_ERROR);
 			ro.setMsg("参数错误");
 			return ro;
 		}
-		
+
 		OrdOrderMo orderMo = new OrdOrderMo();
 		orderMo.setPayOrderId(payOrderId);
 		// 根据订单id查询订单信息
@@ -2837,8 +2837,8 @@ public class OrdOrderSvcImpl extends MybatisBaseSvcImpl<OrdOrderMo, java.lang.Lo
 
 		// 如果订单状态不等于已下单（待支付）则不允许转移订单
 		if (ordOrderMo.getOrderState() != OrderStateDic.ORDERED.getCode()) {
-			_log.error("转移订单时发现该订单不处于已下单（待支付）状态，请求的参数为：payOrderId-{}， newUserId-{}, oldUserId-{}", payOrderId, newUserId,
-					oldUserId);
+			_log.error("转移订单时发现该订单不处于已下单（待支付）状态，请求的参数为：payOrderId-{}， newUserId-{}, oldUserId-{}", payOrderId,
+					newUserId, oldUserId);
 			ro.setResult(ResultDic.FAIL);
 			ro.setMsg("该订单已支付或已取消");
 			return ro;
@@ -2848,8 +2848,8 @@ public class OrdOrderSvcImpl extends MybatisBaseSvcImpl<OrdOrderMo, java.lang.Lo
 		Boolean isExistUser = sucUserSvc.exist(newUserId);
 		_log.info("转移订单判断新用户是否存在的返回值为：{}", isExistUser);
 		if (!isExistUser) {
-			_log.error("转移订单判断新用户是否存在时发现新的用户不存在，请求的参数为：payOrderId-{}， newUserId-{}, oldUserId-{}", payOrderId, newUserId,
-					oldUserId);
+			_log.error("转移订单判断新用户是否存在时发现新的用户不存在，请求的参数为：payOrderId-{}， newUserId-{}, oldUserId-{}", payOrderId,
+					newUserId, oldUserId);
 			ro.setResult(ResultDic.FAIL);
 			ro.setMsg("您的账号不存在");
 			return ro;
@@ -2869,5 +2869,16 @@ public class OrdOrderSvcImpl extends MybatisBaseSvcImpl<OrdOrderMo, java.lang.Lo
 		ro.setResult(ResultDic.SUCCESS);
 		ro.setMsg("转移成功");
 		return ro;
+	}
+
+	/**
+	 * 根据用户id查询订单状态不为退货和未支付且支付时间为最新的订单信息
+	 */
+	@Override
+	public OrdOrderMo getLatestOneByUserId(Long userId) {
+		OrdOrderMo orderMo = new OrdOrderMo();
+		orderMo = _mapper.getLatestOneByUserId(userId);
+		_log.info("查询订单状态不为退货和未支付且支付时间为最新的订单信息的返回值为-{}", orderMo);
+		return orderMo;
 	}
 }

@@ -183,10 +183,18 @@ public class OrdOrderTests {
 		}
 	}
 
-	@Test
+	//@Test
 	public void shiftOrderTest() throws IOException {
 		String url = hostUrl + "/ord/order/shift?orderId=560764839904018433&oldUserId=560723287034822657";
 		String str = OkhttpUtils.get(url);
 		System.out.println(str);
+	}
+	
+	// 测试根据用户id查询订单状态不为退货和未支付且支付时间为最新的订单信息
+	@Test
+	public void latestOneByUserIdTest() throws IOException {
+		String url = hostUrl + "/ord/order/getLatestOne?userId=560723287034822657";
+		String orderMo =OkhttpUtils.get(url);
+		System.out.println(orderMo);
 	}
 }

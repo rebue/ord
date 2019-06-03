@@ -541,4 +541,16 @@ public class OrdOrderCtrl {
 		_log.info("转移订单的请求参数为：payOrderId-{}, oldUserId-{}, newUserId-{}", payOrderId, oldUserId, newUserId);
 		return svc.shiftOrder(payOrderId, newUserId, oldUserId);
 	}
+
+	/**
+	 * 根据用户id查询订单状态不为退货和未支付且支付时间为最新的订单信息
+	 * 
+	 * @param userId
+	 * @return
+	 */
+	@GetMapping("/ord/order/getLatestOne")
+	OrdOrderMo getLatestOneByUserId(@RequestParam("userId") Long userId) {
+		_log.info("查询订单状态不为退货和未支付且支付时间为最新的订单信息的用户id为-{}", userId);
+		return svc.getLatestOneByUserId(userId);
+	}
 }

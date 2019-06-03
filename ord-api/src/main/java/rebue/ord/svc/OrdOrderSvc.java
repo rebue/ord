@@ -9,6 +9,7 @@ import java.util.Date;
 import java.util.List;
 import java.util.Map;
 
+import org.apache.ibatis.annotations.Param;
 import org.springframework.web.bind.annotation.RequestParam;
 
 import rebue.afc.msg.PayDoneMsg;
@@ -358,4 +359,12 @@ public interface OrdOrderSvc extends BaseSvc<java.lang.Long, OrdOrderMo, OrdOrde
 	 * @return
 	 */
 	ShiftOrderRo shiftOrder(Long payOrderId, Long newUserId, Long oldUserId);
+	
+	/**
+	 * 根据用户id查询订单状态不为退货和未支付且支付时间为最新的订单信息
+	 * 
+	 * @param userId
+	 * @return
+	 */
+	OrdOrderMo getLatestOneByUserId(Long userId);
 }
