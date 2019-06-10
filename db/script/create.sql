@@ -1,6 +1,6 @@
 /*==============================================================*/
 /* DBMS name:      MySQL 5.0                                    */
-/* Created on:     2019/3/22 14:28:01                           */
+/* Created on:     2019/6/10 17:37:39                           */
 /*==============================================================*/
 
 
@@ -143,6 +143,7 @@ create table ORD_ORDER
    SEND_OP_ID           bigint comment '发货操作人',
    RECEIVED_OP_ID       bigint comment '签收人',
    CANCEL_REASON        varchar(300) comment '作废原因',
+   IS_NOW_RECEIVED      bool not null default false comment '是否当场签收，默认为false，如果是true在支付成功后订单状态将是已签收状态',
    primary key (ID),
    unique key AK_ORDER_CODE (ORDER_CODE)
 );
@@ -268,7 +269,7 @@ create table ORD_TASK
    SUB_TASK_TYPE        tinyint default -1 comment '子任务类型',
    ORDER_ID             varchar(150) not null comment '订单ID(销售订单ID)',
    primary key (ID),
-   key AK_TASK_TYPE_AND_SUB_TASK_TYPE_AND_ORDER (TASK_TYPE, SUB_TASK_TYPE, ORDER_ID)
+   unique key AK_TASK_TYPE_AND_SUB_TASK_TYPE_AND_ORDER (TASK_TYPE, SUB_TASK_TYPE, ORDER_ID)
 );
 
 alter table ORD_TASK comment '订单任务';
@@ -293,4 +294,3 @@ alter table ORD_RETURN add constraint FK_Relationship_3 foreign key (ORDER_ID)
 
 alter table ORD_RETURN_PIC add constraint FK_Relationship_4 foreign key (RETURN_ID)
       references ORD_RETURN (ID) on delete restrict on update restrict;
-

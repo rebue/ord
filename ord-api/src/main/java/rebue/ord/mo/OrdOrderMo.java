@@ -37,6 +37,22 @@ public class OrdOrderMo implements Serializable {
     private String orderCode;
 
     /**
+     *    订单状态（-1：作废  1：已下单（待支付）  2：已支付（待发货）  3：已发货（待签收）  4：已签收（待结算） 6：开始结算  5：已结算  ）
+     *                -1：作废
+     *                1：已下单（待支付）
+     *                2：已支付（待发货）
+     *                3：已发货（待签收）
+     *                4：已签收（待结算）
+     *                6：开始结算
+     *                5：已结算
+     *
+     *    数据库字段: ORD_ORDER.ORDER_STATE
+     *
+     *    @mbg.generated 自动生成，如需修改，请删除本行
+     */
+    private Byte orderState;
+
+    /**
      *    订单标题
      *
      *    数据库字段: ORD_ORDER.ORDER_TITLE
@@ -46,7 +62,7 @@ public class OrdOrderMo implements Serializable {
     private String orderTitle;
 
     /**
-     *    上线组织ID
+     *    上线组织ID(卖家ID)
      *
      *    数据库字段: ORD_ORDER.ONLINE_ORG_ID
      *
@@ -55,7 +71,7 @@ public class OrdOrderMo implements Serializable {
     private Long onlineOrgId;
 
     /**
-     *    发货组织ID(默认填入上线组织ID，可变更为供应商的ID)
+     *    发货组织ID
      *
      *    数据库字段: ORD_ORDER.DELIVER_ORG_ID
      *
@@ -82,7 +98,7 @@ public class OrdOrderMo implements Serializable {
     private BigDecimal realMoney;
 
     /**
-     *    退货总额
+     *    已退款总额
      *
      *    数据库字段: ORD_ORDER.RETURN_TOTAL
      *
@@ -109,21 +125,6 @@ public class OrdOrderMo implements Serializable {
      *    @mbg.generated 自动生成，如需修改，请删除本行
      */
     private BigDecimal returnAmount2;
-
-    /**
-     *    订单状态（-1：作废  1：已下单（待支付）  2：已支付（待发货）  3：已发货（待签收）  4：已签收（待结算）  5：已结算  ）
-     *                -1：作废
-     *                1：已下单（待支付）
-     *                2：已支付（待发货）
-     *                3：已发货（待签收）
-     *                4：已签收（待结算）
-     *                5：已结算
-     *
-     *    数据库字段: ORD_ORDER.ORDER_STATE
-     *
-     *    @mbg.generated 自动生成，如需修改，请删除本行
-     */
-    private Byte orderState;
 
     /**
      *    下单人用户ID
@@ -398,6 +399,15 @@ public class OrdOrderMo implements Serializable {
     private String cancelReason;
 
     /**
+     *    是否当场签收，默认为false，如果是true在支付成功后订单状态将是已签收状态
+     *
+     *    数据库字段: ORD_ORDER.IS_NOW_RECEIVED
+     *
+     *    @mbg.generated 自动生成，如需修改，请删除本行
+     */
+    private Boolean isNowReceived;
+
+    /**
      *    @mbg.generated 自动生成，如需修改，请删除本行
      */
     private static final long serialVersionUID = 1L;
@@ -447,6 +457,42 @@ public class OrdOrderMo implements Serializable {
     }
 
     /**
+     *    订单状态（-1：作废  1：已下单（待支付）  2：已支付（待发货）  3：已发货（待签收）  4：已签收（待结算） 6：开始结算  5：已结算  ）
+     *                -1：作废
+     *                1：已下单（待支付）
+     *                2：已支付（待发货）
+     *                3：已发货（待签收）
+     *                4：已签收（待结算）
+     *                6：开始结算
+     *                5：已结算
+     *
+     *    数据库字段: ORD_ORDER.ORDER_STATE
+     *
+     *    @mbg.generated 自动生成，如需修改，请删除本行
+     */
+    public Byte getOrderState() {
+        return orderState;
+    }
+
+    /**
+     *    订单状态（-1：作废  1：已下单（待支付）  2：已支付（待发货）  3：已发货（待签收）  4：已签收（待结算） 6：开始结算  5：已结算  ）
+     *                -1：作废
+     *                1：已下单（待支付）
+     *                2：已支付（待发货）
+     *                3：已发货（待签收）
+     *                4：已签收（待结算）
+     *                6：开始结算
+     *                5：已结算
+     *
+     *    数据库字段: ORD_ORDER.ORDER_STATE
+     *
+     *    @mbg.generated 自动生成，如需修改，请删除本行
+     */
+    public void setOrderState(Byte orderState) {
+        this.orderState = orderState;
+    }
+
+    /**
      *    订单标题
      *
      *    数据库字段: ORD_ORDER.ORDER_TITLE
@@ -469,7 +515,7 @@ public class OrdOrderMo implements Serializable {
     }
 
     /**
-     *    上线组织ID
+     *    上线组织ID(卖家ID)
      *
      *    数据库字段: ORD_ORDER.ONLINE_ORG_ID
      *
@@ -480,7 +526,7 @@ public class OrdOrderMo implements Serializable {
     }
 
     /**
-     *    上线组织ID
+     *    上线组织ID(卖家ID)
      *
      *    数据库字段: ORD_ORDER.ONLINE_ORG_ID
      *
@@ -491,7 +537,7 @@ public class OrdOrderMo implements Serializable {
     }
 
     /**
-     *    发货组织ID(默认填入上线组织ID，可变更为供应商的ID)
+     *    发货组织ID
      *
      *    数据库字段: ORD_ORDER.DELIVER_ORG_ID
      *
@@ -502,7 +548,7 @@ public class OrdOrderMo implements Serializable {
     }
 
     /**
-     *    发货组织ID(默认填入上线组织ID，可变更为供应商的ID)
+     *    发货组织ID
      *
      *    数据库字段: ORD_ORDER.DELIVER_ORG_ID
      *
@@ -557,7 +603,7 @@ public class OrdOrderMo implements Serializable {
     }
 
     /**
-     *    退货总额
+     *    已退款总额
      *
      *    数据库字段: ORD_ORDER.RETURN_TOTAL
      *
@@ -568,7 +614,7 @@ public class OrdOrderMo implements Serializable {
     }
 
     /**
-     *    退货总额
+     *    已退款总额
      *
      *    数据库字段: ORD_ORDER.RETURN_TOTAL
      *
@@ -624,40 +670,6 @@ public class OrdOrderMo implements Serializable {
      */
     public void setReturnAmount2(BigDecimal returnAmount2) {
         this.returnAmount2 = returnAmount2;
-    }
-
-    /**
-     *    订单状态（-1：作废  1：已下单（待支付）  2：已支付（待发货）  3：已发货（待签收）  4：已签收（待结算）  5：已结算  ）
-     *                -1：作废
-     *                1：已下单（待支付）
-     *                2：已支付（待发货）
-     *                3：已发货（待签收）
-     *                4：已签收（待结算）
-     *                5：已结算
-     *
-     *    数据库字段: ORD_ORDER.ORDER_STATE
-     *
-     *    @mbg.generated 自动生成，如需修改，请删除本行
-     */
-    public Byte getOrderState() {
-        return orderState;
-    }
-
-    /**
-     *    订单状态（-1：作废  1：已下单（待支付）  2：已支付（待发货）  3：已发货（待签收）  4：已签收（待结算）  5：已结算  ）
-     *                -1：作废
-     *                1：已下单（待支付）
-     *                2：已支付（待发货）
-     *                3：已发货（待签收）
-     *                4：已签收（待结算）
-     *                5：已结算
-     *
-     *    数据库字段: ORD_ORDER.ORDER_STATE
-     *
-     *    @mbg.generated 自动生成，如需修改，请删除本行
-     */
-    public void setOrderState(Byte orderState) {
-        this.orderState = orderState;
     }
 
     /**
@@ -1293,6 +1305,28 @@ public class OrdOrderMo implements Serializable {
     }
 
     /**
+     *    是否当场签收，默认为false，如果是true在支付成功后订单状态将是已签收状态
+     *
+     *    数据库字段: ORD_ORDER.IS_NOW_RECEIVED
+     *
+     *    @mbg.generated 自动生成，如需修改，请删除本行
+     */
+    public Boolean getIsNowReceived() {
+        return isNowReceived;
+    }
+
+    /**
+     *    是否当场签收，默认为false，如果是true在支付成功后订单状态将是已签收状态
+     *
+     *    数据库字段: ORD_ORDER.IS_NOW_RECEIVED
+     *
+     *    @mbg.generated 自动生成，如需修改，请删除本行
+     */
+    public void setIsNowReceived(Boolean isNowReceived) {
+        this.isNowReceived = isNowReceived;
+    }
+
+    /**
      *    @mbg.generated 自动生成，如需修改，请删除本行
      */
     @Override
@@ -1303,6 +1337,7 @@ public class OrdOrderMo implements Serializable {
         sb.append("Hash = ").append(hashCode());
         sb.append(", id=").append(id);
         sb.append(", orderCode=").append(orderCode);
+        sb.append(", orderState=").append(orderState);
         sb.append(", orderTitle=").append(orderTitle);
         sb.append(", onlineOrgId=").append(onlineOrgId);
         sb.append(", deliverOrgId=").append(deliverOrgId);
@@ -1311,7 +1346,6 @@ public class OrdOrderMo implements Serializable {
         sb.append(", returnTotal=").append(returnTotal);
         sb.append(", returnAmount1=").append(returnAmount1);
         sb.append(", returnAmount2=").append(returnAmount2);
-        sb.append(", orderState=").append(orderState);
         sb.append(", userId=").append(userId);
         sb.append(", userName=").append(userName);
         sb.append(", orderTime=").append(orderTime);
@@ -1340,6 +1374,7 @@ public class OrdOrderMo implements Serializable {
         sb.append(", sendOpId=").append(sendOpId);
         sb.append(", receivedOpId=").append(receivedOpId);
         sb.append(", cancelReason=").append(cancelReason);
+        sb.append(", isNowReceived=").append(isNowReceived);
         sb.append(", serialVersionUID=").append(serialVersionUID);
         sb.append("]");
         return sb.toString();
