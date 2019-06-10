@@ -176,10 +176,10 @@ public interface OrdOrderMapper extends MybatisBaseMapper<OrdOrderMo, Long> {
 	int completeSettle(@Param("closeTime") Date closeTime, @Param("orderId") String orderId);
 
 	/**
-	 * 设置订单状态为已支付，根据PAY_ORDER_ID修改订单状态为已支付
+	 * 设置订单状态为已支付，根据PAY_ORDER_ID修改订单状态为已支付(或者是已签收，如果该订单isNowRecevied的值为true的话)
 	 */
-	@Update("UPDATE ORD_ORDER SET ORDER_STATE=2, PAY_TIME=#{payTime,jdbcType=TIMESTAMP} WHERE PAY_ORDER_ID=#{payOrderId} AND ORDER_STATE=1")
-	int paidOrder(@Param("payOrderId") Long payOrderId, @Param("payTime") Date payTime);
+	@Update("UPDATE ORD_ORDER SET ORDER_STATE=#{orderState,jdbcType=TINYINT}, PAY_TIME=#{payTime,jdbcType=TIMESTAMP} WHERE ID=#{Id} AND ORDER_STATE=1")
+	int paidOrder(@Param("Id") Long Id,@Param("orderState") Byte orderState, @Param("payTime") Date payTime);
 
 	/**
 	 * 根据订单编号查询订单状态 Title: selectOrderStateByOrderCode Description:

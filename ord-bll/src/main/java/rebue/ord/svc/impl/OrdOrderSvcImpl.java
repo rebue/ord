@@ -2038,13 +2038,16 @@ public class OrdOrderSvcImpl extends MybatisBaseSvcImpl<OrdOrderMo, java.lang.Lo
 			}
 		}
 
-		_log.info("5. 根据支付订单ID修改订单状态为已支付");
-		_log.info("订单支付完成，根据PAY_ORDER_ID修改订单状态为已支付: payOrderId-{}, payTime-{}", payOrderId, payDoneMsg.getPayTime());
-		final int result = _mapper.paidOrder(payOrderId, payDoneMsg.getPayTime());
-		_log.debug("订单支付完成通知修改订单信息的返回值为：{}", result);
-		if (result == 0) {
-			_log.warn("根据支付订单ID修改订单状态为已支付不成功，可能碰到并发的问题: payOrderId-{}", payOrderId);
-			return false;
+		_log.info("5. 根据订单ID修改订单状态为已支付");
+		_log.info("订单支付完成，根据订单ID修改订单状态为已支付:  payTime-{}",  payDoneMsg.getPayTime());
+		for (final OrdOrderMo order : orders) {
+			final int result = _mapper.paidOrder(order.getId(),order.getIsNowReceived() ==false?(byte)1:(byte)4, payDoneMsg.getPayTime());
+			_log.debug("订单支付完成通知修改订单信息的返回值为：{}", result);
+			if (result == 0) {
+				_log.warn("根据订单ID修改订单状态为已支付(或已签收)不成功，可能碰到并发的问题: order.getId()-{}", order.getId());
+				return false;
+			}
+
 		}
 
 		_log.info("6. 添加计算首单的任务");

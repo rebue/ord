@@ -42,5 +42,12 @@ public class OrderTo {
      * 订单详情
      */
     private List<OrderDetailTo> details;
+    
+    
+    /**
+     * 是否是当场签收，数据库默认为false，如果是true的话在支付成功后将订单状态
+     * 改为已签收。
+     */
+    private Boolean  isNowReceived;
 
 }
