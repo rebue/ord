@@ -260,8 +260,7 @@ public class OrdOrderSvcImpl extends MybatisBaseSvcImpl<OrdOrderMo, java.lang.Lo
 		final Map<Long, List<OrdOrderDetailMo>> onlineOrgs = new LinkedHashMap<>();
 		// 要更新的上线规格列表
 		final List<UpdateOnlineSpecAfterOrderTo> specList = new ArrayList<>();
-		// 是否线下（如果为线下店铺时，默认不发布到平台）
-		boolean isBelowOnline = false;
+
 
 		_log.debug("遍历订单详情");
 		for (final OrderDetailTo orderDetailTo : to.getDetails()) {
@@ -290,7 +289,6 @@ public class OrdOrderSvcImpl extends MybatisBaseSvcImpl<OrdOrderMo, java.lang.Lo
 				// 将获取到的上线信息放入Map中
 				onlines.put(orderDetailTo.getOnlineId(), onlineMo);
 			}
-			isBelowOnline = onlineMo.getIsBelow();
 
 			_log.debug("根据上线规格ID获取上线规格信息");
 			final OnlOnlineSpecMo onlineSpecMo = onlOnlineSpecSvc.getById(orderDetailTo.getOnlineSpecId());
@@ -395,9 +393,10 @@ public class OrdOrderSvcImpl extends MybatisBaseSvcImpl<OrdOrderMo, java.lang.Lo
 		}
 		_log.debug("通过地址ID获取地址详细信息");
 		final OrdAddrMo addrMo = ordAddrSvc.getById(to.getAddrId());
+		
 		if (addrMo == null) {
-			// 如果不是线下店铺的商品则必须要填收货地址
-			if (isBelowOnline == true) {
+			// 不是当场签收的商品必须要填收货地址
+			if (to.getIsNowReceived() !=true) {
 				final String msg = "找不到下单的收货地址信息";
 				_log.error("{}: addrId-{}", msg, to.getAddrId());
 				ro.setResult(ResultDic.PARAM_ERROR);
@@ -423,6 +422,10 @@ public class OrdOrderSvcImpl extends MybatisBaseSvcImpl<OrdOrderMo, java.lang.Lo
 			orderMo.setPayOrderId(payOrderId);
 			// 下单人用户ID
 			orderMo.setUserId(to.getUserId());
+			// 是否当场签收
+			if(to.getIsNowReceived() !=null && to.getIsNowReceived() ==true) {
+				orderMo.setIsNowReceived(to.getIsNowReceived());
+			}
 			// orderMo.setOrderCode(_idWorker.getIdStr()); // 订单编号 TODO 重写订单编号的生成算法
 			orderMo.setOrderCode(genOrderCode(orderMo.getOrderTime(), orderMo.getId(), orderMo.getUserId()));
 			_log.debug("遍历订单详情计算订单的下单金额");
@@ -1909,7 +1912,7 @@ public class OrdOrderSvcImpl extends MybatisBaseSvcImpl<OrdOrderMo, java.lang.Lo
 	/**
 	 * 处理订单支付完成的通知 1. 根据支付订单ID获取所有订单(如果没有找到，退款) 2.
 	 * 判断通知回来的支付金额是否和订单中记录的实际交易金额相同(如果不同，退款) 3. 取消订单自动取消任务 4.
-	 * 按不同发货组织拆单，并重新计算拆单后的订单实际交易金额 5. 根据支付订单ID修改订单状态为已支付 6. 添加首单计算的任务 7. 匹配购买关系
+	 * 按不同发货组织拆单，并重新计算拆单后的订单实际交易金额 5. 根据订单ID和isNowReceived修改订单状态为已支付或已签收 6. 添加首单计算的任务 7. 匹配购买关系
 	 */
 	@Override
 	@Transactional(readOnly = false, propagation = Propagation.REQUIRED)
@@ -2038,10 +2041,10 @@ public class OrdOrderSvcImpl extends MybatisBaseSvcImpl<OrdOrderMo, java.lang.Lo
 			}
 		}
 
-		_log.info("5. 根据订单ID修改订单状态为已支付");
-		_log.info("订单支付完成，根据订单ID修改订单状态为已支付:  payTime-{}",  payDoneMsg.getPayTime());
+		_log.info("5. 根据订单ID修改订单状态为已支付(或已签收)");
+		_log.info("订单支付完成，根据订单ID修改订单状态为已支付(或已签收):  payTime-{}",  payDoneMsg.getPayTime());
 		for (final OrdOrderMo order : orders) {
-			final int result = _mapper.paidOrder(order.getId(),order.getIsNowReceived() ==false?(byte)1:(byte)4, payDoneMsg.getPayTime());
+			final int result = _mapper.paidOrder(order.getId(),order.getIsNowReceived() ==false?(byte)2:(byte)4, payDoneMsg.getPayTime());
 			_log.debug("订单支付完成通知修改订单信息的返回值为：{}", result);
 			if (result == 0) {
 				_log.warn("根据订单ID修改订单状态为已支付(或已签收)不成功，可能碰到并发的问题: order.getId()-{}", order.getId());
