@@ -50,4 +50,15 @@ public interface OrdBuyRelationSvc extends BaseSvc<java.lang.Long, OrdBuyRelatio
      * 匹配购买关系
      */
     String matchBuyRelation(long id, long onlineId, BigDecimal buyPrice, long downLineDetailId, long downLineOrderId, long orderTimestamp);
+    
+    
+    
+    
+    /**
+     * 根据下家详情id将该条关系的是否已签收改为已经签收。
+     * @param detailId
+     * @return
+     */
+    int  modifyIsSignInByDownlineDetailId(Long downlineDetailId);
+
 }

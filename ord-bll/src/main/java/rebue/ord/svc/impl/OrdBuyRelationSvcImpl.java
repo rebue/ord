@@ -692,4 +692,14 @@ public class OrdBuyRelationSvcImpl extends MybatisBaseSvcImpl<OrdBuyRelationMo, 
         }
         return result;
     }
+    
+    /**
+     * 根据下家详情id将该条关系的下家是否签收改为true。
+     */
+	@Override
+	@Transactional(readOnly = true, propagation = Propagation.REQUIRED)
+	public int modifyIsSignInByDownlineDetailId(Long detailId) {
+		_log.info("updateIsSignInByDownlineDetailId： detailId-{}", detailId);
+		return _mapper.updateIsSignInByDownlineDetailId(detailId);
+	}
 }

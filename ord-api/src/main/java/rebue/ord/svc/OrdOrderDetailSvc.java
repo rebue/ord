@@ -165,4 +165,6 @@ public interface OrdOrderDetailSvc extends BaseSvc<java.lang.Long, OrdOrderDetai
      * @return
      */
     int updateIsDeliver(Long orderId, Long onlineId, Long onlineSpecId);
+    
+	int modifyUserIdByOrderId(Long orderId, Long userId);
 }

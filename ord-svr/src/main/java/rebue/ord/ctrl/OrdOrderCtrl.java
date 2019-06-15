@@ -24,6 +24,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.github.pagehelper.PageInfo;
 
+import rebue.afc.msg.PayDoneMsg;
 import rebue.ord.dic.CancellationOfOrderDic;
 import rebue.ord.dic.OrderSignInDic;
 import rebue.ord.dic.ShipmentConfirmationDic;
@@ -553,4 +554,15 @@ public class OrdOrderCtrl {
 		_log.info("查询订单状态不为退货和未支付且支付时间为最新的订单信息的用户id为-{}", userId);
 		return svc.getLatestOneByUserId(userId);
 	}
+	
+	
+//	/**
+//	 * 支付完成通知,仅仅用来单元测试的。
+//	 */
+//	@PutMapping("/ord/order/handleOrderPaidNotify")
+//	boolean handleOrderPaidNotify(@RequestBody final PayDoneMsg payDoneMsg) throws Exception {
+//		_log.info("handleOrderPaidNotify: {}", payDoneMsg);
+//		 svc.handleOrderPaidNotify(payDoneMsg);
+//		return true;
+//	}
 }

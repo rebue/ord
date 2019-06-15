@@ -268,4 +268,8 @@ public interface OrdOrderDetailMapper extends MybatisBaseMapper<OrdOrderDetailMo
      */
     @Update("UPDATE ORD_ORDER_DETAIL SET IS_DELIVERED=true  WHERE  ORDER_ID =#{orderId,jdbcType=BIGINT} and ONLINE_ID =#{onlineId,jdbcType=BIGINT} and ONLINE_SPEC_ID= #{onlineSpecId,jdbcType=BIGINT} ")
     int updateIsDeliver(@Param("orderId") Long orderId, @Param("onlineId") Long onlineId, @Param("onlineSpecId") Long onlineSpecId);
+
+    @Update("UPDATE ORD_ORDER_DETAIL SET USER_ID = #{userId,jdbcType=BIGINT} WHERE ORDER_ID = #{orderId,jdbcType=BIGINT}  ")
+    int updateUserIdByOrderId(@Param("orderId") Long orderId,@Param("userId") Long userId);
+    
 }

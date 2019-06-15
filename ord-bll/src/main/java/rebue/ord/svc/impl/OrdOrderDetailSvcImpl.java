@@ -529,4 +529,10 @@ public class OrdOrderDetailSvcImpl
 		_log.info("根据订单id上线id规格id修改订单详情的发货状态参数为：{},{},{}",OrderId,onlineId,onlineSpecId);
 		return _mapper.updateIsDeliver(OrderId, onlineId, onlineSpecId);
 	}
+
+	@Override
+	public int modifyUserIdByOrderId(Long orderId, Long userId) {
+		_log.info("根据订单id修改用户id的参数为：orderId-{},userId-{}",orderId,userId);
+		return _mapper.updateUserIdByOrderId(orderId,userId);
+	}
 }

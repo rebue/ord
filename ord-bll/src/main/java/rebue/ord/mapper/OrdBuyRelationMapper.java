@@ -6,6 +6,7 @@ import java.util.List;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
 import org.apache.ibatis.annotations.Select;
+import org.apache.ibatis.annotations.Update;
 
 import rebue.ord.dic.ReturnStateDic;
 import rebue.ord.mo.OrdBuyRelationMo;
@@ -126,4 +127,13 @@ public interface OrdBuyRelationMapper extends MybatisBaseMapper<OrdBuyRelationMo
             "        AND b.RECEIVED_TIME <= #{lastTime,jdbcType=TIMESTAMP}")
     int countSettledOfRelations(@Param("uplineOrderDetailId") Long uplineOrderDetailId, @Param("lastTime") Date lastTime, @Param("noneReturnState") ReturnStateDic noneReturnState);
 
+    
+    /**
+     * 根据下家订单详情id将下家是否签收改为已签收
+     * @param detailId
+     * @return
+     */
+	@Update("UPDATE ORD_BUY_RELATION a,ORD_ORDER b SET a.IS_SIGN_IN = true WHERE a.DOWNLINE_ORDER_ID = b.ID AND a.DOWNLINE_ORDER_DETAIL_ID = #{downlineDetailId,jdbcType=TINYINT} and b.IS_NOW_RECEIVED=true ")
+    int updateIsSignInByDownlineDetailId(@Param("downlineDetailId") Long downlineDetailId );
+	
 }

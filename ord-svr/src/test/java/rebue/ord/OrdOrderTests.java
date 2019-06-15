@@ -1,27 +1,23 @@
 package rebue.ord;
-
 import java.io.IOException;
+import java.math.BigDecimal;
 import java.util.LinkedList;
+import java.util.Date;
 import java.util.HashMap;
-import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
-
 import javax.annotation.Resource;
-
 import org.junit.Assert;
 import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.github.dozermapper.core.Mapper;
-
+import rebue.afc.dic.PayAndRefundTypeDic;
+import rebue.afc.msg.PayDoneMsg;
 import rebue.ord.mo.OrdOrderDetailMo;
-import rebue.ord.mo.OrdOrderMo;
 import rebue.ord.ro.OrderRo;
 import rebue.ord.svc.OrdOrderDetailSvc;
-import rebue.ord.svc.OrdOrderSvc;
 import rebue.ord.to.OrderDetailTo;
 import rebue.ord.to.OrderTo;
 import rebue.robotech.dic.ResultDic;
@@ -191,10 +187,43 @@ public class OrdOrderTests {
 	}
 	
 	// 测试根据用户id查询订单状态不为退货和未支付且支付时间为最新的订单信息
-	@Test
+	//@Test
 	public void latestOneByUserIdTest() throws IOException {
 		String url = hostUrl + "/ord/order/getLatestOne?userId=560723287034822657";
 		String orderMo =OkhttpUtils.get(url);
 		System.out.println(orderMo);
 	}
+	
+	
+	/**
+	 * 支付完成通知
+	 * @throws IOException
+	 */
+//	@Test
+	public void handleOrderPaidNotify()  throws IOException  {
+			String url = hostUrl + "/ord/order/handleOrderPaidNotify";
+			PayDoneMsg payDoneMsg=new PayDoneMsg();
+			payDoneMsg.setOrderId("561030684311945221");
+			payDoneMsg.setUserId(561030054302187520l);
+			payDoneMsg.setPayTime(new Date());
+			payDoneMsg.setPayType(PayAndRefundTypeDic.VPAY);
+			payDoneMsg.setPayAmount(new BigDecimal("44"));
+			 OkhttpUtils.putByJsonParams(url, payDoneMsg);
+	}	
+	
+	
+	/**
+	 *  1:app支付成功后将订单的用户id转换为扫码支付的用户的id
+	 *  2:将购买关系中下家订单id是当前订单id的下家用户id改为扫码支付的用户id
+	 *  
+	 * @throws IOException
+	 */
+	@Test
+	public void shiftOrder() throws IOException {
+		String url = hostUrl + "/ord/order/shift?payOrderId=561030684311945221&oldUserId=561030054302187520&newUserId=560723287034822657";
+		String orderMo =OkhttpUtils.get(url);
+		System.out.println(orderMo);
+	}
+	
+
 }
