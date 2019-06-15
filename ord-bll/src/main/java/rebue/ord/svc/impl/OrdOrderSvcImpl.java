@@ -2895,15 +2895,15 @@ public class OrdOrderSvcImpl extends MybatisBaseSvcImpl<OrdOrderMo, java.lang.Lo
 			return ro;
 		}
 
-		_log.error("转移订单成功，请求的参数为：payOrderId-{}， newUserId-{}, oldUserId-{}", payOrderId, newUserId, oldUserId);
+		_log.info("转移订单成功，请求的参数为：payOrderId-{}， newUserId-{}, oldUserId-{}", payOrderId, newUserId, oldUserId);
 		ro.setRealMoney(ordOrderMo.getRealMoney());
 
 		// 循环订单去修改订单详情中的用户id以便后面匹配关系。
 		orderMo = new OrdOrderMo();
 		orderMo.setPayOrderId(payOrderId);
-		_log.error("根据订单支付id获取所有订单的参数为orderMo-{}", orderMo);
+		_log.info("根据订单支付id获取所有订单的参数为orderMo-{}", orderMo);
 		List<OrdOrderMo> orderList = super.list(orderMo);
-		_log.error("根据订单支付id获取所有订单的结果为orderMo-{}", orderList);
+		_log.info("根据订单支付id获取所有订单的结果为orderMo-{}", orderList);
 		for (OrdOrderMo order : orderList) {
 			int i=orderDetailSvc.modifyUserIdByOrderId(order.getId(), newUserId);
 			if(i==0) {

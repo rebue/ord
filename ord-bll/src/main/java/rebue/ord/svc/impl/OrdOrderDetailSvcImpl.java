@@ -252,7 +252,12 @@ public class OrdOrderDetailSvcImpl
 					item.setDownlineRelationSource1(Uplist.get(j).getRelationSource());
 					item.setDownlineIsSignIn1(Uplist.get(j).getIsSignIn());
 					if (dUserName != null) {
-						item.setDownlineUserName1(dUserName.getWxNickname());
+						if(dUserName.getWxNickname() !=null) {
+							item.setDownlineUserName1(dUserName.getWxNickname());	
+						}else if(dUserName.getLoginName() !=null) {
+							item.setDownlineUserName1(dUserName.getLoginName());
+						}
+						
 					}
 					// 设置第一个下家的签收时间
 					_log.info("设置第一个下家签收时间： {}", ordOrderMo.getReceivedTime());
@@ -269,7 +274,12 @@ public class OrdOrderDetailSvcImpl
 					item.setDownlineRelationSource2(Uplist.get(j).getRelationSource());
 					item.setDownlineIsSignIn2(Uplist.get(j).getIsSignIn());
 					if (dUserName != null) {
-						item.setDownlineUserName2(dUserName.getWxNickname());
+						if(dUserName.getWxNickname() !=null) {
+							item.setDownlineUserName2(dUserName.getWxNickname());	
+						}else if(dUserName.getLoginName() !=null) {
+							item.setDownlineUserName2(dUserName.getLoginName());
+						}
+						
 					}
 					// 设置第二个下家的签收时间
 					_log.info("设置第二个下家签收时间： {}", ordOrderMo.getReceivedTime());
