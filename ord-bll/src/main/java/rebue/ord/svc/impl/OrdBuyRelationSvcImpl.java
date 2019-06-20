@@ -513,13 +513,15 @@ public class OrdBuyRelationSvcImpl extends MybatisBaseSvcImpl<OrdBuyRelationMo, 
         map.put("commissionSlot", (byte) 2);
         map.put("downLineRelationId1", downLineRelationId1);
         map.put("downLineRelationId2", downLineRelationId2);
+        _log.info("查询差两人匹配规则的订单详情map-{}",map.toString());
         final OrdOrderDetailMo orderDetailResult = ordOrderDetailSvc.getOrderDetailForBuyRelation(map);
+        _log.info("查询差两人匹配规则的订单结果 orderDetailResult-{}",orderDetailResult);
         if (orderDetailResult == null) {
             _log.info("没有符合差两人匹配规则的订单详情");
             return false;
         }
         // 添加购买关系记录
-        _log.info("在购买关系表中添加记录");
+
         final OrdBuyRelationMo ordBuyRelationMo = new OrdBuyRelationMo();
         ordBuyRelationMo.setId(_idWorker.getId());
         ordBuyRelationMo.setUplineOrderId(orderDetailResult.getOrderId());
@@ -529,7 +531,7 @@ public class OrdBuyRelationSvcImpl extends MybatisBaseSvcImpl<OrdBuyRelationMo, 
         ordBuyRelationMo.setDownlineOrderDetailId(downLineDetailId);
         ordBuyRelationMo.setDownlineOrderId(downLineOrderId);
         ordBuyRelationMo.setRelationSource((byte) BuyRelationDic.BuyRelationByFive.getCode());
-        _log.error("添加购买关系参数:{}", ordBuyRelationMo);
+        _log.info("添加购买关系参数:{}", ordBuyRelationMo);
         final int addBuyRelationResult = selfSvc.add(ordBuyRelationMo);
         if (addBuyRelationResult != 1) {
             _log.error("{}添加下级购买信息失败", id);
