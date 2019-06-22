@@ -199,7 +199,7 @@ public class OrdOrderTests {
 	 * 支付完成通知
 	 * @throws IOException
 	 */
-//	@Test
+	@Test
 	public void handleOrderPaidNotify()  throws IOException  {
 			String url = hostUrl + "/ord/order/handleOrderPaidNotify";
 			PayDoneMsg payDoneMsg=new PayDoneMsg();
@@ -218,7 +218,7 @@ public class OrdOrderTests {
 	 *  
 	 * @throws IOException
 	 */
-	@Test
+//	@Test
 	public void shiftOrder() throws IOException {
 		String url = hostUrl + "/ord/order/shift?payOrderId=561030684311945221&oldUserId=561030054302187520&newUserId=560723287034822657";
 		String orderMo =OkhttpUtils.get(url);

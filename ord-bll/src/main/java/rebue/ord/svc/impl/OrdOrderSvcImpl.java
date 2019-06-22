@@ -1731,7 +1731,7 @@ public class OrdOrderSvcImpl extends MybatisBaseSvcImpl<OrdOrderMo, java.lang.Lo
         }
         final Long userId = order.getUserId();
         // final Long orderId = orderList.get(0).getId();
-        if (order.getOrderState() != OrderStateDic.DELIVERED.getCode()) {
+        if (order.getOrderState() != OrderStateDic.DELIVERED.getCode() && order.getIsNowReceived() ==false ) {
             _log.error("由于订单：{}处于非待签收状态，{}签收订单失败", orderId, userId);
             orderSignInRo.setResult(OrderSignInDic.CURRENT_STATE_NOT_EXIST_CANCEL);
             orderSignInRo.setMsg("当前状态不允许签收");
@@ -1750,33 +1750,34 @@ public class OrdOrderSvcImpl extends MybatisBaseSvcImpl<OrdOrderMo, java.lang.Lo
         }
         final Date date = new Date();
         _log.info("订单签收的时间为：{}", date);
-        for (final OrdOrderDetailMo ordOrderDetailMo : detailList) {
-            if (ordOrderDetailMo.getSubjectType() == 1) {
-                final OrdBuyRelationMo mo = new OrdBuyRelationMo();
-                mo.setDownlineOrderDetailId(ordOrderDetailMo.getId());
-                final OrdBuyRelationMo buyRelationResult = ordBuyRelationSvc.getOne(mo);
-                _log.info("根据订单详情获取订单购买关系为{}", buyRelationResult);
-                if (buyRelationResult != null) {
-                    _log.info("订单签收更新购买关系表");
-                    final OrdBuyRelationMo updateBuyRelationMo = new OrdBuyRelationMo();
-                    updateBuyRelationMo.setId(buyRelationResult.getId());
-                    updateBuyRelationMo.setIsSignIn(true);
-                    final int updateBuyRelationResult = ordBuyRelationSvc.modify(updateBuyRelationMo);
-                    if (updateBuyRelationResult < 1) {
-                        _log.error("{}更新购买关系出错，返回值为：{}", userId, updateBuyRelationResult);
-                        orderSignInRo.setResult(OrderSignInDic.ERROR);
-                        orderSignInRo.setMsg("更新购买关系失败");
-                        return orderSignInRo;
-                    }
-                }
-            }
-        }
+//        这里注释掉是因为下家是否签收这个字段开始弃用了
+//        for (final OrdOrderDetailMo ordOrderDetailMo : detailList) {
+//            if (ordOrderDetailMo.getSubjectType() == 1) {
+//                final OrdBuyRelationMo mo = new OrdBuyRelationMo();
+//                mo.setDownlineOrderDetailId(ordOrderDetailMo.getId());
+//                final OrdBuyRelationMo buyRelationResult = ordBuyRelationSvc.getOne(mo);
+//                _log.info("根据订单详情获取订单购买关系为{}", buyRelationResult);
+//                if (buyRelationResult != null) {
+//                    _log.info("订单签收更新购买关系表");
+//                    final OrdBuyRelationMo updateBuyRelationMo = new OrdBuyRelationMo();
+//                    updateBuyRelationMo.setId(buyRelationResult.getId());
+//                    updateBuyRelationMo.setIsSignIn(true);
+//                    final int updateBuyRelationResult = ordBuyRelationSvc.modify(updateBuyRelationMo);
+//                    if (updateBuyRelationResult < 1) {
+//                        _log.error("{}更新购买关系出错，返回值为：{}", userId, updateBuyRelationResult);
+//                        orderSignInRo.setResult(OrderSignInDic.ERROR);
+//                        orderSignInRo.setMsg("更新购买关系失败");
+//                        return orderSignInRo;
+//                    }
+//                }
+//            }
+//        }
         final OrdOrderMo orderMo = new OrdOrderMo();
         orderMo.setId(orderId);
         orderMo.setUserId(userId);
         orderMo.setReceivedTime(date);
         orderMo.setReceivedOpId(userId);
-        orderMo.setOrderState((byte) OrderStateDic.DELIVERED.getCode());
+        orderMo.setOrderState(order.getIsNowReceived() ==false?(byte) OrderStateDic.DELIVERED.getCode():(byte) OrderStateDic.PAID.getCode());
         _log.info("订单签收的参数为：{}", orderMo);
         final int signInResult = _mapper.orderSignIn(orderMo);
         _log.info("订单签收的返回值为：{}", signInResult);
@@ -1788,7 +1789,7 @@ public class OrdOrderSvcImpl extends MybatisBaseSvcImpl<OrdOrderMo, java.lang.Lo
         _log.info("订单签收取消自动签收任务的参数为：{}", orderId);
         final Ro cancelTaskRo = ordTaskSvc.cancelTask(orderId, OrderTaskTypeDic.SIGNED);
         _log.info("订单签收取消自动签收任务的返回值为：{}", cancelTaskRo);
-        if (cancelTaskRo.getResult() != ResultDic.SUCCESS) {
+        if (cancelTaskRo.getResult() != ResultDic.SUCCESS && order.getIsNowReceived() ==false ) {
             _log.error("签收订单取消签收任务失败，订单id为：{}", orderId);
             throw new RuntimeException("签收错误");
         }
@@ -1886,9 +1887,10 @@ public class OrdOrderSvcImpl extends MybatisBaseSvcImpl<OrdOrderMo, java.lang.Lo
      * 2. 判断通知回来的支付金额是否和订单中记录的实际交易金额相同(如果不同，退款)
      * 3. 取消订单自动取消任务
      * 4. 按不同发货组织拆单，并重新计算拆单后的订单实际交易金额
-     * 5. 根据订单ID和isNowReceived修改订单状态为已支付或(已签收且加上签收时间和订单结算任务)
+     * 5. 根据支付订单id将订单该为已支付
      * 6. 添加首单计算的任务
      * 7. 匹配购买关系
+     * 8. 判断订单是否是当场签收的，是的话调用订单签收接口
      */
     @Override
     @Transactional(readOnly = false, propagation = Propagation.REQUIRED)
@@ -2016,24 +2018,13 @@ public class OrdOrderSvcImpl extends MybatisBaseSvcImpl<OrdOrderMo, java.lang.Lo
             }
         }
 
-        _log.info("5. 根据订单ID修改订单状态为已支付(或已签收且加上签收时间)");
-        _log.info("订单支付完成，根据订单ID和isNowReceived修改订单状态为已支付(或已签收且加上签收时间且加上订单结算任务):  payTime-{}", payDoneMsg.getPayTime());
-        for (final OrdOrderMo order : orders) {
-            _log.info("当前订单order.getId()-{},order.getIsNowReceived()-{}", order.getId(), order.getIsNowReceived());
-            int result = 0;
-            if (order.getIsNowReceived() == false) {
-                result = _mapper.paidOrder(order.getId(), payDoneMsg.getPayTime());
-            } else {
-                result = _mapper.paidOrderAndreceivedOrder(order.getId(), payDoneMsg.getPayTime());
-                _log.info("因为当前支付的订单是当场签收的，所有添加结算任务，参数为：{}", order.getId());
-                ordSettleTaskSvc.addStartSettleTask(order.getId());
-            }
-            _log.debug("订单支付完成通知修改订单信息的返回值为：{}", result);
-            if (result == 0) {
-                _log.warn("根据订单ID修改订单状态为已支付(或已签收)不成功，可能碰到并发的问题: order.getId()-{}", order.getId());
-                return false;
-            }
-
+        _log.info("5. 根据订单支付ID修改订单状态为已支付");
+        _log.info("订单支付完成，根据订单支付ID修改订单状态为已支付  payTime-{}", payDoneMsg.getPayTime());
+        int    result = _mapper.paidOrder(payOrderId, payDoneMsg.getPayTime(),(byte)OrderStateDic.PAID.getCode(),(byte)OrderStateDic.ORDERED.getCode());
+        _log.debug("订单支付完成通知修改订单信息的返回值为：{}", result);
+        if (result == 0) {
+            _log.warn("根据支付订单ID修改订单状态为已支付不成功，可能碰到并发的问题: payOrderId-{}", payOrderId);
+            return false;
         }
 
         _log.info("6. 添加计算首单的任务");
@@ -2097,13 +2088,20 @@ public class OrdOrderSvcImpl extends MybatisBaseSvcImpl<OrdOrderMo, java.lang.Lo
             } catch (final Exception e) {
                 _log.error("匹配购买关系报错：", e);
             }
-            if (orderDetail.getSubjectType() == 1) {
-                // 根据详情id修改购买关系中的下家签收状态为已签收(还要判断该订单isNowReceived是否等于true，在sql中判断)
-                _log.debug("修改下家签收状态的参数为 detailId：{}", orderDetail.getId());
-                final int i = ordBuyRelationSvc.modifyIsSignInByDownlineDetailId(orderDetail.getId());
-                _log.debug("修改下家签收状态的结果为 detailId：{}", i);
-            }
         }
+        
+        _log.info("8. 判断订单是否是当场签收。");
+        _log.info("遍历订单如果订单是当前签收的则调用订单签收接口");
+        OrderSignInTo orderSignInTo=new OrderSignInTo();
+        for (final OrdOrderMo order : orders) {
+        	if(order.getIsNowReceived()) {
+        		orderSignInTo.setOrderId(order.getId());
+        		_log.info("调用签收接口的参数为：orderSignInTo-{}",orderSignInTo);
+        		OrderSignInRo orderSignInRo=orderSignIn(orderSignInTo);
+        		_log.info("调用签收接口的结果为：orderSignInRo-{}",orderSignInRo);
+        	}
+        }
+        
         return true;
     }
 

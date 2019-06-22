@@ -174,18 +174,13 @@ public interface OrdOrderMapper extends MybatisBaseMapper<OrdOrderMo, Long> {
 	 */
 	@Update("UPDATE ORD_ORDER SET ORDER_STATE=5, CLOSE_TIME=#{closeTime,jdbcType=TIMESTAMP} WHERE ID=#{orderId,jdbcType=VARCHAR} AND ORDER_STATE=4")
 	int completeSettle(@Param("closeTime") Date closeTime, @Param("orderId") String orderId);
-
+	
 	/**
 	 * 设置订单状态为已支付，根据ID修改订单状态为已支付(2)
 	 */
-	@Update("UPDATE ORD_ORDER SET ORDER_STATE=2, PAY_TIME=#{payTime,jdbcType=TIMESTAMP} WHERE ID=#{Id} AND ORDER_STATE=1")
-	int paidOrder(@Param("Id") Long Id, @Param("payTime") Date payTime);
+	@Update("UPDATE ORD_ORDER SET ORDER_STATE=#{paid,jdbcType=TINYINT}, PAY_TIME=#{payTime,jdbcType=TIMESTAMP} WHERE PAY_ORDER_ID=#{payOrderId} AND ORDER_STATE=#{ordered,jdbcType=TINYINT}")
+	int paidOrder(@Param("payOrderId") Long payOrderId, @Param("payTime") Date payTime,@Param("paid") byte paid,@Param("ordered") byte ordered);
 	
-	/**
-	 * 设置订单状态为已签收，根据ID修改订单状态为已支付(4)，签收时间为支付时间
-	 */
-	@Update("UPDATE ORD_ORDER SET ORDER_STATE=4, PAY_TIME=#{payTime,jdbcType=TIMESTAMP},RECEIVED_TIME=#{payTime,jdbcType=TIMESTAMP} WHERE ID=#{Id} AND ORDER_STATE=1")
-	int paidOrderAndreceivedOrder(@Param("Id") Long Id, @Param("payTime") Date payTime);
 
 	
 	/**
