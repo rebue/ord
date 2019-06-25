@@ -57,6 +57,14 @@ public interface OrdOrderDetailSvc extends BaseSvc<java.lang.Long, OrdOrderDetai
     OrdOrderDetailMo getAndUpdateBuyRelationByFour(Map<String, Object> map);
 
     List<DetailandBuyRelationRo> listBuyRelationByOrderId(Long orderId);
+    
+    
+    /**
+     * 获取正确匹配的详情
+     * @param map
+     * @return
+     */
+    OrdOrderDetailMo getCorrectMatchOrderDetail(Map<String, Object> map);
 
     /**
      * 得到买家已下单指定上线规格商品的数量(以此来限制买家购买)

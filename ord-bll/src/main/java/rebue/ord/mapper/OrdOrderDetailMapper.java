@@ -272,4 +272,8 @@ public interface OrdOrderDetailMapper extends MybatisBaseMapper<OrdOrderDetailMo
     @Update("UPDATE ORD_ORDER_DETAIL SET USER_ID = #{userId,jdbcType=BIGINT} WHERE ORDER_ID = #{orderId,jdbcType=BIGINT}  ")
     int updateUserIdByOrderId(@Param("orderId") Long orderId,@Param("userId") Long userId);
     
+	/**
+	 * 获取正确匹配的详情
+	 */
+    OrdOrderDetailMo selectCorrectMatchOrderDetail(Map<String, Object> map);
 }

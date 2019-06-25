@@ -19,7 +19,7 @@ public interface OrdBuyRelationSvc extends BaseSvc<java.lang.Long, OrdBuyRelatio
     /**
      * 根据匹配自己匹配购买关系
      */
-    boolean getAndUpdateBuyRelationByOwn(long id, long onlineId, BigDecimal buyPrice, long downLineDetailId, long downLineOrderId, long orderTimestamp);
+    //boolean getAndUpdateBuyRelationByOwn(long userId,long InviterUserId,BigDecimal buyPrice, long detailId, long orderId, long orderTimestamp);
 
     /**
      * 根据购买规则匹配购买关系
@@ -49,9 +49,9 @@ public interface OrdBuyRelationSvc extends BaseSvc<java.lang.Long, OrdBuyRelatio
     /**
      * 匹配购买关系
      */
+    boolean matchOwnOrInviter(long id, long onlineId, BigDecimal buyPrice, long downLineDetailId, long downLineOrderId, long orderTimestamp);
+    
     String matchBuyRelation(long id, long onlineId, BigDecimal buyPrice, long downLineDetailId, long downLineOrderId, long orderTimestamp);
-    
-    
     
     
     /**

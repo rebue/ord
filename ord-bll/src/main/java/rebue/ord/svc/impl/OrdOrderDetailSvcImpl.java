@@ -545,4 +545,13 @@ public class OrdOrderDetailSvcImpl
 		_log.info("根据订单id修改用户id的参数为：orderId-{},userId-{}",orderId,userId);
 		return _mapper.updateUserIdByOrderId(orderId,userId);
 	}
+	
+	/**
+	 * 获取正确匹配的详情
+	 */
+	@Override
+	public OrdOrderDetailMo getCorrectMatchOrderDetail(Map<String, Object> map) {
+		_log.info("获取正确匹配的详情参数为：map-{}",map.toString());
+		return _mapper.selectCorrectMatchOrderDetail(map);
+	}
 }
