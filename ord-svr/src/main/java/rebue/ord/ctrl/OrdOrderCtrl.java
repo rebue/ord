@@ -559,10 +559,10 @@ public class OrdOrderCtrl {
 //	/**
 //	 * 支付完成通知,仅仅用来单元测试的。
 //	 */
-//	@PutMapping("/ord/order/handleOrderPaidNotify")
-//	boolean handleOrderPaidNotify(@RequestBody final PayDoneMsg payDoneMsg) throws Exception {
-//		_log.info("handleOrderPaidNotify: {}", payDoneMsg);
-//		 svc.handleOrderPaidNotify(payDoneMsg);
-//		return true;
-//	}
+	@PutMapping("/ord/order/handleOrderPaidNotify")
+	boolean handleOrderPaidNotify(@RequestBody final PayDoneMsg payDoneMsg) throws Exception {
+		_log.info("handleOrderPaidNotify: {}", payDoneMsg);
+		 svc.handleOrderPaidNotify(payDoneMsg);
+		return true;
+	}
 }

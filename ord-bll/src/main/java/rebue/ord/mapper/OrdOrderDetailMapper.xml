@@ -1137,7 +1137,7 @@
 		        AND a.ORDER_STATE NOT IN (1,-1)
 		        AND a.USER_ID = #{userId,jdbcType=BIGINT}
 		        AND b.COMMISSION_STATE = #{commissionState, jdbcType=TINYINT}
-		        AND b.ORDER_TIMESTAMP < #{orderTimestamp, jdbcType=BIGINT}
+		        AND b.ORDER_TIMESTAMP &lt; #{orderTimestamp, jdbcType=BIGINT}
 		        AND b.BUY_PRICE = #{buyPrice,jdbcType=DECIMAL} order by b.ORDER_TIMESTAMP
 	</select>
 	

@@ -2058,31 +2058,16 @@ public class OrdOrderSvcImpl extends MybatisBaseSvcImpl<OrdOrderMo, java.lang.Lo
         _log.info("遍历订单详情: 添加订单购买关系");
         for (final OrdOrderDetailMo orderDetail : orderDetailAlls) {
             try {
-                _log.debug("订单详情商品类型为：{}" + orderDetail.getSubjectType());
+                _log.info("订单详情商品类型为：{}" + orderDetail.getSubjectType());
                 if (orderDetail.getSubjectType() == 1) {
-                    _log.debug("全返商品添加购买关系");
                     final long userId = orderDetail.getUserId();
-                    final long onlineId = orderDetail.getOnlineId();
                     final BigDecimal buyPrice = orderDetail.getBuyPrice();
                     final long downLineDetailId = orderDetail.getId();
                     final long downLineOrderId = orderDetail.getOrderId();
                     final long orderTimestamp = orderDetail.getOrderTimestamp();
-                    String matchBuyRelationResult = "";
-                    _log.debug("该条详情邀请人id为：{}", orderDetail.getInviteId());
-                    if (orderDetail.getInviteId() == null) {
-                        _log.debug("邀请人id等于null，按照匹配规则匹配：InviteId-{}", orderDetail.getInviteId());
-                        matchBuyRelationResult = ordBuyRelationSvc.matchBuyRelation(userId, onlineId, buyPrice, downLineDetailId, downLineOrderId, orderTimestamp);
-                    } else {
-                        _log.debug("邀请人id不等于null，优先匹配给邀请人：InviteId-{}", orderDetail.getInviteId());
-                        final boolean getAndUpdateBuyRelationByInvite = ordBuyRelationSvc.getAndUpdateBuyRelationByPromote(userId, onlineId, buyPrice, downLineDetailId,
-                                downLineOrderId);
-                        _log.debug("优先匹配给邀请人的结果为：{}", getAndUpdateBuyRelationByInvite);
-                        if (getAndUpdateBuyRelationByInvite == false) {
-                            matchBuyRelationResult = ordBuyRelationSvc.matchBuyRelation(userId, onlineId, buyPrice, downLineDetailId, downLineOrderId, orderTimestamp);
-                        }
-                    }
-
-                    _log.debug(matchBuyRelationResult);
+                    _log.info("全返商品添加购买关系");
+                    String matchBuyRelationResult = ordBuyRelationSvc.matchBuyRelation(userId, orderDetail.getInviteId(), buyPrice, downLineDetailId, downLineOrderId, orderTimestamp);
+                    _log.info(matchBuyRelationResult);
 
                 }
             } catch (final Exception e) {
