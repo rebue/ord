@@ -18,8 +18,6 @@ import com.github.dozermapper.core.Mapper;
 
 import rebue.afc.co.AfcExchangeCo;
 import rebue.afc.msg.PayDoneMsg;
-import rebue.ord.svc.OrdBuyRelationSvc;
-import rebue.ord.svc.OrdGoodsBuyRelationSvc;
 import rebue.ord.svc.OrdOrderDetailSvc;
 import rebue.ord.svc.OrdOrderSvc;
 import rebue.sbs.rabbit.RabbitConsumer;
@@ -60,18 +58,13 @@ public class PayDoneSub implements ApplicationListener<ContextRefreshedEvent> {
     @Resource
     private OrdOrderDetailSvc      ordOrderDetailSvc;
 
-    @Resource
-    private OrdGoodsBuyRelationSvc ordGoodsBuyRelationSvc;
+
 
     /**
      */
     @Resource
     private SucUserSvc             sucUserSvc;
 
-    /**
-     */
-    @Resource
-    private OrdBuyRelationSvc      ordBuyRelationSvc;
 
     @Override
     @Transactional(readOnly = false, propagation = Propagation.REQUIRED)

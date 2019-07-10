@@ -180,9 +180,9 @@ alter table ORD_ORDER_DETAIL add REMARK               varchar(60) comment '备�
 -- ------------------------------------------------------- 上面的已更新到线上 2019.1.25 ----------------------------------------------------
 ALTER TABLE ORD_ORDER_DETAIL ADD UNIQUE ORDER_TIMESTAMP_ONLINE_SPEC_ID (ORDER_TIMESTAMP,ONLINE_SPEC_ID);
 
--- ------------------------------------------------------- 上面的已更新到线上 2019.04.11 ----------------------------------------------------
 
 alter table ORD_ORDER add  IS_NOW_RECEIVED      bool not null default false comment '是否当场签收，默认为false，如果是true在支付成功后订单状态将是已签收状态';
 
+-- ------------------------------------------------------- 上面的已更新到线上 2019.04.11 ----------------------------------------------------
 
 

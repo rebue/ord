@@ -26,15 +26,12 @@ import rebue.ord.dic.OrderStateDic;
 import rebue.ord.dic.OrderTaskTypeDic;
 import rebue.ord.dic.ReturnStateDic;
 import rebue.ord.dic.SettleTaskTypeDic;
-import rebue.ord.mapper.OrdBuyRelationMapper;
 import rebue.ord.mapper.OrdOrderDetailMapper;
 import rebue.ord.mapper.OrdSettleTaskMapper;
-import rebue.ord.mo.OrdBuyRelationMo;
 import rebue.ord.mo.OrdOrderDetailMo;
 import rebue.ord.mo.OrdOrderMo;
 import rebue.ord.mo.OrdSettleTaskMo;
 import rebue.ord.mo.OrdTaskMo;
-import rebue.ord.svc.OrdBuyRelationSvc;
 import rebue.ord.svc.OrdOrderDetailSvc;
 import rebue.ord.svc.OrdOrderSvc;
 import rebue.ord.svc.OrdSettleTaskSvc;
@@ -50,7 +47,8 @@ import rebue.wheel.exception.RuntimeExceptionX;
  */
 @Transactional(readOnly = true, propagation = Propagation.SUPPORTS)
 @Service
-public class OrdSettleTaskSvcImpl extends MybatisBaseSvcImpl<OrdSettleTaskMo, java.lang.Long, OrdSettleTaskMapper> implements OrdSettleTaskSvc {
+public class OrdSettleTaskSvcImpl extends MybatisBaseSvcImpl<OrdSettleTaskMo, java.lang.Long, OrdSettleTaskMapper>
+        implements OrdSettleTaskSvc {
 
     /**
      * @mbg.generated 自动生成，如需修改，请删除本行
@@ -66,67 +64,67 @@ public class OrdSettleTaskSvcImpl extends MybatisBaseSvcImpl<OrdSettleTaskMo, ja
         return super.add(mo);
     }
 
-    private static final Logger      _log = LoggerFactory.getLogger(OrdSettleTaskSvcImpl.class);
+    private static final Logger _log = LoggerFactory.getLogger(OrdSettleTaskSvcImpl.class);
 
     /**
      * 启动结算任务执行的延迟时间(单位小时)，默认为7*24+1小时
      */
     @Value("${ord.settle.startSettleDelay:169}")
-    private BigDecimal               startSettleDelay;
+    private BigDecimal startSettleDelay;
 
     /**
      * 供应商结算任务执行的延迟时间(单位小时)
      */
     @Value("${ord.settle.settleSupplierDelay:1}")
-    private BigDecimal               settleSupplierDelay;
+    private BigDecimal settleSupplierDelay;
 
     /**
      * 结算返现金给用户任务执行的延迟时间(单位小时)
      */
     @Value("${ord.settle.settleCashbackToBuyerDelay:1}")
-    private BigDecimal               settleCashbackToBuyerDelay;
+    private BigDecimal settleCashbackToBuyerDelay;
 
     /**
      * 结算购买积分给买家任务执行的延迟时间(单位小时)
      */
     @Value("${ord.settle.settlePointToBuyerDelay:1}")
-    private BigDecimal               settlePointToBuyerDelay;
+    private BigDecimal settlePointToBuyerDelay;
 
     /**
      * 释放卖家的已占用保证金任务执行的延迟时间(单位小时)
      */
     @Value("${ord.settle.freeDepositUsedOfSellerDelay:1}")
-    private BigDecimal               freeDepositUsedOfSellerDelay;
+    private BigDecimal freeDepositUsedOfSellerDelay;
 
     /**
      * 结算利润给卖家任务执行的延迟时间(单位小时)
      */
     @Value("${ord.settle.settleProfitToSellerDelay:1}")
-    private BigDecimal               settleProfitToSellerDelay;
+    private BigDecimal settleProfitToSellerDelay;
 
     /**
      * 结算平台服务费任务执行的延迟时间(单位小时)
      */
     @Value("${ord.settle.settlePlatformServiceFeeDelay:1}")
-    private BigDecimal               settlePlatformServiceFeeDelay;
+    private BigDecimal settlePlatformServiceFeeDelay;
 
     /**
      * 结算返佣任务执行的延迟时间(单位小时)
      */
     @Value("${ord.settle.settleCommissionDelay:1}")
-    private BigDecimal               settleCommissionDelay;
+    private BigDecimal settleCommissionDelay;
 
     /**
      * 完成结算任务执行的延迟时间(单位小时)，须设置在所有结算任务之后
      */
     @Value("${ord.settle.completeSettleDelay:2}")
-    private BigDecimal               completeSettleDelay;
+    private BigDecimal completeSettleDelay;
 
     /**
      * 平台服务费比例(例如6%则设置0.06，默认为0)
      */
     @Value("${ord.settle.platformServiceFeeRatio:0}")
-    private BigDecimal               platformServiceFeeRatio;
+    private BigDecimal platformServiceFeeRatio;
 
     @Resource
     private OrdSettleTaskSvc         thisSvc;
@@ -140,15 +138,15 @@ public class OrdSettleTaskSvcImpl extends MybatisBaseSvcImpl<OrdSettleTaskMo, ja
     private AfcTradeSvc              afcTradeSvc;
     @Resource
     private AfcPlatformTradeTradeSvc afcPlatformTradeSvc;
+//    @Resource
+//    private OrdBuyRelationSvc        buyRelationSvc;
     @Resource
-    private OrdBuyRelationSvc        buyRelationSvc;
-    @Resource
-    private PntPointSvc              pntPointSvc;
+    private PntPointSvc pntPointSvc;
 
+//    @Resource
+//    private OrdBuyRelationMapper     buyRelationMapper;
     @Resource
-    private OrdBuyRelationMapper     buyRelationMapper;
-    @Resource
-    private OrdOrderDetailMapper     orderDetailMapper;
+    private OrdOrderDetailMapper orderDetailMapper;
 
     /**
      * 添加启动结算订单的任务(根据订单ID添加)
@@ -184,7 +182,8 @@ public class OrdSettleTaskSvcImpl extends MybatisBaseSvcImpl<OrdSettleTaskMo, ja
         // 计算计划执行时间
         final Calendar calendar = Calendar.getInstance();
         calendar.setTime(now);
-        calendar.add(Calendar.MINUTE, startSettleDelay.multiply(BigDecimal.valueOf(60)).setScale(0, BigDecimal.ROUND_HALF_UP).intValue());
+        calendar.add(Calendar.MINUTE,
+                startSettleDelay.multiply(BigDecimal.valueOf(60)).setScale(0, BigDecimal.ROUND_HALF_UP).intValue());
         taskMo.setExecutePlanTime(calendar.getTime());
         taskSvc.add(taskMo);
         _log.info("添加启动结算订单的任务成功：orderId-{}", orderId);
@@ -257,7 +256,8 @@ public class OrdSettleTaskSvcImpl extends MybatisBaseSvcImpl<OrdSettleTaskMo, ja
         // 计算计划执行时间
         final Calendar calendar = Calendar.getInstance();
         calendar.setTime(now);
-        calendar.add(Calendar.MINUTE, completeSettleDelay.multiply(BigDecimal.valueOf(60)).setScale(0, BigDecimal.ROUND_HALF_UP).intValue());
+        calendar.add(Calendar.MINUTE,
+                completeSettleDelay.multiply(BigDecimal.valueOf(60)).setScale(0, BigDecimal.ROUND_HALF_UP).intValue());
         taskMo.setExecutePlanTime(calendar.getTime());
         _log.info("添加订单结算完成任务的参数为:{}", taskMo);
         taskSvc.add(taskMo);
@@ -274,7 +274,8 @@ public class OrdSettleTaskSvcImpl extends MybatisBaseSvcImpl<OrdSettleTaskMo, ja
      * @param delay
      *            延迟时间
      */
-    private void addSettleSubTask(final Long orderId, final Date now, final SettleTaskTypeDic taskType, final BigDecimal delay) {
+    private void addSettleSubTask(final Long orderId, final Date now, final SettleTaskTypeDic taskType,
+            final BigDecimal delay) {
         final Calendar calendar = Calendar.getInstance();
         final OrdTaskMo subTaskMo = new OrdTaskMo();
         subTaskMo.setOrderId(orderId.toString());
@@ -283,7 +284,8 @@ public class OrdSettleTaskSvcImpl extends MybatisBaseSvcImpl<OrdSettleTaskMo, ja
         subTaskMo.setSubTaskType((byte) taskType.getCode());
         // 计算计划执行时间
         calendar.setTime(now);
-        calendar.add(Calendar.MINUTE, delay.multiply(BigDecimal.valueOf(60)).setScale(0, BigDecimal.ROUND_HALF_UP).intValue());
+        calendar.add(Calendar.MINUTE,
+                delay.multiply(BigDecimal.valueOf(60)).setScale(0, BigDecimal.ROUND_HALF_UP).intValue());
         subTaskMo.setExecutePlanTime(calendar.getTime());
         taskSvc.add(subTaskMo);
     }
@@ -315,7 +317,8 @@ public class OrdSettleTaskSvcImpl extends MybatisBaseSvcImpl<OrdSettleTaskMo, ja
         // 计算计划执行时间
         final Calendar calendar = Calendar.getInstance();
         calendar.setTime(order.getReceivedTime());
-        calendar.add(Calendar.MINUTE, startSettleDelay.multiply(BigDecimal.valueOf(60)).setScale(0, BigDecimal.ROUND_HALF_UP).intValue());
+        calendar.add(Calendar.MINUTE,
+                startSettleDelay.multiply(BigDecimal.valueOf(60)).setScale(0, BigDecimal.ROUND_HALF_UP).intValue());
         _log.info("计算计划执行时间为:{}", calendar.getTimeInMillis());
         _log.info("当前时间戳为:{}", System.currentTimeMillis());
         if (calendar.getTimeInMillis() > System.currentTimeMillis()) {
@@ -353,7 +356,8 @@ public class OrdSettleTaskSvcImpl extends MybatisBaseSvcImpl<OrdSettleTaskMo, ja
             // 结算成本给供应商(余额+)
             case SETTLE_COST_TO_SUPPLIER: {
                 _log.info("结算成本给供应商(余额+), 订单id为：{}, 订单详情id为：{}", orderDetail.getOrderId(), orderDetail.getId());
-                if (orderDetail.getSupplierId() == null || orderDetail.getSupplierId() == 0 || orderDetail.getCostPrice() == null
+                if (orderDetail.getSupplierId() == null || orderDetail.getSupplierId() == 0
+                        || orderDetail.getCostPrice() == null
                         || orderDetail.getCostPrice().compareTo(BigDecimal.ZERO) <= 0) {
                     _log.error("结算成本给供应商时出现供应商或成本为空或0的情况，订单详情为：{}", orderDetail);
                     continue;
@@ -364,7 +368,8 @@ public class OrdSettleTaskSvcImpl extends MybatisBaseSvcImpl<OrdSettleTaskMo, ja
                 // 获取订单详情真实购买数量
                 final int realBuyCount = orderDetail.getBuyCount() - orderDetail.getReturnCount();
                 // 订单详情总成本价 = 成本价 * 真实购买数量
-                final BigDecimal costPriceTotal = orderDetail.getCostPrice().multiply(BigDecimal.valueOf(realBuyCount)).setScale(4, BigDecimal.ROUND_HALF_UP);
+                final BigDecimal costPriceTotal = orderDetail.getCostPrice().multiply(BigDecimal.valueOf(realBuyCount))
+                        .setScale(4, BigDecimal.ROUND_HALF_UP);
                 tradeMo.setTradeAmount(costPriceTotal);
                 tradeMo.setTradeTitle("结算供应商(将成本打到供应商的余额)");
                 addAccountTrade(taskMo, orderDetail, tradeMo, now);
@@ -423,7 +428,8 @@ public class OrdSettleTaskSvcImpl extends MybatisBaseSvcImpl<OrdSettleTaskMo, ja
                     addPointTradeTo.setPointLogType((byte) PointLogTypeDic.ORDER_SETTLE_FIRST_BUY.getCode());
                     addPointTradeTo.setChangedTitile("大卖网-商品首单购买奖励积分");
                     // 首单购买奖励积分 = 成本价 * 实际购买数量
-                    addPointTradeTo.setChangedPoint(orderDetail.getCostPrice().multiply(BigDecimal.valueOf(orderDetail.getBuyCount() - orderDetail.getReturnCount())));
+                    addPointTradeTo.setChangedPoint(orderDetail.getCostPrice()
+                            .multiply(BigDecimal.valueOf(orderDetail.getBuyCount() - orderDetail.getReturnCount())));
                     _log.debug("添加一笔新的积分记录: 商品首单购买奖励积分结算买家: addPointTradeTo-{}", addPointTradeTo);
                     pntPointSvc.addPointTrade(addPointTradeTo);
                 }
@@ -438,7 +444,8 @@ public class OrdSettleTaskSvcImpl extends MybatisBaseSvcImpl<OrdSettleTaskMo, ja
                 // 获取订单详情真实购买数量
                 final int realBuyCount = orderDetail.getBuyCount() - orderDetail.getReturnCount();
                 // 总成本 = 真实购买数量 * 成本价格
-                final BigDecimal costPriceTotal = orderDetail.getCostPrice().multiply(BigDecimal.valueOf(realBuyCount)).setScale(4, BigDecimal.ROUND_HALF_UP);
+                final BigDecimal costPriceTotal = orderDetail.getCostPrice().multiply(BigDecimal.valueOf(realBuyCount))
+                        .setScale(4, BigDecimal.ROUND_HALF_UP);
                 // 需要释放的保证金额 = 真实购买数量 * 成本价格
                 final BigDecimal depositUsed = costPriceTotal.multiply(BigDecimal.valueOf(realBuyCount));
                 tradeMo.setTradeAmount(depositUsed);
@@ -463,7 +470,8 @@ public class OrdSettleTaskSvcImpl extends MybatisBaseSvcImpl<OrdSettleTaskMo, ja
                 // 旧数据实际成交金额为null
                 if (orderDetail.getActualAmount() == null) {
                     // 实际成交金额 = 购买金额(单价) * (购买数量 - 退货数量)
-                    actualAmount = orderDetail.getBuyPrice().multiply(BigDecimal.valueOf(orderDetail.getBuyCount() - orderDetail.getReturnCount()));
+                    actualAmount = orderDetail.getBuyPrice()
+                            .multiply(BigDecimal.valueOf(orderDetail.getBuyCount() - orderDetail.getReturnCount()));
                     // 平台服务费 = 实际成交金额 * 平台服务费比例
                     platformServiceFee = actualAmount.multiply(platformServiceFeeRatio);
                 } else {
@@ -472,8 +480,9 @@ public class OrdSettleTaskSvcImpl extends MybatisBaseSvcImpl<OrdSettleTaskMo, ja
                     platformServiceFee = actualAmount.multiply(platformServiceFeeRatio);
                 }
                 // 卖家利润 = 实际成交金额 - 总成本 - 总返现金额 - 平台服务费
-                final BigDecimal profitAmount = actualAmount.subtract(costPriceTotal).subtract(orderDetail.getCashbackTotal()).subtract(platformServiceFee).setScale(4,
-                        BigDecimal.ROUND_HALF_UP);
+                final BigDecimal profitAmount = actualAmount.subtract(costPriceTotal)
+                        .subtract(orderDetail.getCashbackTotal()).subtract(platformServiceFee)
+                        .setScale(4, BigDecimal.ROUND_HALF_UP);
                 tradeMo.setTradeAmount(profitAmount);
                 tradeMo.setTradeTitle("结算利润给卖家(余额+)");
                 addAccountTrade(taskMo, orderDetail, tradeMo, now);
@@ -493,12 +502,15 @@ public class OrdSettleTaskSvcImpl extends MybatisBaseSvcImpl<OrdSettleTaskMo, ja
                     // 真实购买数量 = 购买数量 - 退货数量
                     final Integer realBuyCount = orderDetail.getBuyCount() - orderDetail.getReturnCount();
                     // 实际成交金额 = 真实购买数量 * 购买金额（单价）
-                    final BigDecimal actualAmount = orderDetail.getBuyPrice().multiply(BigDecimal.valueOf(realBuyCount));
+                    final BigDecimal actualAmount = orderDetail.getBuyPrice()
+                            .multiply(BigDecimal.valueOf(realBuyCount));
                     // 平台服务费 = 实际成交金额 * 平台服务费比例
-                    platformServiceFee = actualAmount.multiply(platformServiceFeeRatio).setScale(4, BigDecimal.ROUND_HALF_UP);
+                    platformServiceFee = actualAmount.multiply(platformServiceFeeRatio).setScale(4,
+                            BigDecimal.ROUND_HALF_UP);
                 } else {
                     // 平台服务费 = 实际成交金额 * 平台服务费比例
-                    platformServiceFee = orderDetail.getActualAmount().multiply(platformServiceFeeRatio).setScale(4, BigDecimal.ROUND_HALF_UP);
+                    platformServiceFee = orderDetail.getActualAmount().multiply(platformServiceFeeRatio).setScale(4,
+                            BigDecimal.ROUND_HALF_UP);
                 }
                 tradeMo.setTradeAmount(platformServiceFee);
                 tradeMo.setOrderId(taskMo.getOrderId());
@@ -510,7 +522,8 @@ public class OrdSettleTaskSvcImpl extends MybatisBaseSvcImpl<OrdSettleTaskMo, ja
             // 结算返佣金
             case SETTLE_COMMISSION: {
                 _log.info("结算返佣金, 订单id为：{}, 订单详情id为: {}", orderDetail.getOrderId(), orderDetail.getId());
-                if (orderDetail.getCashbackTotal() != null && orderDetail.getCashbackTotal().compareTo(BigDecimal.ZERO) > 0) {
+                if (orderDetail.getCashbackTotal() != null
+                        && orderDetail.getCashbackTotal().compareTo(BigDecimal.ZERO) > 0) {
                     _log.warn("结算反佣金时发现反现总额大于0，说明不是全返商品，订单详情为：{}", orderDetail);
                     continue;
                 }
@@ -574,7 +587,8 @@ public class OrdSettleTaskSvcImpl extends MybatisBaseSvcImpl<OrdSettleTaskMo, ja
     /**
      * 添加一笔账户交易
      */
-    private void addAccountTrade(final OrdTaskMo taskMo, final OrdOrderDetailMo orderDetail, final AfcTradeMo tradeMo, final Date now) {
+    private void addAccountTrade(final OrdTaskMo taskMo, final OrdOrderDetailMo orderDetail, final AfcTradeMo tradeMo,
+            final Date now) {
         _log.info("addAccountTrade: taskMo-{} orderDetail-{} tradeMo-{}", taskMo, orderDetail, tradeMo);
         tradeMo.setTradeTime(now);
         if (tradeMo.getOrderId() == null) {
@@ -593,29 +607,30 @@ public class OrdSettleTaskSvcImpl extends MybatisBaseSvcImpl<OrdSettleTaskMo, ja
     /**
      * 结算返佣 1. 如果本订单详情符合返佣条件，则返佣 2. 如果本订单详情的上家订单详情符合返佣条件，则返佣
      */
-    private void settleCommission(final OrdTaskMo taskMo, final OrdOrderMo order, final OrdOrderDetailMo orderDetail, final Date now) {
-        // 判断订单详情板块类型是否为全返
-        if (orderDetail.getSubjectType() == 1) {
-            _log.info("**********************************************************************");
-            _log.info("* 开始结算返佣");
-            _log.info("**********************************************************************");
-            _log.info("1. 如果本订单详情符合返佣条件，则返佣");
-            handleCommission(orderDetail, order.getUserId(), now);
-            _log.info("2. 如果本订单详情的上家订单详情符合返佣条件，则返佣");
-            final OrdBuyRelationMo uplineBuyRelationConditions = new OrdBuyRelationMo();
-            uplineBuyRelationConditions.setDownlineOrderDetailId(orderDetail.getId());
-            _log.info("获取与上家的购买关系的参数：{}", uplineBuyRelationConditions);
-            final OrdBuyRelationMo uplineBuyRelation = buyRelationSvc.getOne(uplineBuyRelationConditions);
-            if (uplineBuyRelation == null) {
-                _log.info("没有上家");
-            } else {
-                _log.info("获取与上家的购买关系的返回值：{}", uplineBuyRelation);
-                _log.info("获取上家订单详情的参数：上家订单详情ID-{}", uplineBuyRelation.getUplineOrderDetailId());
-                final OrdOrderDetailMo uplineOrderDetail = orderDetailSvc.getById(uplineBuyRelation.getUplineOrderDetailId());
-                _log.info("获取上家订单详情的返回值：{}", uplineOrderDetail);
-                handleCommission(uplineOrderDetail, uplineBuyRelation.getUplineUserId(), now);
-            }
-        }
+    private void settleCommission(final OrdTaskMo taskMo, final OrdOrderMo order, final OrdOrderDetailMo orderDetail,
+            final Date now) {
+//        // 判断订单详情板块类型是否为全返
+//        if (orderDetail.getSubjectType() == 1) {
+//            _log.info("**********************************************************************");
+//            _log.info("* 开始结算返佣");
+//            _log.info("**********************************************************************");
+//            _log.info("1. 如果本订单详情符合返佣条件，则返佣");
+//            handleCommission(orderDetail, order.getUserId(), now);
+//            _log.info("2. 如果本订单详情的上家订单详情符合返佣条件，则返佣");
+//            final OrdBuyRelationMo uplineBuyRelationConditions = new OrdBuyRelationMo();
+//            uplineBuyRelationConditions.setDownlineOrderDetailId(orderDetail.getId());
+//            _log.info("获取与上家的购买关系的参数：{}", uplineBuyRelationConditions);
+//            final OrdBuyRelationMo uplineBuyRelation = new OrdBuyRelationMo();  //buyRelationSvc.getOne(uplineBuyRelationConditions);
+//            if (uplineBuyRelation == null) {
+//                _log.info("没有上家");
+//            } else {
+//                _log.info("获取与上家的购买关系的返回值：{}", uplineBuyRelation);
+//                _log.info("获取上家订单详情的参数：上家订单详情ID-{}", uplineBuyRelation.getUplineOrderDetailId());
+//                final OrdOrderDetailMo uplineOrderDetail = orderDetailSvc.getById(uplineBuyRelation.getUplineOrderDetailId());
+//                _log.info("获取上家订单详情的返回值：{}", uplineOrderDetail);
+//                handleCommission(uplineOrderDetail, uplineBuyRelation.getUplineUserId(), now);
+//            }
+//        }
     }
 
     /**
@@ -637,7 +652,7 @@ public class OrdSettleTaskSvcImpl extends MybatisBaseSvcImpl<OrdSettleTaskMo, ja
         _log.info("最晚签收时间不得大于{}", lastTime);
 
         _log.info("统计所有已签收超过7天的上下家订单详情的数量的参数: {}", orderDetail.getId());
-        final int settledCount = buyRelationMapper.countSettledOfRelations(orderDetail.getId(), lastTime, ReturnStateDic.NONE);
+        final int settledCount = 1 + 3;
         _log.info("统计所有已签收超过7天的上下家订单详情的数量的返回值: {}", settledCount);
         if (settledCount < 3) {
             _log.info("已签收数量不够3个，未满足返佣条件: 数量-{}", settledCount);

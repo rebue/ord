@@ -1,4 +1,5 @@
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 	<modelVersion>4.0.0</modelVersion>
 
@@ -16,10 +17,10 @@
 	<modules>
 		<module>ord-gen</module>
 		<module>ord-api</module>
- 		<module>ord-bll</module> 
+		<module>ord-bll</module>
 		<module>ord-svr</module>
 		<module>ord-svr-feign</module>
-		<module>ord-scheduler-svr</module> 
+		<module>ord-scheduler-svr</module>
 	</modules>
 
 	<dependencyManagement>
@@ -43,6 +44,11 @@
 			<dependency>
 				<groupId>com.github.rebue.ord</groupId>
 				<artifactId>ord-svr-feign</artifactId>
+				<version>1.0.9</version>
+			</dependency>
+			<dependency>
+				<groupId>com.github.rebue.ibr</groupId>
+				<artifactId>ibr-svr-feign</artifactId>
 				<version>1.0.9</version>
 			</dependency>
 			<dependency>

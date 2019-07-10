@@ -9,8 +9,11 @@ import com.github.pagehelper.PageInfo;
 import rebue.ord.jo.OrdOrderDetailJo;
 import rebue.ord.mo.OrdOrderDetailMo;
 import rebue.ord.ro.DetailandBuyRelationRo;
+import rebue.ord.ro.ShiftOrderRo;
 import rebue.ord.ro.WaitingBuyPointByUserIdListRo;
+import rebue.ord.to.ModifyInviteIdTo;
 import rebue.ord.to.UpdateOrgTo;
+import rebue.robotech.ro.Ro;
 import rebue.robotech.svc.BaseSvc;
 
 /**
@@ -25,8 +28,9 @@ public interface OrdOrderDetailSvc extends BaseSvc<java.lang.Long, OrdOrderDetai
      */
     List<OrdOrderDetailMo> listByOrderId(Long orderId);
 
-    // 
-    int modifyReturn(Integer returnTotal, BigDecimal newCashbackTotal, Byte returnState, Long whereDetailId, Integer whereReturnedCount, BigDecimal whereOldCashbackTotal);
+    //
+    int modifyReturn(Integer returnTotal, BigDecimal newCashbackTotal, Byte returnState, Long whereDetailId,
+            Integer whereReturnedCount, BigDecimal whereOldCashbackTotal);
 
     /**
      * 根据详情ID修改退货状态 Title: modifyReturnStateById Description:
@@ -57,14 +61,29 @@ public interface OrdOrderDetailSvc extends BaseSvc<java.lang.Long, OrdOrderDetai
     OrdOrderDetailMo getAndUpdateBuyRelationByFour(Map<String, Object> map);
 
     List<DetailandBuyRelationRo> listBuyRelationByOrderId(Long orderId);
-    
-    
+
     /**
-     * 获取正确匹配的详情
+     * 匹配正确购买详情
+     * 
      * @param map
      * @return
      */
-    OrdOrderDetailMo getCorrectMatchOrderDetail(Map<String, Object> map);
+    Ro matchBuyRelation(long id, long InviteId, BigDecimal buyPrice, long downLineDetailId, long downLineOrderId,
+            long orderTimestamp);
+
+    /**
+     * 匹配给自己或者是邀请人
+     * 
+     * @param id
+     * @param InviteId
+     * @param buyPrice
+     * @param downLineDetailId
+     * @param downLineOrderId
+     * @param orderTimestamp
+     * @return
+     */
+    boolean matchOwnOrInviter(long id, long InviteId, BigDecimal buyPrice, long downLineDetailId, long downLineOrderId,
+            long orderTimestamp);
 
     /**
      * 得到买家已下单指定上线规格商品的数量(以此来限制买家购买)
@@ -91,7 +110,8 @@ public interface OrdOrderDetailSvc extends BaseSvc<java.lang.Long, OrdOrderDetai
      * @param returnTotal
      * @return
      */
-    int modifyReturnNumAndCashbackTotal(Long id, BigDecimal oldCashbackTotal, BigDecimal newCashbackTotal, Integer returnedCount, Integer returnTotal);
+    int modifyReturnNumAndCashbackTotal(Long id, BigDecimal oldCashbackTotal, BigDecimal newCashbackTotal,
+            Integer returnedCount, Integer returnTotal);
 
     /**
      * 修改订单详情实际金额和退货状态
@@ -103,7 +123,8 @@ public interface OrdOrderDetailSvc extends BaseSvc<java.lang.Long, OrdOrderDetai
      * @param returnedState
      * @return
      */
-    int modifyActualAmountANDReturnState(Long id, BigDecimal newActualAmount, BigDecimal oldActualAmount, Byte returnState, Byte returnedState, BigDecimal realBuyPointTotal);
+    int modifyActualAmountANDReturnState(Long id, BigDecimal newActualAmount, BigDecimal oldActualAmount,
+            Byte returnState, Byte returnedState, BigDecimal realBuyPointTotal);
 
     /**
      * 根据id修改供应商id
@@ -133,34 +154,35 @@ public interface OrdOrderDetailSvc extends BaseSvc<java.lang.Long, OrdOrderDetai
 
     /**
      * 根据用户id计算待入账的积分
+     * 
      * @param userId
      * @return
      */
-	BigDecimal countWaitingBuyPointByUserId(Long userId);
+    BigDecimal countWaitingBuyPointByUserId(Long userId);
 
-	/**
-	 * 获取用户待入积分
-	 * @param userId
-	 * @param pageNum
-	 * @param pageSize
-	 * @return
-	 */
-	PageInfo<WaitingBuyPointByUserIdListRo> waitingBuyPointByUserIdList(Long userId, Integer pageNum, Integer pageSize);
-	
-	/**
-	 * 根据上线id修改订单详情供应商和发货组织
-	 * @param mo
-	 * @return
-	 */
-	 int modifyDeliverAndSupplierByOnlineid(Long supplierId,Long deliverOrgId,Long onlineId);
+    /**
+     * 获取用户待入积分
+     * 
+     * @param userId
+     * @param pageNum
+     * @param pageSize
+     * @return
+     */
+    PageInfo<WaitingBuyPointByUserIdListRo> waitingBuyPointByUserIdList(Long userId, Integer pageNum, Integer pageSize);
 
-	 /**
-	 * 补偿双倍积分
-	 */
-	void compensatePoint();
-	
+    /**
+     * 根据上线id修改订单详情供应商和发货组织
+     * 
+     * @param mo
+     * @return
+     */
+    int modifyDeliverAndSupplierByOnlineid(Long supplierId, Long deliverOrgId, Long onlineId);
 
-	
+    /**
+     * 补偿双倍积分
+     */
+    void compensatePoint();
+
     /**
      * 根据订单id，上线id，规格id去修改订单状态
      *
@@ -173,6 +195,16 @@ public interface OrdOrderDetailSvc extends BaseSvc<java.lang.Long, OrdOrderDetai
      * @return
      */
     int updateIsDeliver(Long orderId, Long onlineId, Long onlineSpecId);
-    
-	int modifyUserIdByOrderId(Long orderId, Long userId);
+
+    int modifyUserIdByOrderId(Long orderId, Long userId);
+
+    /**
+     * 根据订单详情id修改订单详情邀请人id
+     * 
+     * @param id
+     * @param inviteId
+     * @return
+     */
+    ShiftOrderRo modifyInviteId(List<ModifyInviteIdTo> modifyInviteIdList);
+
 }

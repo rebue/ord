@@ -27,6 +27,11 @@
 		</dependency>
 
 		<dependency>
+			<groupId>com.github.rebue.ibr</groupId>
+			<artifactId>ibr-svr-feign</artifactId>
+		</dependency>
+
+		<dependency>
 			<groupId>com.github.rebue.robotech</groupId>
 			<artifactId>robotech-bll</artifactId>
 		</dependency>
