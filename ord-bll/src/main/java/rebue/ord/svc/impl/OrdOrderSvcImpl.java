@@ -65,12 +65,14 @@ import rebue.ord.dic.ShipmentConfirmationDic;
 import rebue.ord.mapper.OrdOrderMapper;
 import rebue.ord.mo.OrdAddrMo;
 import rebue.ord.mo.OrdBuyRelationMo;
+import rebue.ord.mo.OrdGoodsBuyRelationMo;
 import rebue.ord.mo.OrdOrderDetailDeliverMo;
 import rebue.ord.mo.OrdOrderDetailMo;
 import rebue.ord.mo.OrdOrderMo;
 import rebue.ord.mo.OrdTaskMo;
 import rebue.ord.ro.BulkShipmentRo;
 import rebue.ord.ro.CancellationOfOrderRo;
+import rebue.ord.ro.DetailAndRelationRo;
 import rebue.ord.ro.ModifyOrderRealMoneyRo;
 import rebue.ord.ro.OrdBuyRelationRo;
 import rebue.ord.ro.OrdOrderRo;
@@ -83,6 +85,7 @@ import rebue.ord.ro.ShiftOrderRo;
 import rebue.ord.ro.ShipmentConfirmationRo;
 import rebue.ord.svc.OrdAddrSvc;
 import rebue.ord.svc.OrdBuyRelationSvc;
+import rebue.ord.svc.OrdGoodsBuyRelationSvc;
 import rebue.ord.svc.OrdOrderDetailDeliverSvc;
 import rebue.ord.svc.OrdOrderDetailSvc;
 import rebue.ord.svc.OrdOrderSvc;
@@ -120,7 +123,8 @@ import rebue.suc.svr.feign.SucUserSvc;
  */
 @Transactional(readOnly = true, propagation = Propagation.SUPPORTS)
 @Service
-public class OrdOrderSvcImpl extends MybatisBaseSvcImpl<OrdOrderMo, java.lang.Long, OrdOrderMapper> implements OrdOrderSvc {
+public class OrdOrderSvcImpl extends MybatisBaseSvcImpl<OrdOrderMo, java.lang.Long, OrdOrderMapper>
+        implements OrdOrderSvc {
 
     /**
      * @mbg.generated 自动生成，如需修改，请删除本行
@@ -145,73 +149,76 @@ public class OrdOrderSvcImpl extends MybatisBaseSvcImpl<OrdOrderMo, java.lang.Lo
      * 执行取消用户订单时间
      */
     @Value("${ord.testSupplierOrgId:-1}")
-    private Long                     testSupplierOrgId;
+    private Long testSupplierOrgId;
 
     /**
      * 执行取消用户订单时间
      */
     @Value("${ord.cancel-order-time}")
-    private int                      cancelOrderTime;
+    private int cancelOrderTime;
 
     /**
      * 执行用户订单签收时间
      */
     @Value("${ord.signin-order-time}")
-    private int                      signinOrderTime;
+    private int signinOrderTime;
 
     @Resource
-    private OrdAddrSvc               ordAddrSvc;
+    private OrdAddrSvc ordAddrSvc;
 
     @Resource
-    private OrdOrderDetailSvc        orderDetailSvc;
+    private OrdOrderDetailSvc orderDetailSvc;
 
     @Resource
-    private OrdReturnSvc             returnSvc;
+    private OrdReturnSvc returnSvc;
 
     @Resource
-    private OrdTaskSvc               ordTaskSvc;
+    private OrdTaskSvc ordTaskSvc;
 
     @Resource
-    private OnlOnlineSvc             onlineSvc;
+    private OnlOnlineSvc onlineSvc;
 
     @Resource
-    private OnlOnlineSpecSvc         onlOnlineSpecSvc;
+    private OnlOnlineSpecSvc onlOnlineSpecSvc;
 
     @Resource
-    private OnlCartSvc               onlCartSvc;
+    private OnlCartSvc onlCartSvc;
 
     @Resource
-    private KdiSvc                   kdiSvc;
+    private KdiSvc kdiSvc;
 
     @Resource
-    private OnlOnlinePicSvc          onlOnlinePicSvc;
+    private OnlOnlinePicSvc onlOnlinePicSvc;
 
     @Resource
-    private AfcRefundSvc             refundSvc;
+    private AfcRefundSvc refundSvc;
 
     @Resource
-    private SucUserSvc               sucUserSvc;
+    private SucUserSvc sucUserSvc;
 
     @Resource
-    private SucOrgSvc                sucOrgSvc;
+    private SucOrgSvc sucOrgSvc;
 
     @Resource
-    private OrdBuyRelationSvc        ordBuyRelationSvc;
+    private OrdBuyRelationSvc ordBuyRelationSvc;
 
     @Resource
-    private OrdOrderSvc              thisSvc;
+    private OrdOrderSvc thisSvc;
 
     @Resource
-    private OrdSettleTaskSvc         ordSettleTaskSvc;
+    private OrdSettleTaskSvc ordSettleTaskSvc;
 
     @Resource
-    private AfcRefundSvc             afcRefundSvc;
+    private AfcRefundSvc afcRefundSvc;
 
     @Resource
     private OrdOrderDetailDeliverSvc ordOrderDetailDeliverSvc;
 
     @Resource
-    private Mapper                   dozerMapper;
+    private Mapper dozerMapper;
+
+    @Resource
+    private OrdGoodsBuyRelationSvc ordGoodsBuyRelationSvc;
 
     /**
      * 检查订单是否可结算 1. 订单必须存在 2. 订单必须处于签收状态 3. 订单必须已经记录签收时间 4. 已经超过订单启动结算的时间 5.
@@ -267,7 +274,8 @@ public class OrdOrderSvcImpl extends MybatisBaseSvcImpl<OrdOrderMo, java.lang.Lo
         _log.debug("遍历订单详情");
         for (final OrderDetailTo orderDetailTo : to.getDetails()) {
             _log.debug("根据上线ID获取上线信息");
-            if (orderDetailTo.getOnlineId() == null || orderDetailTo.getOnlineSpecId() == null || orderDetailTo.getBuyCount() == null) {
+            if (orderDetailTo.getOnlineId() == null || orderDetailTo.getOnlineSpecId() == null
+                    || orderDetailTo.getBuyCount() == null) {
                 final String msg = "参数错误";
                 _log.error("{}: {}", msg, "上线ID/上线规格ID/购买数量不能为空 " + orderDetailTo);
                 ro.setResult(ResultDic.PARAM_ERROR);
@@ -314,7 +322,8 @@ public class OrdOrderSvcImpl extends MybatisBaseSvcImpl<OrdOrderMo, java.lang.Lo
             // 如果是限制购买的商品，同一用户的所有购买数量不能超过限制的数量
             if (onlineSpecMo.getLimitCount() > 0) {
                 // 计算更新后的库存
-                final int buyerOrderedCount = orderDetailSvc.getBuyerOrderedCount(to.getUserId(), orderDetailTo.getOnlineSpecId());
+                final int buyerOrderedCount = orderDetailSvc.getBuyerOrderedCount(to.getUserId(),
+                        orderDetailTo.getOnlineSpecId());
                 if (buyerOrderedCount + orderDetailTo.getBuyCount() > onlineSpecMo.getLimitCount()) {
                     final String msg = "已超过限购数量，不能再购买";
                     _log.error("{}: userId-{} onlineSpecId-{}", msg, to.getUserId(), orderDetailTo.getOnlineSpecId());
@@ -340,7 +349,8 @@ public class OrdOrderSvcImpl extends MybatisBaseSvcImpl<OrdOrderMo, java.lang.Lo
             orderDetailMo.setBuyPrice(onlineSpecMo.getSalePrice());
             orderDetailMo.setBuyCount(orderDetailTo.getBuyCount());
             // 计算实际价格=单价*数量
-            orderDetailMo.setActualAmount(onlineSpecMo.getSalePrice().multiply(BigDecimal.valueOf(orderDetailTo.getBuyCount())));
+            orderDetailMo.setActualAmount(
+                    onlineSpecMo.getSalePrice().multiply(BigDecimal.valueOf(orderDetailTo.getBuyCount())));
             orderDetailMo.setBuyUnit(onlineSpecMo.getSaleUnit());
             orderDetailMo.setCostPrice(onlineSpecMo.getCostPrice());
             orderDetailMo.setBuyPoint(onlineSpecMo.getBuyPoint());
@@ -361,12 +371,17 @@ public class OrdOrderSvcImpl extends MybatisBaseSvcImpl<OrdOrderMo, java.lang.Lo
             }
             if (OnlineSubjectTypeDic.NORMAL.getCode() == orderDetailMo.getSubjectType()) {
                 orderDetailMo.setCashbackAmount(onlineSpecMo.getCashbackAmount());
-                orderDetailMo.setCashbackTotal(BigDecimal.valueOf(orderDetailTo.getBuyCount()).multiply(onlineSpecMo.getCashbackAmount()));
-                orderDetailMo.setBuyPointTotal(onlineSpecMo.getBuyPoint().multiply(BigDecimal.valueOf(orderDetailTo.getBuyCount())));
+                orderDetailMo.setCashbackTotal(
+                        BigDecimal.valueOf(orderDetailTo.getBuyCount()).multiply(onlineSpecMo.getCashbackAmount()));
+                orderDetailMo.setBuyPointTotal(
+                        onlineSpecMo.getBuyPoint().multiply(BigDecimal.valueOf(orderDetailTo.getBuyCount())));
                 orderDetails.add(orderDetailMo);
             } else if (OnlineSubjectTypeDic.BACK_COMMISSION.getCode() == orderDetailMo.getSubjectType()) {
-                if (orderDetailTo.getInviteId() != null) {
+                if (orderDetailTo.isInviter() != false) {
+                    _log.debug("设置邀请人id-{}", orderDetailTo.isInviter());
                     orderDetailMo.setInviteId(orderDetailTo.getInviteId());
+                } else {
+                    _log.debug("不设置邀请人id-{}", orderDetailTo.isInviter());
                 }
                 orderDetailMo.setBuyCount(1);
                 orderDetailMo.setCommissionSlot((byte) 2);
@@ -430,7 +445,8 @@ public class OrdOrderSvcImpl extends MybatisBaseSvcImpl<OrdOrderMo, java.lang.Lo
             BigDecimal orderAmount = BigDecimal.ZERO;
             for (final OrdOrderDetailMo orderDetailMo : onlineOrg.getValue()) {
                 // 计算订单的下单金额
-                orderAmount = orderAmount.add(orderDetailMo.getBuyPrice().multiply(BigDecimal.valueOf(orderDetailMo.getBuyCount())));
+                orderAmount = orderAmount
+                        .add(orderDetailMo.getBuyPrice().multiply(BigDecimal.valueOf(orderDetailMo.getBuyCount())));
             }
             _log.debug("订单的下单金额为: {}", orderAmount);
             // 下单金额
@@ -511,8 +527,8 @@ public class OrdOrderSvcImpl extends MybatisBaseSvcImpl<OrdOrderMo, java.lang.Lo
      * 查询用户订单信息
      */
     @Override
-    public List<Map<String, Object>> selectOrderInfo(final Map<String, Object> map)
-            throws ParseException, IntrospectionException, IllegalAccessException, IllegalArgumentException, InvocationTargetException {
+    public List<Map<String, Object>> selectOrderInfo(final Map<String, Object> map) throws ParseException,
+            IntrospectionException, IllegalAccessException, IllegalArgumentException, InvocationTargetException {
         final List<Map<String, Object>> list = new ArrayList<>();
         _log.info("查询用户订单信息的参数为：{}", map.toString());
         final List<OrdOrderMo> orderList = _mapper.selectOrderInfo(map);
@@ -568,7 +584,8 @@ public class OrdOrderSvcImpl extends MybatisBaseSvcImpl<OrdOrderMo, java.lang.Lo
                 final List<OrderDetailRo> orderDetailRoList = new ArrayList<>();
                 for (final OrdOrderDetailMo orderDetailMo : orderDetailList) {
                     _log.info("查询用户订单信息开始获取商品主图");
-                    final List<OnlOnlinePicMo> onlinePicList = onlOnlinePicSvc.list(orderDetailMo.getOnlineId(), (byte) 1);
+                    final List<OnlOnlinePicMo> onlinePicList = onlOnlinePicSvc.list(orderDetailMo.getOnlineId(),
+                            (byte) 1);
                     _log.info("获取商品主图的返回值为{}", String.valueOf(onlinePicList));
                     _log.info("根据上线ID查找上线商品信息");
                     _log.info("参数 " + orderDetailMo.getOnlineId());
@@ -584,7 +601,8 @@ public class OrdOrderSvcImpl extends MybatisBaseSvcImpl<OrdOrderMo, java.lang.Lo
                     } else {
                         for (int j = 0; j < ordBuyRelationResult.size(); j++) {
                             _log.info("获取下家用户昵称及头像");
-                            final SucUserMo userMo = sucUserSvc.getById(ordBuyRelationResult.get(j).getDownlineUserId());
+                            final SucUserMo userMo = sucUserSvc
+                                    .getById(ordBuyRelationResult.get(j).getDownlineUserId());
                             if (userMo == null) {
                                 _log.info("用户信息为空");
                             } else {
@@ -617,8 +635,10 @@ public class OrdOrderSvcImpl extends MybatisBaseSvcImpl<OrdOrderMo, java.lang.Lo
                     orderDetailRo.setCashbackTotal(orderDetailMo.getCashbackTotal());
                     orderDetailRo.setCashbackCommissionSlot(orderDetailMo.getCommissionSlot());
                     orderDetailRo.setCashbackCommissionState(orderDetailMo.getCommissionState());
-                    orderDetailRo.setBuyPoint(orderDetailMo.getBuyPoint() == null ? BigDecimal.ZERO : orderDetailMo.getBuyPoint());
-                    orderDetailRo.setBuyPointTotal(orderDetailMo.getBuyPointTotal() == null ? BigDecimal.ZERO : orderDetailMo.getBuyPointTotal());
+                    orderDetailRo.setBuyPoint(
+                            orderDetailMo.getBuyPoint() == null ? BigDecimal.ZERO : orderDetailMo.getBuyPoint());
+                    orderDetailRo.setBuyPointTotal(orderDetailMo.getBuyPointTotal() == null ? BigDecimal.ZERO
+                            : orderDetailMo.getBuyPointTotal());
                     orderDetailRo.setPaySeq(orderDetailMo.getPaySeq());
                     orderDetailRoList.add(orderDetailRo);
                 }
@@ -676,8 +696,10 @@ public class OrdOrderSvcImpl extends MybatisBaseSvcImpl<OrdOrderMo, java.lang.Lo
             throw new RuntimeException("修改订单状态失败");
         }
         for (final OrdOrderDetailMo ordOrderDetailMo : orderDetailList) {
-            _log.info("取消订单根据上线规格id修改销售数量的参数为：onlineSpecId-{}, buyCount-{}", ordOrderDetailMo.getOnlineSpecId(), ordOrderDetailMo.getBuyCount());
-            final Ro modifySaleCountByIdResult = onlOnlineSpecSvc.modifySaleCountById(ordOrderDetailMo.getOnlineSpecId(), ordOrderDetailMo.getBuyCount());
+            _log.info("取消订单根据上线规格id修改销售数量的参数为：onlineSpecId-{}, buyCount-{}", ordOrderDetailMo.getOnlineSpecId(),
+                    ordOrderDetailMo.getBuyCount());
+            final Ro modifySaleCountByIdResult = onlOnlineSpecSvc
+                    .modifySaleCountById(ordOrderDetailMo.getOnlineSpecId(), ordOrderDetailMo.getBuyCount());
             _log.info("取消订单根据上线规格id修改销售数量的返回值为：{}", modifySaleCountByIdResult);
             if (modifySaleCountByIdResult.getResult() != ResultDic.SUCCESS) {
                 throw new RuntimeException("修改规格数量失败");
@@ -742,7 +764,8 @@ public class OrdOrderSvcImpl extends MybatisBaseSvcImpl<OrdOrderMo, java.lang.Lo
     public Ro cancelDelivery(final CancelDeliveryTo to) {
         _log.info("取消发货的请求参数为：{}", to);
         final Ro ro = new Ro();
-        if (to.getId() == null || to.getCancelingOrderOpId() == null || to.getCanceldeliReason() == null || to.getOpIp() == null) {
+        if (to.getId() == null || to.getCancelingOrderOpId() == null || to.getCanceldeliReason() == null
+                || to.getOpIp() == null) {
             ro.setResult(ResultDic.PARAM_ERROR);
             ro.setMsg("参数错误");
             return ro;
@@ -787,7 +810,8 @@ public class OrdOrderSvcImpl extends MybatisBaseSvcImpl<OrdOrderMo, java.lang.Lo
         }
         System.out.println("订单真实金额=" + ordOrderMo.getRealMoney() + ", 退货总额=" + ordOrderMo.getReturnTotal());
         // 订单真实购买金额 = 订单真实购买金额 - 退货总额
-        final BigDecimal realMoney = ordOrderMo.getRealMoney().subtract(ordOrderMo.getReturnTotal()).setScale(4, BigDecimal.ROUND_HALF_UP);
+        final BigDecimal realMoney = ordOrderMo.getRealMoney().subtract(ordOrderMo.getReturnTotal()).setScale(4,
+                BigDecimal.ROUND_HALF_UP);
         final RefundApprovedTo approvedTo = new RefundApprovedTo();
         approvedTo.setOrderId(ordOrderMo.getPayOrderId().toString());
         approvedTo.setIsAutoCalcRefund(true);
@@ -809,8 +833,10 @@ public class OrdOrderSvcImpl extends MybatisBaseSvcImpl<OrdOrderMo, java.lang.Lo
             throw new RuntimeException("退款失败");
         }
         for (final OrdOrderDetailMo ordOrderDetailMo : orderDetailList) {
-            _log.info("取消订单根据上线规格id修改销售数量的参数为：onlineSpecId-{}, buyCount-{}", ordOrderDetailMo.getOnlineSpecId(), ordOrderDetailMo.getBuyCount());
-            final Ro modifySaleCountByIdResult = onlOnlineSpecSvc.modifySaleCountById(ordOrderDetailMo.getOnlineSpecId(), ordOrderDetailMo.getBuyCount());
+            _log.info("取消订单根据上线规格id修改销售数量的参数为：onlineSpecId-{}, buyCount-{}", ordOrderDetailMo.getOnlineSpecId(),
+                    ordOrderDetailMo.getBuyCount());
+            final Ro modifySaleCountByIdResult = onlOnlineSpecSvc
+                    .modifySaleCountById(ordOrderDetailMo.getOnlineSpecId(), ordOrderDetailMo.getBuyCount());
             _log.info("取消订单根据上线规格id修改销售数量的返回值为：{}", modifySaleCountByIdResult);
         }
         _log.info("{}取消发货订单：{}成功", to.getCancelingOrderOpId(), to.getId());
@@ -872,7 +898,8 @@ public class OrdOrderSvcImpl extends MybatisBaseSvcImpl<OrdOrderMo, java.lang.Lo
 
             // 根据没有当前订单详情的所有未发货详情Id和当前被选择的详情Id长度是否相等来决定是否修改订单状态为已发货。
             if (to.getAllDetaile().size() == to.getSelectDetaile().size()) {
-                _log.debug("需要修改订单状态，订单所有未发货详情等于被选择的详情：AllDetaileId长度-{}, SelectDetailId长度-{}", to.getAllDetaile().size(), to.getSelectDetaile().size());
+                _log.debug("需要修改订单状态，订单所有未发货详情等于被选择的详情：AllDetaileId长度-{}, SelectDetailId长度-{}",
+                        to.getAllDetaile().size(), to.getSelectDetaile().size());
                 final OrdOrderMo ordOrderMo = new OrdOrderMo();
                 final Date date = new Date();
                 ordOrderMo.setSendOpId(to.getSendOpId());
@@ -886,7 +913,8 @@ public class OrdOrderSvcImpl extends MybatisBaseSvcImpl<OrdOrderMo, java.lang.Lo
                 }
                 _log.info("确认发货并修改订单状态成功，返回值为：{}", result);
             } else {
-                _log.info("不需要要修改订单状态，订单所有未发货详情不等于被选择的详情：AllDetaile长度-{}, SelectDetaile长度-{}", to.getAllDetaile().size(), to.getSelectDetaile().size());
+                _log.info("不需要要修改订单状态，订单所有未发货详情不等于被选择的详情：AllDetaile长度-{}, SelectDetaile长度-{}",
+                        to.getAllDetaile().size(), to.getSelectDetaile().size());
                 _log.info("确认发货成功");
             }
         } else {
@@ -947,7 +975,8 @@ public class OrdOrderSvcImpl extends MybatisBaseSvcImpl<OrdOrderMo, java.lang.Lo
 
             // 根据没有当前订单详情的所有未发货详情Id和当前被选择的详情Id长度是否相等来决定是否修改订单状态为已发货。
             if (to.getAllDetaile().size() == to.getSelectDetaile().size()) {
-                _log.debug("需要修改订单状态，订单所有未发货详情等于被选择的详情：AllDetaileId长度-{}, SelectDetailId长度-{}", to.getAllDetaile().size(), to.getSelectDetaile().size());
+                _log.debug("需要修改订单状态，订单所有未发货详情等于被选择的详情：AllDetaileId长度-{}, SelectDetailId长度-{}",
+                        to.getAllDetaile().size(), to.getSelectDetaile().size());
                 final OrdOrderMo ordOrderMo = new OrdOrderMo();
                 final Date date = new Date();
                 ordOrderMo.setSendOpId(to.getSendOpId());
@@ -961,7 +990,8 @@ public class OrdOrderSvcImpl extends MybatisBaseSvcImpl<OrdOrderMo, java.lang.Lo
                 }
                 _log.info("确认发货并修改订单状态成功，返回值为：{}", result);
             } else {
-                _log.info("不需要要修改订单状态，订单所有未发货详情不等于被选择的详情：AllDetaile长度-{}, SelectDetaile长度-{}", to.getAllDetaile().size(), to.getSelectDetaile().size());
+                _log.info("不需要要修改订单状态，订单所有未发货详情不等于被选择的详情：AllDetaile长度-{}, SelectDetaile长度-{}",
+                        to.getAllDetaile().size(), to.getSelectDetaile().size());
                 _log.info("确认发货成功");
             }
         } else {
@@ -1001,15 +1031,18 @@ public class OrdOrderSvcImpl extends MybatisBaseSvcImpl<OrdOrderMo, java.lang.Lo
             _log.info("获取订单id,上线id，上线规格id获取详情的参数：{}", orderDetailMo);
             final List<OrdOrderDetailMo> detailResult = orderDetailSvc.list(orderDetailMo);
             _log.info("获取订单id,上线id，上线规格id获取详情的结果为：{}", detailResult);
-            orderTitle += detailResult.get(0).getOnlineTitle() + detailResult.get(0).getSpecName() + "x" + detailResult.size();
+            orderTitle += detailResult.get(0).getOnlineTitle() + detailResult.get(0).getSpecName() + "x"
+                    + detailResult.size();
 
             // 修改详情的发货状态 和插入到发货表
             for (final OrdOrderDetailMo ordOrderDetailMo2 : detailResult) {
                 if (to.isFirst()) {
                     _log.info("首次订阅，需要修改详情 first: {}", to.isFirst());
                     // 修改详情的发货状态
-                    _log.info("修改订单详情发货状态的参数是：orderId：{}，onlineId：{}，onlineSpecId：{}", to.getId(), ordOrderDetailMo2.getOnlineId(), ordOrderDetailMo2.getOnlineSpecId());
-                    final int updateResult = orderDetailSvc.updateIsDeliver(to.getId(), ordOrderDetailMo2.getOnlineId(), ordOrderDetailMo2.getOnlineSpecId());
+                    _log.info("修改订单详情发货状态的参数是：orderId：{}，onlineId：{}，onlineSpecId：{}", to.getId(),
+                            ordOrderDetailMo2.getOnlineId(), ordOrderDetailMo2.getOnlineSpecId());
+                    final int updateResult = orderDetailSvc.updateIsDeliver(to.getId(), ordOrderDetailMo2.getOnlineId(),
+                            ordOrderDetailMo2.getOnlineSpecId());
                     _log.info("修改结果是 {}", updateResult);
                     if (updateResult < 1) {
                         _log.error("修改订单详情发货状态失败");
@@ -1080,7 +1113,8 @@ public class OrdOrderSvcImpl extends MybatisBaseSvcImpl<OrdOrderMo, java.lang.Lo
             to.setLogisticId(_idWorker.getId());
 
             // 设置订单标题，也就是orderTitle
-            to.setOrderTitle(detailResult.get(0).getOnlineTitle() + detailResult.get(0).getSpecName() + "x" + detailResult.size());
+            to.setOrderTitle(detailResult.get(0).getOnlineTitle() + detailResult.get(0).getSpecName() + "x"
+                    + detailResult.size());
 
             // 设置物流标号，因为和选择的详情一样长，所有选择i
             to.setLogisticCode(to.getLogisticCodeArr().get(i));
@@ -1097,8 +1131,10 @@ public class OrdOrderSvcImpl extends MybatisBaseSvcImpl<OrdOrderMo, java.lang.Lo
                 if (to.isFirst()) {
                     _log.info("首次订阅，需要修改详情 first: {}", to.isFirst());
                     // 修改详情的发货状态
-                    _log.info("修改订单详情发货状态的参数是：orderId：{}，onlineId：{}，onlineSpecId：{}", to.getId(), ordOrderDetailMo2.getOnlineId(), ordOrderDetailMo2.getOnlineSpecId());
-                    final int updateResult = orderDetailSvc.updateIsDeliver(to.getId(), ordOrderDetailMo2.getOnlineId(), ordOrderDetailMo2.getOnlineSpecId());
+                    _log.info("修改订单详情发货状态的参数是：orderId：{}，onlineId：{}，onlineSpecId：{}", to.getId(),
+                            ordOrderDetailMo2.getOnlineId(), ordOrderDetailMo2.getOnlineSpecId());
+                    final int updateResult = orderDetailSvc.updateIsDeliver(to.getId(), ordOrderDetailMo2.getOnlineId(),
+                            ordOrderDetailMo2.getOnlineSpecId());
                     _log.info("修改结果是 {}", updateResult);
                     if (updateResult < 1) {
                         _log.error("修改订单详情发货状态失败");
@@ -1215,7 +1251,8 @@ public class OrdOrderSvcImpl extends MybatisBaseSvcImpl<OrdOrderMo, java.lang.Lo
             _log.info("第四种获取方式循环开始---------------------");
 
             // 设置订单标题，也就是orderTitle
-            to.setOrderTitle(to.getSelectDetaile().get(i).getOnlineTitle() + to.getSelectDetaile().get(i).getSpecName() + "x" + to.getSelectDetaile().size());
+            to.setOrderTitle(to.getSelectDetaile().get(i).getOnlineTitle() + to.getSelectDetaile().get(i).getSpecName()
+                    + "x" + to.getSelectDetaile().size());
 
             // 提前设置物流id，提前设置是因为下面发货表需要用到且需要关联，所有在这里设置并传过去就不用在录入的时候返回回来
             to.setLogisticId(_idWorker.getId());
@@ -1362,8 +1399,10 @@ public class OrdOrderSvcImpl extends MybatisBaseSvcImpl<OrdOrderMo, java.lang.Lo
                     _log.info("是首次发货，需要修改订单详情状态 to.isFirst()：{}", to.isFirst());
 
                     // 修改详情的发货状态
-                    _log.info("修改订单详情发货状态的参数是：orderId：{}，onlineId：{}，onlineSpecId：{}", to.getId(), ordOrderDetailMo2.getOnlineId(), ordOrderDetailMo2.getOnlineSpecId());
-                    final int updateResult = orderDetailSvc.updateIsDeliver(to.getId(), ordOrderDetailMo2.getOnlineId(), ordOrderDetailMo2.getOnlineSpecId());
+                    _log.info("修改订单详情发货状态的参数是：orderId：{}，onlineId：{}，onlineSpecId：{}", to.getId(),
+                            ordOrderDetailMo2.getOnlineId(), ordOrderDetailMo2.getOnlineSpecId());
+                    final int updateResult = orderDetailSvc.updateIsDeliver(to.getId(), ordOrderDetailMo2.getOnlineId(),
+                            ordOrderDetailMo2.getOnlineSpecId());
                     _log.info("修改结果是 {}", updateResult);
                     if (updateResult < 1) {
                         _log.error("修改订单详情发货状态失败");
@@ -1428,9 +1467,11 @@ public class OrdOrderSvcImpl extends MybatisBaseSvcImpl<OrdOrderMo, java.lang.Lo
 
             // 拼接发货备注(也就是orderDetail)，先判断是否有留言
             if (to.getOrderMessages() != null) {
-                to.setOrderDetail(to.getOrderMessages() + "," + detailResult.get(0).getOnlineTitle() + "." + detailResult.get(0).getSpecName() + "x" + detailResult.size());
+                to.setOrderDetail(to.getOrderMessages() + "," + detailResult.get(0).getOnlineTitle() + "."
+                        + detailResult.get(0).getSpecName() + "x" + detailResult.size());
             } else {
-                to.setOrderDetail(detailResult.get(0).getOnlineTitle() + "." + detailResult.get(0).getSpecName() + "x" + detailResult.size());
+                to.setOrderDetail(detailResult.get(0).getOnlineTitle() + "." + detailResult.get(0).getSpecName() + "x"
+                        + detailResult.size());
             }
 
             // 添加签收任务并调用快递鸟
@@ -1442,8 +1483,10 @@ public class OrdOrderSvcImpl extends MybatisBaseSvcImpl<OrdOrderMo, java.lang.Lo
                 if (to.isFirst()) {
                     _log.info("是首次发货，需要修改订单详情状态 to.isFirst()：{}", to.isFirst());
 
-                    _log.info("修改订单详情发货状态的参数是：orderId：{}，onlineId：{}，onlineSpecId：{}", to.getId(), ordOrderDetailMo2.getOnlineId(), ordOrderDetailMo2.getOnlineSpecId());
-                    final int updateResult = orderDetailSvc.updateIsDeliver(to.getId(), ordOrderDetailMo2.getOnlineId(), ordOrderDetailMo2.getOnlineSpecId());
+                    _log.info("修改订单详情发货状态的参数是：orderId：{}，onlineId：{}，onlineSpecId：{}", to.getId(),
+                            ordOrderDetailMo2.getOnlineId(), ordOrderDetailMo2.getOnlineSpecId());
+                    final int updateResult = orderDetailSvc.updateIsDeliver(to.getId(), ordOrderDetailMo2.getOnlineId(),
+                            ordOrderDetailMo2.getOnlineSpecId());
                     _log.info("修改结果是 {}", updateResult);
                     if (updateResult < 1) {
                         _log.error("修改订单详情发货状态失败");
@@ -1565,10 +1608,12 @@ public class OrdOrderSvcImpl extends MybatisBaseSvcImpl<OrdOrderMo, java.lang.Lo
 
             // 拼接发货备注(也就是orderDetail)
             if (to.getOrderMessages() != null) {
-                to.setOrderDetail(to.getOrderMessages() + "," + OrdOrderDetailMo.getOnlineTitle() + "." + OrdOrderDetailMo.getSpecName() + "x" + OrdOrderDetailMo.getBuyCount());
+                to.setOrderDetail(to.getOrderMessages() + "," + OrdOrderDetailMo.getOnlineTitle() + "."
+                        + OrdOrderDetailMo.getSpecName() + "x" + OrdOrderDetailMo.getBuyCount());
 
             } else {
-                to.setOrderDetail(OrdOrderDetailMo.getOnlineTitle() + "." + OrdOrderDetailMo.getSpecName() + "x" + OrdOrderDetailMo.getBuyCount());
+                to.setOrderDetail(OrdOrderDetailMo.getOnlineTitle() + "." + OrdOrderDetailMo.getSpecName() + "x"
+                        + OrdOrderDetailMo.getBuyCount());
 
             }
 
@@ -1731,7 +1776,7 @@ public class OrdOrderSvcImpl extends MybatisBaseSvcImpl<OrdOrderMo, java.lang.Lo
         }
         final Long userId = order.getUserId();
         // final Long orderId = orderList.get(0).getId();
-        if (order.getOrderState() != OrderStateDic.DELIVERED.getCode() && order.getIsNowReceived() ==false ) {
+        if (order.getOrderState() != OrderStateDic.DELIVERED.getCode() && order.getIsNowReceived() == false) {
             _log.error("由于订单：{}处于非待签收状态，{}签收订单失败", orderId, userId);
             orderSignInRo.setResult(OrderSignInDic.CURRENT_STATE_NOT_EXIST_CANCEL);
             orderSignInRo.setMsg("当前状态不允许签收");
@@ -1777,7 +1822,8 @@ public class OrdOrderSvcImpl extends MybatisBaseSvcImpl<OrdOrderMo, java.lang.Lo
         orderMo.setUserId(userId);
         orderMo.setReceivedTime(date);
         orderMo.setReceivedOpId(userId);
-        orderMo.setOrderState(order.getIsNowReceived() ==false?(byte) OrderStateDic.DELIVERED.getCode():(byte) OrderStateDic.PAID.getCode());
+        orderMo.setOrderState(order.getIsNowReceived() == false ? (byte) OrderStateDic.DELIVERED.getCode()
+                : (byte) OrderStateDic.PAID.getCode());
         _log.info("订单签收的参数为：{}", orderMo);
         final int signInResult = _mapper.orderSignIn(orderMo);
         _log.info("订单签收的返回值为：{}", signInResult);
@@ -1789,7 +1835,7 @@ public class OrdOrderSvcImpl extends MybatisBaseSvcImpl<OrdOrderMo, java.lang.Lo
         _log.info("订单签收取消自动签收任务的参数为：{}", orderId);
         final Ro cancelTaskRo = ordTaskSvc.cancelTask(orderId, OrderTaskTypeDic.SIGNED);
         _log.info("订单签收取消自动签收任务的返回值为：{}", cancelTaskRo);
-        if (cancelTaskRo.getResult() != ResultDic.SUCCESS && order.getIsNowReceived() ==false ) {
+        if (cancelTaskRo.getResult() != ResultDic.SUCCESS && order.getIsNowReceived() == false) {
             _log.error("签收订单取消签收任务失败，订单id为：{}", orderId);
             throw new RuntimeException("签收错误");
         }
@@ -1816,8 +1862,10 @@ public class OrdOrderSvcImpl extends MybatisBaseSvcImpl<OrdOrderMo, java.lang.Lo
      */
     @Override
     @Transactional(readOnly = false, propagation = Propagation.REQUIRED)
-    public int modifyRefund(final BigDecimal refundTotal, final Byte orderState, final Long whereOrderId, final BigDecimal whereRefundedTotal) {
-        _log.info("修改退款金额(根据订单ID和已退款总额): 退款金额-{} 订单状态-{} 订单ID-{} 订单已退总额-{}", refundTotal, orderState, whereOrderId, whereRefundedTotal);
+    public int modifyRefund(final BigDecimal refundTotal, final Byte orderState, final Long whereOrderId,
+            final BigDecimal whereRefundedTotal) {
+        _log.info("修改退款金额(根据订单ID和已退款总额): 退款金额-{} 订单状态-{} 订单ID-{} 订单已退总额-{}", refundTotal, orderState, whereOrderId,
+                whereRefundedTotal);
         return _mapper.updateRefund(refundTotal, orderState, whereOrderId, whereRefundedTotal);
     }
 
@@ -1993,7 +2041,8 @@ public class OrdOrderSvcImpl extends MybatisBaseSvcImpl<OrdOrderMo, java.lang.Lo
                     tempOrder.setId(_idWorker.getId());
                     tempOrder.setDeliverOrgId(orderDetail.getDeliverOrgId());
                     // tempOrder.setOrderCode(_idWorker.getIdStr());
-                    tempOrder.setOrderCode(genOrderCode(tempOrder.getOrderTime(), tempOrder.getId(), tempOrder.getUserId()));
+                    tempOrder.setOrderCode(
+                            genOrderCode(tempOrder.getOrderTime(), tempOrder.getId(), tempOrder.getUserId()));
                     thisSvc.add(tempOrder);
                     orderMap.put(orderDetail.getDeliverOrgId(), tempOrder);
                 }
@@ -2020,7 +2069,8 @@ public class OrdOrderSvcImpl extends MybatisBaseSvcImpl<OrdOrderMo, java.lang.Lo
 
         _log.info("5. 根据订单支付ID修改订单状态为已支付");
         _log.info("订单支付完成，根据订单支付ID修改订单状态为已支付  payTime-{}", payDoneMsg.getPayTime());
-        int    result = _mapper.paidOrder(payOrderId, payDoneMsg.getPayTime(),(byte)OrderStateDic.PAID.getCode(),(byte)OrderStateDic.ORDERED.getCode());
+        int result = _mapper.paidOrder(payOrderId, payDoneMsg.getPayTime(), (byte) OrderStateDic.PAID.getCode(),
+                (byte) OrderStateDic.ORDERED.getCode());
         _log.debug("订单支付完成通知修改订单信息的返回值为：{}", result);
         if (result == 0) {
             _log.warn("根据支付订单ID修改订单状态为已支付不成功，可能碰到并发的问题: payOrderId-{}", payOrderId);
@@ -2071,14 +2121,17 @@ public class OrdOrderSvcImpl extends MybatisBaseSvcImpl<OrdOrderMo, java.lang.Lo
                     _log.debug("该条详情邀请人id为：{}", orderDetail.getInviteId());
                     if (orderDetail.getInviteId() == null) {
                         _log.debug("邀请人id等于null，按照匹配规则匹配：InviteId-{}", orderDetail.getInviteId());
-                        matchBuyRelationResult = ordBuyRelationSvc.matchBuyRelation(userId, onlineId, buyPrice, downLineDetailId, downLineOrderId, orderTimestamp);
+                        matchBuyRelationResult = ordBuyRelationSvc.matchBuyRelation(userId, onlineId, buyPrice,
+                                downLineDetailId, downLineOrderId, orderTimestamp);
                     } else {
                         _log.debug("邀请人id不等于null，优先匹配给邀请人：InviteId-{}", orderDetail.getInviteId());
-                        final boolean getAndUpdateBuyRelationByInvite = ordBuyRelationSvc.getAndUpdateBuyRelationByPromote(userId, onlineId, buyPrice, downLineDetailId,
-                                downLineOrderId);
+                        final boolean getAndUpdateBuyRelationByInvite = ordBuyRelationSvc
+                                .getAndUpdateBuyRelationByPromote(userId, onlineId, buyPrice, downLineDetailId,
+                                        downLineOrderId);
                         _log.debug("优先匹配给邀请人的结果为：{}", getAndUpdateBuyRelationByInvite);
                         if (getAndUpdateBuyRelationByInvite == false) {
-                            matchBuyRelationResult = ordBuyRelationSvc.matchBuyRelation(userId, onlineId, buyPrice, downLineDetailId, downLineOrderId, orderTimestamp);
+                            matchBuyRelationResult = ordBuyRelationSvc.matchBuyRelation(userId, onlineId, buyPrice,
+                                    downLineDetailId, downLineOrderId, orderTimestamp);
                         }
                     }
 
@@ -2089,19 +2142,19 @@ public class OrdOrderSvcImpl extends MybatisBaseSvcImpl<OrdOrderMo, java.lang.Lo
                 _log.error("匹配购买关系报错：", e);
             }
         }
-        
+
         _log.info("8. 判断订单是否是当场签收。");
         _log.info("遍历订单如果订单是当前签收的则调用订单签收接口");
-        OrderSignInTo orderSignInTo=new OrderSignInTo();
+        OrderSignInTo orderSignInTo = new OrderSignInTo();
         for (final OrdOrderMo order : orders) {
-        	if(order.getIsNowReceived()) {
-        		orderSignInTo.setOrderId(order.getId());
-        		_log.info("调用签收接口的参数为：orderSignInTo-{}",orderSignInTo);
-        		OrderSignInRo orderSignInRo=orderSignIn(orderSignInTo);
-        		_log.info("调用签收接口的结果为：orderSignInRo-{}",orderSignInRo);
-        	}
+            if (order.getIsNowReceived()) {
+                orderSignInTo.setOrderId(order.getId());
+                _log.info("调用签收接口的参数为：orderSignInTo-{}", orderSignInTo);
+                OrderSignInRo orderSignInRo = orderSignIn(orderSignInTo);
+                _log.info("调用签收接口的结果为：orderSignInRo-{}", orderSignInRo);
+            }
         }
-        
+
         return true;
     }
 
@@ -2120,7 +2173,8 @@ public class OrdOrderSvcImpl extends MybatisBaseSvcImpl<OrdOrderMo, java.lang.Lo
     public PageInfo<OrdOrderRo> listOrder(final ListOrderTo to, final int pageNum, final int pageSize) {
         _log.info("获取订单的参数为: {}", to);
         _log.info("orderList: ro-{}; pageNum-{}; pageSize-{}", to, pageNum, pageSize);
-        final PageInfo<OrdOrderRo> result = PageHelper.startPage(pageNum, pageSize).doSelectPageInfo(() -> _mapper.listOrder(to));
+        final PageInfo<OrdOrderRo> result = PageHelper.startPage(pageNum, pageSize)
+                .doSelectPageInfo(() -> _mapper.listOrder(to));
         _log.info("获取订单的结果为: {}", result.getList());
         final List<SucOrgMo> sucOrgResult = sucOrgSvc.listAll();
         _log.info("获取所有组织的结果为: {}", sucOrgResult);
@@ -2390,7 +2444,8 @@ public class OrdOrderSvcImpl extends MybatisBaseSvcImpl<OrdOrderMo, java.lang.Lo
                         final Integer value = detailMap.get(orderDetail);
                         detailMap.put(orderDetail, value + 1);
                     } else {
-                        final String orderDetail = ordorderdetailmo.getOnlineTitle() + "-" + ordorderdetailmo.getSpecName();
+                        final String orderDetail = ordorderdetailmo.getOnlineTitle() + "-"
+                                + ordorderdetailmo.getSpecName();
                         map.put(online, orderDetail);
                         detailMap.put(orderDetail, 1);
                     }
@@ -2502,7 +2557,8 @@ public class OrdOrderSvcImpl extends MybatisBaseSvcImpl<OrdOrderMo, java.lang.Lo
                         final Integer value = detailMap.get(orderDetail);
                         detailMap.put(orderDetail, value + 1);
                     } else {
-                        final String orderDetail = ordorderdetailmo.getOnlineTitle() + "-" + ordorderdetailmo.getSpecName();
+                        final String orderDetail = ordorderdetailmo.getOnlineTitle() + "-"
+                                + ordorderdetailmo.getSpecName();
                         map.put(online, orderDetail);
                         detailMap.put(orderDetail, 1);
                     }
@@ -2631,7 +2687,8 @@ public class OrdOrderSvcImpl extends MybatisBaseSvcImpl<OrdOrderMo, java.lang.Lo
                         final Integer value = detailMap.get(orderDetail);
                         detailMap.put(orderDetail, value + 1);
                     } else {
-                        final String orderDetail = ordorderdetailmo.getOnlineTitle() + "-" + ordorderdetailmo.getSpecName();
+                        final String orderDetail = ordorderdetailmo.getOnlineTitle() + "-"
+                                + ordorderdetailmo.getSpecName();
                         map.put(online, orderDetail);
                         detailMap.put(orderDetail, 1);
                     }
@@ -2735,7 +2792,8 @@ public class OrdOrderSvcImpl extends MybatisBaseSvcImpl<OrdOrderMo, java.lang.Lo
                         final Integer value = detailMap.get(orderDetail);
                         detailMap.put(orderDetail, value + 1);
                     } else {
-                        final String orderDetail = ordorderdetailmo.getOnlineTitle() + "-" + ordorderdetailmo.getSpecName();
+                        final String orderDetail = ordorderdetailmo.getOnlineTitle() + "-"
+                                + ordorderdetailmo.getSpecName();
                         map.put(online, orderDetail);
                         detailMap.put(orderDetail, 1);
                     }
@@ -2807,7 +2865,8 @@ public class OrdOrderSvcImpl extends MybatisBaseSvcImpl<OrdOrderMo, java.lang.Lo
 
         final ShiftOrderRo ro = new ShiftOrderRo();
         if (payOrderId == null || newUserId == null) {
-            _log.error("转移订单时发现orderId/userId为null, 请求的参数为：payOrderId-{}, newUserId-{}, oldUserId-{}", payOrderId, newUserId, oldUserId);
+            _log.error("转移订单时发现orderId/userId为null, 请求的参数为：payOrderId-{}, newUserId-{}, oldUserId-{}", payOrderId,
+                    newUserId, oldUserId);
             ro.setResult(ResultDic.PARAM_ERROR);
             ro.setMsg("参数错误");
             return ro;
@@ -2820,7 +2879,8 @@ public class OrdOrderSvcImpl extends MybatisBaseSvcImpl<OrdOrderMo, java.lang.Lo
         _log.info("转移订单根据订单id查询订单信息的返回值为：{}", ordOrderMo);
 
         if (ordOrderMo == null) {
-            _log.error("转移订单查询订单信息时没有发现订单信息，请求的参数为：payOrderId-{}, newUserId-{}, oldUserId-{}", payOrderId, newUserId, oldUserId);
+            _log.error("转移订单查询订单信息时没有发现订单信息，请求的参数为：payOrderId-{}, newUserId-{}, oldUserId-{}", payOrderId, newUserId,
+                    oldUserId);
             ro.setResult(ResultDic.FAIL);
             ro.setMsg("没有发现该订单");
             return ro;
@@ -2828,7 +2888,8 @@ public class OrdOrderSvcImpl extends MybatisBaseSvcImpl<OrdOrderMo, java.lang.Lo
 
         // 如果订单状态不等于已下单（待支付）则不允许转移订单
         if (ordOrderMo.getOrderState() != OrderStateDic.ORDERED.getCode()) {
-            _log.error("转移订单时发现该订单不处于已下单（待支付）状态，请求的参数为：payOrderId-{}， newUserId-{}, oldUserId-{}", payOrderId, newUserId, oldUserId);
+            _log.error("转移订单时发现该订单不处于已下单（待支付）状态，请求的参数为：payOrderId-{}， newUserId-{}, oldUserId-{}", payOrderId,
+                    newUserId, oldUserId);
             ro.setResult(ResultDic.FAIL);
             ro.setMsg("该订单已支付或已取消");
             return ro;
@@ -2838,7 +2899,8 @@ public class OrdOrderSvcImpl extends MybatisBaseSvcImpl<OrdOrderMo, java.lang.Lo
         final Boolean isExistUser = sucUserSvc.exist(newUserId);
         _log.info("转移订单判断新用户是否存在的返回值为：{}", isExistUser);
         if (!isExistUser) {
-            _log.error("转移订单判断新用户是否存在时发现新的用户不存在，请求的参数为：payOrderId-{}， newUserId-{}, oldUserId-{}", payOrderId, newUserId, oldUserId);
+            _log.error("转移订单判断新用户是否存在时发现新的用户不存在，请求的参数为：payOrderId-{}， newUserId-{}, oldUserId-{}", payOrderId,
+                    newUserId, oldUserId);
             ro.setResult(ResultDic.FAIL);
             ro.setMsg("您的账号不存在");
             return ro;

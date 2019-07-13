@@ -1,16 +1,21 @@
 package rebue.ord.svc.impl;
+
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+
 import javax.annotation.Resource;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
+
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
+
 import damai.pnt.dic.PointLogTypeDic;
 import rebue.kdi.svr.feign.KdiSvc;
 import rebue.onl.svr.feign.OnlOnlineSpecSvc;
@@ -23,11 +28,13 @@ import rebue.ord.mo.OrdBuyRelationMo;
 import rebue.ord.mo.OrdOrderDetailMo;
 import rebue.ord.mo.OrdOrderMo;
 import rebue.ord.ro.DetailandBuyRelationRo;
+import rebue.ord.ro.ShiftOrderRo;
 import rebue.ord.ro.WaitingBuyPointByUserIdListRo;
 import rebue.ord.svc.OrdBuyRelationSvc;
 import rebue.ord.svc.OrdOrderDetailSvc;
 import rebue.ord.svc.OrdOrderSvc;
 import rebue.ord.svc.OrdTaskSvc;
+import rebue.ord.to.ModifyInviteIdTo;
 import rebue.ord.to.UpdateOrgTo;
 import rebue.pnt.svr.feign.PntPointSvc;
 import rebue.pnt.to.AddPointTradeTo;
@@ -53,408 +60,420 @@ import rebue.suc.svr.feign.SucUserSvc;
 @Transactional(readOnly = true, propagation = Propagation.SUPPORTS)
 @Service
 public class OrdOrderDetailSvcImpl
-		extends BaseSvcImpl<java.lang.Long, OrdOrderDetailJo, OrdOrderDetailDao, OrdOrderDetailMo, OrdOrderDetailMapper>
-		implements OrdOrderDetailSvc {
+        extends BaseSvcImpl<java.lang.Long, OrdOrderDetailJo, OrdOrderDetailDao, OrdOrderDetailMo, OrdOrderDetailMapper>
+        implements OrdOrderDetailSvc {
 
-	/**
-	 * @mbg.generated 自动生成，如需修改，请删除本行
-	 */
-	private static final Logger _log = LoggerFactory.getLogger(OrdOrderDetailSvcImpl.class);
+    /**
+     * @mbg.generated 自动生成，如需修改，请删除本行
+     */
+    private static final Logger _log = LoggerFactory.getLogger(OrdOrderDetailSvcImpl.class);
 
-	/**
-	 * @mbg.generated 自动生成，如需修改，请删除本行
-	 */
-	@Override
-	@Transactional(readOnly = false, propagation = Propagation.REQUIRED)
-	public int add(final OrdOrderDetailMo mo) {
-		_log.info("添加订单详情");
-		// 如果id为空那么自动生成分布式id
-		if (mo.getId() == null || mo.getId() == 0) {
-			mo.setId(_idWorker.getId());
-		}
-		return super.add(mo);
-	}
+    /**
+     * @mbg.generated 自动生成，如需修改，请删除本行
+     */
+    @Override
+    @Transactional(readOnly = false, propagation = Propagation.REQUIRED)
+    public int add(final OrdOrderDetailMo mo) {
+        _log.info("添加订单详情");
+        // 如果id为空那么自动生成分布式id
+        if (mo.getId() == null || mo.getId() == 0) {
+            mo.setId(_idWorker.getId());
+        }
+        return super.add(mo);
+    }
 
-	@Resource
-	private SucUserSvc sucUserSvc;
-	@Resource
-	private OrdBuyRelationSvc selfSvc;
-	@Resource
-	private SucOrgSvc sucOrgSvc;
-	@Resource
-	private OrdTaskSvc ordTaskSvc;
-	@Resource
-	private OrdOrderSvc ordOrderSvc;
-	@Resource
-	private OnlOnlineSpecSvc onlOnlineSpecSvc;
-	@Resource
-	private PntPointSvc pntPointSvc;
-	
-	@Resource
-	private KdiSvc kdiSvc;
+    @Resource
+    private SucUserSvc        sucUserSvc;
+    @Resource
+    private OrdBuyRelationSvc selfSvc;
+    @Resource
+    private SucOrgSvc         sucOrgSvc;
+    @Resource
+    private OrdTaskSvc        ordTaskSvc;
+    @Resource
+    private OrdOrderSvc       ordOrderSvc;
+    @Resource
+    private OnlOnlineSpecSvc  onlOnlineSpecSvc;
+    @Resource
+    private PntPointSvc       pntPointSvc;
 
-	/**
-	 * 修改订单详情的退货情况(根据订单详情ID、已退货数量、旧的返现金总额，修改退货总数、返现金总额以及退货状态)
-	 *
-	 * @param returnTotal           退货总数
-	 * @param newCashbackTotal      新的返现金总额
-	 * @param returnState           退货状态
-	 * @param whereDetailId         where-订单详情ID
-	 * @param whereReturnedCount    where-之前的已退货数量
-	 * @param whereOldCashbackTotal where-退货之前的返现金总额
-	 */
-	@Override
-	@Transactional(readOnly = false, propagation = Propagation.REQUIRED)
-	public int modifyReturn(final Integer returnTotal, final BigDecimal newCashbackTotal, final Byte returnState,
-			final Long whereDetailId, final Integer whereReturnedCount, final BigDecimal whereOldCashbackTotal) {
-		_log.info("修改订单详情的退货情况: 退货总数-{}, 新的返现金总额-{}, 退货状态-{}, where-订单详情ID-{}, where-之前的已退货数量-{}, where-退货之前的返现金总额-{}",
-				returnTotal, newCashbackTotal, returnState, whereDetailId, whereReturnedCount, whereOldCashbackTotal);
-		return _mapper.updateReturn(returnTotal, newCashbackTotal, returnState, whereDetailId, whereReturnedCount,
-				whereOldCashbackTotal);
-	}
+    @Resource
+    private KdiSvc kdiSvc;
 
-	/**
-	 * 修改订单详情实际金额和退货状态
-	 *
-	 * @param id
-	 * @param newActualAmount
-	 * @param oldActualAmount
-	 * @param returnState
-	 * @param returnedState
-	 * @return
-	 */
-	@Override
-	@Transactional(readOnly = false, propagation = Propagation.REQUIRED)
-	public int modifyActualAmountANDReturnState(final Long id, final BigDecimal newActualAmount,
-			final BigDecimal oldActualAmount, final Byte returnState, final Byte returnedState, BigDecimal realBuyPointTotal) {
-		_log.info("修改订单详情实际金额的参数为：详情id-{}，新的实际金额-{}，旧的实际金额-{}, 新的退货状态-{}, 旧的退货状态-{}, 新的总积分-{}", id, newActualAmount,
-				oldActualAmount, returnState, returnedState, realBuyPointTotal);
-		return _mapper.updateActualAmountANDReturnState(id, newActualAmount, oldActualAmount, returnState,
-				returnedState, realBuyPointTotal);
-	}
+    /**
+     * 修改订单详情的退货情况(根据订单详情ID、已退货数量、旧的返现金总额，修改退货总数、返现金总额以及退货状态)
+     *
+     * @param returnTotal
+     *            退货总数
+     * @param newCashbackTotal
+     *            新的返现金总额
+     * @param returnState
+     *            退货状态
+     * @param whereDetailId
+     *            where-订单详情ID
+     * @param whereReturnedCount
+     *            where-之前的已退货数量
+     * @param whereOldCashbackTotal
+     *            where-退货之前的返现金总额
+     */
+    @Override
+    @Transactional(readOnly = false, propagation = Propagation.REQUIRED)
+    public int modifyReturn(final Integer returnTotal, final BigDecimal newCashbackTotal, final Byte returnState,
+            final Long whereDetailId, final Integer whereReturnedCount, final BigDecimal whereOldCashbackTotal) {
+        _log.info("修改订单详情的退货情况: 退货总数-{}, 新的返现金总额-{}, 退货状态-{}, where-订单详情ID-{}, where-之前的已退货数量-{}, where-退货之前的返现金总额-{}",
+                returnTotal, newCashbackTotal, returnState, whereDetailId, whereReturnedCount, whereOldCashbackTotal);
+        return _mapper.updateReturn(returnTotal, newCashbackTotal, returnState, whereDetailId, whereReturnedCount,
+                whereOldCashbackTotal);
+    }
 
-	/**
-	 * 根据详情ID修改退货状态 Title: modifyReturnStateById Description:
-	 *
-	 * @param id
-	 * @param returnState
-	 * @return
-	 * @date 2018年5月8日 上午10:59:02
-	 */
-	@Override
-	@Transactional(readOnly = false, propagation = Propagation.REQUIRED)
-	public int modifyReturnStateById(final long id, final byte returnState) {
-		return _mapper.modifyReturnStateById(returnState, id);
-	}
+    /**
+     * 修改订单详情实际金额和退货状态
+     *
+     * @param id
+     * @param newActualAmount
+     * @param oldActualAmount
+     * @param returnState
+     * @param returnedState
+     * @return
+     */
+    @Override
+    @Transactional(readOnly = false, propagation = Propagation.REQUIRED)
+    public int modifyActualAmountANDReturnState(final Long id, final BigDecimal newActualAmount,
+            final BigDecimal oldActualAmount, final Byte returnState, final Byte returnedState,
+            BigDecimal realBuyPointTotal) {
+        _log.info("修改订单详情实际金额的参数为：详情id-{}，新的实际金额-{}，旧的实际金额-{}, 新的退货状态-{}, 旧的退货状态-{}, 新的总积分-{}", id, newActualAmount,
+                oldActualAmount, returnState, returnedState, realBuyPointTotal);
+        return _mapper.updateActualAmountANDReturnState(id, newActualAmount, oldActualAmount, returnState,
+                returnedState, realBuyPointTotal);
+    }
 
-	/**
-	 * 用户匹配自己购买关系，获取用户还有两个匹配名额的订单详情
-	 */
-	@Override
-	public OrdOrderDetailMo getOrderDetailForBuyRelation(final Map<String, Object> map) {
-		return _mapper.getOrderDetailForBuyRelation(map);
-	}
+    /**
+     * 根据详情ID修改退货状态 Title: modifyReturnStateById Description:
+     *
+     * @param id
+     * @param returnState
+     * @return
+     * @date 2018年5月8日 上午10:59:02
+     */
+    @Override
+    @Transactional(readOnly = false, propagation = Propagation.REQUIRED)
+    public int modifyReturnStateById(final long id, final byte returnState) {
+        return _mapper.modifyReturnStateById(returnState, id);
+    }
 
-	/**
-	 * 根据OrderId获取订单详情列表
-	 */
-	@Override
-	public List<OrdOrderDetailMo> listByOrderId(final Long orderId) {
-		_log.info("根据OrderId获取订单详情列表", orderId);
-		final OrdOrderDetailMo conditions = new OrdOrderDetailMo();
-		conditions.setOrderId(orderId);
-		return _mapper.selectSelective(conditions);
-	}
+    /**
+     * 用户匹配自己购买关系，获取用户还有两个匹配名额的订单详情
+     */
+    @Override
+    public OrdOrderDetailMo getOrderDetailForBuyRelation(final Map<String, Object> map) {
+        return _mapper.getOrderDetailForBuyRelation(map);
+    }
 
-	@Override
-	public int updateCommissionSlotForBuyRelation(final OrdOrderDetailMo mo) {
-		return _mapper.updateCommissionSlotForBuyRelation(mo);
-	}
+    /**
+     * 根据OrderId获取订单详情列表
+     */
+    @Override
+    public List<OrdOrderDetailMo> listByOrderId(final Long orderId) {
+        _log.info("根据OrderId获取订单详情列表", orderId);
+        final OrdOrderDetailMo conditions = new OrdOrderDetailMo();
+        conditions.setOrderId(orderId);
+        return _mapper.selectSelective(conditions);
+    }
 
-	@Override
-	public int updateCashbackSlot(final OrdOrderDetailMo mo) {
-		return _mapper.updateCashbackSlot(mo);
-	}
+    @Override
+    public int updateCommissionSlotForBuyRelation(final OrdOrderDetailMo mo) {
+        return _mapper.updateCommissionSlotForBuyRelation(mo);
+    }
 
-	@Override
-	public OrdOrderDetailMo getAndUpdateBuyRelationByFour(final Map<String, Object> map) {
-		return _mapper.getAndUpdateBuyRelationByFour(map);
-	}
+    @Override
+    public int updateCashbackSlot(final OrdOrderDetailMo mo) {
+        return _mapper.updateCashbackSlot(mo);
+    }
 
-	@Override
-	public OrdOrderDetailMo getAndUpdateBuyRelationByInvite(final Map<String, Object> map) {
-		return _mapper.getAndUpdateBuyRelationByInvite(map);
-	}
+    @Override
+    public OrdOrderDetailMo getAndUpdateBuyRelationByFour(final Map<String, Object> map) {
+        return _mapper.getAndUpdateBuyRelationByFour(map);
+    }
 
-	@Override
-	public OrdOrderDetailMo getOrderDetailForOneCommissonSlot(final Map<String, Object> map) {
-		return _mapper.getOrderDetailForOneCommissonSlot(map);
-	}
+    @Override
+    public OrdOrderDetailMo getAndUpdateBuyRelationByInvite(final Map<String, Object> map) {
+        return _mapper.getAndUpdateBuyRelationByInvite(map);
+    }
 
-	@Override
-	public List<DetailandBuyRelationRo> listBuyRelationByOrderId(final Long orderId) {
-		final List<DetailandBuyRelationRo> result = new ArrayList<>();
-		_log.info("根据orderId获取购买关系参数为： {}", orderId);
-		_log.info("先查询订单详情参数为： {}", orderId);
-		// 查询回来的订单详情列表
-		final List<OrdOrderDetailMo> detailList = _mapper.getDetailByOrderId(orderId);
-		_log.info("查询订单详情的返回值： {}", detailList);
-		// 根据订单详情列表中的id去获取购买关系
-		final OrdBuyRelationMo uPmo = new OrdBuyRelationMo();
-		final OrdBuyRelationMo dWmo = new OrdBuyRelationMo();
-		for (int i = 0; i < detailList.size(); i++) {
-			// 映射当前详情的所有字段
-			final DetailandBuyRelationRo item = new DetailandBuyRelationRo();
-			item.setCostPrice(detailList.get(i).getCostPrice());
-			item.setIsDeliver(detailList.get(i).getIsDelivered());
-			item.setId(detailList.get(i).getId());
-			item.setOrderId(detailList.get(i).getOrderId());
-			item.setProductId(detailList.get(i).getProductId());
-			item.setOnlineTitle(detailList.get(i).getOnlineTitle());
-			item.setSpecName(detailList.get(i).getSpecName());
-			item.setBuyCount(detailList.get(i).getBuyCount());
-			item.setBuyPrice(detailList.get(i).getBuyPrice());
-			item.setCashbackAmount(detailList.get(i).getCashbackAmount());
-			item.setBuyUnit(detailList.get(i).getBuyUnit());
-			item.setReturnCount(detailList.get(i).getReturnCount());
-			item.setReturnState(detailList.get(i).getReturnState());
-			item.setCashbackCommissionSlot(detailList.get(i).getCommissionSlot());
-			item.setCashbackCommissionState(detailList.get(i).getCommissionState());
-			item.setSubjectType(detailList.get(i).getSubjectType());
+    @Override
+    public OrdOrderDetailMo getOrderDetailForOneCommissonSlot(final Map<String, Object> map) {
+        return _mapper.getOrderDetailForOneCommissonSlot(map);
+    }
 
-			_log.info("获取当前供应商参数为： {}", detailList.get(i).getSupplierId());
-			if (detailList.get(i).getSupplierId() != null) {
-				final SucOrgRo sucOrgRo = sucOrgSvc.getById(detailList.get(i).getSupplierId());
-				_log.info("获取当前供应商结果为： {}", sucOrgRo.getRecord());
-				if (sucOrgRo != null && sucOrgRo.getRecord() != null && sucOrgRo.getRecord().getName() != null) {
-					item.setSupplierName(sucOrgRo.getRecord().getName());
-				}
-			}
-			uPmo.setUplineOrderDetailId(detailList.get(i).getId());
-			_log.info("当前下家关系的的参数为： {}", uPmo);
-			final List<OrdBuyRelationMo> Uplist = selfSvc.list(uPmo);
-			_log.info("查询下家关系的结果为： {}", Uplist);
-			for (int j = 0; j < Uplist.size(); j++) {
-				_log.info("开始获取下家信息开始--------------------------------------");
+    @Override
+    public List<DetailandBuyRelationRo> listBuyRelationByOrderId(final Long orderId) {
+        final List<DetailandBuyRelationRo> result = new ArrayList<>();
+        _log.info("根据orderId获取购买关系参数为： {}", orderId);
+        _log.info("先查询订单详情参数为： {}", orderId);
+        // 查询回来的订单详情列表
+        final List<OrdOrderDetailMo> detailList = _mapper.getDetailByOrderId(orderId);
+        _log.info("查询订单详情的返回值： {}", detailList);
+        // 根据订单详情列表中的id去获取购买关系
+        final OrdBuyRelationMo uPmo = new OrdBuyRelationMo();
+        final OrdBuyRelationMo dWmo = new OrdBuyRelationMo();
+        for (int i = 0; i < detailList.size(); i++) {
+            // 映射当前详情的所有字段
+            final DetailandBuyRelationRo item = new DetailandBuyRelationRo();
+            item.setCostPrice(detailList.get(i).getCostPrice());
+            item.setIsDeliver(detailList.get(i).getIsDelivered());
+            item.setId(detailList.get(i).getId());
+            item.setOrderId(detailList.get(i).getOrderId());
+            item.setProductId(detailList.get(i).getProductId());
+            item.setOnlineTitle(detailList.get(i).getOnlineTitle());
+            item.setSpecName(detailList.get(i).getSpecName());
+            item.setBuyCount(detailList.get(i).getBuyCount());
+            item.setBuyPrice(detailList.get(i).getBuyPrice());
+            item.setCashbackAmount(detailList.get(i).getCashbackAmount());
+            item.setBuyUnit(detailList.get(i).getBuyUnit());
+            item.setReturnCount(detailList.get(i).getReturnCount());
+            item.setReturnState(detailList.get(i).getReturnState());
+            item.setCashbackCommissionSlot(detailList.get(i).getCommissionSlot());
+            item.setCashbackCommissionState(detailList.get(i).getCommissionState());
+            item.setSubjectType(detailList.get(i).getSubjectType());
 
-				final Long dId = Uplist.get(j).getDownlineUserId();
-				final Long OrderId = Uplist.get(j).getDownlineOrderId();
-				// 当前条购买关系的下家订单
-				_log.info("开始获取下家订单签收时间,订单id为： {}", OrderId);
-				final OrdOrderMo ordOrderMo = ordOrderSvc.getById(OrderId);
-				_log.info("开始获取下家订单签收时间返回值： {}", ordOrderMo);
-				// 当前条购买关系的下家名字
-				_log.info("开始获取下家名字id为： {}", dId);
-				final SucUserMo dUserName = sucUserSvc.getById(dId);
-				_log.info("获取下家的结果为： {}", dUserName);
-				if (item.getDownlineUserName1() == null) {
-					_log.info("设置第一个下家名字： {}", dUserName);
-					item.setDownlineRelationSource1(Uplist.get(j).getRelationSource());
-					item.setDownlineIsSignIn1(Uplist.get(j).getIsSignIn());
-					if (dUserName != null) {
-						if(dUserName.getWxNickname() !=null) {
-							item.setDownlineUserName1(dUserName.getWxNickname());	
-						}else if(dUserName.getLoginName() !=null) {
-							item.setDownlineUserName1(dUserName.getLoginName());
-						}
-						
-					}
-					// 设置第一个下家的签收时间
-					_log.info("设置第一个下家签收时间： {}", ordOrderMo.getReceivedTime());
-					if (ordOrderMo != null && ordOrderMo.getReceivedTime() != null) {
-						_log.info("设置第一个下家签收时间： {}", ordOrderMo.getReceivedTime());
-						item.setDownlineReceivedTime1(ordOrderMo.getReceivedTime());
-					}
-					// 设置第一个下家订单编号
-					if (ordOrderMo != null && ordOrderMo.getOrderCode() != null) {
-						item.setDownlineOrderCode1(ordOrderMo.getOrderCode());
-					}
-				} else {
-					_log.info("设置第二个下家名字： {}", dUserName);
-					item.setDownlineRelationSource2(Uplist.get(j).getRelationSource());
-					item.setDownlineIsSignIn2(Uplist.get(j).getIsSignIn());
-					if (dUserName != null) {
-						if(dUserName.getWxNickname() !=null) {
-							item.setDownlineUserName2(dUserName.getWxNickname());	
-						}else if(dUserName.getLoginName() !=null) {
-							item.setDownlineUserName2(dUserName.getLoginName());
-						}
-						
-					}
-					// 设置第二个下家的签收时间
-					_log.info("设置第二个下家签收时间： {}", ordOrderMo.getReceivedTime());
-					if (ordOrderMo != null && ordOrderMo.getReceivedTime() != null) {
-						item.setDownlineReceivedTime2(ordOrderMo.getReceivedTime());
-					}
-					// 设置第二个下家订单编号
-					if (ordOrderMo != null && ordOrderMo.getOrderCode() != null) {
-						item.setDownlineOrderCode2(ordOrderMo.getOrderCode());
-					}
-				}
-				_log.info("开始获取下家信息结束+++++++++++++++++++++++");
-			}
-			dWmo.setDownlineOrderDetailId(detailList.get(i).getId());
-			_log.info("当前订单详情上家关系的参数为： {}", dWmo);
-			// 已经获取到第一条订单详情的所有购买关系
-			final List<OrdBuyRelationMo> dwList = selfSvc.list(dWmo);
-			_log.info("当前订单详情上家关系的结果为： {}", dwList);
+            _log.info("获取当前供应商参数为： {}", detailList.get(i).getSupplierId());
+            if (detailList.get(i).getSupplierId() != null) {
+                final SucOrgRo sucOrgRo = sucOrgSvc.getById(detailList.get(i).getSupplierId());
+                _log.info("获取当前供应商结果为： {}", sucOrgRo.getRecord());
+                if (sucOrgRo != null && sucOrgRo.getRecord() != null && sucOrgRo.getRecord().getName() != null) {
+                    item.setSupplierName(sucOrgRo.getRecord().getName());
+                }
+            }
+            uPmo.setUplineOrderDetailId(detailList.get(i).getId());
+            _log.info("当前下家关系的的参数为： {}", uPmo);
+            final List<OrdBuyRelationMo> Uplist = selfSvc.list(uPmo);
+            _log.info("查询下家关系的结果为： {}", Uplist);
+            for (int j = 0; j < Uplist.size(); j++) {
+                _log.info("开始获取下家信息开始--------------------------------------");
 
-			for (int j = 0; j < dwList.size(); j++) {
-				_log.info("开始获取上家信息开始=======================");
+                final Long dId = Uplist.get(j).getDownlineUserId();
+                final Long OrderId = Uplist.get(j).getDownlineOrderId();
+                // 当前条购买关系的下家订单
+                _log.info("开始获取下家订单签收时间,订单id为： {}", OrderId);
+                final OrdOrderMo ordOrderMo = ordOrderSvc.getById(OrderId);
+                _log.info("开始获取下家订单签收时间返回值： {}", ordOrderMo);
+                // 当前条购买关系的下家名字
+                _log.info("开始获取下家名字id为： {}", dId);
+                final SucUserMo dUserName = sucUserSvc.getById(dId);
+                _log.info("获取下家的结果为： {}", dUserName);
+                if (item.getDownlineUserName1() == null) {
+                    _log.info("设置第一个下家名字： {}", dUserName);
+                    item.setDownlineRelationSource1(Uplist.get(j).getRelationSource());
+                    item.setDownlineIsSignIn1(Uplist.get(j).getIsSignIn());
+                    if (dUserName != null) {
+                        if (dUserName.getWxNickname() != null) {
+                            item.setDownlineUserName1(dUserName.getWxNickname());
+                        } else if (dUserName.getLoginName() != null) {
+                            item.setDownlineUserName1(dUserName.getLoginName());
+                        }
 
-				_log.info("当前订单详情上家订单的参数为： {}", dwList.get(0).getUplineOrderId());
-				final OrdOrderMo ordOrderMo = ordOrderSvc.getById(dwList.get(0).getUplineOrderId());
-				_log.info("当前订单详情上家订单的返回值为： {}", ordOrderMo.getReceivedTime());
-				// 设置上家的订单签收时间
-				if (ordOrderMo != null && ordOrderMo.getReceivedTime() != null) {
-					item.setUplineReceivedTime(ordOrderMo.getReceivedTime());
-				}
-				// 设置上家订单编号
-				if (ordOrderMo != null && ordOrderMo.getOrderCode() != null) {
-					item.setUplineOrderCode(ordOrderMo.getOrderCode());
-				}
+                    }
+                    // 设置第一个下家的签收时间
+                    _log.info("设置第一个下家签收时间： {}", ordOrderMo.getReceivedTime());
+                    if (ordOrderMo != null && ordOrderMo.getReceivedTime() != null) {
+                        _log.info("设置第一个下家签收时间： {}", ordOrderMo.getReceivedTime());
+                        item.setDownlineReceivedTime1(ordOrderMo.getReceivedTime());
+                    }
+                    // 设置第一个下家订单编号
+                    if (ordOrderMo != null && ordOrderMo.getOrderCode() != null) {
+                        item.setDownlineOrderCode1(ordOrderMo.getOrderCode());
+                    }
+                } else {
+                    _log.info("设置第二个下家名字： {}", dUserName);
+                    item.setDownlineRelationSource2(Uplist.get(j).getRelationSource());
+                    item.setDownlineIsSignIn2(Uplist.get(j).getIsSignIn());
+                    if (dUserName != null) {
+                        if (dUserName.getWxNickname() != null) {
+                            item.setDownlineUserName2(dUserName.getWxNickname());
+                        } else if (dUserName.getLoginName() != null) {
+                            item.setDownlineUserName2(dUserName.getLoginName());
+                        }
 
-				final Long uId = dwList.get(0).getUplineUserId();
-				// 当前条购买关系的上家名字
-				_log.info("开始获取上家名字id为： {}", uId);
-				final SucUserMo uUserName = sucUserSvc.getById(uId);
-				_log.info("获取上家的结果为： {}", uUserName);
-				item.setUplineRelationSource(dwList.get(0).getRelationSource());
-				item.setUplineIsSignIn(dwList.get(0).getIsSignIn());
-				if (uUserName != null) {
-					item.setUplineUserName(uUserName.getWxNickname());
-				}
-				_log.info("开始获取上家信息结束——————————————————————————");
+                    }
+                    // 设置第二个下家的签收时间
+                    _log.info("设置第二个下家签收时间： {}", ordOrderMo.getReceivedTime());
+                    if (ordOrderMo != null && ordOrderMo.getReceivedTime() != null) {
+                        item.setDownlineReceivedTime2(ordOrderMo.getReceivedTime());
+                    }
+                    // 设置第二个下家订单编号
+                    if (ordOrderMo != null && ordOrderMo.getOrderCode() != null) {
+                        item.setDownlineOrderCode2(ordOrderMo.getOrderCode());
+                    }
+                }
+                _log.info("开始获取下家信息结束+++++++++++++++++++++++");
+            }
+            dWmo.setDownlineOrderDetailId(detailList.get(i).getId());
+            _log.info("当前订单详情上家关系的参数为： {}", dWmo);
+            // 已经获取到第一条订单详情的所有购买关系
+            final List<OrdBuyRelationMo> dwList = selfSvc.list(dWmo);
+            _log.info("当前订单详情上家关系的结果为： {}", dwList);
 
-			}
-			result.add(item);
-		}
-		return result;
-	}
+            for (int j = 0; j < dwList.size(); j++) {
+                _log.info("开始获取上家信息开始=======================");
 
-	/**
-	 * 得到买家已下单指定上线规格商品的数量(以此来限制买家购买)
-	 *
-	 * @param userId       购买用户的用户ID
-	 * @param onlineSpecId 上线规格ID
-	 */
-	@Override
-	public int getBuyerOrderedCount(final Long userId, final Long onlineSpecId) {
-		_log.info("得到买家已下单指定上线规格商品的数量(以此来限制买家购买): userId-{} onlineSpecId-{}", userId, onlineSpecId);
-		return _mapper.getBuyerOrderedCount(userId, onlineSpecId);
-	}
+                _log.info("当前订单详情上家订单的参数为： {}", dwList.get(0).getUplineOrderId());
+                final OrdOrderMo ordOrderMo = ordOrderSvc.getById(dwList.get(0).getUplineOrderId());
+                _log.info("当前订单详情上家订单的返回值为： {}", ordOrderMo.getReceivedTime());
+                // 设置上家的订单签收时间
+                if (ordOrderMo != null && ordOrderMo.getReceivedTime() != null) {
+                    item.setUplineReceivedTime(ordOrderMo.getReceivedTime());
+                }
+                // 设置上家订单编号
+                if (ordOrderMo != null && ordOrderMo.getOrderCode() != null) {
+                    item.setUplineOrderCode(ordOrderMo.getOrderCode());
+                }
 
-	/**
-	 * 设置订单详情已结算返现金给买家
-	 */
-	@Override
-	public void settleBuyer(final Long orderDetailId) {
-		_log.info("设置订单详情已结算返现金给买家: orderDetailId-{}", orderDetailId);
-		final OrdOrderDetailMo mo = new OrdOrderDetailMo();
-		mo.setId(orderDetailId);
-		mo.setIsSettleBuyer(true);
-		_mapper.updateByPrimaryKeySelective(mo);
-	}
+                final Long uId = dwList.get(0).getUplineUserId();
+                // 当前条购买关系的上家名字
+                _log.info("开始获取上家名字id为： {}", uId);
+                final SucUserMo uUserName = sucUserSvc.getById(uId);
+                _log.info("获取上家的结果为： {}", uUserName);
+                item.setUplineRelationSource(dwList.get(0).getRelationSource());
+                item.setUplineIsSignIn(dwList.get(0).getIsSignIn());
+                if (uUserName != null) {
+                    item.setUplineUserName(uUserName.getWxNickname());
+                }
+                _log.info("开始获取上家信息结束——————————————————————————");
 
-	/**
-	 * 根据订单修改订单发货状态
-	 */
-	@Override
-	public int modifyIsDeliverByOrderId(final long orderId) {
-		return _mapper.modifyIsDeliverByOrderId(orderId);
-	}
+            }
+            result.add(item);
+        }
+        return result;
+    }
 
-	/**
-	 * 修改返现总额、退货数量
-	 *
-	 * @param id
-	 * @param oldCashbackTotal
-	 * @param newCashbackTotal
-	 * @param returnedCount
-	 * @param returnTotal
-	 * @return
-	 */
-	@Override
-	@Transactional(readOnly = false, propagation = Propagation.REQUIRED)
-	public int modifyReturnNumAndCashbackTotal(final Long id, final BigDecimal oldCashbackTotal,
-			final BigDecimal newCashbackTotal, final Integer returnedCount, final Integer returnTotal) {
-		_log.info("修改返现总额和退货数量的参数为：id={}, oldCashbackTotal={}, newCashbackTotal={}, returnedCount={}, returnTotal={}",
-				id, oldCashbackTotal, newCashbackTotal, returnedCount, returnTotal);
-		return _mapper.updateReturnNumAndCashbackTotal(id, oldCashbackTotal, newCashbackTotal, returnedCount,
-				returnTotal);
-	}
+    /**
+     * 得到买家已下单指定上线规格商品的数量(以此来限制买家购买)
+     *
+     * @param userId
+     *            购买用户的用户ID
+     * @param onlineSpecId
+     *            上线规格ID
+     */
+    @Override
+    public int getBuyerOrderedCount(final Long userId, final Long onlineSpecId) {
+        _log.info("得到买家已下单指定上线规格商品的数量(以此来限制买家购买): userId-{} onlineSpecId-{}", userId, onlineSpecId);
+        return _mapper.getBuyerOrderedCount(userId, onlineSpecId);
+    }
 
-	/**
-	 * 根据id修改供应商id
-	 *
-	 * @param id            订单详情id
-	 * @param newSupplierId 新供应商id
-	 * @param oldSupplierId 旧供应商id
-	 * @return
-	 */
-	@Override
-	@Transactional(readOnly = false, propagation = Propagation.REQUIRED)
-	public int updateSupplierIdById(final Long id, final Long newSupplierId, final Long oldSupplierId) {
-		_log.info("根据订单详情id修改供应商id的参数为：id={}, newSupplierId={}, oldSupplierId={}", id, newSupplierId, oldSupplierId);
-		return _mapper.updateSupplierIdById(id, newSupplierId, oldSupplierId);
-	}
+    /**
+     * 设置订单详情已结算返现金给买家
+     */
+    @Override
+    public void settleBuyer(final Long orderDetailId) {
+        _log.info("设置订单详情已结算返现金给买家: orderDetailId-{}", orderDetailId);
+        final OrdOrderDetailMo mo = new OrdOrderDetailMo();
+        mo.setId(orderDetailId);
+        mo.setIsSettleBuyer(true);
+        _mapper.updateByPrimaryKeySelective(mo);
+    }
 
-	/**
-	 * 根据订单id修改发货组织和供应商
-	 */
-	@Override
-	public int modifyOrg(final UpdateOrgTo to) {
-		final Long orderId = to.getId();
-		return _mapper.modifyOrg(to.getSupplierId(), to.getDeliverOrgId(), orderId);
-	}
+    /**
+     * 根据订单修改订单发货状态
+     */
+    @Override
+    public int modifyIsDeliverByOrderId(final long orderId) {
+        return _mapper.modifyIsDeliverByOrderId(orderId);
+    }
 
-	/**
-	 * 计算首单购买
-	 *
-	 * @param onlineSpecId 上线规格ID
-	 */
-	@Override
-	public void calcFirstBuy(final Long onlineSpecId) {
-		_log.info("计算首单购买: onlineSpecId-{}", onlineSpecId);
-		_log.debug("获取首单购买的订单详情");
-		final OrdOrderDetailMo orderDetailMo = _mapper.getFirstBuyDetail(onlineSpecId, ReturnStateDic.RETURNED,
-				OrderStateDic.PAID);
-		_log.debug("获取首单购买的订单详情结果 {}",orderDetailMo);
+    /**
+     * 修改返现总额、退货数量
+     *
+     * @param id
+     * @param oldCashbackTotal
+     * @param newCashbackTotal
+     * @param returnedCount
+     * @param returnTotal
+     * @return
+     */
+    @Override
+    @Transactional(readOnly = false, propagation = Propagation.REQUIRED)
+    public int modifyReturnNumAndCashbackTotal(final Long id, final BigDecimal oldCashbackTotal,
+            final BigDecimal newCashbackTotal, final Integer returnedCount, final Integer returnTotal) {
+        _log.info("修改返现总额和退货数量的参数为：id={}, oldCashbackTotal={}, newCashbackTotal={}, returnedCount={}, returnTotal={}",
+                id, oldCashbackTotal, newCashbackTotal, returnedCount, returnTotal);
+        return _mapper.updateReturnNumAndCashbackTotal(id, oldCashbackTotal, newCashbackTotal, returnedCount,
+                returnTotal);
+    }
 
-		if (orderDetailMo == null) {
-			_log.warn("未发现有已经支付的订单详情，可能已退货: onlineSpecId-{}", onlineSpecId);
-			Ro ro = onlOnlineSpecSvc.modifyIsHaveFirstOrderById(onlineSpecId, false);
-			_log.info("计算首单购买修改是否已有首单的返回值为：{}", ro);
-			if (ro.getResult() != ResultDic.SUCCESS) {
-				throw new RuntimeException("修改是否已有首单失败");
-			}
-			return;
-		}
+    /**
+     * 根据id修改供应商id
+     *
+     * @param id
+     *            订单详情id
+     * @param newSupplierId
+     *            新供应商id
+     * @param oldSupplierId
+     *            旧供应商id
+     * @return
+     */
+    @Override
+    @Transactional(readOnly = false, propagation = Propagation.REQUIRED)
+    public int updateSupplierIdById(final Long id, final Long newSupplierId, final Long oldSupplierId) {
+        _log.info("根据订单详情id修改供应商id的参数为：id={}, newSupplierId={}, oldSupplierId={}", id, newSupplierId, oldSupplierId);
+        return _mapper.updateSupplierIdById(id, newSupplierId, oldSupplierId);
+    }
 
-		if (orderDetailMo.getPaySeq() != null && orderDetailMo.getPaySeq() == 1) {
-			
-			_log.info("首单购买已经设置正确，无需修改");
-			return;
-		}
+    /**
+     * 根据订单id修改发货组织和供应商
+     */
+    @Override
+    public int modifyOrg(final UpdateOrgTo to) {
+        final Long orderId = to.getId();
+        return _mapper.modifyOrg(to.getSupplierId(), to.getDeliverOrgId(), orderId);
+    }
 
-		_log.debug("清除旧的首单的支付顺序标志");
-		_mapper.clearPaySeqOfFirst(onlineSpecId);
+    /**
+     * 计算首单购买
+     *
+     * @param onlineSpecId
+     *            上线规格ID
+     */
+    @Override
+    public void calcFirstBuy(final Long onlineSpecId) {
+        _log.info("计算首单购买: onlineSpecId-{}", onlineSpecId);
+        _log.debug("获取首单购买的订单详情");
+        final OrdOrderDetailMo orderDetailMo = _mapper.getFirstBuyDetail(onlineSpecId, ReturnStateDic.RETURNED,
+                OrderStateDic.PAID);
+        _log.debug("获取首单购买的订单详情结果 {}", orderDetailMo);
 
-		_log.debug("设置新的首单的支付顺序标志");
-		_mapper.setFirstPaySeq(orderDetailMo.getId());
-		
-		
-		Ro ro = onlOnlineSpecSvc.modifyIsHaveFirstOrderById(onlineSpecId, true);
-		_log.info("计算首单购买修改是否已有首单的返回值为：{}", ro);
-		if (ro.getResult() != ResultDic.SUCCESS) {
-			throw new RuntimeException("修改是否已有首单失败");
-		}
-		
-		_log.debug("查询该订单是否已经结算，如果已经结算就添加首单积分交易");
-		_log.debug("查询该订单是否已经结算的参数为 {}",orderDetailMo.getOrderId());
-		final OrdOrderMo ordOrderMo = ordOrderSvc.getById(orderDetailMo.getOrderId());
-		_log.debug("查询该订单是否已经结算的返回值为 {}",ordOrderMo);
-		if(ordOrderMo.getOrderState()==5) {
+        if (orderDetailMo == null) {
+            _log.warn("未发现有已经支付的订单详情，可能已退货: onlineSpecId-{}", onlineSpecId);
+            Ro ro = onlOnlineSpecSvc.modifyIsHaveFirstOrderById(onlineSpecId, false);
+            _log.info("计算首单购买修改是否已有首单的返回值为：{}", ro);
+            if (ro.getResult() != ResultDic.SUCCESS) {
+                throw new RuntimeException("修改是否已有首单失败");
+            }
+            return;
+        }
+
+        if (orderDetailMo.getPaySeq() != null && orderDetailMo.getPaySeq() == 1) {
+
+            _log.info("首单购买已经设置正确，无需修改");
+            return;
+        }
+
+        _log.debug("清除旧的首单的支付顺序标志");
+        _mapper.clearPaySeqOfFirst(onlineSpecId);
+
+        _log.debug("设置新的首单的支付顺序标志");
+        _mapper.setFirstPaySeq(orderDetailMo.getId());
+
+        Ro ro = onlOnlineSpecSvc.modifyIsHaveFirstOrderById(onlineSpecId, true);
+        _log.info("计算首单购买修改是否已有首单的返回值为：{}", ro);
+        if (ro.getResult() != ResultDic.SUCCESS) {
+            throw new RuntimeException("修改是否已有首单失败");
+        }
+
+        _log.debug("查询该订单是否已经结算，如果已经结算就添加首单积分交易");
+        _log.debug("查询该订单是否已经结算的参数为 {}", orderDetailMo.getOrderId());
+        final OrdOrderMo ordOrderMo = ordOrderSvc.getById(orderDetailMo.getOrderId());
+        _log.debug("查询该订单是否已经结算的返回值为 {}", ordOrderMo);
+        if (ordOrderMo.getOrderState() == 5) {
 
             final AddPointTradeTo addPointTradeTo = new AddPointTradeTo();
             addPointTradeTo.setPointLogType((byte) PointLogTypeDic.ORDER_SETTLE_FIRST_BUY.getCode());
@@ -462,87 +481,113 @@ public class OrdOrderDetailSvcImpl
             addPointTradeTo.setAccountId(ordOrderMo.getUserId());
             addPointTradeTo.setOrderDetailId(orderDetailMo.getId());
             addPointTradeTo.setOrderId(ordOrderMo.getId());
-			_log.debug("成本价格{},购买数量{},退货数量{}",orderDetailMo.getCostPrice(),orderDetailMo.getBuyCount(),orderDetailMo.getReturnCount());
-           
-			// 首单购买奖励积分 = 成本价 * 实际购买数量
-            addPointTradeTo.setChangedPoint(orderDetailMo.getCostPrice().multiply(BigDecimal.valueOf(orderDetailMo.getBuyCount() - orderDetailMo.getReturnCount())));
+            _log.debug("成本价格{},购买数量{},退货数量{}", orderDetailMo.getCostPrice(), orderDetailMo.getBuyCount(),
+                    orderDetailMo.getReturnCount());
+
+            // 首单购买奖励积分 = 成本价 * 实际购买数量
+            addPointTradeTo.setChangedPoint(orderDetailMo.getCostPrice()
+                    .multiply(BigDecimal.valueOf(orderDetailMo.getBuyCount() - orderDetailMo.getReturnCount())));
             _log.debug("添加一笔新的积分记录: 商品首单购买奖励积分结算买家: addPointTradeTo-{}", addPointTradeTo);
             pntPointSvc.addPointTrade(addPointTradeTo);
-		}
+        }
 
-	}
+    }
 
-	/**
-	 * 根据用户id计算待入账的积分
-	 * @param userId
-	 * @return
-	 */
-	@Override
-	public BigDecimal countWaitingBuyPointByUserId(Long userId) {
-		_log.info("查询用户待入账的积分的参数为：{}", userId);
-		return _mapper.countWaitingBuyPointByUserId(userId);
-	}
-	
-	/**
-	 * 获取用户待入积分
-	 * @param userId
-	 * @param pageNum
-	 * @param pageSize
-	 * @return
-	 */
-	@Override
-	public PageInfo<WaitingBuyPointByUserIdListRo> waitingBuyPointByUserIdList(Long userId, Integer pageNum, Integer pageSize) {
-		_log.info("获取用户待入积分列表信息的参数为：userId-{}; pageNum-{}, pageSize-{}", userId, pageNum, pageSize);
-		return PageHelper.startPage(pageNum, pageSize).doSelectPageInfo(() -> _mapper.selectWaitingBuyPointByUserId(userId));
-	}
-	
-	/**
-	 * 根据上线id修改订单详情供应商和发货组织
-	 */
-	@Override
-	public int modifyDeliverAndSupplierByOnlineid(Long supplierId,Long deliverOrgId,Long onlineId) {
-		return _mapper.modifyDeliverAndSupplierByOnlineid(supplierId,deliverOrgId,onlineId);
-	}
-	
-	/**
-	 * 补偿双倍积分
-	 */
-	@Override
-	public void compensatePoint() {
-		_log.info("开始补偿双倍积分");
-		List<OrdOrderDetailMo> oldPointList = _mapper.selectOldPoint();
-		_log.info("补偿双倍积分获取到需要补偿的积分列表参数为：{}", String.valueOf(oldPointList));
-		for (OrdOrderDetailMo ordOrderDetailMo : oldPointList) {
-			System.out.println(ordOrderDetailMo);
-			
-			int updateBuyPointByIdResult = _mapper.updateBuyPointById(ordOrderDetailMo.getId(), ordOrderDetailMo.getBuyPoint(), ordOrderDetailMo.getBuyPoint());
-			_log.info("补偿双倍积分修改订单详情积分的返回值为：{}", updateBuyPointByIdResult);
-			if (updateBuyPointByIdResult != 1) {
-				_log.error("补偿双倍积分修改订单详情积分出现错误，请求的参数为：{}", ordOrderDetailMo);
-				return;
-			}
-			
-			AddPointTradeTo to = new AddPointTradeTo();
-			to.setAccountId(ordOrderDetailMo.getUserId());
-			to.setPointLogType((byte) PointLogTypeDic.RECHARGE.getCode());
-			to.setChangedTitile("大卖网络-积分充值");
-			to.setChangedDetail("补偿购买商品：" + ordOrderDetailMo.getOnlineTitle() + ",规格为：" + ordOrderDetailMo.getSpecName() + "的积分");
-			to.setOrderId(ordOrderDetailMo.getOrderId());
-			to.setOrderDetailId(ordOrderDetailMo.getId());
-			to.setChangedPoint(ordOrderDetailMo.getBuyPoint());
-			pntPointSvc.addPointTrade(to);
-		}
-	}
-	
-	@Override
-	public int updateIsDeliver(Long OrderId, Long onlineId, Long onlineSpecId) {
-		_log.info("根据订单id上线id规格id修改订单详情的发货状态参数为：{},{},{}",OrderId,onlineId,onlineSpecId);
-		return _mapper.updateIsDeliver(OrderId, onlineId, onlineSpecId);
-	}
+    /**
+     * 根据用户id计算待入账的积分
+     * 
+     * @param userId
+     * @return
+     */
+    @Override
+    public BigDecimal countWaitingBuyPointByUserId(Long userId) {
+        _log.info("查询用户待入账的积分的参数为：{}", userId);
+        return _mapper.countWaitingBuyPointByUserId(userId);
+    }
 
-	@Override
-	public int modifyUserIdByOrderId(Long orderId, Long userId) {
-		_log.info("根据订单id修改用户id的参数为：orderId-{},userId-{}",orderId,userId);
-		return _mapper.updateUserIdByOrderId(orderId,userId);
-	}
+    /**
+     * 获取用户待入积分
+     * 
+     * @param userId
+     * @param pageNum
+     * @param pageSize
+     * @return
+     */
+    @Override
+    public PageInfo<WaitingBuyPointByUserIdListRo> waitingBuyPointByUserIdList(Long userId, Integer pageNum,
+            Integer pageSize) {
+        _log.info("获取用户待入积分列表信息的参数为：userId-{}; pageNum-{}, pageSize-{}", userId, pageNum, pageSize);
+        return PageHelper.startPage(pageNum, pageSize)
+                .doSelectPageInfo(() -> _mapper.selectWaitingBuyPointByUserId(userId));
+    }
+
+    /**
+     * 根据上线id修改订单详情供应商和发货组织
+     */
+    @Override
+    public int modifyDeliverAndSupplierByOnlineid(Long supplierId, Long deliverOrgId, Long onlineId) {
+        return _mapper.modifyDeliverAndSupplierByOnlineid(supplierId, deliverOrgId, onlineId);
+    }
+
+    /**
+     * 补偿双倍积分
+     */
+    @Override
+    public void compensatePoint() {
+        _log.info("开始补偿双倍积分");
+        List<OrdOrderDetailMo> oldPointList = _mapper.selectOldPoint();
+        _log.info("补偿双倍积分获取到需要补偿的积分列表参数为：{}", String.valueOf(oldPointList));
+        for (OrdOrderDetailMo ordOrderDetailMo : oldPointList) {
+            System.out.println(ordOrderDetailMo);
+
+            int updateBuyPointByIdResult = _mapper.updateBuyPointById(ordOrderDetailMo.getId(),
+                    ordOrderDetailMo.getBuyPoint(), ordOrderDetailMo.getBuyPoint());
+            _log.info("补偿双倍积分修改订单详情积分的返回值为：{}", updateBuyPointByIdResult);
+            if (updateBuyPointByIdResult != 1) {
+                _log.error("补偿双倍积分修改订单详情积分出现错误，请求的参数为：{}", ordOrderDetailMo);
+                return;
+            }
+
+            AddPointTradeTo to = new AddPointTradeTo();
+            to.setAccountId(ordOrderDetailMo.getUserId());
+            to.setPointLogType((byte) PointLogTypeDic.RECHARGE.getCode());
+            to.setChangedTitile("大卖网络-积分充值");
+            to.setChangedDetail(
+                    "补偿购买商品：" + ordOrderDetailMo.getOnlineTitle() + ",规格为：" + ordOrderDetailMo.getSpecName() + "的积分");
+            to.setOrderId(ordOrderDetailMo.getOrderId());
+            to.setOrderDetailId(ordOrderDetailMo.getId());
+            to.setChangedPoint(ordOrderDetailMo.getBuyPoint());
+            pntPointSvc.addPointTrade(to);
+        }
+    }
+
+    @Override
+    public int updateIsDeliver(Long OrderId, Long onlineId, Long onlineSpecId) {
+        _log.info("根据订单id上线id规格id修改订单详情的发货状态参数为：{},{},{}", OrderId, onlineId, onlineSpecId);
+        return _mapper.updateIsDeliver(OrderId, onlineId, onlineSpecId);
+    }
+
+    @Override
+    public int modifyUserIdByOrderId(Long orderId, Long userId) {
+        _log.info("根据订单id修改用户id的参数为：orderId-{},userId-{}", orderId, userId);
+        return _mapper.updateUserIdByOrderId(orderId, userId);
+    }
+
+    /**
+     * 根据订单详情id修改邀请人id
+     */
+    @Override
+    public ShiftOrderRo modifyInviteId(List<ModifyInviteIdTo> modifyInviteIdList) {
+        ShiftOrderRo ro = new ShiftOrderRo();
+        for (ModifyInviteIdTo modifyInviteIdTo : modifyInviteIdList) {
+            if (_mapper.updateInviteIdById(modifyInviteIdTo.getId(), modifyInviteIdTo.getInviterId()) != 1) {
+                _log.error("根据订单详情id修改邀请人失败为 id-{},inviteId-{}", modifyInviteIdTo.getId(),
+                        modifyInviteIdTo.getInviterId());
+                throw new RuntimeException("修改失败");
+            }
+        }
+        ro.setMsg("修改成功");
+        ro.setResult(ResultDic.SUCCESS);
+        return ro;
+    }
 }
