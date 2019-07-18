@@ -304,4 +304,15 @@ public class OrdOrderDetailCtrl {
         return svc.modifyInviteId(modifyInviteIdList);
     }
 
+    @GetMapping("/ord/order-detail/get-one")
+    OrdOrderDetailMo getOneDetail(OrdOrderDetailMo mo) {
+        _log.info("获取单个订单详情参数 getOneDetail  OrdOrderDetailMo-{} ", mo);
+        List<OrdOrderDetailMo> resultList = svc.list(mo);
+        _log.info("获取单个订单详情结果 resultList-{} ", resultList);
+        if (svc.list(mo).size() > 0) {
+            return resultList.get(0);
+        }
+        return null;
+    }
+
 }

@@ -2,7 +2,6 @@ package rebue.ord.svc;
 
 import java.math.BigDecimal;
 import java.util.List;
-import java.util.Map;
 
 import com.github.pagehelper.PageInfo;
 
@@ -13,7 +12,6 @@ import rebue.ord.ro.ShiftOrderRo;
 import rebue.ord.ro.WaitingBuyPointByUserIdListRo;
 import rebue.ord.to.ModifyInviteIdTo;
 import rebue.ord.to.UpdateOrgTo;
-import rebue.robotech.ro.Ro;
 import rebue.robotech.svc.BaseSvc;
 
 /**
@@ -47,43 +45,7 @@ public interface OrdOrderDetailSvc extends BaseSvc<java.lang.Long, OrdOrderDetai
      */
     int updateCashbackSlot(OrdOrderDetailMo mo);
 
-    /**
-     * 添加购买关系时，更新订单详情返佣名额字段
-     */
-    int updateCommissionSlotForBuyRelation(OrdOrderDetailMo mo);
-
-    OrdOrderDetailMo getOrderDetailForBuyRelation(Map<String, Object> map);
-
-    OrdOrderDetailMo getOrderDetailForOneCommissonSlot(Map<String, Object> map);
-
-    OrdOrderDetailMo getAndUpdateBuyRelationByInvite(Map<String, Object> map);
-
-    OrdOrderDetailMo getAndUpdateBuyRelationByFour(Map<String, Object> map);
-
     List<DetailandBuyRelationRo> listBuyRelationByOrderId(Long orderId);
-
-    /**
-     * 匹配正确购买详情
-     * 
-     * @param map
-     * @return
-     */
-    Ro matchBuyRelation(long id, long InviteId, BigDecimal buyPrice, long downLineDetailId, long downLineOrderId,
-            long orderTimestamp);
-
-    /**
-     * 匹配给自己或者是邀请人
-     * 
-     * @param id
-     * @param InviteId
-     * @param buyPrice
-     * @param downLineDetailId
-     * @param downLineOrderId
-     * @param orderTimestamp
-     * @return
-     */
-    boolean matchOwnOrInviter(long id, long InviteId, BigDecimal buyPrice, long downLineDetailId, long downLineOrderId,
-            long orderTimestamp);
 
     /**
      * 得到买家已下单指定上线规格商品的数量(以此来限制买家购买)

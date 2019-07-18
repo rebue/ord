@@ -39,8 +39,10 @@ import rebue.afc.svr.feign.AfcRefundSvc;
 import rebue.afc.to.RefundApprovedTo;
 import rebue.afc.to.RefundImmediateTo;
 import rebue.ibr.mo.IbrBuyRelationMo;
+import rebue.ibr.mo.IbrBuyRelationTaskMo;
 import rebue.ibr.mo.IbrInviteRelationMo;
 import rebue.ibr.svr.feign.IbrBuyRelationSvc;
+import rebue.ibr.svr.feign.IbrBuyRelationTaskSvc;
 import rebue.ibr.svr.feign.IbrInviteRelationSvc;
 import rebue.kdi.ro.EOrderRo;
 import rebue.kdi.ro.KdiLogisticRo;
@@ -219,6 +221,9 @@ public class OrdOrderSvcImpl extends MybatisBaseSvcImpl<OrdOrderMo, java.lang.Lo
 
     @Resource
     private IbrInviteRelationSvc ibrInviteRelationSvc;
+
+    @Resource
+    private IbrBuyRelationTaskSvc ibrBuyRelationTaskSvc;
 
     /**
      * 检查订单是否可结算 1. 订单必须存在 2. 订单必须处于签收状态 3. 订单必须已经记录签收时间 4. 已经超过订单启动结算的时间 5.
@@ -1935,7 +1940,7 @@ public class OrdOrderSvcImpl extends MybatisBaseSvcImpl<OrdOrderMo, java.lang.Lo
      * 4. 按不同发货组织拆单，并重新计算拆单后的订单实际交易金额
      * 5. 根据支付订单id将订单该为已支付
      * 6. 添加首单计算的任务
-     * 7. 匹配购买关系
+     * 7. 添加匹配购买关系任务
      * 8. 判断订单是否是当场签收的，是的话调用订单签收接口
      */
     @Override
@@ -2102,26 +2107,27 @@ public class OrdOrderSvcImpl extends MybatisBaseSvcImpl<OrdOrderMo, java.lang.Lo
             }
         }
 
-        _log.info("7. 匹配购买关系");
-        _log.info("遍历订单详情: 添加订单购买关系");
+        _log.info("7. 添加匹配购买关系任务");
+        _log.info("遍历订单详情: 添加匹配购买关系任务");
         for (final OrdOrderDetailMo orderDetail : orderDetailAlls) {
             try {
                 _log.info("订单详情商品类型为：subjectType-{}", orderDetail.getSubjectType());
                 if (orderDetail.getSubjectType() == 1) {
-                    final long userId = orderDetail.getUserId();
-                    final BigDecimal buyPrice = orderDetail.getBuyPrice();
-                    final long downLineDetailId = orderDetail.getId();
-                    final long downLineOrderId = orderDetail.getOrderId();
-                    final long orderTimestamp = orderDetail.getOrderTimestamp();
-                    _log.info("全返商品添加购买关系");
-                    Ro ro = orderDetailSvc.matchBuyRelation(userId,
-                            orderDetail.getInviteId() == null ? 0l : orderDetail.getInviteId(), buyPrice,
-                            downLineDetailId, downLineOrderId, orderTimestamp);
-                    _log.info(ro.getMsg());
-
+                    // 添加匹配任务,五分钟后执行。
+                    IbrBuyRelationTaskMo addTaskMo = new IbrBuyRelationTaskMo();
+                    final Calendar calendar = Calendar.getInstance();
+                    calendar.setTime(new Date());
+                    calendar.add(Calendar.MINUTE, 5);
+                    final Date executePlanTime = calendar.getTime();
+                    addTaskMo.setExecuteState((byte) TaskExecuteStateDic.NONE.getCode());
+                    addTaskMo.setTaskType((byte) 1);
+                    addTaskMo.setExecutePlanTime(executePlanTime);
+                    addTaskMo.setOrderDetailId(orderDetail.getId());
+                    _log.info("添加订阅物流的参数为:{}", addTaskMo);
+                    ibrBuyRelationTaskSvc.add(addTaskMo);
                 }
             } catch (final Exception e) {
-                _log.error("匹配购买关系报错：", e);
+                _log.error("添加匹配购买关系任务报错：", e);
             }
         }
 

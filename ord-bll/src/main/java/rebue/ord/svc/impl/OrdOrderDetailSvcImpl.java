@@ -20,7 +20,6 @@ import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
 
 import damai.pnt.dic.PointLogTypeDic;
-import rebue.ibr.dic.RelationSourceDic;
 import rebue.ibr.mo.IbrBuyRelationMo;
 import rebue.ibr.svr.feign.IbrBuyRelationSvc;
 import rebue.ibr.svr.feign.IbrInviteRelationSvc;
@@ -28,7 +27,6 @@ import rebue.kdi.svr.feign.KdiSvc;
 import rebue.onl.svr.feign.OnlOnlinePicSvc;
 import rebue.onl.svr.feign.OnlOnlineSpecSvc;
 import rebue.ord.dao.OrdOrderDetailDao;
-import rebue.ord.dic.CommissionStateDic;
 import rebue.ord.dic.OrderStateDic;
 import rebue.ord.dic.ReturnStateDic;
 import rebue.ord.jo.OrdOrderDetailJo;
@@ -46,7 +44,6 @@ import rebue.ord.to.UpdateOrgTo;
 import rebue.pnt.svr.feign.PntPointSvc;
 import rebue.pnt.to.AddPointTradeTo;
 import rebue.robotech.dic.ResultDic;
-import rebue.robotech.ro.IdRo;
 import rebue.robotech.ro.Ro;
 import rebue.robotech.svc.impl.BaseSvcImpl;
 import rebue.suc.mo.SucUserMo;
@@ -179,14 +176,6 @@ public class OrdOrderDetailSvcImpl
     }
 
     /**
-     * 用户匹配自己购买关系，获取用户还有两个匹配名额的订单详情
-     */
-    @Override
-    public OrdOrderDetailMo getOrderDetailForBuyRelation(final Map<String, Object> map) {
-        return _mapper.getOrderDetailForBuyRelation(map);
-    }
-
-    /**
      * 根据OrderId获取订单详情列表
      */
     @Override
@@ -198,28 +187,8 @@ public class OrdOrderDetailSvcImpl
     }
 
     @Override
-    public int updateCommissionSlotForBuyRelation(final OrdOrderDetailMo mo) {
-        return _mapper.updateCommissionSlotForBuyRelation(mo);
-    }
-
-    @Override
     public int updateCashbackSlot(final OrdOrderDetailMo mo) {
         return _mapper.updateCashbackSlot(mo);
-    }
-
-    @Override
-    public OrdOrderDetailMo getAndUpdateBuyRelationByFour(final Map<String, Object> map) {
-        return _mapper.getAndUpdateBuyRelationByFour(map);
-    }
-
-    @Override
-    public OrdOrderDetailMo getAndUpdateBuyRelationByInvite(final Map<String, Object> map) {
-        return _mapper.getAndUpdateBuyRelationByInvite(map);
-    }
-
-    @Override
-    public OrdOrderDetailMo getOrderDetailForOneCommissonSlot(final Map<String, Object> map) {
-        return _mapper.getOrderDetailForOneCommissonSlot(map);
     }
 
     /**
@@ -580,107 +549,6 @@ public class OrdOrderDetailSvcImpl
     public int modifyUserIdByOrderId(Long orderId, Long userId) {
         _log.info("根据订单id修改用户id的参数为：orderId-{},userId-{}", orderId, userId);
         return _mapper.updateUserIdByOrderId(orderId, userId);
-    }
-
-    /**
-     * 获取正确匹配的详情
-     */
-    @Override
-    public Ro matchBuyRelation(final long userId, long InviterUserId, final BigDecimal buyPrice, final long detailId,
-            final long orderId, final long orderTimestamp) {
-
-        Ro ro = new Ro();
-        boolean result = matchOwnOrInviter(userId, InviterUserId, buyPrice, detailId, orderId, orderTimestamp);
-        if (result == false && InviterUserId != 0l) {
-            // 如果失败且邀请人id不为0，那么上面执行的就是匹配给邀请人的，将邀请人id设置为0再执行尝试匹配给自己。
-            InviterUserId = 0l;
-            _log.info("匹配邀请失败，将邀请人设置为0后尝试匹配给自己 InviterUserId-{}", InviterUserId);
-            result = matchOwnOrInviter(userId, InviterUserId, buyPrice, detailId, orderId, orderTimestamp);
-        }
-        if (result) {
-            _log.info("购买关系匹配成功 result-{}", result);
-            ro.setMsg("匹配关系成功");
-            return ro;
-        }
-        _log.info("购买关系匹配失败 result-{}", result);
-
-        // 添加进去调度器
-        _log.info("添加进调度器中n个小时后执行匹配关系");
-
-        ro.setMsg("匹配关系成功");
-        return ro;
-    }
-
-    /**
-     * 匹配自己或者是邀请人规则
-     * 1：订单状态不在(1,-1),也就是不是已下单和已作废状态。
-     * 2：用户id是自己或者是邀请人
-     * 3：待返佣状态是匹配中
-     * 4：下单时间戳小于当前订单详情下单时间戳
-     * 5：购买价格是当前详情的购买价格
-     * 
-     * @param userid
-     * @param buyPrice
-     * @param downLineDetailId
-     * @param downLineOrderId
-     * @param orderTimestamp
-     * @return
-     */
-    @Override
-    @Transactional(readOnly = false, propagation = Propagation.REQUIRED)
-    public boolean matchOwnOrInviter(final long userId, final long InviterUserId, final BigDecimal buyPrice,
-            final long detailId, final long orderId, final long orderTimestamp) {
-        _log.info("匹配购买关系获取订单详情的参数userId-{},InviterUserId-{},buyPrice-{},detailId-{},orderId-{},orderTimestamp-{}",
-                userId, InviterUserId, buyPrice, detailId, orderId, orderTimestamp);
-        if (InviterUserId == 0l) {
-            _log.info("邀请人id为空，匹配给自己:InviterUserId-{}", InviterUserId);
-        } else {
-            _log.info("邀请人id不为空，匹配给邀请人:InviterUserId-{}", InviterUserId);
-        }
-        final Map<String, Object> map = new HashMap<>();
-        map.put("userId", InviterUserId == 0l ? userId : InviterUserId);
-        map.put("buyPrice", buyPrice);
-        map.put("orderTimestamp", orderTimestamp);
-        map.put("commissionState", CommissionStateDic.MATCHING);
-        OrdOrderDetailMo UplineOderDetailResult = _mapper.selectCorrectMatchOrderDetail(map);
-        if (UplineOderDetailResult == null) {
-            _log.info("获取正确订单详情的结果为:{},匹配失败，没有合适的详情", UplineOderDetailResult);
-            return false;
-        }
-
-        // 添加购买关系记录
-        _log.info("在购买关系表中添加记录");
-        final IbrBuyRelationMo buyRelationMo = new IbrBuyRelationMo();
-        buyRelationMo.setId(detailId);
-        buyRelationMo.setGroupId(buyPrice.longValue());
-        buyRelationMo.setParentId(UplineOderDetailResult.getId());
-        buyRelationMo.setRelationSource(
-                InviterUserId == 0l ? (byte) RelationSourceDic.OWN.getCode() : (byte) RelationSourceDic.BUY.getCode());
-        _log.info("添加购买关系参数:{}", buyRelationMo);
-        IdRo addBuyRelationResult = ibrBuyRelationSvc.add(buyRelationMo);
-        if (addBuyRelationResult.getResult().getCode() != 1) {
-            _log.error("{}添加下级购买信息失败addBuyRelationResult-{}", addBuyRelationResult);
-            throw new RuntimeException("生成购买关系出错");
-        }
-
-        // 更新上家购买关系订单详情的返佣名额和返拥金状态
-        final OrdOrderDetailMo updateOrderDetailMo = new OrdOrderDetailMo();
-        if (UplineOderDetailResult.getCommissionSlot() == (byte) 1) {
-            updateOrderDetailMo.setCommissionSlot((byte) 2);
-            updateOrderDetailMo.setCommissionState((byte) CommissionStateDic.RETURNING.getCode());
-        } else {
-            updateOrderDetailMo.setCommissionSlot((byte) 1);
-        }
-        updateOrderDetailMo.setId(UplineOderDetailResult.getId());
-        _log.info("更新上家订单详情返佣名额和返拥金状态的参数为:{}", buyRelationMo);
-        final int updateOrderDetailResult = super.modify(updateOrderDetailMo);
-        if (updateOrderDetailResult != 1) {
-            _log.error("更新上家订单详情返佣名额失败 id-{}", UplineOderDetailResult.getId());
-            throw new RuntimeException("更新上家订单详情返现名额失败");
-        }
-        _log.info("根据规则购买关系成功，匹配的购买关系ID为:{}" + buyRelationMo.getId());
-
-        return true;
     }
 
     /**
