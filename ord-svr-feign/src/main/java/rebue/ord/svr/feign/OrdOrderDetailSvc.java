@@ -25,4 +25,11 @@ public interface OrdOrderDetailSvc {
 
     @GetMapping("/ord/order-detail/get-one")
     OrdOrderDetailMo getOneDetail(@RequestParam("userId") Long userId, @RequestParam("buyPrice") BigDecimal buyPrice);
+
+    /**
+     * 获取单个订单详情
+     *
+     */
+    @GetMapping("/ord/orderdetail/getbyid")
+    OrdOrderDetailMo getById(@RequestParam("id") java.lang.Long id);
 }
