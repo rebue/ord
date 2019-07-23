@@ -185,4 +185,9 @@ alter table ORD_ORDER add  IS_NOW_RECEIVED      bool not null default false comm
 
 -- ------------------------------------------------------- 上面的已更新到线上 2019.04.11 ----------------------------------------------------
 
+alter table ORD_ORDER_DETAIL modify column BUY_COUNT decimal(20,4) default 0 comment "购买数量";
+
+alter table ORD_ORDER_DETAIL modify column RETURN_COUNT decimal(20,4) default 0 comment "退货数量";
+
+alter table ORD_RETURN modify column RETURN_COUNT decimal(20,4) default 0 comment "退货数量";
 

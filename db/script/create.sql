@@ -1,6 +1,6 @@
 /*==============================================================*/
 /* DBMS name:      MySQL 5.0                                    */
-/* Created on:     2019/6/10 17:37:39                           */
+/* Created on:     2019/7/23 1:41:15                            */
 /*==============================================================*/
 
 
@@ -169,8 +169,8 @@ create table ORD_ORDER_DETAIL
    SPEC_NAME            varchar(50) not null comment '规格名称',
    IS_SETTLE_BUYER      bool comment '是否结算给买家',
    ACTUAL_AMOUNT        decimal(18,4) comment '实际成交金额',
-   BUY_COUNT            int not null comment '购买数量(实际数量=购买数量-退货数量)',
-   RETURN_COUNT         int not null default 0 comment '退货数量',
+   BUY_COUNT            decimal(18,4) not null comment '购买数量(实际数量=购买数量-退货数量)',
+   RETURN_COUNT         decimal(18,4) not null default 0 comment '退货数量',
    BUY_PRICE            decimal(18,4) not null comment '购买价格（单价）',
    COST_PRICE           decimal(18,4) comment '成本价格（单个）',
    BUY_POINT            decimal(18,4) comment '购买积分',
@@ -216,7 +216,7 @@ create table ORD_RETURN
    RETURN_CODE          bigint not null comment '退货编号',
    ORDER_ID             bigint not null comment '订单ID',
    ORDER_DETAIL_ID      bigint not null comment '订单详情ID',
-   RETURN_COUNT         int not null comment '退货数量',
+   RETURN_COUNT         decimal(18,4) not null comment '退货数量',
    REFUND_TOTAL         decimal(18,4) comment '退款总额（退款总额=退款余额+退款返现金+退款补偿金）',
    REFUND_COMPENSATION  decimal(18,4) default 0 comment '退款补偿金额(退货退款产生的需补偿给卖家的金额，例如补偿运费)',
    RETURN_TYPE          tinyint not null comment '退货类型（1：仅退款  2：退货并退款）',
@@ -294,3 +294,4 @@ alter table ORD_RETURN add constraint FK_Relationship_3 foreign key (ORDER_ID)
 
 alter table ORD_RETURN_PIC add constraint FK_Relationship_4 foreign key (RETURN_ID)
       references ORD_RETURN (ID) on delete restrict on update restrict;
+
