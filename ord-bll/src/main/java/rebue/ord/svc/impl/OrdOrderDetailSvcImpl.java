@@ -333,7 +333,7 @@ public class OrdOrderDetailSvcImpl
      *            上线规格ID
      */
     @Override
-    public int getBuyerOrderedCount(final Long userId, final Long onlineSpecId) {
+    public BigDecimal getBuyerOrderedCount(final Long userId, final Long onlineSpecId) {
         _log.info("得到买家已下单指定上线规格商品的数量(以此来限制买家购买): userId-{} onlineSpecId-{}", userId, onlineSpecId);
         return _mapper.getBuyerOrderedCount(userId, onlineSpecId);
     }
@@ -371,7 +371,7 @@ public class OrdOrderDetailSvcImpl
     @Override
     @Transactional(readOnly = false, propagation = Propagation.REQUIRED)
     public int modifyReturnNumAndCashbackTotal(final Long id, final BigDecimal oldCashbackTotal,
-            final BigDecimal newCashbackTotal, final Integer returnedCount, final Integer returnTotal) {
+            final BigDecimal newCashbackTotal, final BigDecimal returnedCount, final BigDecimal returnTotal) {
         _log.info("修改返现总额和退货数量的参数为：id={}, oldCashbackTotal={}, newCashbackTotal={}, returnedCount={}, returnTotal={}",
                 id, oldCashbackTotal, newCashbackTotal, returnedCount, returnTotal);
         return _mapper.updateReturnNumAndCashbackTotal(id, oldCashbackTotal, newCashbackTotal, returnedCount,
@@ -464,7 +464,7 @@ public class OrdOrderDetailSvcImpl
 
             // 首单购买奖励积分 = 成本价 * 实际购买数量
             addPointTradeTo.setChangedPoint(orderDetailMo.getCostPrice()
-                    .multiply(BigDecimal.valueOf(orderDetailMo.getBuyCount() - orderDetailMo.getReturnCount())));
+                    .multiply(orderDetailMo.getBuyCount().subtract(orderDetailMo.getReturnCount())));
             _log.debug("添加一笔新的积分记录: 商品首单购买奖励积分结算买家: addPointTradeTo-{}", addPointTradeTo);
             pntPointSvc.addPointTrade(addPointTradeTo);
         }

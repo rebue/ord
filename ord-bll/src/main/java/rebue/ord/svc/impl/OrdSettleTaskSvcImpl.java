@@ -268,15 +268,15 @@ public class OrdSettleTaskSvcImpl extends MybatisBaseSvcImpl<OrdSettleTaskMo, ja
      * 添加结算子任务
      *
      * @param orderId
-     *            订单ID
+     *                订单ID
      * @param now
-     *            当前时间
+     *                当前时间
      * @param delay
-     *            延迟时间
+     *                延迟时间
      */
     private void addSettleSubTask(final Long orderId, final Date now, final SettleTaskTypeDic taskType,
             final BigDecimal delay) {
-        final Calendar calendar = Calendar.getInstance();
+        final Calendar  calendar  = Calendar.getInstance();
         final OrdTaskMo subTaskMo = new OrdTaskMo();
         subTaskMo.setOrderId(orderId.toString());
         subTaskMo.setTaskType((byte) OrderTaskTypeDic.SETTLE.getCode());
@@ -301,8 +301,8 @@ public class OrdSettleTaskSvcImpl extends MybatisBaseSvcImpl<OrdSettleTaskMo, ja
             _log.error(msg);
             throw new RuntimeException(msg);
         }
-        final Long orderId = Long.valueOf(taskMo.getOrderId());
-        final OrdOrderMo order = orderSvc.getById(orderId);
+        final Long       orderId = Long.valueOf(taskMo.getOrderId());
+        final OrdOrderMo order   = orderSvc.getById(orderId);
         if (order == null) {
             final String msg = "订单不存在";
             _log.error("{}: orderId-{}", msg, orderId);
@@ -366,10 +366,10 @@ public class OrdSettleTaskSvcImpl extends MybatisBaseSvcImpl<OrdSettleTaskMo, ja
                 tradeMo.setTradeType((byte) TradeTypeDic.SETTLE_SUPPLIER.getCode());
                 tradeMo.setAccountId(orderDetail.getSupplierId());
                 // 获取订单详情真实购买数量
-                final int realBuyCount = orderDetail.getBuyCount() - orderDetail.getReturnCount();
+                final BigDecimal realBuyCount = orderDetail.getBuyCount().subtract(orderDetail.getReturnCount());
                 // 订单详情总成本价 = 成本价 * 真实购买数量
-                final BigDecimal costPriceTotal = orderDetail.getCostPrice().multiply(BigDecimal.valueOf(realBuyCount))
-                        .setScale(4, BigDecimal.ROUND_HALF_UP);
+                final BigDecimal costPriceTotal = orderDetail.getCostPrice().multiply(realBuyCount).setScale(4,
+                        BigDecimal.ROUND_HALF_UP);
                 tradeMo.setTradeAmount(costPriceTotal);
                 tradeMo.setTradeTitle("结算供应商(将成本打到供应商的余额)");
                 addAccountTrade(taskMo, orderDetail, tradeMo, now);
@@ -416,7 +416,7 @@ public class OrdSettleTaskSvcImpl extends MybatisBaseSvcImpl<OrdSettleTaskMo, ja
                 addPointTradeTo.setPointLogType((byte) PointLogTypeDic.ORDER_SETTLE.getCode());
                 addPointTradeTo.setChangedTitile("大卖网-商品购买积分");
                 addPointTradeTo.setChangedDetail(orderDetail.getOnlineTitle() + orderDetail.getSpecName()//
-                        + " x " + (orderDetail.getBuyCount() - orderDetail.getReturnCount()));
+                        + " x " + (orderDetail.getBuyCount().subtract(orderDetail.getReturnCount())));
                 addPointTradeTo.setOrderId(order.getId());
                 addPointTradeTo.setOrderDetailId(orderDetail.getId());
                 addPointTradeTo.setChangedPoint(orderDetail.getBuyPointTotal());
@@ -429,7 +429,7 @@ public class OrdSettleTaskSvcImpl extends MybatisBaseSvcImpl<OrdSettleTaskMo, ja
                     addPointTradeTo.setChangedTitile("大卖网-商品首单购买奖励积分");
                     // 首单购买奖励积分 = 成本价 * 实际购买数量
                     addPointTradeTo.setChangedPoint(orderDetail.getCostPrice()
-                            .multiply(BigDecimal.valueOf(orderDetail.getBuyCount() - orderDetail.getReturnCount())));
+                            .multiply(orderDetail.getBuyCount().subtract(orderDetail.getReturnCount())));
                     _log.debug("添加一笔新的积分记录: 商品首单购买奖励积分结算买家: addPointTradeTo-{}", addPointTradeTo);
                     pntPointSvc.addPointTrade(addPointTradeTo);
                 }
@@ -442,12 +442,12 @@ public class OrdSettleTaskSvcImpl extends MybatisBaseSvcImpl<OrdSettleTaskMo, ja
                 tradeMo.setTradeType((byte) TradeTypeDic.SETTLE_DEPOSIT_USED.getCode());
                 tradeMo.setAccountId(order.getOnlineOrgId());
                 // 获取订单详情真实购买数量
-                final int realBuyCount = orderDetail.getBuyCount() - orderDetail.getReturnCount();
+                final BigDecimal realBuyCount = orderDetail.getBuyCount().subtract(orderDetail.getReturnCount());
                 // 总成本 = 真实购买数量 * 成本价格
-                final BigDecimal costPriceTotal = orderDetail.getCostPrice().multiply(BigDecimal.valueOf(realBuyCount))
-                        .setScale(4, BigDecimal.ROUND_HALF_UP);
+                final BigDecimal costPriceTotal = orderDetail.getCostPrice().multiply(realBuyCount).setScale(4,
+                        BigDecimal.ROUND_HALF_UP);
                 // 需要释放的保证金额 = 真实购买数量 * 成本价格
-                final BigDecimal depositUsed = costPriceTotal.multiply(BigDecimal.valueOf(realBuyCount));
+                final BigDecimal depositUsed = costPriceTotal.multiply(realBuyCount);
                 tradeMo.setTradeAmount(depositUsed);
                 tradeMo.setTradeTitle("释放卖家的已占用保证金");
                 addAccountTrade(taskMo, orderDetail, tradeMo, now);
@@ -460,9 +460,9 @@ public class OrdSettleTaskSvcImpl extends MybatisBaseSvcImpl<OrdSettleTaskMo, ja
                 tradeMo.setTradeType((byte) TradeTypeDic.SETTLE_SELLER.getCode());
                 tradeMo.setAccountId(order.getOnlineOrgId());
                 // 获取订单详情真实购买数量
-                final int realBuyCount = orderDetail.getBuyCount() - orderDetail.getReturnCount();
+                final BigDecimal realBuyCount = orderDetail.getBuyCount().subtract(orderDetail.getReturnCount());
                 // 总成本 = 真实购买数量 * 成本价格
-                final BigDecimal costPriceTotal = orderDetail.getCostPrice().multiply(BigDecimal.valueOf(realBuyCount));
+                final BigDecimal costPriceTotal = orderDetail.getCostPrice().multiply(realBuyCount);
                 // 平台服务费
                 BigDecimal platformServiceFee = null;
                 // 实际成交金额
@@ -471,7 +471,7 @@ public class OrdSettleTaskSvcImpl extends MybatisBaseSvcImpl<OrdSettleTaskMo, ja
                 if (orderDetail.getActualAmount() == null) {
                     // 实际成交金额 = 购买金额(单价) * (购买数量 - 退货数量)
                     actualAmount = orderDetail.getBuyPrice()
-                            .multiply(BigDecimal.valueOf(orderDetail.getBuyCount() - orderDetail.getReturnCount()));
+                            .multiply(orderDetail.getBuyCount().subtract(orderDetail.getReturnCount()));
                     // 平台服务费 = 实际成交金额 * 平台服务费比例
                     platformServiceFee = actualAmount.multiply(platformServiceFeeRatio);
                 } else {
@@ -500,10 +500,9 @@ public class OrdSettleTaskSvcImpl extends MybatisBaseSvcImpl<OrdSettleTaskMo, ja
                 BigDecimal platformServiceFee = null;
                 if (orderDetail.getActualAmount() == null) {
                     // 真实购买数量 = 购买数量 - 退货数量
-                    final Integer realBuyCount = orderDetail.getBuyCount() - orderDetail.getReturnCount();
+                    final BigDecimal realBuyCount = orderDetail.getBuyCount().subtract(orderDetail.getReturnCount());
                     // 实际成交金额 = 真实购买数量 * 购买金额（单价）
-                    final BigDecimal actualAmount = orderDetail.getBuyPrice()
-                            .multiply(BigDecimal.valueOf(realBuyCount));
+                    final BigDecimal actualAmount = orderDetail.getBuyPrice().multiply(realBuyCount);
                     // 平台服务费 = 实际成交金额 * 平台服务费比例
                     platformServiceFee = actualAmount.multiply(platformServiceFeeRatio).setScale(4,
                             BigDecimal.ROUND_HALF_UP);
@@ -598,7 +597,7 @@ public class OrdSettleTaskSvcImpl extends MybatisBaseSvcImpl<OrdSettleTaskMo, ja
             tradeMo.setOrderDetailId(orderDetail.getId().toString());
         }
         tradeMo.setTradeDetail(orderDetail.getOnlineTitle() + orderDetail.getSpecName() + " x " //
-                + (orderDetail.getBuyCount() - orderDetail.getReturnCount()));
+                + (orderDetail.getBuyCount().subtract(orderDetail.getReturnCount())));
         tradeMo.setOpId(0L);
         _log.info("执行添加一笔交易的参数为：{}", tradeMo);
         afcTradeSvc.addTrade(tradeMo);
@@ -637,7 +636,7 @@ public class OrdSettleTaskSvcImpl extends MybatisBaseSvcImpl<OrdSettleTaskMo, ja
      * 处理返佣(订单详情如果符合返佣条件，则返佣)
      * 
      * @param orderDetail
-     *            要判断是否返佣的订单详情
+     *                    要判断是否返佣的订单详情
      */
     private void handleCommission(final OrdOrderDetailMo orderDetail, final Long buyerId, final Date now) {
         _log.info("处理返佣(订单详情如果符合返佣条件，则返佣): orderDetail-{}", orderDetail);

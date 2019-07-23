@@ -148,7 +148,7 @@ public class OrdOrderDetailMo implements Serializable {
      *
      *    @mbg.generated 自动生成，如需修改，请删除本行
      */
-    private Integer buyCount;
+    private BigDecimal buyCount;
 
     /**
      *    退货数量
@@ -157,7 +157,7 @@ public class OrdOrderDetailMo implements Serializable {
      *
      *    @mbg.generated 自动生成，如需修改，请删除本行
      */
-    private Integer returnCount;
+    private BigDecimal returnCount;
 
     /**
      *    购买价格（单价）
@@ -614,7 +614,7 @@ public class OrdOrderDetailMo implements Serializable {
      *
      *    @mbg.generated 自动生成，如需修改，请删除本行
      */
-    public Integer getBuyCount() {
+    public BigDecimal getBuyCount() {
         return buyCount;
     }
 
@@ -625,7 +625,7 @@ public class OrdOrderDetailMo implements Serializable {
      *
      *    @mbg.generated 自动生成，如需修改，请删除本行
      */
-    public void setBuyCount(Integer buyCount) {
+    public void setBuyCount(BigDecimal buyCount) {
         this.buyCount = buyCount;
     }
 
@@ -636,7 +636,7 @@ public class OrdOrderDetailMo implements Serializable {
      *
      *    @mbg.generated 自动生成，如需修改，请删除本行
      */
-    public Integer getReturnCount() {
+    public BigDecimal getReturnCount() {
         return returnCount;
     }
 
@@ -647,7 +647,7 @@ public class OrdOrderDetailMo implements Serializable {
      *
      *    @mbg.generated 自动生成，如需修改，请删除本行
      */
-    public void setReturnCount(Integer returnCount) {
+    public void setReturnCount(BigDecimal returnCount) {
         this.returnCount = returnCount;
     }
 

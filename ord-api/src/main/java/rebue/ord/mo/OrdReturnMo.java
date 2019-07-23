@@ -61,7 +61,7 @@ public class OrdReturnMo implements Serializable {
      *
      *    @mbg.generated 自动生成，如需修改，请删除本行
      */
-    private Integer returnCount;
+    private BigDecimal returnCount;
 
     /**
      *    退款总额（退款总额=退款余额+退款返现金+退款补偿金）
@@ -366,7 +366,7 @@ public class OrdReturnMo implements Serializable {
      *
      *    @mbg.generated 自动生成，如需修改，请删除本行
      */
-    public Integer getReturnCount() {
+    public BigDecimal getReturnCount() {
         return returnCount;
     }
 
@@ -377,7 +377,7 @@ public class OrdReturnMo implements Serializable {
      *
      *    @mbg.generated 自动生成，如需修改，请删除本行
      */
-    public void setReturnCount(Integer returnCount) {
+    public void setReturnCount(BigDecimal returnCount) {
         this.returnCount = returnCount;
     }
 

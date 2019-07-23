@@ -16,7 +16,6 @@ import org.springframework.transaction.annotation.Transactional;
 
 import com.github.dozermapper.core.Mapper;
 
-import rebue.afc.co.AfcExchangeCo;
 import rebue.afc.msg.PayDoneMsg;
 import rebue.ord.svc.OrdOrderDetailSvc;
 import rebue.ord.svc.OrdOrderSvc;
@@ -29,17 +28,17 @@ import rebue.wheel.idworker.IdWorker3;
  */
 @Service
 public class PayDoneSub implements ApplicationListener<ContextRefreshedEvent> {
-    private final static Logger _log                = LoggerFactory.getLogger(PayDoneSub.class);
+    private final static Logger _log = LoggerFactory.getLogger(PayDoneSub.class);
 
     /**
      * 处理支付完成通知的队列
      */
-    private final static String PAY_DONE_QUEUE_NAME = "rebue.ord.pay.done.queue";
+    private final static String PAY_DONE_QUEUE_NAME = "rebue.ord.pay.done.queue1";
 
     @Value("${appid:0}")
-    private int                 _appid;
+    private int _appid;
 
-    protected IdWorker3         _idWorker;
+    protected IdWorker3 _idWorker;
 
     @PostConstruct
     public void init() {
@@ -47,24 +46,21 @@ public class PayDoneSub implements ApplicationListener<ContextRefreshedEvent> {
     }
 
     @Resource
-    private RabbitConsumer         consumer;
+    private RabbitConsumer consumer;
 
     @Resource
-    private Mapper                 dozerMapper;
+    private Mapper dozerMapper;
 
     @Resource
-    private OrdOrderSvc            ordOrderSvc;
+    private OrdOrderSvc ordOrderSvc;
 
     @Resource
-    private OrdOrderDetailSvc      ordOrderDetailSvc;
-
-
+    private OrdOrderDetailSvc ordOrderDetailSvc;
 
     /**
      */
     @Resource
-    private SucUserSvc             sucUserSvc;
-
+    private SucUserSvc sucUserSvc;
 
     @Override
     @Transactional(readOnly = false, propagation = Propagation.REQUIRED)
@@ -74,13 +70,13 @@ public class PayDoneSub implements ApplicationListener<ContextRefreshedEvent> {
             return;
         }
         _log.info("订阅支付完成的通知");
-        consumer.bind(AfcExchangeCo.PAY_DONE_EXCHANGE_NAME, PAY_DONE_QUEUE_NAME, PayDoneMsg.class, (msg) -> {
-            _log.info("收到支付完成的通知: {}", msg);
-            if (!handlePayNotify(msg)) {
-                return false;
-            }
-            return true;
-        });
+//        consumer.bind(AfcExchangeCo.PAY_DONE_EXCHANGE_NAME, PAY_DONE_QUEUE_NAME, PayDoneMsg.class, (msg) -> {
+//            _log.info("收到支付完成的通知: {}", msg);
+//            if (!handlePayNotify(msg)) {
+//                return false;
+//            }
+//            return true;
+//        });
     }
 
     /**

@@ -1,5 +1,7 @@
 package rebue.ord.to;
 
+import java.math.BigDecimal;
+
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
 
@@ -18,26 +20,26 @@ public class OrderDetailTo {
     /**
      * 上线ID
      */
-    private Long    onlineId;
+    private Long onlineId;
 
     /**
      * 上线规格名称
      */
-    private Long    onlineSpecId;
+    private Long onlineSpecId;
 
     /**
      * 购买数量
      */
-    private Integer buyCount;
+    private BigDecimal buyCount;
 
     /**
      * 购物车ID
      */
-    private Long    cartId;
-    
+    private Long cartId;
+
     /**
      * 邀请人id
      */
-    private Long  inviteId;
+    private Long inviteId;
 
 }

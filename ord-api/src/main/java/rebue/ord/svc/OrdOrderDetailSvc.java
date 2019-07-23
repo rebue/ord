@@ -55,7 +55,7 @@ public interface OrdOrderDetailSvc extends BaseSvc<java.lang.Long, OrdOrderDetai
      * @param onlineSpecId
      *            上线规格ID
      */
-    int getBuyerOrderedCount(Long userId, Long onlineSpecId);
+    BigDecimal getBuyerOrderedCount(Long userId, Long onlineSpecId);
 
     /**
      * 设置订单详情已结算返现金给买家
@@ -73,7 +73,7 @@ public interface OrdOrderDetailSvc extends BaseSvc<java.lang.Long, OrdOrderDetai
      * @return
      */
     int modifyReturnNumAndCashbackTotal(Long id, BigDecimal oldCashbackTotal, BigDecimal newCashbackTotal,
-            Integer returnedCount, Integer returnTotal);
+            BigDecimal returnedCount, BigDecimal returnTotal);
 
     /**
      * 修改订单详情实际金额和退货状态

@@ -31,7 +31,7 @@ public class ShiftOrderRo extends Ro {
     /**
      * 总数量
      */
-    private Integer totalNumber;
+    private BigDecimal totalNumber;
 
     /**
      * 真实价格

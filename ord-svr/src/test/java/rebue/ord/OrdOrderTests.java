@@ -40,98 +40,107 @@ public class OrdOrderTests {
 
     private ObjectMapper _objectMapper = new ObjectMapper();
 
+    @Resource
+    private OrdOrderDetailSvc svc;
+
+    @Resource
+    private Mapper dozerMapper;
+
     /**
      * 测试下单
      */
-//    @Test
+    @Test
     public void test01() throws IOException {
         final List<OrderDetailTo> details = new LinkedList<>();
-        final OrderTo orderTo = new OrderTo();
+        final OrderTo             orderTo = new OrderTo();
         orderTo.setUserId(515488916007157761L); // 下单的用户ID
-
-        Ro ro = order(orderTo);
-        Assert.assertEquals("参数错误", ro.getMsg());
-
         orderTo.setDetails(details);
-        ro = order(orderTo);
-        Assert.assertEquals("参数错误", ro.getMsg());
+//        Ro ro = order(orderTo);
+//        Assert.assertEquals("参数错误", ro.getMsg());
+
+//        orderTo.setDetails(details);
+//        Ro ro = order(orderTo);
+//        Assert.assertEquals("参数错误", ro.getMsg());
 
         orderTo.setAddrId(1L); // 错误的收货地址ID
-        details.clear();
+//        details.clear();
         OrderDetailTo orderDetailTo = new OrderDetailTo();
-        orderDetailTo.setOnlineId(1L);
-        details.add(orderDetailTo);
-        ro = order(orderTo);
-        Assert.assertEquals("参数错误", ro.getMsg());
+//        orderDetailTo.setOnlineId(560761261214793728L);
+//        details.add(orderDetailTo);
+//        Ro ro = order(orderTo);
+//        Assert.assertEquals("参数错误", ro.getMsg());
 
         details.clear();
         orderDetailTo = new OrderDetailTo();
-        orderDetailTo.setOnlineId(1L);
-        orderDetailTo.setOnlineSpecId(1L);
-        details.add(orderDetailTo);
-        ro = order(orderTo);
-        Assert.assertEquals("参数错误", ro.getMsg());
-
-        details.clear();
-        orderDetailTo = new OrderDetailTo();
-        orderDetailTo.setOnlineId(1L);
-        orderDetailTo.setOnlineSpecId(1L);
-        orderDetailTo.setBuyCount(3);
-        details.add(orderDetailTo);
-        ro = order(orderTo);
-        Assert.assertEquals("找不到上线的信息", ro.getMsg());
-
-        details.clear();
-        orderDetailTo = new OrderDetailTo();
-        orderDetailTo.setOnlineId(523717218609922183L);
-        orderDetailTo.setOnlineSpecId(1L);
-        orderDetailTo.setBuyCount(3);
-        details.add(orderDetailTo);
-        ro = order(orderTo);
-        Assert.assertEquals("找不到上线规格的信息", ro.getMsg());
-
-        details.clear();
-        orderDetailTo = new OrderDetailTo();
-        orderDetailTo.setOnlineId(523717218609922183L);
-        orderDetailTo.setOnlineSpecId(523717218643476617L);
-        orderDetailTo.setBuyCount(Integer.MAX_VALUE);
-        details.add(orderDetailTo);
-        ro = order(orderTo);
-        Assert.assertEquals("商品库存不足", ro.getMsg());
-
-        details.clear();
-        orderDetailTo = new OrderDetailTo();
-        orderDetailTo.setOnlineId(523717218609922183L);
-        orderDetailTo.setOnlineSpecId(523717218643476617L);
-        orderDetailTo.setBuyCount(3);
-        details.add(orderDetailTo);
-        ro = order(orderTo);
-        Assert.assertEquals("找不到下单的收货地址信息", ro.getMsg());
-
-        orderTo.setAddrId(521992662694232064L); // 正确的收货地址ID
-
+//        orderDetailTo.setOnlineId(560761261214793728L);
+//        orderDetailTo.setOnlineSpecId(560761261843939330L);
+//        details.add(orderDetailTo);
+//        Ro ro = order(orderTo);
+//        Assert.assertEquals("参数错误", ro.getMsg());
+//
+//        details.clear();
+//        orderDetailTo = new OrderDetailTo();
+//        orderDetailTo.setOnlineId(1L);
+//        orderDetailTo.setOnlineSpecId(1L);
+//        orderDetailTo.setBuyCount(new BigDecimal("3"));
+//        details.add(orderDetailTo);
+//        Ro ro = order(orderTo);
+//        Assert.assertEquals("找不到上线的信息", ro.getMsg());
+//
+//        details.clear();
+//        orderDetailTo = new OrderDetailTo();
+//        orderDetailTo.setOnlineId(560761261214793728L);
+//        orderDetailTo.setOnlineSpecId(1L);
+//        orderDetailTo.setBuyCount(new BigDecimal("3.56"));
+//        details.add(orderDetailTo);
+//        Ro ro = order(orderTo);
+//        Assert.assertEquals("找不到上线规格的信息", ro.getMsg());
+//
+//        details.clear();
+//        orderDetailTo = new OrderDetailTo();
+//        orderDetailTo.setOnlineId(560761261214793728L);
+//        orderDetailTo.setOnlineSpecId(560761261843939330L);
+//        orderDetailTo.setBuyCount(new BigDecimal(Integer.MAX_VALUE));
+//        details.add(orderDetailTo);
+//        Ro ro = order(orderTo);
+//        Assert.assertEquals("商品库存不足", ro.getMsg());
+//
+//        details.clear();
+//        orderDetailTo = new OrderDetailTo();
+//        orderDetailTo.setOnlineId(560761261214793728L);
+//        orderDetailTo.setOnlineSpecId(560761261843939330L);
+//        orderDetailTo.setBuyCount(new BigDecimal("3.5"));
+//        orderTo.setIsNowReceived(false);
+//        details.add(orderDetailTo);
+//        Ro ro = order(orderTo);
+//        Assert.assertEquals("找不到下单的收货地址信息", ro.getMsg());
+//
+        orderTo.setAddrId(521989707005952000L); // 正确的收货地址ID
+//
         orderTo.setOrderMessages("订单留言"); // 订单留言
+
+        orderTo.setIsNowReceived(true);
         details.clear();
         // 第一个订单详情
         orderDetailTo = new OrderDetailTo();
-        orderDetailTo.setOnlineId(523717218609922183L);
-        orderDetailTo.setOnlineSpecId(523717218643476617L);
-        orderDetailTo.setBuyCount(3);
+        orderDetailTo.setOnlineId(560761261214793728L);
+        orderDetailTo.setOnlineSpecId(560761261843939330L);
+        orderDetailTo.setBuyCount(new BigDecimal("2.5"));
         details.add(orderDetailTo);
         // 第二个订单详情
         orderDetailTo = new OrderDetailTo();
-        orderDetailTo.setOnlineId(523055292770942981L);
-        orderDetailTo.setOnlineSpecId(523055292825468935L);
-        orderDetailTo.setBuyCount(6);
+        orderDetailTo.setOnlineId(560761261214793728L);
+        orderDetailTo.setOnlineSpecId(560761261843939330L);
+        orderDetailTo.setBuyCount(new BigDecimal("6"));
         details.add(orderDetailTo);
         // 第三个订单详情
         orderDetailTo = new OrderDetailTo();
-        orderDetailTo.setOnlineId(523055292770942981L);
-        orderDetailTo.setOnlineSpecId(523055293202956297L);
-        orderDetailTo.setBuyCount(9);
+        orderDetailTo.setOnlineId(560761261214793728L);
+        orderDetailTo.setOnlineSpecId(560761261843939330L);
+        orderDetailTo.setBuyCount(new BigDecimal("8.6"));
         details.add(orderDetailTo);
         // 下单
-        ro = order(orderTo);
+        Ro ro = order(orderTo);
         Assert.assertEquals(ResultDic.SUCCESS, ro.getResult());
     }
 
@@ -154,12 +163,6 @@ public class OrdOrderTests {
         _log.info("修改支付订单id的返回值为: {}", results);
     }
 
-    @Resource
-    private OrdOrderDetailSvc svc;
-
-    @Resource
-    private Mapper dozerMapper;
-
 //	@Test
     public void updateOrderTime() throws IOException {
         _log.info("修改订单详情下单时间戳");
@@ -172,7 +175,7 @@ public class OrdOrderTests {
 
         OrdOrderDetailMo[] result = _objectMapper.readValue(OkhttpUtils.get(hostUrl + "/ord/detailList", map),
                 OrdOrderDetailMo[].class);
-        Long i = 0l;
+        Long               i      = 0l;
         url = hostUrl + "/ord/orderdetail";
         for (OrdOrderDetailMo DetailMo : result) {
             _log.info("订单下单时间戳为0的详情: {}", DetailMo);
@@ -195,7 +198,7 @@ public class OrdOrderTests {
     // 测试根据用户id查询订单状态不为退货和未支付且支付时间为最新的订单信息
     // @Test
     public void latestOneByUserIdTest() throws IOException {
-        String url = hostUrl + "/ord/order/getLatestOne?userId=560723287034822657";
+        String url     = hostUrl + "/ord/order/getLatestOne?userId=560723287034822657";
         String orderMo = OkhttpUtils.get(url);
         System.out.println(orderMo);
     }
@@ -207,7 +210,7 @@ public class OrdOrderTests {
      */
     // @Test
     public void handleOrderPaidNotify() throws IOException {
-        String url = hostUrl + "/ord/order/handleOrderPaidNotify";
+        String     url        = hostUrl + "/ord/order/handleOrderPaidNotify";
         PayDoneMsg payDoneMsg = new PayDoneMsg();
         payDoneMsg.setOrderId("561030684311945221");
         payDoneMsg.setUserId(561030054302187520l);
@@ -223,10 +226,10 @@ public class OrdOrderTests {
      * 
      * @throws IOException
      */
-//	@Test
+    // @Test
     public void shiftOrder() throws IOException {
-        String url = hostUrl
-                + "/ord/order/shift?payOrderId=561030684311945221&oldUserId=561030054302187520&newUserId=560723287034822657";
+        String url     = hostUrl
+                + "/ord/order/shift?payOrderId=628468490273161218&oldUserId=515488916007157761&newUserId=621980963517366273";
         String orderMo = OkhttpUtils.get(url);
         System.out.println(orderMo);
     }
@@ -240,11 +243,11 @@ public class OrdOrderTests {
         System.out.println(result);
     }
 
-    @Test
+    // @Test
     public void modifyInviteId() throws IOException {
-        String url = hostUrl + "/ord/order-detail/modify-invite-id";
+        String                       url                = hostUrl + "/ord/order-detail/modify-invite-id";
         final List<ModifyInviteIdTo> modifyInviteIdList = new LinkedList<>();
-        ModifyInviteIdTo modifyInviteIdTo = new ModifyInviteIdTo();
+        ModifyInviteIdTo             modifyInviteIdTo   = new ModifyInviteIdTo();
         modifyInviteIdTo.setId(165465465435163541l);
         modifyInviteIdTo.setInviterId(46547647647l);
         modifyInviteIdList.add(modifyInviteIdTo);

@@ -139,7 +139,7 @@ public interface OrdOrderDetailMapper extends MybatisBaseMapper<OrdOrderDetailMo
     Select("SELECT " + "    IFNULL(SUM(a.BUY_COUNT - a.RETURN_COUNT),0) " + " FROM" + "    ORD_ORDER_DETAIL AS a,"
             + "    ORD_ORDER AS b " + " WHERE" + "    a.ORDER_ID = b.ID" + "        AND a.USER_ID = #{userId}"
             + "        AND a.ONLINE_SPEC_ID = #{onlineSpecId}" + "        AND b.ORDER_STATE > 0")
-    int getBuyerOrderedCount(@Param("userId") Long userId, @Param("onlineSpecId") Long onlineSpecId);
+    BigDecimal getBuyerOrderedCount(@Param("userId") Long userId, @Param("onlineSpecId") Long onlineSpecId);
 
     /**
      * 修改返现总额、退货数量
@@ -151,10 +151,10 @@ public interface OrdOrderDetailMapper extends MybatisBaseMapper<OrdOrderDetailMo
      * @param returnTotal
      * @return
      */
-    @Update("update ORD_ORDER_DETAIL set CASHBACK_TOTAL=#{newCashbackTotal,jdbcType=DECIMAL}, RETURN_COUNT = #{returnTotal,jdbcType=INTEGER} where ID=#{id,jdbcType=BIGINT} and CASHBACK_TOTAL=#{oldCashbackTotal,jdbcType=DECIMAL} and RETURN_COUNT = #{returnedCount,jdbcType=INTEGER}")
+    @Update("update ORD_ORDER_DETAIL set CASHBACK_TOTAL=#{newCashbackTotal,jdbcType=DECIMAL}, RETURN_COUNT = #{returnTotal,jdbcType=DECIMAL} where ID=#{id,jdbcType=BIGINT} and CASHBACK_TOTAL=#{oldCashbackTotal,jdbcType=DECIMAL} and RETURN_COUNT = #{returnedCount,jdbcType=DECIMAL}")
     int updateReturnNumAndCashbackTotal(@Param("id") Long id, @Param("oldCashbackTotal") BigDecimal oldCashbackTotal,
-            @Param("newCashbackTotal") BigDecimal newCashbackTotal, @Param("returnedCount") Integer returnedCount,
-            @Param("returnTotal") Integer returnTotal);
+            @Param("newCashbackTotal") BigDecimal newCashbackTotal, @Param("returnedCount") BigDecimal returnedCount,
+            @Param("returnTotal") BigDecimal returnTotal);
 
     /**
      * 根据id修改供应商id

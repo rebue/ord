@@ -34,7 +34,7 @@ public class OrderDetailRo {
     private String specName;
 
     /** 购买数量 **/
-    private Integer buyCount;
+    private BigDecimal buyCount;
 
     /** 购买价格 **/
     private BigDecimal buyPrice;
@@ -49,7 +49,7 @@ public class OrderDetailRo {
     private String buyUnit;
 
     /** 退货数量 **/
-    private Integer returnCount;
+    private BigDecimal returnCount;
 
     /** 退货状态（0：未退货 1：退货中 2：已退货） **/
     private Byte returnState;
