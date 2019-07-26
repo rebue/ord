@@ -1,10 +1,11 @@
 package rebue.ord.ctrl;
 
-import com.github.pagehelper.PageInfo;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.List;
+
 import javax.annotation.Resource;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.dao.DuplicateKeyException;
@@ -15,9 +16,13 @@ import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+
+import com.github.pagehelper.PageInfo;
+
 import rebue.ord.dic.OrderTaskTypeDic;
 import rebue.ord.mo.OrdTaskMo;
 import rebue.ord.svc.OrdTaskSvc;
+import rebue.ord.to.TempTo;
 import rebue.robotech.dic.ResultDic;
 import rebue.robotech.dic.TaskExecuteStateDic;
 import rebue.robotech.ro.Ro;
@@ -160,7 +165,8 @@ public class OrdTaskCtrl {
      * @mbg.generated 自动生成，如需修改，请删除本行
      */
     @GetMapping("/ord/task")
-    PageInfo<OrdTaskMo> list(OrdTaskMo mo, @RequestParam(value = "pageNum", required = false) Integer pageNum, @RequestParam(value = "pageSize", required = false) Integer pageSize) {
+    PageInfo<OrdTaskMo> list(OrdTaskMo mo, @RequestParam(value = "pageNum", required = false) Integer pageNum,
+            @RequestParam(value = "pageSize", required = false) Integer pageSize) {
         if (pageNum == null)
             pageNum = 1;
         if (pageSize == null)
@@ -194,7 +200,8 @@ public class OrdTaskCtrl {
      * 获取订单任务ID列表(根据订单任务状态和任务类型)
      */
     @GetMapping(value = "/ord/tasks")
-    List<Long> getTaskIdsThatShouldExecute(@RequestParam("executeState") final TaskExecuteStateDic executeState, @RequestParam("taskType") final OrderTaskTypeDic taskType) {
+    List<Long> getTaskIdsThatShouldExecute(@RequestParam("executeState") final TaskExecuteStateDic executeState,
+            @RequestParam("taskType") final OrderTaskTypeDic taskType) {
         _log.info("查询订单任务数量的参数为：{}， {}", executeState, taskType);
         return taskSvc.getTaskIdsThatShouldExecute(executeState, taskType);
     }
@@ -227,8 +234,8 @@ public class OrdTaskCtrl {
      * 执行订单结算的任务
      */
     @PostMapping("/ord/task/executeSettle")
-    void executeSettleTask(@RequestParam("taskId") final Long taskId) {
-        taskSvc.executeSettleTask(taskId);
+    void executeSettleTask(@RequestBody final TempTo to) {
+        taskSvc.executeSettleTask(to.getTaskId());
     }
 
     /**

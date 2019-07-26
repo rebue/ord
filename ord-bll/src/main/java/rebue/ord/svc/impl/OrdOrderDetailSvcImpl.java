@@ -224,10 +224,8 @@ public class OrdOrderDetailSvcImpl
 
             // 获取当前详情上家，也就是购买关系中id是本详情的关系
             _log.info("获取上家关系");
-            IbrBuyRelationMo getUplineMo = new IbrBuyRelationMo();
-            getUplineMo.setId(detailList.get(i).getId());
-            _log.info("获取上家关系参数为 getUplineMo-{}", getUplineMo);
-            IbrBuyRelationMo getUplineResult = ibrBuyRelationSvc.getOne(getUplineMo);  // 这里需要修改成gitById，不过这里应该会被移到购买关系服务哪里。
+            _log.info("获取上家关系参数为 id-{}", detailList.get(i).getId());
+            IbrBuyRelationMo getUplineResult = ibrBuyRelationSvc.getById(detailList.get(i).getId());
             _log.info("获取上家关系参数为 getUplineResult-{}", getUplineResult);
             if (getUplineResult != null) {
                 OrdOrderDetailMo detailRo = super.getById(getUplineResult.getParentId());
@@ -270,10 +268,8 @@ public class OrdOrderDetailSvcImpl
             }
 
             // 获取当前详情下家，也就是购买关系中父id是本详情的关系
-            final IbrBuyRelationMo getDownLineMo = new IbrBuyRelationMo();
-            getDownLineMo.setParentId(detailList.get(i).getId());
-            _log.info("当前下家关系的的参数为： {}", getDownLineMo);
-            final List<IbrBuyRelationMo> getDownLineResult = ibrBuyRelationSvc.list(getDownLineMo);
+            _log.info("当前下家关系的的参数为： parentId{}", detailList.get(i).getId());
+            final List<IbrBuyRelationMo> getDownLineResult = ibrBuyRelationSvc.list(detailList.get(i).getId());
             _log.info("查询下家关系的结果为： {}", getDownLineResult);
             // 获取每个下家的订单信息
             for (IbrBuyRelationMo ibrBuyRelationMo : getDownLineResult) {
@@ -285,8 +281,10 @@ public class OrdOrderDetailSvcImpl
                     info.put("id", detailRo.getId().toString());
                     // 设置为下家，让页面好区分
                     info.put("relation", "downLine");
-                    // 设置关系来源
-                    info.put("relationSource", ibrBuyRelationMo.getRelationSource().toString());
+                    // 设置关系来源，首单可能没有来源，要判断
+                    if (ibrBuyRelationMo.getRelationSource() != null) {
+                        info.put("relationSource", ibrBuyRelationMo.getRelationSource().toString());
+                    }
                     // 设置详情退货状态
                     info.put("returnState", detailRo.getReturnState().toString());
                     // 获取用户昵称

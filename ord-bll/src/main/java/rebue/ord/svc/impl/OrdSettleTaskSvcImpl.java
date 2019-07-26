@@ -21,6 +21,9 @@ import rebue.afc.mo.AfcTradeMo;
 import rebue.afc.platform.dic.PlatformTradeTypeDic;
 import rebue.afc.svr.feign.AfcPlatformTradeTradeSvc;
 import rebue.afc.svr.feign.AfcTradeSvc;
+import rebue.ibr.dic.TaskTypeDic;
+import rebue.ibr.mo.IbrBuyRelationTaskMo;
+import rebue.ibr.svr.feign.IbrBuyRelationTaskSvc;
 import rebue.ord.dic.CommissionStateDic;
 import rebue.ord.dic.OrderStateDic;
 import rebue.ord.dic.OrderTaskTypeDic;
@@ -109,6 +112,12 @@ public class OrdSettleTaskSvcImpl extends MybatisBaseSvcImpl<OrdSettleTaskMo, ja
     private BigDecimal settlePlatformServiceFeeDelay;
 
     /**
+     * 结算平台利润任务执行的延迟时间(单位小时)
+     */
+    @Value("${ord.settle.settlePlatformProfitFeeDelay:1}")
+    private BigDecimal settlePlatformProfitFeeDelay;
+
+    /**
      * 结算返佣任务执行的延迟时间(单位小时)
      */
     @Value("${ord.settle.settleCommissionDelay:1}")
@@ -147,6 +156,9 @@ public class OrdSettleTaskSvcImpl extends MybatisBaseSvcImpl<OrdSettleTaskMo, ja
 //    private OrdBuyRelationMapper     buyRelationMapper;
     @Resource
     private OrdOrderDetailMapper orderDetailMapper;
+
+    @Resource
+    private IbrBuyRelationTaskSvc ibrBuyRelationTaskSvc;
 
     /**
      * 添加启动结算订单的任务(根据订单ID添加)
@@ -246,9 +258,32 @@ public class OrdSettleTaskSvcImpl extends MybatisBaseSvcImpl<OrdSettleTaskMo, ja
         addSettleSubTask(orderId, now, SettleTaskTypeDic.SETTLE_PROFIT_TO_SELLER, settleProfitToSellerDelay);
         _log.info("添加结算平台服务费的任务");
         addSettleSubTask(orderId, now, SettleTaskTypeDic.SETTLE_PLATFORM_SERVICE_FEE, settlePlatformServiceFeeDelay);
-        _log.info("添加结算返佣金的任务");
-        addSettleSubTask(orderId, now, SettleTaskTypeDic.SETTLE_COMMISSION, settleCommissionDelay);
-        // 添加启动结算的任务
+//        _log.info("添加结算返佣金的任务");这个是原来的，现在去掉在ibr那边做这件事
+//        addSettleSubTask(orderId, now, SettleTaskTypeDic.SETTLE_COMMISSION, settleCommissionDelay);
+        _log.info("添加结算平台利润任务");
+        addSettleSubTask(orderId, now, SettleTaskTypeDic.SETTLE_PROFIT_TO_PLATFORM, settlePlatformProfitFeeDelay);
+
+        // 添加结算返佣金的任务，因为要把购买关系有联系的拆分出去，所以这个任务在ibr哪里执行。
+        OrdOrderDetailMo getDetailMo = new OrdOrderDetailMo();
+        getDetailMo.setOrderId(orderId);
+        _log.info("获取该订单所有的详情以便添加结算任务的参数为 mo-", getDetailMo);
+        List<OrdOrderDetailMo> detailResult = orderDetailMapper.selectSelective(getDetailMo);
+        _log.info("获取该订单所有的详情以便添加结算任务的结果为 mo-", detailResult);
+        for (OrdOrderDetailMo ordOrderDetailMo : detailResult) {
+            IbrBuyRelationTaskMo addTaskMo = new IbrBuyRelationTaskMo();
+            final Calendar settleCommissionCalendar = Calendar.getInstance();
+            settleCommissionCalendar.setTime(new Date());
+            settleCommissionCalendar.add(Calendar.MINUTE, 5);
+            final Date executePlanTime = settleCommissionCalendar.getTime();
+            addTaskMo.setExecuteState((byte) TaskExecuteStateDic.NONE.getCode());
+            addTaskMo.setTaskType((byte) TaskTypeDic.SETTLE_COMMISSION.getCode());
+            addTaskMo.setExecutePlanTime(executePlanTime);
+            addTaskMo.setOrderDetailId(ordOrderDetailMo.getId());
+            _log.info("添加结算返佣金关系的参数为:{}", addTaskMo);
+            ibrBuyRelationTaskSvc.add(addTaskMo);
+        }
+
+        // 添加完成结算的任务
         final OrdTaskMo taskMo = new OrdTaskMo();
         taskMo.setOrderId(orderId.toString());
         taskMo.setTaskType((byte) OrderTaskTypeDic.COMPLETE_SETTLE.getCode());
@@ -268,11 +303,11 @@ public class OrdSettleTaskSvcImpl extends MybatisBaseSvcImpl<OrdSettleTaskMo, ja
      * 添加结算子任务
      *
      * @param orderId
-     *                订单ID
+     *            订单ID
      * @param now
-     *                当前时间
+     *            当前时间
      * @param delay
-     *                延迟时间
+     *            延迟时间
      */
     private void addSettleSubTask(final Long orderId, final Date now, final SettleTaskTypeDic taskType,
             final BigDecimal delay) {
@@ -453,6 +488,24 @@ public class OrdSettleTaskSvcImpl extends MybatisBaseSvcImpl<OrdSettleTaskMo, ja
                 addAccountTrade(taskMo, orderDetail, tradeMo, now);
                 break;
             }
+            // 结算-结算利润给平台
+            case SETTLE_PROFIT_TO_PLATFORM: {
+                _log.info("结算利润给平台,全返商品实际成交价格的二分之一(余额+)");
+                final AfcPlatformTradeMo tradeMo = new AfcPlatformTradeMo();
+                tradeMo.setPlatformTradeType((byte) PlatformTradeTypeDic.PROFIT_TO_PLATFORM.getCode());
+                // 真实购买数量 = 购买数量 - 退货数量
+                final BigDecimal realBuyCount = orderDetail.getBuyCount().subtract(orderDetail.getReturnCount());
+                // 实际成交金额 = 真实购买数量 * 购买金额（单价）
+                final BigDecimal actualAmount = orderDetail.getBuyPrice().multiply(realBuyCount);
+                // 平台利润 = 实际成交价格/2
+                final BigDecimal platformProfit = actualAmount.divide(BigDecimal.valueOf(2));
+                tradeMo.setTradeAmount(platformProfit);
+                tradeMo.setOrderId(taskMo.getOrderId());
+                tradeMo.setOrderDetailId(orderDetail.getId().toString());
+                tradeMo.setModifiedTimestamp(now.getTime());
+                afcPlatformTradeSvc.addTrade(tradeMo);
+                break;
+            }
             // 结算利润给卖家(余额+)
             case SETTLE_PROFIT_TO_SELLER: {
                 _log.info("结算利润给卖家(余额+)");
@@ -479,8 +532,8 @@ public class OrdSettleTaskSvcImpl extends MybatisBaseSvcImpl<OrdSettleTaskMo, ja
                     // 平台服务费 = 实际成交金额 * 平台服务费比例
                     platformServiceFee = actualAmount.multiply(platformServiceFeeRatio);
                 }
-                // 卖家利润 = 实际成交金额 - 总成本 - 总返现金额 - 平台服务费
-                final BigDecimal profitAmount = actualAmount.subtract(costPriceTotal)
+                // 卖家利润 = 实际成交金额/2 - 总成本 - 总返现金额 - 平台服务费
+                final BigDecimal profitAmount = actualAmount.divide(BigDecimal.valueOf(2)).subtract(costPriceTotal)
                         .subtract(orderDetail.getCashbackTotal()).subtract(platformServiceFee)
                         .setScale(4, BigDecimal.ROUND_HALF_UP);
                 tradeMo.setTradeAmount(profitAmount);
@@ -608,7 +661,7 @@ public class OrdSettleTaskSvcImpl extends MybatisBaseSvcImpl<OrdSettleTaskMo, ja
      */
     private void settleCommission(final OrdTaskMo taskMo, final OrdOrderMo order, final OrdOrderDetailMo orderDetail,
             final Date now) {
-//        // 判断订单详情板块类型是否为全返
+        // 判断订单详情板块类型是否为全返
 //        if (orderDetail.getSubjectType() == 1) {
 //            _log.info("**********************************************************************");
 //            _log.info("* 开始结算返佣");
@@ -619,13 +672,14 @@ public class OrdSettleTaskSvcImpl extends MybatisBaseSvcImpl<OrdSettleTaskMo, ja
 //            final OrdBuyRelationMo uplineBuyRelationConditions = new OrdBuyRelationMo();
 //            uplineBuyRelationConditions.setDownlineOrderDetailId(orderDetail.getId());
 //            _log.info("获取与上家的购买关系的参数：{}", uplineBuyRelationConditions);
-//            final OrdBuyRelationMo uplineBuyRelation = new OrdBuyRelationMo();  //buyRelationSvc.getOne(uplineBuyRelationConditions);
+//            final OrdBuyRelationMo uplineBuyRelation = new OrdBuyRelationMo();  // buyRelationSvc.getOne(uplineBuyRelationConditions);
 //            if (uplineBuyRelation == null) {
 //                _log.info("没有上家");
 //            } else {
 //                _log.info("获取与上家的购买关系的返回值：{}", uplineBuyRelation);
 //                _log.info("获取上家订单详情的参数：上家订单详情ID-{}", uplineBuyRelation.getUplineOrderDetailId());
-//                final OrdOrderDetailMo uplineOrderDetail = orderDetailSvc.getById(uplineBuyRelation.getUplineOrderDetailId());
+//                final OrdOrderDetailMo uplineOrderDetail = orderDetailSvc
+//                        .getById(uplineBuyRelation.getUplineOrderDetailId());
 //                _log.info("获取上家订单详情的返回值：{}", uplineOrderDetail);
 //                handleCommission(uplineOrderDetail, uplineBuyRelation.getUplineUserId(), now);
 //            }
@@ -636,7 +690,7 @@ public class OrdSettleTaskSvcImpl extends MybatisBaseSvcImpl<OrdSettleTaskMo, ja
      * 处理返佣(订单详情如果符合返佣条件，则返佣)
      * 
      * @param orderDetail
-     *                    要判断是否返佣的订单详情
+     *            要判断是否返佣的订单详情
      */
     private void handleCommission(final OrdOrderDetailMo orderDetail, final Long buyerId, final Date now) {
         _log.info("处理返佣(订单详情如果符合返佣条件，则返佣): orderDetail-{}", orderDetail);

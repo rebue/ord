@@ -3,6 +3,8 @@ package rebue.ord;
 import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.LinkedHashMap;
+import java.util.Map;
 
 import org.junit.Test;
 import org.slf4j.Logger;
@@ -16,70 +18,92 @@ import rebue.wheel.OkhttpUtils;
 
 public class OrdSettleTaskTest {
 
-	private final static Logger _log = LoggerFactory.getLogger(OrdOrderTests.class);
+    private final static Logger _log = LoggerFactory.getLogger(OrdSettleTaskTest.class);
 
-	private final String hostUrl = "http://localhost:20180";
+    private final String hostUrl = "http://localhost:20180";
 
-	//	@Test
-	public void addTest() throws IOException {
-		// 立即执行的时间
-		final Date now = new Date();
-		OrdSettleTaskMo mo = new OrdSettleTaskMo();
-		mo.setExecuteState((byte) SettleTaskExecuteStateDic.NOT_PERFORMED.getCode());
-		mo.setExecutePlanTime(new Date(now.getTime() + 60000));
-		mo.setTradeType((byte) SettleTypeDic.WAIT_SETTLE.getCode());
-		mo.setOrderId("123456789");
-		mo.setIp("192.168.1.40");
-		_log.info("添加结算任务的参数为：{}", mo);
-		String result = OkhttpUtils.postByJsonParams(hostUrl + "/ord/settletask", mo);
-		_log.info("添加结算任务的返回值为：{}", result);
-	}
-
-//	@Test
-	public void suspendSettleTaskTest() throws IOException {
-		SuspendSettleTaskTo to = new SuspendSettleTaskTo();
-		to.setTradeType((byte) SettleTypeDic.WAIT_SETTLE.getCode());
-		to.setOrderId(123456789L);
-		_log.info("暂停结算任务的参数为：{}", to);
-		String result = OkhttpUtils.putByJsonParams(hostUrl + "/ord/settletask/suspend", to);
-		_log.info("暂停结算任务的返回值为：{}", result);
-	}
+    // @Test
+    public void addTest() throws IOException {
+        // 立即执行的时间
+        final Date now = new Date();
+        OrdSettleTaskMo mo = new OrdSettleTaskMo();
+        mo.setExecuteState((byte) SettleTaskExecuteStateDic.NOT_PERFORMED.getCode());
+        mo.setExecutePlanTime(new Date(now.getTime() + 60000));
+        mo.setTradeType((byte) SettleTypeDic.WAIT_SETTLE.getCode());
+        mo.setOrderId("123456789");
+        mo.setIp("192.168.1.40");
+        _log.info("添加结算任务的参数为：{}", mo);
+        String result = OkhttpUtils.postByJsonParams(hostUrl + "/ord/settletask", mo);
+        _log.info("添加结算任务的返回值为：{}", result);
+    }
 
 //	@Test
-	public void resumeSettleTaskTest() throws IOException {
-		SuspendSettleTaskTo to = new SuspendSettleTaskTo();
-		to.setTradeType((byte) SettleTypeDic.WAIT_SETTLE.getCode());
-		to.setOrderId(123456789L);
-		_log.info("恢复结算任务的参数为：{}", to);
-		String result = OkhttpUtils.putByJsonParams(hostUrl + "/ord/settletask/resume", to);
-		_log.info("恢复结算任务的返回值为：{}", result);
-	}
+    public void suspendSettleTaskTest() throws IOException {
+        SuspendSettleTaskTo to = new SuspendSettleTaskTo();
+        to.setTradeType((byte) SettleTypeDic.WAIT_SETTLE.getCode());
+        to.setOrderId(123456789L);
+        _log.info("暂停结算任务的参数为：{}", to);
+        String result = OkhttpUtils.putByJsonParams(hostUrl + "/ord/settletask/suspend", to);
+        _log.info("暂停结算任务的返回值为：{}", result);
+    }
 
 //	@Test
-	public void cancelSettleTaskTest() throws IOException {
-		SuspendSettleTaskTo to = new SuspendSettleTaskTo();
-		to.setTradeType((byte) SettleTypeDic.WAIT_SETTLE.getCode());
-		to.setOrderId(123456789L);
-		_log.info("取消结算任务的参数为：{}", to);
-		String result = OkhttpUtils.putByJsonParams(hostUrl + "/ord/settletask/cancel", to);
-		_log.info("取消结算任务的返回值为：{}", result);
-	}
+    public void resumeSettleTaskTest() throws IOException {
+        SuspendSettleTaskTo to = new SuspendSettleTaskTo();
+        to.setTradeType((byte) SettleTypeDic.WAIT_SETTLE.getCode());
+        to.setOrderId(123456789L);
+        _log.info("恢复结算任务的参数为：{}", to);
+        String result = OkhttpUtils.putByJsonParams(hostUrl + "/ord/settletask/resume", to);
+        _log.info("恢复结算任务的返回值为：{}", result);
+    }
 
 //	@Test
-	public void getTaskIdsThatShouldExecuteTest() throws IOException {
-		String result = OkhttpUtils.get(hostUrl + "/ord/settletask/getid");
-		System.out.println(result);
-	}
-	
-	@Test
-	public void dateTest() {
-		Long date = new Date().getTime();
-		System.out.println(date);
-		System.out.println(date + 86400000 * 7);
-		Long thisTimestamp = System.currentTimeMillis();
-		System.out.println(thisTimestamp);
-		SimpleDateFormat dd=new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-		System.out.println(dd.format(date));
-		System.out.println(dd.format(date + 86400000 * 8));
-	}
+    public void cancelSettleTaskTest() throws IOException {
+        SuspendSettleTaskTo to = new SuspendSettleTaskTo();
+        to.setTradeType((byte) SettleTypeDic.WAIT_SETTLE.getCode());
+        to.setOrderId(123456789L);
+        _log.info("取消结算任务的参数为：{}", to);
+        String result = OkhttpUtils.putByJsonParams(hostUrl + "/ord/settletask/cancel", to);
+        _log.info("取消结算任务的返回值为：{}", result);
+    }
+
+//	@Test
+    public void getTaskIdsThatShouldExecuteTest() throws IOException {
+        String result = OkhttpUtils.get(hostUrl + "/ord/settletask/getid");
+        System.out.println(result);
+    }
+
+    // @Test
+    public void dateTest() {
+        Long date = new Date().getTime();
+        System.out.println(date);
+        System.out.println(date + 86400000 * 7);
+        Long thisTimestamp = System.currentTimeMillis();
+        System.out.println(thisTimestamp);
+        SimpleDateFormat dd = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+        System.out.println(dd.format(date));
+        System.out.println(dd.format(date + 86400000 * 8));
+    }
+
+    @Test
+    public void executeSettleTask() throws IOException {
+        // 执行订单结算任务
+        Map<String, Object> paramsMap = new LinkedHashMap<>();
+        // 将成本打给供应商(1)
+        // paramsMap.put("taskId", 628504366747353092l);
+        // 将返现金打买给家(2)
+        // paramsMap.put("taskId", 628504366814461957l);
+        // 释放卖家已经占用的保证金(3)
+        // paramsMap.put("taskId", 628504366873182215l);
+        // 结算利润给卖家(4)
+        // paramsMap.put("taskId", 628504366873182215l);
+        // 结算平台服务费(5)
+        // paramsMap.put("taskId", 628504366923513865l);
+        // 结算购买所得积分给买家(7)
+        // paramsMap.put("taskId", 628504366848016390l);
+        // 结算利润给平台(8)
+        // paramsMap.put("taskId", 628504366957068299l);
+        String result = OkhttpUtils.postByJsonParams(hostUrl + "/ord/task/executeSettle", paramsMap);
+        _log.info("执行订单结算任务的返回值为：{}", result);
+    }
 }

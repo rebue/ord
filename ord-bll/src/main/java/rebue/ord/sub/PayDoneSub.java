@@ -16,6 +16,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import com.github.dozermapper.core.Mapper;
 
+import rebue.afc.co.AfcExchangeCo;
 import rebue.afc.msg.PayDoneMsg;
 import rebue.ord.svc.OrdOrderDetailSvc;
 import rebue.ord.svc.OrdOrderSvc;
@@ -33,7 +34,7 @@ public class PayDoneSub implements ApplicationListener<ContextRefreshedEvent> {
     /**
      * 处理支付完成通知的队列
      */
-    private final static String PAY_DONE_QUEUE_NAME = "rebue.ord.pay.done.queue1";
+    private final static String PAY_DONE_QUEUE_NAME = "rebue.ord.pay.done.queue";
 
     @Value("${appid:0}")
     private int _appid;
@@ -70,13 +71,13 @@ public class PayDoneSub implements ApplicationListener<ContextRefreshedEvent> {
             return;
         }
         _log.info("订阅支付完成的通知");
-//        consumer.bind(AfcExchangeCo.PAY_DONE_EXCHANGE_NAME, PAY_DONE_QUEUE_NAME, PayDoneMsg.class, (msg) -> {
-//            _log.info("收到支付完成的通知: {}", msg);
-//            if (!handlePayNotify(msg)) {
-//                return false;
-//            }
-//            return true;
-//        });
+        consumer.bind(AfcExchangeCo.PAY_DONE_EXCHANGE_NAME, PAY_DONE_QUEUE_NAME, PayDoneMsg.class, (msg) -> {
+            _log.info("收到支付完成的通知: {}", msg);
+            if (!handlePayNotify(msg)) {
+                return false;
+            }
+            return true;
+        });
     }
 
     /**
