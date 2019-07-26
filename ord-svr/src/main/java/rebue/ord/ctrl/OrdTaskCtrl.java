@@ -22,7 +22,6 @@ import com.github.pagehelper.PageInfo;
 import rebue.ord.dic.OrderTaskTypeDic;
 import rebue.ord.mo.OrdTaskMo;
 import rebue.ord.svc.OrdTaskSvc;
-import rebue.ord.to.TempTo;
 import rebue.robotech.dic.ResultDic;
 import rebue.robotech.dic.TaskExecuteStateDic;
 import rebue.robotech.ro.Ro;
@@ -234,8 +233,8 @@ public class OrdTaskCtrl {
      * 执行订单结算的任务
      */
     @PostMapping("/ord/task/executeSettle")
-    void executeSettleTask(@RequestBody final TempTo to) {
-        taskSvc.executeSettleTask(to.getTaskId());
+    void executeSettleTask(@RequestParam("taskId") final Long taskId) {
+        taskSvc.executeSettleTask(taskId);
     }
 
     /**

@@ -50,7 +50,7 @@ public enum SettleTaskTypeDic implements EnumBase {
     SETTLE_POINT_TO_BUYER(7),
 
     /**
-     * 结算-结算利润给平台
+     * 8：结算-结算利润给平台
      */
     SETTLE_PROFIT_TO_PLATFORM(8);
 
