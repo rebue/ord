@@ -1696,7 +1696,7 @@ public class OrdOrderSvcImpl extends MybatisBaseSvcImpl<OrdOrderMo, java.lang.Lo
             final Date executePlanTime = calendar.getTime();
             final OrdTaskMo ordTaskMo = new OrdTaskMo();
             ordTaskMo.setOrderId(String.valueOf(mo.getId()));
-            ordTaskMo.setTaskType((byte) 2);
+            ordTaskMo.setTaskType((byte) OrderStateDic.SIGNED.getCode());
             // 先查询任务是否已经存在
             _log.info("查看签收任务是否存在的参数为：{}", ordTaskMo);
             final List<OrdTaskMo> ordTaskList = ordTaskSvc.list(ordTaskMo);
