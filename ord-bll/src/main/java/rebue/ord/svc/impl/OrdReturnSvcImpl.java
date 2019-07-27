@@ -10,6 +10,7 @@ import java.math.BigDecimal;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
@@ -34,6 +35,9 @@ import rebue.afc.svr.feign.AfcRefundSvc;
 import rebue.afc.svr.feign.AfcSettleTaskSvc;
 import rebue.afc.to.RefundApprovedTo;
 import rebue.afc.to.TaskTo;
+import rebue.ibr.dic.TaskTypeDic;
+import rebue.ibr.mo.IbrBuyRelationTaskMo;
+import rebue.ibr.svr.feign.IbrBuyRelationTaskSvc;
 import rebue.onl.mo.OnlOnlinePicMo;
 import rebue.onl.svr.feign.OnlOnlinePicSvc;
 import rebue.onl.svr.feign.OnlOnlineSpecSvc;
@@ -61,6 +65,7 @@ import rebue.ord.to.RejectReturnTo;
 import rebue.pnt.svr.feign.PntPointSvc;
 import rebue.pnt.to.AddPointTradeTo;
 import rebue.robotech.dic.ResultDic;
+import rebue.robotech.dic.TaskExecuteStateDic;
 import rebue.robotech.ro.Ro;
 import rebue.robotech.svc.impl.MybatisBaseSvcImpl;
 
@@ -132,6 +137,9 @@ public class OrdReturnSvcImpl extends MybatisBaseSvcImpl<OrdReturnMo, java.lang.
 
     @Resource
     private PntPointSvc pntPointSvc;
+
+    @Resource
+    private IbrBuyRelationTaskSvc ibrBuyRelationTaskSvc;
 
     /**
      * 买家返款限制时间
@@ -212,7 +220,7 @@ public class OrdReturnSvcImpl extends MybatisBaseSvcImpl<OrdReturnMo, java.lang.
             return ro;
         }
         // 退货id
-        final Long        returnId = _idWorker.getId();
+        final Long returnId = _idWorker.getId();
         final OrdReturnMo returnMo = new OrdReturnMo();
         returnMo.setId(returnId);
         returnMo.setReturnCode(_idWorker.getId());
@@ -354,7 +362,7 @@ public class OrdReturnSvcImpl extends MybatisBaseSvcImpl<OrdReturnMo, java.lang.
             ro.setMsg("该订单详情并未申请退货");
             return ro;
         }
-        final Date        now      = new Date();
+        final Date now = new Date();
         final OrdReturnMo returnMo = new OrdReturnMo();
         returnMo.setId(to.getId());
         returnMo.setRejectOpId(to.getRejectOpId());
@@ -400,7 +408,7 @@ public class OrdReturnSvcImpl extends MybatisBaseSvcImpl<OrdReturnMo, java.lang.
      * 8、判断退货数量是否为空或者为0，如果不为空则表示为退货并退款 1、如果为退货并退款，则修改订单详情退货数量和返现总额
      * 9、修改订单详情实际成交金额和退货状态
      * 10、修改退货单信息
-     * 11、重新匹配购买关系
+     * 11、添加匹配购买关系任务
      * 12、执行退款
      */
     @Override
@@ -606,67 +614,22 @@ public class OrdReturnSvcImpl extends MybatisBaseSvcImpl<OrdReturnMo, java.lang.
         confirmRefundRowCount = _mapper.confirmRefund(currentRefundTotal, to.getRefundCompensation(),
                 (byte) ReturnApplicationStateDic.TURNED.getCode(), to.getOpId(), now, to.getReturnId());
         _log.info("同意退款修改退货信息的返回值为：{}", confirmRefundRowCount);
-        _log.info("获取该定单详情做为下家的购买关系记录");
-//		final OrdBuyRelationMo buyRelationParamMo = new OrdBuyRelationMo();
-//		buyRelationParamMo.setDownlineOrderDetailId(detail.getId());
-//		final OrdBuyRelationMo buyRelationResult = ordBuyRelationSvc.getOne(buyRelationParamMo);
-//		_log.info("获取该定单详情做为下家的购买关系记录为:{}", buyRelationResult);
-//		if (buyRelationResult == null) {
-//			_log.info("该定单详情做为下家的购买关系记录为空");
-//		} else {
-//			_log.info("删除该定单详情做为下家的购买关系记录");
-//			final int delResult = ordBuyRelationSvc.del(buyRelationResult.getId());
-//			_log.info("删除该定单详情的购买关系记录的返回值为：{}", delResult);
-//			if (delResult != 1) {
-//				_log.info("删除该定单详情做为下家的购买关系记录失败");
-//				throw new RuntimeException("删除该定单详情做为下家的购买关系记录失败");
-//			}
-//			_log.info("更新该定单详情上家的返佣名额");
-//			final OrdOrderDetailMo ordDetailMo = orderDetailSvc.getById(buyRelationResult.getUplineOrderDetailId());
-//			if (ordDetailMo == null) {
-//				_log.info("该定单上家的定单详情为空");
-//				throw new RuntimeException("该定单上家的定单详情为空");
-//			}
-//			final byte commissionSlot = ordDetailMo.getCommissionSlot();
-//			ordDetailMo.setCommissionSlot((byte) (commissionSlot + 1));
-//			final int updateUplineDetailResult = orderDetailSvc.modify(ordDetailMo);
-//			if (updateUplineDetailResult != 1) {
-//				_log.info("更新该定单详情上家的返佣名额失败");
-//				throw new RuntimeException("更新该定单详情上家的返佣名额失败");
-//			}
-//		}
-//		_log.info("获取该定单详情下家购买关系");
-//		final OrdBuyRelationMo buyRelationParamMo1 = new OrdBuyRelationMo();
-//		buyRelationParamMo1.setUplineOrderDetailId(detail.getId());
-//		final List<OrdBuyRelationMo> buyRelationResult1 = ordBuyRelationSvc.list(buyRelationParamMo1);
-//		_log.info("获取该定单详情下家购买关系结果为：List<OrdBuyRelationMo>-{}",buyRelationResult1.toString());
-//		if (buyRelationResult1.size() == 0) {
-//			_log.info("该定单详情下家购买关系为空");
-//		} else {
-//			for (int i = 0; i < buyRelationResult1.size(); i++) {
-//				_log.info("删除购买关系：" + buyRelationResult1.get(i).getId());
-//				final int delResult = ordBuyRelationSvc.del(buyRelationResult1.get(i).getId());
-//				if (delResult != 1) {
-//					_log.info("删除购买关系失败：" + buyRelationResult1.get(i).getId());
-//					throw new RuntimeException("删除购买关系失败");
-//				}
-//				
-//				_log.info("重新匹配该定单详情下家购买关系，购买关系ID：" + buyRelationResult1.get(i).getId());
-//				_log.info("全返商品添加购买关系");
-//				final long userId = buyRelationResult1.get(i).getDownlineUserId();
-//				final long onlineId = detail.getOnlineId();
-//				final BigDecimal buyPrice = detail.getBuyPrice();
-//				final long downLineDetailId = buyRelationResult1.get(i).getDownlineOrderDetailId();
-//				final long downLineOrderId = buyRelationResult1.get(i).getDownlineOrderId();
-//				final long orderTimestamp = detail.getOrderTimestamp();
-//				_log.info("全返商品添加购买关系参数为:userId-{},onlineId-{},buyPrice-{},downLineDetailId-{},downLineOrderId-{},orderTimestamp-{}",
-//						userId,onlineId,buyPrice,downLineDetailId,downLineOrderId,orderTimestamp);
-//				final String matchBuyRelationResult = ordBuyRelationSvc.matchBuyRelation(userId, onlineId, buyPrice,
-//						downLineDetailId, downLineOrderId, orderTimestamp);
-//				_log.info(matchBuyRelationResult);
-//
-//			}
-//		}
+        _log.info("添加重新匹配任务(ibr中)");
+        if (detail.getSubjectType() == 1) {
+            // 添加匹配任务,五分钟后执行。
+            IbrBuyRelationTaskMo addTaskMo = new IbrBuyRelationTaskMo();
+            final Calendar calendar = Calendar.getInstance();
+            calendar.setTime(new Date());
+            calendar.add(Calendar.MINUTE, 5);
+            final Date executePlanTime = calendar.getTime();
+            addTaskMo.setExecuteState((byte) TaskExecuteStateDic.NONE.getCode());
+            addTaskMo.setTaskType((byte) TaskTypeDic.REFUND_AGAIN_MATCH.getCode());
+            addTaskMo.setExecutePlanTime(executePlanTime);
+            addTaskMo.setOrderDetailId(detail.getId());
+            _log.info("添加重新匹配购买关系的参数为:{}", addTaskMo);
+            ibrBuyRelationTaskSvc.add(addTaskMo);
+        }
+
         if ((newActualAmount.compareTo(BigDecimal.ZERO) == 0)
                 && order.getOrderState() == OrderStateDic.PAID.getCode()) {
             _log.info("同意退款根据上线规格id修改销售数量的参数为：onlineSpecId-{}. buycount-{}", detail.getOnlineSpecId(),
@@ -844,7 +807,7 @@ public class OrdReturnSvcImpl extends MybatisBaseSvcImpl<OrdReturnMo, java.lang.
             ro.setMsg("当前退货状态允许退款");
             return ro;
         }
-        final Date        now      = new Date();
+        final Date now = new Date();
         final OrdReturnMo returnMo = new OrdReturnMo();
         // 退款总额
         BigDecimal refundTotal = new BigDecimal("0");
@@ -932,28 +895,28 @@ public class OrdReturnSvcImpl extends MybatisBaseSvcImpl<OrdReturnMo, java.lang.
     public List<Map<String, Object>> selectReturningInfo(final Map<String, Object> map) throws ParseException,
             IntrospectionException, IllegalAccessException, IllegalArgumentException, InvocationTargetException {
         _log.info("查询用户退货中订单信息的参数为：{}", map.toString());
-        final List<Map<String, Object>> list            = new ArrayList<>();
-        final List<OrdReturnMo>         orderReturnList = _mapper.selectReturningOrder(map);
+        final List<Map<String, Object>> list = new ArrayList<>();
+        final List<OrdReturnMo> orderReturnList = _mapper.selectReturningOrder(map);
         _log.info("查询的结果为: {}", String.valueOf(orderReturnList));
         final SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
         if (orderReturnList.size() != 0) {
             for (int i = 0; i < orderReturnList.size(); i++) {
-                final Map<String, Object> hm   = new HashMap<>();
-                final String              l    = simpleDateFormat.format(orderReturnList.get(i).getApplicationTime());
-                final Date                date = simpleDateFormat.parse(l);
-                final long                ts   = date.getTime();
+                final Map<String, Object> hm = new HashMap<>();
+                final String l = simpleDateFormat.format(orderReturnList.get(i).getApplicationTime());
+                final Date date = simpleDateFormat.parse(l);
+                final long ts = date.getTime();
                 _log.info("转换时间得到的时间戳为：{}", ts);
                 hm.put("dateline", ts / 1000);
                 hm.put("finishDate", ts / 1000 + 86400);
                 hm.put("system", System.currentTimeMillis() / 1000);
-                final OrdReturnMo          obj                 = orderReturnList.get(i);
-                final BeanInfo             beanInfo            = Introspector.getBeanInfo(obj.getClass());
+                final OrdReturnMo obj = orderReturnList.get(i);
+                final BeanInfo beanInfo = Introspector.getBeanInfo(obj.getClass());
                 final PropertyDescriptor[] propertyDescriptors = beanInfo.getPropertyDescriptors();
                 for (final PropertyDescriptor property : propertyDescriptors) {
                     final String key = property.getName();
                     if (!key.equals("class")) {
                         final Method getter = property.getReadMethod();
-                        final Object value  = getter.invoke(obj);
+                        final Object value = getter.invoke(obj);
                         hm.put(key, value);
                     }
                 }
@@ -997,28 +960,28 @@ public class OrdReturnSvcImpl extends MybatisBaseSvcImpl<OrdReturnMo, java.lang.
     public List<Map<String, Object>> selectReturnInfo(final Map<String, Object> map) throws ParseException,
             IntrospectionException, IllegalAccessException, IllegalArgumentException, InvocationTargetException {
         _log.info("查询用户退货完成订单信息的参数为：{}", map.toString());
-        final List<Map<String, Object>> list            = new ArrayList<>();
-        final List<OrdReturnMo>         orderReturnList = _mapper.selectReturnOrder(map);
+        final List<Map<String, Object>> list = new ArrayList<>();
+        final List<OrdReturnMo> orderReturnList = _mapper.selectReturnOrder(map);
         _log.info("查询的结果为: {}", String.valueOf(orderReturnList));
         final SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
         if (orderReturnList.size() != 0) {
             for (int i = 0; i < orderReturnList.size(); i++) {
-                final Map<String, Object> hm   = new HashMap<>();
-                final String              l    = simpleDateFormat.format(orderReturnList.get(i).getApplicationTime());
-                final Date                date = simpleDateFormat.parse(l);
-                final long                ts   = date.getTime();
+                final Map<String, Object> hm = new HashMap<>();
+                final String l = simpleDateFormat.format(orderReturnList.get(i).getApplicationTime());
+                final Date date = simpleDateFormat.parse(l);
+                final long ts = date.getTime();
                 _log.info("转换时间得到的时间戳为：{}", ts);
                 hm.put("dateline", ts / 1000);
                 hm.put("finishDate", ts / 1000 + 86400);
                 hm.put("system", System.currentTimeMillis() / 1000);
-                final OrdReturnMo          obj                 = orderReturnList.get(i);
-                final BeanInfo             beanInfo            = Introspector.getBeanInfo(obj.getClass());
+                final OrdReturnMo obj = orderReturnList.get(i);
+                final BeanInfo beanInfo = Introspector.getBeanInfo(obj.getClass());
                 final PropertyDescriptor[] propertyDescriptors = beanInfo.getPropertyDescriptors();
                 for (final PropertyDescriptor property : propertyDescriptors) {
                     final String key = property.getName();
                     if (!key.equals("class")) {
                         final Method getter = property.getReadMethod();
-                        final Object value  = getter.invoke(obj);
+                        final Object value = getter.invoke(obj);
                         hm.put(key, value);
                     }
                 }

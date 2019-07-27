@@ -38,6 +38,7 @@ import rebue.afc.msg.PayDoneMsg;
 import rebue.afc.svr.feign.AfcRefundSvc;
 import rebue.afc.to.RefundApprovedTo;
 import rebue.afc.to.RefundImmediateTo;
+import rebue.ibr.dic.TaskTypeDic;
 import rebue.ibr.mo.IbrBuyRelationMo;
 import rebue.ibr.mo.IbrBuyRelationTaskMo;
 import rebue.ibr.mo.IbrInviteRelationMo;
@@ -2124,7 +2125,7 @@ public class OrdOrderSvcImpl extends MybatisBaseSvcImpl<OrdOrderMo, java.lang.Lo
                     calendar.add(Calendar.MINUTE, 5);
                     final Date executePlanTime = calendar.getTime();
                     addTaskMo.setExecuteState((byte) TaskExecuteStateDic.NONE.getCode());
-                    addTaskMo.setTaskType((byte) 1);
+                    addTaskMo.setTaskType((byte) TaskTypeDic.MATCH_BUY_RELATION.getCode());
                     addTaskMo.setExecutePlanTime(executePlanTime);
                     addTaskMo.setOrderDetailId(orderDetail.getId());
                     _log.info("添加匹配购买关系的参数为:{}", addTaskMo);
