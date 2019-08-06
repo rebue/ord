@@ -55,14 +55,14 @@ public class OrderDetailRo {
     private Byte returnState;
 
     /**
-     * 返现佣金名额
+     * 返现佣金状态
      */
-    private Byte cashbackCommissionSlot;
+    private boolean isSettled;
 
     /**
-     * 返现佣金状态（0：匹配中，1：待返，2：已返)
+     * 下家数量，默认是零，不能超过2
      */
-    private Byte cashbackCommissionState;
+    private Byte childrenCount;
 
     /** 商品主图 **/
     private String goodsQsmm;
