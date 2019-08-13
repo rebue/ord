@@ -11,6 +11,7 @@ import org.apache.ibatis.annotations.Update;
 
 import rebue.ord.dic.OrderStateDic;
 import rebue.ord.dic.ReturnStateDic;
+import rebue.ord.mo.OrdBuyRelationMo;
 import rebue.ord.mo.OrdOrderDetailMo;
 import rebue.ord.ro.WaitingBuyPointByUserIdListRo;
 import rebue.robotech.mapper.MybatisBaseMapper;
@@ -305,4 +306,7 @@ public interface OrdOrderDetailMapper extends MybatisBaseMapper<OrdOrderDetailMo
 
     @Update("UPDATE ORD_ORDER_DETAIL SET INVITE_ID = #{inviteId}  where ID = #{id,jdbcType=BIGINT} ")
     int updateInviteIdById(@Param("id") Long id, @Param("inviteId") Long inviteId);
+
+    @Select("select * from ORD_BUY_RELATION where UPLINE_ORDER_DETAIL_ID = #{parentId,jdbcType=BIGINT} ")
+    List<OrdBuyRelationMo> getParentRelation(@Param("parentId") Long parentId);
 }

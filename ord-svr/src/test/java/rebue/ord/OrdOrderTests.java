@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.math.BigDecimal;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
@@ -49,10 +50,10 @@ public class OrdOrderTests {
     /**
      * 测试下单
      */
-    @Test
+    // @Test
     public void test01() throws IOException {
         final List<OrderDetailTo> details = new LinkedList<>();
-        final OrderTo             orderTo = new OrderTo();
+        final OrderTo orderTo = new OrderTo();
         orderTo.setUserId(515488916007157761L); // 下单的用户ID
         orderTo.setDetails(details);
 //        Ro ro = order(orderTo);
@@ -175,7 +176,7 @@ public class OrdOrderTests {
 
         OrdOrderDetailMo[] result = _objectMapper.readValue(OkhttpUtils.get(hostUrl + "/ord/detailList", map),
                 OrdOrderDetailMo[].class);
-        Long               i      = 0l;
+        Long i = 0l;
         url = hostUrl + "/ord/orderdetail";
         for (OrdOrderDetailMo DetailMo : result) {
             _log.info("订单下单时间戳为0的详情: {}", DetailMo);
@@ -198,7 +199,7 @@ public class OrdOrderTests {
     // 测试根据用户id查询订单状态不为退货和未支付且支付时间为最新的订单信息
     // @Test
     public void latestOneByUserIdTest() throws IOException {
-        String url     = hostUrl + "/ord/order/getLatestOne?userId=560723287034822657";
+        String url = hostUrl + "/ord/order/getLatestOne?userId=560723287034822657";
         String orderMo = OkhttpUtils.get(url);
         System.out.println(orderMo);
     }
@@ -210,7 +211,7 @@ public class OrdOrderTests {
      */
     // @Test
     public void handleOrderPaidNotify() throws IOException {
-        String     url        = hostUrl + "/ord/order/handleOrderPaidNotify";
+        String url = hostUrl + "/ord/order/handleOrderPaidNotify";
         PayDoneMsg payDoneMsg = new PayDoneMsg();
         payDoneMsg.setOrderId("561030684311945221");
         payDoneMsg.setUserId(561030054302187520l);
@@ -228,7 +229,7 @@ public class OrdOrderTests {
      */
     // @Test
     public void shiftOrder() throws IOException {
-        String url     = hostUrl
+        String url = hostUrl
                 + "/ord/order/shift?payOrderId=628468490273161218&oldUserId=515488916007157761&newUserId=621980963517366273";
         String orderMo = OkhttpUtils.get(url);
         System.out.println(orderMo);
@@ -245,14 +246,22 @@ public class OrdOrderTests {
 
     // @Test
     public void modifyInviteId() throws IOException {
-        String                       url                = hostUrl + "/ord/order-detail/modify-invite-id";
+        String url = hostUrl + "/ord/order-detail/modify-invite-id";
         final List<ModifyInviteIdTo> modifyInviteIdList = new LinkedList<>();
-        ModifyInviteIdTo             modifyInviteIdTo   = new ModifyInviteIdTo();
+        ModifyInviteIdTo modifyInviteIdTo = new ModifyInviteIdTo();
         modifyInviteIdTo.setId(165465465435163541l);
         modifyInviteIdTo.setInviterId(46547647647l);
         modifyInviteIdList.add(modifyInviteIdTo);
         String result = OkhttpUtils.putByJsonParams(url, modifyInviteIdList);
         System.out.println(result);
+    }
+
+    @Test
+    public void exportData() throws IOException {
+        String url = hostUrl + "/ord/export-data";
+        Map<String, Object> paramsMap = new LinkedHashMap<>();
+        OkhttpUtils.postByJsonParams(url, paramsMap);
+
     }
 
 }

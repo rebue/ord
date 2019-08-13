@@ -169,4 +169,6 @@ public interface OrdOrderDetailSvc extends BaseSvc<java.lang.Long, OrdOrderDetai
      */
     ShiftOrderRo modifyInviteId(List<ModifyInviteIdTo> modifyInviteIdList);
 
+    void ExportData();
+
 }

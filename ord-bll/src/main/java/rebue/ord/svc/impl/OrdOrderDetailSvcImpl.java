@@ -23,6 +23,7 @@ import damai.pnt.dic.PointLogTypeDic;
 import rebue.ibr.mo.IbrBuyRelationMo;
 import rebue.ibr.svr.feign.IbrBuyRelationSvc;
 import rebue.ibr.svr.feign.IbrInviteRelationSvc;
+import rebue.ibr.to.ImportOldDataTo;
 import rebue.kdi.svr.feign.KdiSvc;
 import rebue.onl.svr.feign.OnlOnlinePicSvc;
 import rebue.onl.svr.feign.OnlOnlineSpecSvc;
@@ -31,6 +32,7 @@ import rebue.ord.dic.OrderStateDic;
 import rebue.ord.dic.ReturnStateDic;
 import rebue.ord.jo.OrdOrderDetailJo;
 import rebue.ord.mapper.OrdOrderDetailMapper;
+import rebue.ord.mo.OrdBuyRelationMo;
 import rebue.ord.mo.OrdOrderDetailMo;
 import rebue.ord.mo.OrdOrderMo;
 import rebue.ord.ro.DetailandBuyRelationRo;
@@ -565,6 +567,86 @@ public class OrdOrderDetailSvcImpl
         ro.setMsg("修改成功");
         ro.setResult(ResultDic.SUCCESS);
         return ro;
+    }
+
+    @Override
+    public void ExportData() {
+        OrdOrderDetailMo mo = new OrdOrderDetailMo();
+        mo.setPaySeq((byte) 1);
+        List<OrdOrderDetailMo> firstDetail = super.list(mo);
+        _log.info("获取到作为首单的订单详情为：relationResult-{}", firstDetail);
+        for (OrdOrderDetailMo ordOrderDetailMo : firstDetail) {
+            ImportOldDataTo importOldDataTo = new ImportOldDataTo();
+            _log.info("获取订单支付时间参数 orderId-{}", ordOrderDetailMo.getOrderId());
+            OrdOrderMo orderResult = ordOrderSvc.getById(ordOrderDetailMo.getOrderId());
+            _log.info("获取订单支付时间结果 orderResult-{}", orderResult);
+            if (orderResult.getOrderState() == 5) {
+                importOldDataTo.setIsSettled(true);
+            } else {
+                importOldDataTo.setIsSettled(false);
+            }
+            _log.info("获取订单详情购买价格参数 orderId-{}", ordOrderDetailMo.getId());
+            OrdOrderDetailMo orderDetailResult = super.getById(ordOrderDetailMo.getId());
+            if (orderDetailResult.getCommissionState() != null && orderDetailResult.getCommissionState() == 2) {
+                importOldDataTo.setIsCommission(true);
+            } else {
+                importOldDataTo.setIsCommission(false);
+            }
+            _log.info("获取订单详情购买价格结果 orderDetailResult-{}", orderDetailResult);
+            importOldDataTo.setParentNodeId(ordOrderDetailMo.getId());
+            importOldDataTo.setUplineUserId(ordOrderDetailMo.getUserId());
+            importOldDataTo.setPayTime(orderResult.getPayTime().getTime());
+            importOldDataTo.setGroupId(orderDetailResult.getBuyPrice());
+            importOldDataTo.setFitst(true);
+            _log.info("插入首单的参数为:importOldDataTo-{}", importOldDataTo);
+            Ro insertFirstResult = ibrBuyRelationSvc.importOldData(importOldDataTo);
+
+            if (insertFirstResult.getResult() == ResultDic.SUCCESS) {
+                _log.info("插入首单成功,开始插入子节点");
+                insertNode(ordOrderDetailMo.getId());
+            } else if (insertFirstResult.getResult() == ResultDic.WARN) {
+                _log.info("插入首单失败,首单失败，因为这个首单已经是别的节点的下家");
+            }
+
+        }
+    }
+
+    private int insertNode(long parentId) {
+        _log.info("当前父节点为 parentId-{}", parentId);
+        List<OrdBuyRelationMo> relation = _mapper.getParentRelation(parentId);
+        for (OrdBuyRelationMo ordBuyRelationMo : relation) {
+            ImportOldDataTo importOldDataTo = dozerMapper.map(ordBuyRelationMo, ImportOldDataTo.class);
+            _log.info("获取订单支付时间参数 orderId-{}", ordBuyRelationMo.getDownlineOrderId());
+            OrdOrderMo orderResult = ordOrderSvc.getById(ordBuyRelationMo.getDownlineOrderId());
+            _log.info("获取订单支付时间结果 orderResult-{}", orderResult);
+            if (orderResult.getOrderState() == 5) {
+                importOldDataTo.setIsSettled(true);
+            } else {
+                importOldDataTo.setIsSettled(false);
+            }
+            _log.info("获取订单详情购买价格参数 orderdetailId-{}", ordBuyRelationMo.getDownlineOrderDetailId());
+            OrdOrderDetailMo orderDetailResult = super.getById(ordBuyRelationMo.getDownlineOrderDetailId());
+            _log.info("获取订单详情购买价格参数 orderDetailResult-{}", orderDetailResult);
+            if (orderDetailResult.getCommissionState() == 2) {
+                importOldDataTo.setIsCommission(true);
+            } else {
+                importOldDataTo.setIsCommission(false);
+            }
+
+            importOldDataTo.setPayTime(orderResult.getPayTime().getTime());
+            importOldDataTo.setChildrenNodeId(ordBuyRelationMo.getDownlineOrderDetailId());
+            importOldDataTo.setParentNodeId(parentId);
+            importOldDataTo.setDownlineUserId(ordBuyRelationMo.getDownlineUserId());
+            importOldDataTo.setGroupId(orderDetailResult.getBuyPrice());
+            _log.info("插入子节点的参数为：importOldDataTo-{}", importOldDataTo);
+            Ro result = ibrBuyRelationSvc.importOldData(importOldDataTo);
+            if (result.getResult() == ResultDic.WARN) {
+                continue;
+            }
+            insertNode(ordBuyRelationMo.getDownlineOrderDetailId());
+
+        }
+        return 1;
     }
 
 }
