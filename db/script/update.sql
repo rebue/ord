@@ -191,3 +191,6 @@ alter table ORD_ORDER_DETAIL modify column RETURN_COUNT decimal(20,4) default 0 
 
 alter table ORD_RETURN modify column RETURN_COUNT decimal(20,4) default 0 comment "退货数量";
 
+-- ------------------------------------------------------- 上面的已更新到线上 2019.08.13 ----------------------------------------------------
+
+
