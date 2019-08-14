@@ -2127,13 +2127,10 @@ public class OrdOrderSvcImpl extends MybatisBaseSvcImpl<OrdOrderMo, java.lang.Lo
                 if (orderDetail.getSubjectType() == 1) {
                     // 添加匹配任务,五分钟后执行。
                     IbrBuyRelationTaskMo addTaskMo = new IbrBuyRelationTaskMo();
-                    final Calendar calendar = Calendar.getInstance();
-                    calendar.setTime(new Date());
-                    calendar.add(Calendar.MINUTE, 5);
-                    final Date executePlanTime = calendar.getTime();
+
                     addTaskMo.setExecuteState((byte) TaskExecuteStateDic.NONE.getCode());
                     addTaskMo.setTaskType((byte) TaskTypeDic.MATCH_BUY_RELATION.getCode());
-                    addTaskMo.setExecutePlanTime(executePlanTime);
+                    addTaskMo.setExecutePlanTime(new Date());
                     addTaskMo.setOrderDetailId(orderDetail.getId());
                     _log.info("添加匹配购买关系的参数为:{}", addTaskMo);
                     ibrBuyRelationTaskSvc.add(addTaskMo);
