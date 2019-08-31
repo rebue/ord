@@ -171,4 +171,6 @@ public interface OrdOrderDetailSvc extends BaseSvc<java.lang.Long, OrdOrderDetai
 
     void ExportData();
 
+    void ExportData２();
+
 }

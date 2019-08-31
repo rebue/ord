@@ -256,9 +256,17 @@ public class OrdOrderTests {
         System.out.println(result);
     }
 
-    @Test
+    // @Test
     public void exportData() throws IOException {
         String url = hostUrl + "/ord/export-data";
+        Map<String, Object> paramsMap = new LinkedHashMap<>();
+        OkhttpUtils.postByJsonParams(url, paramsMap);
+
+    }
+
+    @Test
+    public void exportData２() throws IOException {
+        String url = hostUrl + "/ord/export-data２";
         Map<String, Object> paramsMap = new LinkedHashMap<>();
         OkhttpUtils.postByJsonParams(url, paramsMap);
 

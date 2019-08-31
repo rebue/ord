@@ -36,4 +36,7 @@ public interface OrdOrderDetailSvc {
 
     @PostMapping("/ord/export-data")
     void exportData();
+
+    @PostMapping("/ord/export-data２")
+    void exportData２();
 }

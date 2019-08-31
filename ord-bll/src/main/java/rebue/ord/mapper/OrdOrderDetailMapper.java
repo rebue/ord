@@ -309,4 +309,9 @@ public interface OrdOrderDetailMapper extends MybatisBaseMapper<OrdOrderDetailMo
 
     @Select("select * from ORD_BUY_RELATION where UPLINE_ORDER_DETAIL_ID = #{parentId,jdbcType=BIGINT} ")
     List<OrdBuyRelationMo> getParentRelation(@Param("parentId") Long parentId);
+
+    @Select("SELECT \n" + "    a.*\n" + "FROM\n" + "    ord.ORD_ORDER_DETAIL a,\n" + "    ORD_ORDER b\n" + "WHERE\n"
+            + "    a.PAY_SEQ IS NULL \n" + "    AND \n" + "    a.ORDER_ID = b.id\n" + "    and a.RETURN_STATE = 0\n"
+            + "    and a.SUBJECT_TYPE = 1\n" + "    and b.ORDER_STATE > 1\n" + "    order by b.PAY_TIME  ")
+    List<OrdOrderDetailMo> getNotIsFirstDetail();
 }

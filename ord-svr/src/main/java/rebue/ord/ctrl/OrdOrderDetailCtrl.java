@@ -317,7 +317,13 @@ public class OrdOrderDetailCtrl {
 
     @PostMapping("/ord/export-data")
     void ExportData() {
-        _log.info("开始到数据");
+        _log.info("开始导数据１");
         svc.ExportData();
+    }
+
+    @PostMapping("/ord/export-data２")
+    void ExportData２() {
+        _log.info("开始到数据２");
+        svc.ExportData２();
     }
 }

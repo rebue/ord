@@ -619,6 +619,9 @@ public class OrdOrderDetailSvcImpl
             _log.info("获取订单支付时间参数 orderId-{}", ordBuyRelationMo.getDownlineOrderId());
             OrdOrderMo orderResult = ordOrderSvc.getById(ordBuyRelationMo.getDownlineOrderId());
             _log.info("获取订单支付时间结果 orderResult-{}", orderResult);
+            if (orderResult == null) {
+                continue;
+            }
             if (orderResult.getOrderState() == 5) {
                 importOldDataTo.setIsSettled(true);
             } else {
@@ -647,6 +650,57 @@ public class OrdOrderDetailSvcImpl
 
         }
         return 1;
+    }
+
+    /**
+     * 到出旧数据第二个方法。
+     * 因为有的详情是没有关系的，
+     * 且有的关系是飘忽的，也就是某个树是没有
+     * 节点连接出来的。
+     * 
+     * １：先查询除了首单之外所有的详情出来。
+     * ２：遍历详情，将当前详情作为首单去插入
+     * 2-1:成功，那么继续插入子节点
+     * 2-2:失败，证明以前根据首单的时候已经将该节点下的所有节点插入，不需要在插入
+     */
+    @Override
+    public void ExportData２() {
+        // 根据支付时间从远到近获取所有不是首单的订单详情
+        List<OrdOrderDetailMo> detailData = _mapper.getNotIsFirstDetail();
+        for (OrdOrderDetailMo ordOrderDetailMo : detailData) {
+            ImportOldDataTo importOldDataTo = new ImportOldDataTo();
+            _log.info("获取订单支付时间参数 orderId-{}", ordOrderDetailMo.getOrderId());
+            OrdOrderMo orderResult = ordOrderSvc.getById(ordOrderDetailMo.getOrderId());
+            _log.info("获取订单支付时间结果 orderResult-{}", orderResult);
+            if (orderResult.getOrderState() == 5) {
+                importOldDataTo.setIsSettled(true);
+            } else {
+                importOldDataTo.setIsSettled(false);
+            }
+            _log.info("获取订单详情购买价格参数 orderId-{}", ordOrderDetailMo.getId());
+            OrdOrderDetailMo orderDetailResult = super.getById(ordOrderDetailMo.getId());
+            if (orderDetailResult.getCommissionState() != null && orderDetailResult.getCommissionState() == 2) {
+                importOldDataTo.setIsCommission(true);
+            } else {
+                importOldDataTo.setIsCommission(false);
+            }
+            _log.info("获取订单详情购买价格结果 orderDetailResult-{}", orderDetailResult);
+            importOldDataTo.setParentNodeId(ordOrderDetailMo.getId());
+            importOldDataTo.setUplineUserId(ordOrderDetailMo.getUserId());
+            importOldDataTo.setPayTime(orderResult.getPayTime().getTime());
+            importOldDataTo.setGroupId(orderDetailResult.getBuyPrice());
+            importOldDataTo.setFitst(true);
+            _log.info("插入首单的参数为:importOldDataTo-{}", importOldDataTo);
+            Ro insertFirstResult = ibrBuyRelationSvc.importOldData(importOldDataTo);
+
+            if (insertFirstResult.getResult() == ResultDic.SUCCESS) {
+                _log.info("插入首单成功,开始插入子节点");
+                insertNode(ordOrderDetailMo.getId());
+            } else if (insertFirstResult.getResult() == ResultDic.WARN) {
+                _log.info("插入首单失败,首单失败，因为这个首单已经是别的节点的下家");
+            }
+
+        }
     }
 
 }
