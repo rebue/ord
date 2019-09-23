@@ -5,10 +5,13 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
+
+import rebue.ord.dao.OrdReturnPicDao;
+import rebue.ord.jo.OrdReturnPicJo;
 import rebue.ord.mapper.OrdReturnPicMapper;
 import rebue.ord.mo.OrdReturnPicMo;
 import rebue.ord.svc.OrdReturnPicSvc;
-import rebue.robotech.svc.impl.MybatisBaseSvcImpl;
+import rebue.robotech.svc.impl.BaseSvcImpl;
 
 /**
  * 退货图片
@@ -26,7 +29,9 @@ import rebue.robotech.svc.impl.MybatisBaseSvcImpl;
  */
 @Transactional(readOnly = true, propagation = Propagation.SUPPORTS)
 @Service
-public class OrdReturnPicSvcImpl extends MybatisBaseSvcImpl<OrdReturnPicMo, java.lang.Long, OrdReturnPicMapper> implements OrdReturnPicSvc {
+public class OrdReturnPicSvcImpl
+        extends BaseSvcImpl<java.lang.Long, OrdReturnPicJo, OrdReturnPicDao, OrdReturnPicMo, OrdReturnPicMapper>
+        implements OrdReturnPicSvc {
 
     /**
      * @mbg.generated 自动生成，如需修改，请删除本行

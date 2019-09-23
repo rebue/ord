@@ -11,7 +11,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import rebue.ord.mo.OrdOrderDetailMo;
 import rebue.sbs.feign.FeignConfig;
 
-@FeignClient(name = "ord-svr", configuration = FeignConfig.class)
+@FeignClient(name = "ord-svr", configuration = FeignConfig.class, contextId = "ord-svr-order-detail")
 public interface OrdOrderDetailSvc {
 
     /**

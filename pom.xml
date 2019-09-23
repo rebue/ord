@@ -6,7 +6,7 @@
 	<parent>
 		<groupId>com.github.rebue.common-pom</groupId>
 		<artifactId>sb-parent</artifactId>
-		<version>1.0.9</version>
+		<version>1.1.0</version>
 	</parent>
 
 	<groupId>com.github.rebue.ord</groupId>
@@ -28,58 +28,58 @@
 			<dependency>
 				<groupId>rebue.damai</groupId>
 				<artifactId>damai-pnt</artifactId>
-				<version>1.0.9</version>
+				<version>1.1.0</version>
 			</dependency>
 
 			<dependency>
 				<groupId>com.github.rebue.ord</groupId>
 				<artifactId>ord-api</artifactId>
-				<version>1.0.9</version>
+				<version>1.1.0</version>
 			</dependency>
 			<dependency>
 				<groupId>com.github.rebue.ord</groupId>
 				<artifactId>ord-bll</artifactId>
-				<version>1.0.9</version>
+				<version>1.1.0</version>
 			</dependency>
 			<dependency>
 				<groupId>com.github.rebue.ord</groupId>
 				<artifactId>ord-svr-feign</artifactId>
-				<version>1.0.9</version>
+				<version>1.1.0</version>
 			</dependency>
 			<dependency>
 				<groupId>com.github.rebue.ibr</groupId>
 				<artifactId>ibr-svr-feign</artifactId>
-				<version>1.0.9</version>
+				<version>1.1.0</version>
 			</dependency>
 			<dependency>
 				<groupId>com.github.rebue.onl</groupId>
 				<artifactId>onl-svr-feign</artifactId>
-				<version>1.0.9</version>
+				<version>1.1.0</version>
 			</dependency>
 			<dependency>
 				<groupId>com.github.rebue.suc</groupId>
 				<artifactId>suc-svr-feign</artifactId>
-				<version>1.0.8</version>
+				<version>1.1.0</version>
 			</dependency>
 			<dependency>
 				<groupId>com.github.rebue.kdi</groupId>
 				<artifactId>kdi-svr-feign</artifactId>
-				<version>1.0.9</version>
+				<version>1.1.0</version>
 			</dependency>
 			<dependency>
 				<groupId>com.github.rebue.afc</groupId>
 				<artifactId>afc-svr-feign</artifactId>
-				<version>1.0.9</version>
+				<version>1.1.0</version>
 			</dependency>
 			<dependency>
 				<groupId>com.github.rebue.kdi</groupId>
 				<artifactId>kdi-api</artifactId>
-				<version>1.0.9</version>
+				<version>1.1.0</version>
 			</dependency>
 			<dependency>
 				<groupId>com.github.rebue.pnt</groupId>
 				<artifactId>pnt-svr-feign</artifactId>
-				<version>1.0.9</version>
+				<version>1.1.0</version>
 			</dependency>
 		</dependencies>
 	</dependencyManagement>

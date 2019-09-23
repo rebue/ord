@@ -24,11 +24,13 @@ import rebue.afc.svr.feign.AfcTradeSvc;
 import rebue.ibr.dic.TaskTypeDic;
 import rebue.ibr.mo.IbrBuyRelationTaskMo;
 import rebue.ibr.svr.feign.IbrBuyRelationTaskSvc;
+import rebue.ord.dao.OrdSettleTaskDao;
 import rebue.ord.dic.CommissionStateDic;
 import rebue.ord.dic.OrderStateDic;
 import rebue.ord.dic.OrderTaskTypeDic;
 import rebue.ord.dic.ReturnStateDic;
 import rebue.ord.dic.SettleTaskTypeDic;
+import rebue.ord.jo.OrdSettleTaskJo;
 import rebue.ord.mapper.OrdOrderDetailMapper;
 import rebue.ord.mapper.OrdSettleTaskMapper;
 import rebue.ord.mo.OrdOrderDetailMo;
@@ -42,7 +44,7 @@ import rebue.ord.svc.OrdTaskSvc;
 import rebue.pnt.svr.feign.PntPointSvc;
 import rebue.pnt.to.AddPointTradeTo;
 import rebue.robotech.dic.TaskExecuteStateDic;
-import rebue.robotech.svc.impl.MybatisBaseSvcImpl;
+import rebue.robotech.svc.impl.BaseSvcImpl;
 import rebue.wheel.exception.RuntimeExceptionX;
 
 /**
@@ -50,7 +52,8 @@ import rebue.wheel.exception.RuntimeExceptionX;
  */
 @Transactional(readOnly = true, propagation = Propagation.SUPPORTS)
 @Service
-public class OrdSettleTaskSvcImpl extends MybatisBaseSvcImpl<OrdSettleTaskMo, java.lang.Long, OrdSettleTaskMapper>
+public class OrdSettleTaskSvcImpl
+        extends BaseSvcImpl<java.lang.Long, OrdSettleTaskJo, OrdSettleTaskDao, OrdSettleTaskMo, OrdSettleTaskMapper>
         implements OrdSettleTaskSvc {
 
     /**
@@ -270,8 +273,8 @@ public class OrdSettleTaskSvcImpl extends MybatisBaseSvcImpl<OrdSettleTaskMo, ja
         List<OrdOrderDetailMo> detailResult = orderDetailMapper.selectSelective(getDetailMo);
         _log.info("获取该订单所有的详情以便添加结算任务的结果为 mo-", detailResult);
         for (OrdOrderDetailMo ordOrderDetailMo : detailResult) {
-            IbrBuyRelationTaskMo addTaskMo = new IbrBuyRelationTaskMo();
-            final Calendar settleCommissionCalendar = Calendar.getInstance();
+            IbrBuyRelationTaskMo addTaskMo                = new IbrBuyRelationTaskMo();
+            final Calendar       settleCommissionCalendar = Calendar.getInstance();
             settleCommissionCalendar.setTime(new Date());
             settleCommissionCalendar.add(Calendar.MINUTE, 5);
             final Date executePlanTime = settleCommissionCalendar.getTime();
@@ -303,11 +306,11 @@ public class OrdSettleTaskSvcImpl extends MybatisBaseSvcImpl<OrdSettleTaskMo, ja
      * 添加结算子任务
      *
      * @param orderId
-     *            订单ID
+     *                订单ID
      * @param now
-     *            当前时间
+     *                当前时间
      * @param delay
-     *            延迟时间
+     *                延迟时间
      */
     private void addSettleSubTask(final Long orderId, final Date now, final SettleTaskTypeDic taskType,
             final BigDecimal delay) {
@@ -690,7 +693,7 @@ public class OrdSettleTaskSvcImpl extends MybatisBaseSvcImpl<OrdSettleTaskMo, ja
      * 处理返佣(订单详情如果符合返佣条件，则返佣)
      * 
      * @param orderDetail
-     *            要判断是否返佣的订单详情
+     *                    要判断是否返佣的订单详情
      */
     private void handleCommission(final OrdOrderDetailMo orderDetail, final Long buyerId, final Date now) {
         _log.info("处理返佣(订单详情如果符合返佣条件，则返佣): orderDetail-{}", orderDetail);

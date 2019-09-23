@@ -4,15 +4,19 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
+
+import rebue.ord.dao.OrdAddrDao;
+import rebue.ord.jo.OrdAddrJo;
 import rebue.ord.mapper.OrdAddrMapper;
 import rebue.ord.mo.OrdAddrMo;
 import rebue.ord.svc.OrdAddrSvc;
-import rebue.robotech.svc.impl.MybatisBaseSvcImpl;
+import rebue.robotech.svc.impl.BaseSvcImpl;
 
 /**
  * 用户收货地址
@@ -30,14 +34,15 @@ import rebue.robotech.svc.impl.MybatisBaseSvcImpl;
  */
 @Transactional(readOnly = true, propagation = Propagation.SUPPORTS)
 @Service
-public class OrdAddrSvcImpl extends MybatisBaseSvcImpl<OrdAddrMo, java.lang.Long, OrdAddrMapper> implements OrdAddrSvc {
+public class OrdAddrSvcImpl extends BaseSvcImpl<java.lang.Long, OrdAddrJo, OrdAddrDao, OrdAddrMo, OrdAddrMapper>
+        implements OrdAddrSvc {
 
     /**
      */
     private static final Logger _log = LoggerFactory.getLogger(OrdAddrSvcImpl.class);
 
     /**
-     *  添加用户收货地址 2018年4月8日13:48:03
+     * 添加用户收货地址 2018年4月8日13:48:03
      */
     @Override
     @Transactional(readOnly = false, propagation = Propagation.REQUIRED)
@@ -66,20 +71,20 @@ public class OrdAddrSvcImpl extends MybatisBaseSvcImpl<OrdAddrMo, java.lang.Long
     }
 
     /**
-     *  修改用户默认收货地址 Title: exUpdate Description:
+     * 修改用户默认收货地址 Title: exUpdate Description:
      *
-     *  @param mo
-     *  @date 2018年4月8日 下午3:05:54
+     * @param mo
+     * @date 2018年4月8日 下午3:05:54
      */
     @Override
     @Transactional(readOnly = false, propagation = Propagation.REQUIRED)
     public Map<String, Object> updateDef(OrdAddrMo mo) {
         Map<String, Object> resultMap = new HashMap<String, Object>();
         _log.info("修改用户默认收货地址的参数为：{}", mo);
-        List<OrdAddrMo> list = _mapper.selectSelective(mo);
-        long newId = mo.getId();
-        boolean isDef = mo.getIsDef();
-        long oldId = 0;
+        List<OrdAddrMo> list  = _mapper.selectSelective(mo);
+        long            newId = mo.getId();
+        boolean         isDef = mo.getIsDef();
+        long            oldId = 0;
         if (list.size() != 0) {
             oldId = list.get(0).getId();
             mo.setId(oldId);
@@ -105,14 +110,14 @@ public class OrdAddrSvcImpl extends MybatisBaseSvcImpl<OrdAddrMo, java.lang.Long
     }
 
     /**
-     *  修改用户收货地址 2018年4月8日16:09:49
+     * 修改用户收货地址 2018年4月8日16:09:49
      */
     @Override
     @Transactional(readOnly = false, propagation = Propagation.REQUIRED)
     public Map<String, Object> update(OrdAddrMo mo) {
         Map<String, Object> resultMap = new HashMap<String, Object>();
-        boolean newisDef = mo.getIsDef();
-        long newId = mo.getId();
+        boolean             newisDef  = mo.getIsDef();
+        long                newId     = mo.getId();
         if (newisDef) {
             List<OrdAddrMo> list = _mapper.selectSelective(mo);
             if (list.size() != 0) {

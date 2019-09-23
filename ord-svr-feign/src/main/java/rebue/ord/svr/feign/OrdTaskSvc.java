@@ -18,14 +18,15 @@ import rebue.sbs.feign.FeignConfig;
  * @version 1.0
  * @since JDK 1.8 文件名称：OrdTaskSvc.java 类说明： 订单任务内部接口
  */
-@FeignClient(name = "ord-svr", configuration = FeignConfig.class)
+@FeignClient(name = "ord-svr", configuration = FeignConfig.class, contextId = "ord-svr-task")
 public interface OrdTaskSvc {
 
     /**
      * 获取订单任务ID列表(根据订单任务状态和任务类型)
      */
     @GetMapping(value = "/ord/tasks")
-    List<Long> getTaskIdsThatShouldExecute(@RequestParam("executeState") TaskExecuteStateDic executeState, @RequestParam("taskType") OrderTaskTypeDic taskType);
+    List<Long> getTaskIdsThatShouldExecute(@RequestParam("executeState") TaskExecuteStateDic executeState,
+            @RequestParam("taskType") OrderTaskTypeDic taskType);
 
     /**
      * 执行订单自动签收的任务

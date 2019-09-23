@@ -2,15 +2,20 @@ package rebue.ord.svc.impl;
 
 import java.util.Date;
 import java.util.List;
+
 import javax.annotation.Resource;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.dao.DuplicateKeyException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
+
+import rebue.ord.dao.OrdTaskDao;
 import rebue.ord.dic.OrderStateDic;
 import rebue.ord.dic.OrderTaskTypeDic;
+import rebue.ord.jo.OrdTaskJo;
 import rebue.ord.mapper.OrdTaskMapper;
 import rebue.ord.mo.OrdOrderMo;
 import rebue.ord.mo.OrdTaskMo;
@@ -24,7 +29,7 @@ import rebue.ord.to.OrderSignInTo;
 import rebue.robotech.dic.ResultDic;
 import rebue.robotech.dic.TaskExecuteStateDic;
 import rebue.robotech.ro.Ro;
-import rebue.robotech.svc.impl.MybatisBaseSvcImpl;
+import rebue.robotech.svc.impl.BaseSvcImpl;
 import rebue.wheel.NetUtils;
 
 /**
@@ -43,7 +48,8 @@ import rebue.wheel.NetUtils;
  */
 @Transactional(readOnly = true, propagation = Propagation.SUPPORTS)
 @Service
-public class OrdTaskSvcImpl extends MybatisBaseSvcImpl<OrdTaskMo, java.lang.Long, OrdTaskMapper> implements OrdTaskSvc {
+public class OrdTaskSvcImpl extends BaseSvcImpl<java.lang.Long, OrdTaskJo, OrdTaskDao, OrdTaskMo, OrdTaskMapper>
+        implements OrdTaskSvc {
 
     /**
      * @mbg.generated 自动生成，如需修改，请删除本行
@@ -58,25 +64,25 @@ public class OrdTaskSvcImpl extends MybatisBaseSvcImpl<OrdTaskMo, java.lang.Long
         }
         return super.add(mo);
     }
-    
-	/**
-	 * 添加任务，如果重复添加不抛异常，事务不会回滚
-	 */
-	@Override
-	@Transactional(readOnly = false, propagation = Propagation.REQUIRED)
-	public int addEx(OrdTaskMo mo) {
-		_log.info("添加订单任务");
-		// 如果id为空那么自动生成分布式id
-		if (mo.getId() == null || mo.getId() == 0) {
-			mo.setId(_idWorker.getId());
-		}
-		try {
-			return super.add(mo);
-		} catch (DuplicateKeyException e) {
-			_log.info("插入出错订单任务已经存在 orderId-{}",mo.getOrderId());
-			return 0;
-		}
-	}
+
+    /**
+     * 添加任务，如果重复添加不抛异常，事务不会回滚
+     */
+    @Override
+    @Transactional(readOnly = false, propagation = Propagation.REQUIRED)
+    public int addEx(OrdTaskMo mo) {
+        _log.info("添加订单任务");
+        // 如果id为空那么自动生成分布式id
+        if (mo.getId() == null || mo.getId() == 0) {
+            mo.setId(_idWorker.getId());
+        }
+        try {
+            return super.add(mo);
+        } catch (DuplicateKeyException e) {
+            _log.info("插入出错订单任务已经存在 orderId-{}", mo.getOrderId());
+            return 0;
+        }
+    }
 
     private static final Logger _log = LoggerFactory.getLogger(OrdTaskSvcImpl.class);
 
@@ -93,7 +99,8 @@ public class OrdTaskSvcImpl extends MybatisBaseSvcImpl<OrdTaskMo, java.lang.Long
      * 获取需要执行任务的ID列表(根据任务类型)
      */
     @Override
-    public List<Long> getTaskIdsThatShouldExecute(final TaskExecuteStateDic executeState, final OrderTaskTypeDic taskType) {
+    public List<Long> getTaskIdsThatShouldExecute(final TaskExecuteStateDic executeState,
+            final OrderTaskTypeDic taskType) {
         _log.info("根据订单任务状态和任务类型获取订单任务ID列表的参数为：executeState-{}， taskType-{}", executeState, taskType);
         return _mapper.selectThatShouldExecute((byte) taskType.getCode());
     }
@@ -111,7 +118,7 @@ public class OrdTaskSvcImpl extends MybatisBaseSvcImpl<OrdTaskMo, java.lang.Long
      * 执行订单自动签收任务
      *
      * @param taskId
-     *            任务ID
+     *               任务ID
      */
     @Override
     @Transactional(readOnly = false, propagation = Propagation.REQUIRED)
@@ -150,7 +157,8 @@ public class OrdTaskSvcImpl extends MybatisBaseSvcImpl<OrdTaskMo, java.lang.Long
         }
         final Date executeFactTime = new Date();
         _log.info("执行订单签收任务的参数为：{}", taskId);
-        _mapper.executeSignInOrderTask(executeFactTime, taskId, (byte) TaskExecuteStateDic.DONE.getCode(), (byte) TaskExecuteStateDic.NONE.getCode());
+        _mapper.executeSignInOrderTask(executeFactTime, taskId, (byte) TaskExecuteStateDic.DONE.getCode(),
+                (byte) TaskExecuteStateDic.NONE.getCode());
     }
 
     /**
@@ -188,7 +196,8 @@ public class OrdTaskSvcImpl extends MybatisBaseSvcImpl<OrdTaskMo, java.lang.Long
             return ro;
         }
         // 取消任务，rowCount为影响的行数
-        final int rowCount = _mapper.cancelTask(task.getId(), task.getExecuteState(), TaskExecuteStateDic.CANCEL.getCode());
+        final int rowCount = _mapper.cancelTask(task.getId(), task.getExecuteState(),
+                TaskExecuteStateDic.CANCEL.getCode());
         if (rowCount != 1) {
             _log.info("影响行数为: {}", rowCount);
             final String msg = "任务取消失败: 可能出现并发问题";
@@ -208,7 +217,7 @@ public class OrdTaskSvcImpl extends MybatisBaseSvcImpl<OrdTaskMo, java.lang.Long
      * 执行订单自动取消任务
      *
      * @param taskId
-     *            任务ID
+     *               任务ID
      */
     @Override
     @Transactional(readOnly = false, propagation = Propagation.REQUIRED)
@@ -245,7 +254,8 @@ public class OrdTaskSvcImpl extends MybatisBaseSvcImpl<OrdTaskMo, java.lang.Long
         }
         final Date executeFactTime = new Date();
         _log.info("执行订单取消任务的参数为：{}", taskId);
-        _mapper.executeSignInOrderTask(executeFactTime, taskId, (byte) TaskExecuteStateDic.DONE.getCode(), (byte) TaskExecuteStateDic.NONE.getCode());
+        _mapper.executeSignInOrderTask(executeFactTime, taskId, (byte) TaskExecuteStateDic.DONE.getCode(),
+                (byte) TaskExecuteStateDic.NONE.getCode());
     }
 
     /**
@@ -284,20 +294,21 @@ public class OrdTaskSvcImpl extends MybatisBaseSvcImpl<OrdTaskMo, java.lang.Long
             throw new RuntimeException(msg);
         }
         _log.info("将任务状态改为已经执行");
-        final int rowCount = _mapper.done(now, taskMo.getId(), (byte) TaskExecuteStateDic.DONE.getCode(), (byte) TaskExecuteStateDic.NONE.getCode());
+        final int rowCount = _mapper.done(now, taskMo.getId(), (byte) TaskExecuteStateDic.DONE.getCode(),
+                (byte) TaskExecuteStateDic.NONE.getCode());
         if (rowCount != 1) {
             _log.info("影响行数为: {}", rowCount);
             final String msg = "执行任务不成功: 可能出现并发问题";
             _log.error("{}-{}", msg, taskMo);
             throw new RuntimeException(msg);
         }
-    // if (taskMo.getTradeType() == TradeTypeDic.SETTLE_COMMISSION.getCode()) {
-    // _log.info("发送返佣结算完成通知");
-    // final CommissionSettleDoneMsg msg = new CommissionSettleDoneMsg();
-    // msg.setOrderDetailId(taskMo.getOrderDetailId());
-    // msg.setSettleTime(now);
-    // commissionSettleNotifyPub.send(msg);
-    // }
+        // if (taskMo.getTradeType() == TradeTypeDic.SETTLE_COMMISSION.getCode()) {
+        // _log.info("发送返佣结算完成通知");
+        // final CommissionSettleDoneMsg msg = new CommissionSettleDoneMsg();
+        // msg.setOrderDetailId(taskMo.getOrderDetailId());
+        // msg.setSettleTime(now);
+        // commissionSettleNotifyPub.send(msg);
+        // }
     }
 
     /**
@@ -335,7 +346,8 @@ public class OrdTaskSvcImpl extends MybatisBaseSvcImpl<OrdTaskMo, java.lang.Long
             throw new RuntimeException(msg);
         }
         _log.info("将任务状态改为已经执行");
-        final int rowCount = _mapper.done(now, taskMo.getId(), (byte) TaskExecuteStateDic.DONE.getCode(), (byte) TaskExecuteStateDic.NONE.getCode());
+        final int rowCount = _mapper.done(now, taskMo.getId(), (byte) TaskExecuteStateDic.DONE.getCode(),
+                (byte) TaskExecuteStateDic.NONE.getCode());
         if (rowCount != 1) {
             _log.info("影响行数为: {}", rowCount);
             final String msg = "执行任务不成功: 可能出现并发问题";
@@ -379,7 +391,8 @@ public class OrdTaskSvcImpl extends MybatisBaseSvcImpl<OrdTaskMo, java.lang.Long
             throw new RuntimeException(msg);
         }
         _log.info("将任务状态改为已经执行");
-        final int rowCount = _mapper.done(now, taskMo.getId(), (byte) TaskExecuteStateDic.DONE.getCode(), (byte) TaskExecuteStateDic.NONE.getCode());
+        final int rowCount = _mapper.done(now, taskMo.getId(), (byte) TaskExecuteStateDic.DONE.getCode(),
+                (byte) TaskExecuteStateDic.NONE.getCode());
         if (rowCount != 1) {
             _log.info("影响行数为: {}", rowCount);
             final String msg = "执行任务不成功: 可能出现并发问题";
@@ -426,7 +439,8 @@ public class OrdTaskSvcImpl extends MybatisBaseSvcImpl<OrdTaskMo, java.lang.Long
             throw new RuntimeException(msg);
         }
         _log.info("将任务状态改为已经执行");
-        final int rowCount = _mapper.done(now, taskMo.getId(), (byte) TaskExecuteStateDic.DONE.getCode(), (byte) TaskExecuteStateDic.NONE.getCode());
+        final int rowCount = _mapper.done(now, taskMo.getId(), (byte) TaskExecuteStateDic.DONE.getCode(),
+                (byte) TaskExecuteStateDic.NONE.getCode());
         if (rowCount != 1) {
             _log.info("影响行数为: {}", rowCount);
             final String msg = "执行任务不成功: 可能出现并发问题";

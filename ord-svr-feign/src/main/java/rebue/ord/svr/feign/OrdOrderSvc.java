@@ -22,7 +22,7 @@ import rebue.sbs.feign.FeignConfig;
  * @version 1.0
  * @since JDK 1.8 文件名称：OrdOrderSvc.java 类说明： 订单对内接口
  */
-@FeignClient(name = "ord-svr", configuration = FeignConfig.class)
+@FeignClient(name = "ord-svr", configuration = FeignConfig.class, contextId = "ord-svr-order")
 public interface OrdOrderSvc {
 
     /**
