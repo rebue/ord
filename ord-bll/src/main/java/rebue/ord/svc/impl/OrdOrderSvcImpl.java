@@ -60,7 +60,6 @@ import rebue.onl.svr.feign.OnlOnlineSpecSvc;
 import rebue.onl.svr.feign.OnlOnlineSvc;
 import rebue.onl.to.UpdateOnlineAfterOrderTo;
 import rebue.onl.to.UpdateOnlineSpecAfterOrderTo;
-import rebue.ord.dao.OrdOrderDao;
 import rebue.ord.dic.CancellationOfOrderDic;
 import rebue.ord.dic.CommissionStateDic;
 import rebue.ord.dic.ModifyOrderRealMoneyDic;
@@ -106,10 +105,14 @@ import rebue.ord.to.OrderSignInTo;
 import rebue.ord.to.OrderTo;
 import rebue.ord.to.ShipmentConfirmationTo;
 import rebue.ord.to.UpdateOrgTo;
+import rebue.prd.mo.PrdProductMo;
+import rebue.prd.mo.PrdProductSpecMo;
+import rebue.prd.svr.feign.PrdProductSpecSvc;
+import rebue.prd.svr.feign.PrdProductSvc;
 import rebue.robotech.dic.ResultDic;
 import rebue.robotech.dic.TaskExecuteStateDic;
 import rebue.robotech.ro.Ro;
-import rebue.robotech.svc.impl.BaseSvcImpl;
+import rebue.robotech.svc.impl.MybatisBaseSvcImpl;
 import rebue.suc.mo.SucOrgMo;
 import rebue.suc.mo.SucUserMo;
 import rebue.suc.svr.feign.SucOrgSvc;
@@ -128,7 +131,7 @@ import rebue.suc.svr.feign.SucUserSvc;
  */
 @Transactional(readOnly = true, propagation = Propagation.SUPPORTS)
 @Service
-public class OrdOrderSvcImpl extends BaseSvcImpl<java.lang.Long, OrdOrderJo, OrdOrderDao, OrdOrderMo, OrdOrderMapper>
+public class OrdOrderSvcImpl extends MybatisBaseSvcImpl<OrdOrderMo, java.lang.Long, OrdOrderMapper>
         implements OrdOrderSvc {
 
     /**
@@ -214,6 +217,12 @@ public class OrdOrderSvcImpl extends BaseSvcImpl<java.lang.Long, OrdOrderJo, Ord
     private AfcRefundSvc afcRefundSvc;
 
     @Resource
+    private PrdProductSvc prdProductSvc;
+
+    @Resource
+    private PrdProductSpecSvc prdProductSpecSvc;
+
+    @Resource
     private OrdOrderDetailDeliverSvc ordOrderDetailDeliverSvc;
 
     @Resource
@@ -281,141 +290,194 @@ public class OrdOrderSvcImpl extends BaseSvcImpl<java.lang.Long, OrdOrderJo, Ord
 
         _log.debug("遍历订单详情");
         for (final OrderDetailTo orderDetailTo : to.getDetails()) {
-            _log.debug("根据上线ID获取上线信息");
-            if (orderDetailTo.getOnlineId() == null || orderDetailTo.getOnlineSpecId() == null
-                    || orderDetailTo.getBuyCount() == null) {
+            if (orderDetailTo.getBuyCount() == null || orderDetailTo.getBuyCount().compareTo(BigDecimal.ZERO) <= 0) {
                 final String msg = "参数错误";
-                _log.error("{}: {}", msg, "上线ID/上线规格ID/购买数量不能为空 " + orderDetailTo);
+                _log.error("{}: {}", msg, "购买数量不能为空或小于等于0 " + orderDetailTo);
                 ro.setResult(ResultDic.PARAM_ERROR);
                 ro.setMsg(msg);
                 return ro;
             }
-            _log.debug("获取上线信息");
-            // 如果已经获取过上线信息，从Map中获取就可避免重复获取，减轻数据库负担
-            OnlOnlineMo onlineMo = onlines.get(orderDetailTo.getOnlineId());
-            if (onlineMo == null) {
-                onlineMo = onlineSvc.getById(orderDetailTo.getOnlineId());
-                if (onlineMo == null) {
-                    final String msg = "找不到上线的信息";
-                    _log.error("{}: onlineId-{}", msg, orderDetailTo.getOnlineId());
+
+            // 添加的订单详情
+            OrdOrderDetailMo orderDetailMo = new OrdOrderDetailMo();
+            orderDetailMo.setIsDelivered(to.getIsNowReceived());
+            if (orderDetailTo.getBuyPrice() != null) {
+                orderDetailMo.setBuyPrice(orderDetailTo.getBuyPrice());
+            }
+            orderDetailMo.setBuyCount(orderDetailTo.getBuyCount());
+
+            if (!StringUtils.isBlank(orderDetailTo.getBuyUnit())) {
+                orderDetailMo.setBuyUnit(orderDetailTo.getBuyUnit());
+            }
+
+            _log.debug("根据产品ID获取产品信息");
+            // 根据产品ID获取产品信息(在不是临时商品的情况下才去获取)
+            if (!orderDetailTo.isTempGood()) {
+                _log.info("获取产品信息的参数为-{}", orderDetailTo.getProductId());
+                PrdProductMo prdProductResult = prdProductSvc.getById(orderDetailTo.getProductId());
+                _log.info("获取产品信息的结果为-{}", prdProductResult);
+                orderDetailMo.setProductId(orderDetailTo.getProductId());
+                orderDetailMo.setProductSpecId(orderDetailTo.getProductSpecId());
+                _log.info("获取产品规格信息的参数为-{}", orderDetailTo.getProductSpecId());
+                PrdProductSpecMo prdProductSeocResult = prdProductSpecSvc.getById(orderDetailTo.getProductSpecId());
+                _log.info("获取产品规格信息的结果为-{}", prdProductSeocResult);
+                orderDetailMo.setSpecName(prdProductSeocResult.getName());
+                orderDetailMo.setBuyUnit(prdProductSeocResult.getUnit());
+            }
+
+            _log.debug("根据上线ID获取上线信息");
+            if (orderDetailTo.getOnlineId() == null || orderDetailTo.getOnlineSpecId() == null) {
+                if (!to.getIsNowReceived()) {
+                    final String msg = "参数错误";
+                    _log.error("{}: {}", msg, "上线ID/上线规格ID不能为空 " + orderDetailTo);
                     ro.setResult(ResultDic.PARAM_ERROR);
                     ro.setMsg(msg);
                     return ro;
                 }
-                _log.info("获取上线的信息为：{}", onlineMo);
-                // 将获取到的上线信息放入Map中
-                onlines.put(orderDetailTo.getOnlineId(), onlineMo);
-            }
+                // 临时商品或未上架产品
+                List<OrdOrderDetailMo> orderDetails = new LinkedList<>();
+                onlineOrgs.put(null, orderDetails);
+                orderDetailMo.setActualAmount(orderDetailMo.getBuyPrice().multiply(orderDetailMo.getBuyCount()));
+                orderDetails.add(orderDetailMo);
 
-            _log.debug("根据上线规格ID获取上线规格信息");
-            final OnlOnlineSpecMo onlineSpecMo = onlOnlineSpecSvc.getById(orderDetailTo.getOnlineSpecId());
-            if (onlineSpecMo == null) {
-                final String msg = "找不到上线规格的信息";
-                _log.error("{}: onlineSpecId-{}", msg, orderDetailTo.getOnlineSpecId());
-                ro.setResult(ResultDic.PARAM_ERROR);
-                ro.setMsg(msg);
-                return ro;
-            }
-            _log.info("获取上线规格的信息为：{}", onlineSpecMo);
-            _log.info("检查购买数量是否超过库存数量");
-            // XXX 检查购买数量是否超过库存数量：判断上线数量-销售数量是否小于购买数量-1
-            if (onlineSpecMo.getCurrentOnlineCount().subtract(onlineSpecMo.getSaleCount())
-                    .compareTo(orderDetailTo.getBuyCount()) == -1) {
-                final String msg = "商品库存不足";
-                _log.error("{}: onlineSpecMo-{}, 购买数量-{}", msg, onlineSpecMo, orderDetailTo.getBuyCount());
-                ro.setResult(ResultDic.FAIL);
-                ro.setMsg(msg);
-                return ro;
-            }
-            _log.info("检查是否限制购买");
-            // 如果是限制购买的商品，同一用户的所有购买数量不能超过限制的数量
-            if (onlineSpecMo.getLimitCount().compareTo(BigDecimal.ZERO) == 1) {
-                // 计算更新后的库存
-                final BigDecimal buyerOrderedCount = orderDetailSvc.getBuyerOrderedCount(to.getUserId(),
-                        orderDetailTo.getOnlineSpecId());
-                if (buyerOrderedCount.add(orderDetailTo.getBuyCount()).compareTo(onlineSpecMo.getLimitCount()) == 1) {
-                    final String msg = "已超过限购数量，不能再购买";
-                    _log.error("{}: userId-{} onlineSpecId-{}", msg, to.getUserId(), orderDetailTo.getOnlineSpecId());
-                    ro.setResult(ResultDic.FAIL);
+            } else {
+                _log.debug("获取上线信息");
+                // 如果已经获取过上线信息，从Map中获取就可避免重复获取，减轻数据库负担
+                OnlOnlineMo onlineMo = onlines.get(orderDetailTo.getOnlineId());
+                if (onlineMo == null) {
+                    onlineMo = onlineSvc.getById(orderDetailTo.getOnlineId());
+                    if (onlineMo == null) {
+                        final String msg = "找不到上线的信息";
+                        _log.error("{}: onlineId-{}", msg, orderDetailTo.getOnlineId());
+                        ro.setResult(ResultDic.PARAM_ERROR);
+                        ro.setMsg(msg);
+                        return ro;
+                    }
+                    _log.info("获取上线的信息为：{}", onlineMo);
+                    // 将获取到的上线信息放入Map中
+                    onlines.put(orderDetailTo.getOnlineId(), onlineMo);
+                }
+
+                _log.debug("根据上线规格ID获取上线规格信息");
+                final OnlOnlineSpecMo onlineSpecMo = onlOnlineSpecSvc.getById(orderDetailTo.getOnlineSpecId());
+                if (onlineSpecMo == null) {
+                    final String msg = "找不到上线规格的信息";
+                    _log.error("{}: onlineSpecId-{}", msg, orderDetailTo.getOnlineSpecId());
+                    ro.setResult(ResultDic.PARAM_ERROR);
                     ro.setMsg(msg);
                     return ro;
                 }
-            }
-            // 当前订单详情的下单时间戳(购买关系匹配自己的详情需要用来过滤，只匹配小于当前订单详情的下单时间戳的详情)
-            // long orderTimestamp = System.currentTimeMillis();
-            // 计算当前详情的下单时间戳
-            // orderTimestamp++;
-            // 开始添加订单详情
-            OrdOrderDetailMo orderDetailMo = new OrdOrderDetailMo();
-            // orderDetailMo.setOrderTimestamp(orderTimestamp);
-            orderDetailMo.setOnlineId(orderDetailTo.getOnlineId());
-            orderDetailMo.setOnlineSpecId(orderDetailTo.getOnlineSpecId());
-            orderDetailMo.setOnlineTitle(onlineMo.getOnlineTitle());
-            orderDetailMo.setProductId(onlineMo.getProductId());
-            orderDetailMo.setProductSpecId(onlineSpecMo.getProductSpecId());
-            orderDetailMo.setIsDelivered(false);
-            orderDetailMo.setSpecName(onlineSpecMo.getOnlineSpec());
-            orderDetailMo.setBuyPrice(onlineSpecMo.getSalePrice());
-            orderDetailMo.setBuyCount(orderDetailTo.getBuyCount());
-            // 计算实际价格=单价*数量
-            orderDetailMo.setActualAmount(onlineSpecMo.getSalePrice().multiply(orderDetailTo.getBuyCount()));
-            orderDetailMo.setBuyUnit(onlineSpecMo.getSaleUnit());
-            orderDetailMo.setCostPrice(onlineSpecMo.getCostPrice());
-            orderDetailMo.setBuyPoint(onlineSpecMo.getBuyPoint());
-            // 判断是否是测试用户
-            if (to.getIsTester()) {
-                orderDetailMo.setSupplierId(testSupplierOrgId);
-                orderDetailMo.setDeliverOrgId(testSupplierOrgId);
-            } else {
-                orderDetailMo.setSupplierId(onlineMo.getSupplierId());
-                orderDetailMo.setDeliverOrgId(onlineMo.getDeliverOrgId());
-            }
-            orderDetailMo.setSubjectType(onlineMo.getSubjectType());
-            // 添加订单详情到上线组织列表中(根据上线组织拆分订单详情)
-            List<OrdOrderDetailMo> orderDetails = onlineOrgs.get(onlineMo.getOnlineOrgId());
-            if (orderDetails == null) {
-                orderDetails = new LinkedList<>();
-                onlineOrgs.put(onlineMo.getOnlineOrgId(), orderDetails);
-            }
-            if (OnlineSubjectTypeDic.NORMAL.getCode() == orderDetailMo.getSubjectType()) {
-                orderDetailMo.setCashbackAmount(onlineSpecMo.getCashbackAmount());
-                orderDetailMo.setCashbackTotal(orderDetailTo.getBuyCount().multiply(onlineSpecMo.getCashbackAmount()));
-                orderDetailMo.setBuyPointTotal(onlineSpecMo.getBuyPoint().multiply(orderDetailTo.getBuyCount()));
-                orderDetails.add(orderDetailMo);
-            } else if (OnlineSubjectTypeDic.BACK_COMMISSION.getCode() == orderDetailMo.getSubjectType()) {
-                if (orderDetailTo.getInviteId() != null) {
-                    orderDetailMo.setInviteId(orderDetailTo.getInviteId());
+                _log.info("获取上线规格的信息为：{}", onlineSpecMo);
+
+                _log.info("检查购买数量是否超过库存数量");
+                // XXX 检查购买数量是否超过库存数量：判断上线数量-销售数量是否小于购买数量-1
+                if (onlineSpecMo.getCurrentOnlineCount().subtract(onlineSpecMo.getSaleCount())
+                        .compareTo(orderDetailTo.getBuyCount()) == -1) {
+                    if (!to.getIsNowReceived()) {
+                        final String msg = "商品库存不足";
+                        _log.error("{}: onlineSpecMo-{}, 购买数量-{}", msg, onlineSpecMo, orderDetailTo.getBuyCount());
+                        ro.setResult(ResultDic.FAIL);
+                        ro.setMsg(msg);
+                        return ro;
+                    } else {
+                        // TODO 临时增加库存(增加数量为CurrentOnlineCount-SaleCount-BuyCount)
+                    }
                 }
-                orderDetailMo.setBuyCount(BigDecimal.ONE);
-                orderDetailMo.setCommissionSlot((byte) 2);
-                orderDetailMo.setCommissionState((byte) CommissionStateDic.MATCHING.getCode());
-                orderDetailMo.setCashbackAmount(BigDecimal.ZERO);
-                orderDetailMo.setCashbackTotal(BigDecimal.ZERO);
-                orderDetailMo.setActualAmount(orderDetailMo.getBuyPrice());
-                orderDetailMo.setBuyPointTotal(onlineSpecMo.getBuyPoint());
-                // 如果订单购买数量有小数则不拆单
-                if (new BigDecimal(orderDetailTo.getBuyCount().intValue())
-                        .compareTo(orderDetailTo.getBuyCount()) == 0) {
-                    _log.info("订单购买数量没有小数，开始拆单");
+                _log.info("检查是否限制购买");
+                // 如果是限制购买的商品，同一用户的所有购买数量不能超过限制的数量
+                if (onlineSpecMo.getLimitCount().compareTo(BigDecimal.ZERO) == 1) {
+                    // 计算更新后的库存
+                    final BigDecimal buyerOrderedCount = orderDetailSvc.getBuyerOrderedCount(to.getUserId(),
+                            orderDetailTo.getOnlineSpecId());
+                    if (buyerOrderedCount.add(orderDetailTo.getBuyCount())
+                            .compareTo(onlineSpecMo.getLimitCount()) == 1) {
+                        final String msg = "已超过限购数量，不能再购买";
+                        _log.error("{}: userId-{} onlineSpecId-{}", msg, to.getUserId(),
+                                orderDetailTo.getOnlineSpecId());
+                        ro.setResult(ResultDic.FAIL);
+                        ro.setMsg(msg);
+                        return ro;
+                    }
+                }
+
+                orderDetailMo.setOnlineId(orderDetailTo.getOnlineId());
+                orderDetailMo.setOnlineSpecId(orderDetailTo.getOnlineSpecId());
+                orderDetailMo.setOnlineTitle(onlineMo.getOnlineTitle());
+                orderDetailMo.setSpecName(onlineSpecMo.getOnlineSpec());
+                orderDetailMo.setBuyPrice(onlineSpecMo.getSalePrice());
+                orderDetailMo.setBuyUnit(onlineSpecMo.getSaleUnit());
+                orderDetailMo.setCostPrice(onlineSpecMo.getCostPrice());
+                // 计算实际价格=单价*数量
+                orderDetailMo.setActualAmount(orderDetailMo.getBuyPrice().multiply(orderDetailMo.getBuyCount()));
+                if (onlineSpecMo.getCashbackAmount() != null) {
+                    orderDetailMo.setCashbackAmount(onlineSpecMo.getCashbackAmount());
+                    orderDetailMo
+                            .setCashbackTotal(orderDetailMo.getBuyCount().multiply(onlineSpecMo.getCashbackAmount()));
+                }
+                if (onlineSpecMo.getBuyPoint() != null) {
+                    orderDetailMo.setBuyPoint(onlineSpecMo.getBuyPoint());
+                    orderDetailMo.setBuyPointTotal(onlineSpecMo.getBuyPoint().multiply(orderDetailMo.getBuyCount()));
+                }
+
+                // 判断是否是测试用户
+                if (to.getIsTester()) {
+                    orderDetailMo.setSupplierId(testSupplierOrgId);
+                    orderDetailMo.setDeliverOrgId(testSupplierOrgId);
+                } else {
+                    orderDetailMo.setSupplierId(onlineMo.getSupplierId());
+                    orderDetailMo.setDeliverOrgId(onlineMo.getDeliverOrgId());
+                }
+
+                orderDetailMo.setSubjectType(onlineMo.getSubjectType());
+                // 添加订单详情到上线组织列表中(根据上线组织拆分订单详情)
+                List<OrdOrderDetailMo> orderDetails = onlineOrgs.get(onlineMo.getOnlineOrgId());
+                if (orderDetails == null) {
+                    orderDetails = new LinkedList<>();
+                    onlineOrgs.put(onlineMo.getOnlineOrgId(), orderDetails);
+                }
+
+                if (OnlineSubjectTypeDic.BACK_COMMISSION.getCode() == orderDetailMo.getSubjectType()) {
+                    if (orderDetailTo.getInviteId() != null) {
+                        orderDetailMo.setInviteId(orderDetailTo.getInviteId());
+                    }
+                    orderDetailMo.setBuyCount(BigDecimal.ONE);
+                    orderDetailMo.setCommissionSlot((byte) 2);
+                    orderDetailMo.setCommissionState((byte) CommissionStateDic.MATCHING.getCode());
+                    orderDetailMo.setCashbackAmount(BigDecimal.ZERO);
+                    orderDetailMo.setCashbackTotal(BigDecimal.ZERO);
+                    orderDetailMo.setActualAmount(orderDetailMo.getBuyPrice());
+                    orderDetailMo.setBuyPointTotal(orderDetailMo.getBuyPoint());
+                    // 如果订单购买数量有小数则不拆单
+//                    if (BigDecimal.valueOf(orderDetailTo.getBuyCount().intValue())
+//                            .compareTo(orderDetailTo.getBuyCount()) == 0) {
+//                  _log.info("订单购买数量没有小数，开始拆单");
+                    _log.info("开始拆单");
                     for (int i = 0; i < orderDetailTo.getBuyCount().intValue(); i++) {
                         orderDetails.add(orderDetailMo);
                         orderDetailMo = dozerMapper.map(orderDetailMo, OrdOrderDetailMo.class);
                     }
+//                    } else {
+//                        _log.info("订单购买数量有小数，不拆单");
+//                        orderDetails.add(orderDetailMo);
+//                        orderDetailMo = dozerMapper.map(orderDetailMo, OrdOrderDetailMo.class);
+//                    }
                 } else {
-                    _log.info("订单购买数量有小数，不拆单");
                     orderDetails.add(orderDetailMo);
-                    orderDetailMo = dozerMapper.map(orderDetailMo, OrdOrderDetailMo.class);
                 }
+
+                // 添加要更新的上线规格信息
+                final UpdateOnlineSpecAfterOrderTo specTo = new UpdateOnlineSpecAfterOrderTo();
+                specTo.setOnlineId(orderDetailTo.getOnlineId());
+                specTo.setOnlineSpecId(orderDetailTo.getOnlineSpecId());
+                specTo.setBuyCount(orderDetailTo.getBuyCount());
+                specTo.setCartId(orderDetailTo.getCartId());
+                specList.add(specTo);
             }
-            // 添加要更新的上线规格信息
-            final UpdateOnlineSpecAfterOrderTo specTo = new UpdateOnlineSpecAfterOrderTo();
-            specTo.setOnlineId(orderDetailTo.getOnlineId());
-            specTo.setOnlineSpecId(orderDetailTo.getOnlineSpecId());
-            specTo.setBuyCount(orderDetailTo.getBuyCount());
-            specTo.setCartId(orderDetailTo.getCartId());
-            specList.add(specTo);
+
         }
+
         _log.debug("通过地址ID获取地址详细信息");
+
         final OrdAddrMo addrMo = ordAddrSvc.getById(to.getAddrId());
 
         if (addrMo == null) {
@@ -501,21 +563,25 @@ public class OrdOrderSvcImpl extends BaseSvcImpl<java.lang.Long, OrdOrderJo, Ord
                 orderDetailSvc.add(orderDetailMo);
             }
 
-            _log.debug("计算自动取消订单的执行时间");
-            final Calendar calendar = Calendar.getInstance();
-            calendar.setTime(now);
-            calendar.add(Calendar.MINUTE, cancelOrderTime);
-            final Date executePlanTime = calendar.getTime();
-            _log.debug("取消订单的执行时间为: {}", executePlanTime);
-            _log.debug("准备添加自动取消订单的任务");
-            final OrdTaskMo ordTaskMo = new OrdTaskMo();
-            ordTaskMo.setExecuteState((byte) TaskExecuteStateDic.NONE.getCode());
-            ordTaskMo.setExecutePlanTime(executePlanTime);
-            ordTaskMo.setTaskType((byte) OrderTaskTypeDic.CANCEL.getCode());
-            ordTaskMo.setOrderId(String.valueOf(orderMo.getId()));
-            _log.debug("添加自动取消订单任务的参数为：{}", ordTaskMo);
-            // 添加取消订单任务
-            ordTaskSvc.add(ordTaskMo);
+            if (!to.getIsNowReceived()) {
+                _log.debug("计算自动取消订单的执行时间");
+                final Calendar calendar = Calendar.getInstance();
+                calendar.setTime(now);
+                calendar.add(Calendar.MINUTE, cancelOrderTime);
+                final Date executePlanTime = calendar.getTime();
+                _log.debug("取消订单的执行时间为: {}", executePlanTime);
+                _log.debug("准备添加自动取消订单的任务");
+                final OrdTaskMo ordTaskMo = new OrdTaskMo();
+                ordTaskMo.setExecuteState((byte) TaskExecuteStateDic.NONE.getCode());
+                ordTaskMo.setExecutePlanTime(executePlanTime);
+                ordTaskMo.setTaskType((byte) OrderTaskTypeDic.CANCEL.getCode());
+                ordTaskMo.setOrderId(String.valueOf(orderMo.getId()));
+                _log.debug("添加自动取消订单任务的参数为：{}", ordTaskMo);
+                // 添加取消订单任务
+                ordTaskSvc.add(ordTaskMo);
+            } else {
+
+            }
 
             final UpdateOnlineAfterOrderTo updateOnlineTo = new UpdateOnlineAfterOrderTo();
             updateOnlineTo.setUserId(to.getUserId());
@@ -550,7 +616,7 @@ public class OrdOrderSvcImpl extends BaseSvcImpl<java.lang.Long, OrdOrderJo, Ord
                 final Map<String, Object> hm = new HashMap<>();
                 // 下单时间
                 final String orderTime = simpleDateFormat.format(orderList.get(i).getOrderTime());
-                Date         date      = new Date();
+                Date date = new Date();
                 date = simpleDateFormat.parse(orderTime);
                 final long orderTimes = date.getTime();
                 _log.info("转换下单时间得到的时间戳为：{}", orderTimes);
@@ -575,14 +641,14 @@ public class OrdOrderSvcImpl extends BaseSvcImpl<java.lang.Long, OrdOrderJo, Ord
                 hm.put("orderTimes", orderTimes / 1000);
                 // 系统时间戳
                 hm.put("system", System.currentTimeMillis() / 1000);
-                final OrdOrderMo           obj                 = orderList.get(i);
-                final BeanInfo             beanInfo            = Introspector.getBeanInfo(obj.getClass());
+                final OrdOrderMo obj = orderList.get(i);
+                final BeanInfo beanInfo = Introspector.getBeanInfo(obj.getClass());
                 final PropertyDescriptor[] propertyDescriptors = beanInfo.getPropertyDescriptors();
                 for (final PropertyDescriptor property : propertyDescriptors) {
                     final String key = property.getName();
                     if (!key.equals("class")) {
                         final Method getter = property.getReadMethod();
-                        final Object value  = getter.invoke(obj);
+                        final Object value = getter.invoke(obj);
                         hm.put(key, value);
                     }
                 }
@@ -613,7 +679,7 @@ public class OrdOrderSvcImpl extends BaseSvcImpl<java.lang.Long, OrdOrderJo, Ord
                     }
                     _log.info("获取订单下家购买关系参数id-{}", orderDetailMo.getId());
                     final List<IbrBuyRelationMo> ordBuyRelationResult = ibrBuyRelationSvc.list(orderDetailMo.getId());
-                    final List<OrdBuyRelationRo> buyRelationList      = new ArrayList<>();
+                    final List<OrdBuyRelationRo> buyRelationList = new ArrayList<>();
                     if (ordBuyRelationResult.size() == 0) {
                         _log.info("下家购买关系为空");
                     } else {
@@ -674,8 +740,8 @@ public class OrdOrderSvcImpl extends BaseSvcImpl<java.lang.Long, OrdOrderJo, Ord
     @Transactional(readOnly = false, propagation = Propagation.REQUIRED)
     public CancellationOfOrderRo cancellationOfOrder(final OrdOrderMo mo) {
         final CancellationOfOrderRo cancellationOfOrderRo = new CancellationOfOrderRo();
-        final Map<String, Object>   map                   = new HashMap<>();
-        final Long                  id                    = mo.getId();
+        final Map<String, Object> map = new HashMap<>();
+        final Long id = mo.getId();
         map.put("id", id);
         final List<OrdOrderMo> orderList = _mapper.selectOrderInfo(map);
         _log.info("用户查询订单信息的返回值为：{}", String.valueOf(orderList));
@@ -827,7 +893,7 @@ public class OrdOrderSvcImpl extends BaseSvcImpl<java.lang.Long, OrdOrderJo, Ord
         }
         System.out.println("订单真实金额=" + ordOrderMo.getRealMoney() + ", 退货总额=" + ordOrderMo.getReturnTotal());
         // 订单真实购买金额 = 订单真实购买金额 - 退货总额
-        final BigDecimal       realMoney  = ordOrderMo.getRealMoney().subtract(ordOrderMo.getReturnTotal()).setScale(4,
+        final BigDecimal realMoney = ordOrderMo.getRealMoney().subtract(ordOrderMo.getReturnTotal()).setScale(4,
                 BigDecimal.ROUND_HALF_UP);
         final RefundApprovedTo approvedTo = new RefundApprovedTo();
         approvedTo.setOrderId(ordOrderMo.getPayOrderId().toString());
@@ -918,7 +984,7 @@ public class OrdOrderSvcImpl extends BaseSvcImpl<java.lang.Long, OrdOrderJo, Ord
                 _log.debug("需要修改订单状态，订单所有未发货详情等于被选择的详情：AllDetaileId长度-{}, SelectDetailId长度-{}",
                         to.getAllDetaile().size(), to.getSelectDetaile().size());
                 final OrdOrderMo ordOrderMo = new OrdOrderMo();
-                final Date       date       = new Date();
+                final Date date = new Date();
                 ordOrderMo.setSendOpId(to.getSendOpId());
                 ordOrderMo.setSendTime(date);
                 ordOrderMo.setId(to.getId());
@@ -995,7 +1061,7 @@ public class OrdOrderSvcImpl extends BaseSvcImpl<java.lang.Long, OrdOrderJo, Ord
                 _log.debug("需要修改订单状态，订单所有未发货详情等于被选择的详情：AllDetaileId长度-{}, SelectDetailId长度-{}",
                         to.getAllDetaile().size(), to.getSelectDetaile().size());
                 final OrdOrderMo ordOrderMo = new OrdOrderMo();
-                final Date       date       = new Date();
+                final Date date = new Date();
                 ordOrderMo.setSendOpId(to.getSendOpId());
                 ordOrderMo.setSendTime(date);
                 ordOrderMo.setId(to.getId());
@@ -1343,8 +1409,8 @@ public class OrdOrderSvcImpl extends BaseSvcImpl<java.lang.Long, OrdOrderJo, Ord
             final Calendar calendar = Calendar.getInstance();
             calendar.setTime(date);
             calendar.add(Calendar.HOUR, signinOrderTime);
-            final Date      executePlanTime = calendar.getTime();
-            final OrdTaskMo ordTaskMo       = new OrdTaskMo();
+            final Date executePlanTime = calendar.getTime();
+            final OrdTaskMo ordTaskMo = new OrdTaskMo();
             ordTaskMo.setOrderId(String.valueOf(mo.getId()));
             ordTaskMo.setTaskType((byte) 2);
             // 先查询任务是否已经存在
@@ -1532,7 +1598,7 @@ public class OrdOrderSvcImpl extends BaseSvcImpl<java.lang.Long, OrdOrderJo, Ord
                 printPage += "<br><div style=\"page-break-after:always\"></div>\n\r";
             }
             printPage += callKdiNiaoAndaddTaskRo.getPrintPage();
-            i         += 1;
+            i += 1;
 
             _log.info("第二种发货方式循环结束+++++++++++++++");
         }
@@ -1675,7 +1741,7 @@ public class OrdOrderSvcImpl extends BaseSvcImpl<java.lang.Long, OrdOrderJo, Ord
                 printPage += "<br><div style=\"page-break-after:always\"></div>\n\r";
             }
             printPage += callKdiNiaoAndaddTaskRo.getPrintPage();
-            i         += 1;
+            i += 1;
         }
 
         _log.info("第四种发货方式成功。。。。。。。。。。。。。");
@@ -1703,8 +1769,8 @@ public class OrdOrderSvcImpl extends BaseSvcImpl<java.lang.Long, OrdOrderJo, Ord
             final Calendar calendar = Calendar.getInstance();
             calendar.setTime(date);
             calendar.add(Calendar.HOUR, signinOrderTime);
-            final Date      executePlanTime = calendar.getTime();
-            final OrdTaskMo ordTaskMo       = new OrdTaskMo();
+            final Date executePlanTime = calendar.getTime();
+            final OrdTaskMo ordTaskMo = new OrdTaskMo();
             ordTaskMo.setOrderId(String.valueOf(mo.getId()));
             ordTaskMo.setTaskType((byte) OrderStateDic.SIGNED.getCode());
             // 先查询任务是否已经存在
@@ -1779,7 +1845,7 @@ public class OrdOrderSvcImpl extends BaseSvcImpl<java.lang.Long, OrdOrderJo, Ord
     @Transactional(readOnly = false, propagation = Propagation.REQUIRED)
     public OrderSignInRo orderSignIn(final OrderSignInTo to) {
         final OrderSignInRo orderSignInRo = new OrderSignInRo();
-        final Long          orderId       = to.getOrderId();
+        final Long orderId = to.getOrderId();
         // map.put("id", orderId);
         // _log.info("用户查询订单的参数为：{}", String.valueOf(map));
         // final List<OrdOrderMo> orderList = _mapper.selectOrderInfo(map);
@@ -1868,14 +1934,14 @@ public class OrdOrderSvcImpl extends BaseSvcImpl<java.lang.Long, OrdOrderJo, Ord
      * 修改订单退款金额(根据订单ID和已退款总额)
      *
      * @param refundTotal
-     *                           退款总额
+     *            退款总额
      *
      * @param orderState
-     *                           订单状态
+     *            订单状态
      * @param whereOrderId
-     *                           where条件-订单ID
+     *            where条件-订单ID
      * @param whereRefundedTotal
-     *                           where条件-已退款总额
+     *            where条件-已退款总额
      */
     @Override
     @Transactional(readOnly = false, propagation = Propagation.REQUIRED)
@@ -1931,18 +1997,18 @@ public class OrdOrderSvcImpl extends BaseSvcImpl<java.lang.Long, OrdOrderJo, Ord
      * 生成订单编号
      *
      * @param orderTime
-     *                  下单时间
+     *            下单时间
      * @param orderId
-     *                  订单ID
+     *            订单ID
      * @param userId
-     *                  用户ID
+     *            用户ID
      * @return YYMMDDHH-订单ID末8位-用户ID末8位
      */
     private String genOrderCode(final Date orderTime, final Long orderId, final Long userId) {
-        final SimpleDateFormat sdf      = new SimpleDateFormat("YYMMDDHH");
-        final String           YYMMDDHH = sdf.format(orderTime);
-        final String           orderId8 = StringUtils.right(orderId.toString(), 8);
-        final String           userId8  = StringUtils.right(userId.toString(), 8);
+        final SimpleDateFormat sdf = new SimpleDateFormat("YYMMDDHH");
+        final String YYMMDDHH = sdf.format(orderTime);
+        final String orderId8 = StringUtils.right(orderId.toString(), 8);
+        final String userId8 = StringUtils.right(userId.toString(), 8);
         return YYMMDDHH + "-" + orderId8 + "-" + userId8;
     }
 
@@ -2279,7 +2345,7 @@ public class OrdOrderSvcImpl extends BaseSvcImpl<java.lang.Long, OrdOrderJo, Ord
         _log.info("根据订单id修改支付订单id根据支付订单id查询订单信息的返回值为：{}", orderCount);
         if (orderCount > 1) {
             final Long payOrderId = _idWorker.getId();
-            final int  result     = _mapper.updatePayOrderId(payOrderId, id);
+            final int result = _mapper.updatePayOrderId(payOrderId, id);
             if (result != 1) {
                 _log.error("根据订单id修改支付订单id时出现错误, 订单id为: {]", id);
                 ro.setResult(ResultDic.FAIL);
@@ -2324,7 +2390,7 @@ public class OrdOrderSvcImpl extends BaseSvcImpl<java.lang.Long, OrdOrderJo, Ord
     public OrdSettleRo getSettleTotal(final Long supplierId) {
         _log.info("根据供应商Id获取未结算或者已经结算的详情的总额: {}", supplierId);
         final OrdSettleRo result = new OrdSettleRo();
-        OrdSettleRo       temp   = new OrdSettleRo();
+        OrdSettleRo temp = new OrdSettleRo();
         temp = _mapper.getNotSettleTotal(supplierId);
         _log.info("获取供应商等待结算详情的结果: {}", temp);
         if (temp != null) {
@@ -2393,9 +2459,9 @@ public class OrdOrderSvcImpl extends BaseSvcImpl<java.lang.Long, OrdOrderJo, Ord
     @Override
     @Transactional(readOnly = false, propagation = Propagation.REQUIRED)
     public BulkShipmentRo bulkShipment(final BulkShipmentTo qo) {
-        final BulkShipmentRo shipmentRo    = new BulkShipmentRo();
-        final List<String>   batchPrinting = new ArrayList<>();
-        final OrdOrderMo[]   ordOrderMos   = qo.getReceiver();
+        final BulkShipmentRo shipmentRo = new BulkShipmentRo();
+        final List<String> batchPrinting = new ArrayList<>();
+        final OrdOrderMo[] ordOrderMos = qo.getReceiver();
         for (final OrdOrderMo mo : ordOrderMos) {
             // 获取订单的订单详情
             List<OrdOrderDetailMo> list = new ArrayList<>();
@@ -2409,8 +2475,8 @@ public class OrdOrderSvcImpl extends BaseSvcImpl<java.lang.Long, OrdOrderJo, Ord
                 final Calendar calendar = Calendar.getInstance();
                 calendar.setTime(date);
                 calendar.add(Calendar.HOUR, signinOrderTime);
-                final Date      executePlanTime = calendar.getTime();
-                final OrdTaskMo ordTaskMo       = new OrdTaskMo();
+                final Date executePlanTime = calendar.getTime();
+                final OrdTaskMo ordTaskMo = new OrdTaskMo();
                 ordTaskMo.setOrderId(String.valueOf(mo.getId()));
                 ordTaskMo.setTaskType((byte) 2);
 
@@ -2433,14 +2499,14 @@ public class OrdOrderSvcImpl extends BaseSvcImpl<java.lang.Long, OrdOrderJo, Ord
                 }
 
                 // 整理订单详情
-                String                     orderDetails = "";
-                final Map<String, String>  map          = new HashMap<>();
-                final Map<String, Integer> detailMap    = new HashMap<>();
+                String orderDetails = "";
+                final Map<String, String> map = new HashMap<>();
+                final Map<String, Integer> detailMap = new HashMap<>();
                 for (final OrdOrderDetailMo ordorderdetailmo : list) {
                     final String online = ordorderdetailmo.getOnlineId() + "-" + ordorderdetailmo.getOnlineSpecId();
                     if (map.containsKey(online)) {
-                        final String  orderDetail = map.get(online);
-                        final Integer value       = detailMap.get(orderDetail);
+                        final String orderDetail = map.get(online);
+                        final Integer value = detailMap.get(orderDetail);
                         detailMap.put(orderDetail, value + 1);
                     } else {
                         final String orderDetail = ordorderdetailmo.getOnlineTitle() + "-"
@@ -2546,14 +2612,14 @@ public class OrdOrderSvcImpl extends BaseSvcImpl<java.lang.Long, OrdOrderJo, Ord
 
             } else {
                 // 整理订单详情
-                String                     orderDetails = "";
-                final Map<String, String>  map          = new HashMap<>();
-                final Map<String, Integer> detailMap    = new HashMap<>();
+                String orderDetails = "";
+                final Map<String, String> map = new HashMap<>();
+                final Map<String, Integer> detailMap = new HashMap<>();
                 for (final OrdOrderDetailMo ordorderdetailmo : list) {
                     final String online = ordorderdetailmo.getOnlineId() + "-" + ordorderdetailmo.getOnlineSpecId();
                     if (map.containsKey(online)) {
-                        final String  orderDetail = map.get(online);
-                        final Integer value       = detailMap.get(orderDetail);
+                        final String orderDetail = map.get(online);
+                        final Integer value = detailMap.get(orderDetail);
                         detailMap.put(orderDetail, value + 1);
                     } else {
                         final String orderDetail = ordorderdetailmo.getOnlineTitle() + "-"
@@ -2636,8 +2702,8 @@ public class OrdOrderSvcImpl extends BaseSvcImpl<java.lang.Long, OrdOrderJo, Ord
     @Override
     @Transactional(readOnly = false, propagation = Propagation.REQUIRED)
     public BulkShipmentRo bulkSubscription(final BulkShipmentTo qo) {
-        final BulkShipmentRo shipmentRo  = new BulkShipmentRo();
-        final OrdOrderMo[]   ordOrderMos = qo.getReceiver();
+        final BulkShipmentRo shipmentRo = new BulkShipmentRo();
+        final OrdOrderMo[] ordOrderMos = qo.getReceiver();
         for (final OrdOrderMo mo : ordOrderMos) {
             // 获取订单的订单详情
             List<OrdOrderDetailMo> list = new ArrayList<>();
@@ -2652,8 +2718,8 @@ public class OrdOrderSvcImpl extends BaseSvcImpl<java.lang.Long, OrdOrderJo, Ord
                 final Calendar calendar = Calendar.getInstance();
                 calendar.setTime(date);
                 calendar.add(Calendar.HOUR, signinOrderTime);
-                final Date      executePlanTime = calendar.getTime();
-                final OrdTaskMo ordTaskMo       = new OrdTaskMo();
+                final Date executePlanTime = calendar.getTime();
+                final OrdTaskMo ordTaskMo = new OrdTaskMo();
                 ordTaskMo.setOrderId(String.valueOf(mo.getId()));
                 ordTaskMo.setTaskType((byte) 2);
 
@@ -2676,14 +2742,14 @@ public class OrdOrderSvcImpl extends BaseSvcImpl<java.lang.Long, OrdOrderJo, Ord
                 }
 
                 // 整理订单详情
-                String                     orderDetails = "";
-                final Map<String, String>  map          = new HashMap<>();
-                final Map<String, Integer> detailMap    = new HashMap<>();
+                String orderDetails = "";
+                final Map<String, String> map = new HashMap<>();
+                final Map<String, Integer> detailMap = new HashMap<>();
                 for (final OrdOrderDetailMo ordorderdetailmo : list) {
                     final String online = ordorderdetailmo.getOnlineId() + "-" + ordorderdetailmo.getOnlineSpecId();
                     if (map.containsKey(online)) {
-                        final String  orderDetail = map.get(online);
-                        final Integer value       = detailMap.get(orderDetail);
+                        final String orderDetail = map.get(online);
+                        final Integer value = detailMap.get(orderDetail);
                         detailMap.put(orderDetail, value + 1);
                     } else {
                         final String orderDetail = ordorderdetailmo.getOnlineTitle() + "-"
@@ -2781,14 +2847,14 @@ public class OrdOrderSvcImpl extends BaseSvcImpl<java.lang.Long, OrdOrderJo, Ord
 
             } else {
                 // 整理订单详情
-                String                     orderDetails = "";
-                final Map<String, String>  map          = new HashMap<>();
-                final Map<String, Integer> detailMap    = new HashMap<>();
+                String orderDetails = "";
+                final Map<String, String> map = new HashMap<>();
+                final Map<String, Integer> detailMap = new HashMap<>();
                 for (final OrdOrderDetailMo ordorderdetailmo : list) {
                     final String online = ordorderdetailmo.getOnlineId() + "-" + ordorderdetailmo.getOnlineSpecId();
                     if (map.containsKey(online)) {
-                        final String  orderDetail = map.get(online);
-                        final Integer value       = detailMap.get(orderDetail);
+                        final String orderDetail = map.get(online);
+                        final Integer value = detailMap.get(orderDetail);
                         detailMap.put(orderDetail, value + 1);
                     } else {
                         final String orderDetail = ordorderdetailmo.getOnlineTitle() + "-"
@@ -2850,11 +2916,11 @@ public class OrdOrderSvcImpl extends BaseSvcImpl<java.lang.Long, OrdOrderJo, Ord
      * 转移订单和购买关系
      * 
      * @param orderId
-     *                  订单id
+     *            订单id
      * @param newUserId
-     *                  新用户id
+     *            新用户id
      * @param oldUserId
-     *                  旧用户id
+     *            旧用户id
      * @return
      */
     @Override
@@ -2936,9 +3002,9 @@ public class OrdOrderSvcImpl extends BaseSvcImpl<java.lang.Long, OrdOrderJo, Ord
         ro.setRealMoney(ordOrderMo.getRealMoney());
         ro.setUserId(ordOrderMo.getUserId());
         ro.setPayOrderId(ordOrderMo.getPayOrderId());
-        BigDecimal                totalNumber = BigDecimal.ZERO;
-        OrdOrderDetailMo          getDetailMo = new OrdOrderDetailMo();
-        List<DetailAndRelationRo> detailInfo  = new ArrayList<>();
+        BigDecimal totalNumber = BigDecimal.ZERO;
+        OrdOrderDetailMo getDetailMo = new OrdOrderDetailMo();
+        List<DetailAndRelationRo> detailInfo = new ArrayList<>();
         for (final OrdOrderMo order : orderList) {
             getDetailMo.setOrderId(order.getId());
             _log.info("根据订单id获取订单详情的参数为：getDetailMo-{}", getDetailMo);
@@ -3004,6 +3070,18 @@ public class OrdOrderSvcImpl extends BaseSvcImpl<java.lang.Long, OrdOrderJo, Ord
         orderMo = _mapper.getLatestOneByUserId(userId);
         _log.info("查询订单状态不为退货和未支付且支付时间为最新的订单信息的返回值为-{}", orderMo);
         return orderMo;
+    }
+
+    @Override
+    public OrdOrderJo getJoById(Long arg0) {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    @Override
+    public List<OrdOrderJo> listJoAll() {
+        // TODO Auto-generated method stub
+        return null;
     }
 
 }

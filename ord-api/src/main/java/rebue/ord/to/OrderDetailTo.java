@@ -28,6 +28,16 @@ public class OrderDetailTo {
     private Long onlineSpecId;
 
     /**
+     * 产品ID
+     */
+    private Long productId;
+
+    /**
+     * 产品规格ID
+     */
+    private Long productSpecId;
+
+    /**
      * 购买数量
      */
     private BigDecimal buyCount;
@@ -41,5 +51,20 @@ public class OrderDetailTo {
      * 邀请人id
      */
     private Long inviteId;
+
+    /**
+     * 购买价格
+     */
+    private BigDecimal buyPrice;
+
+    /**
+     * 购买单位
+     */
+    private String buyUnit;
+
+    /**
+     * 是否是临时商品
+     */
+    private boolean isTempGood;
 
 }
