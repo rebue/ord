@@ -17,6 +17,12 @@ import lombok.ToString;
 @Getter
 @Setter
 public class OrderDetailTo {
+
+    /**
+     * 可能是临时商品名字，或者是上线活动名字或者是产品名字或者是临时商品的名字
+     */
+    private String goodName;
+
     /**
      * 上线ID
      */

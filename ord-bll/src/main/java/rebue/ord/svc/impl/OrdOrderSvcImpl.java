@@ -336,8 +336,17 @@ public class OrdOrderSvcImpl extends MybatisBaseSvcImpl<OrdOrderMo, java.lang.Lo
                 }
                 // 临时商品或未上架产品
                 List<OrdOrderDetailMo> orderDetails = new LinkedList<>();
-                onlineOrgs.put(null, orderDetails);
+                if (orderDetailTo.isTempGood()) {
+                    onlineOrgs.put(1L, orderDetails); // 只是为了在下面使用上线组织拆单的时候临时商品和上线商品会被拆开
+                } else {
+                    onlineOrgs.put(2L, orderDetails);
+                }
                 orderDetailMo.setActualAmount(orderDetailMo.getBuyPrice().multiply(orderDetailMo.getBuyCount()));
+                orderDetailMo.setCashbackAmount(new BigDecimal("0"));
+                orderDetailMo.setCashbackTotal(new BigDecimal("0"));
+                if (orderDetailTo.isTempGood()) {
+                    orderDetailMo.setSpecName(orderDetailTo.getGoodName());
+                }
                 orderDetails.add(orderDetailMo);
 
             } else {
@@ -498,8 +507,9 @@ public class OrdOrderSvcImpl extends MybatisBaseSvcImpl<OrdOrderMo, java.lang.Lo
         for (final Entry<Long, List<OrdOrderDetailMo>> onlineOrg : onlineOrgs.entrySet()) {
             final OrdOrderMo orderMo = new OrdOrderMo();
             orderMo.setId(_idWorker.getId());
-            // 订单状态已下单
-            orderMo.setOrderState((byte) OrderStateDic.ORDERED.getCode());
+            // 订单状态(如果是当场签收则设置为已签收状态，否则是已下单)
+            orderMo.setOrderState(to.getIsNowReceived() ? (byte) OrderStateDic.SIGNED.getCode()
+                    : (byte) OrderStateDic.ORDERED.getCode());
             // 下单时间
             orderMo.setOrderTime(now);
             // 上线组织ID(卖家ID)
@@ -514,14 +524,16 @@ public class OrdOrderSvcImpl extends MybatisBaseSvcImpl<OrdOrderMo, java.lang.Lo
             }
             // orderMo.setOrderCode(_idWorker.getIdStr()); // 订单编号 TODO 重写订单编号的生成算法
             orderMo.setOrderCode(genOrderCode(orderMo.getOrderTime(), orderMo.getId(), orderMo.getUserId()));
-            _log.debug("遍历订单详情计算订单的下单金额");
+            _log.info("遍历订单详情计算订单的下单金额");
             // 下单金额
             BigDecimal orderAmount = BigDecimal.ZERO;
             for (final OrdOrderDetailMo orderDetailMo : onlineOrg.getValue()) {
+                _log.info("订单详情金额和数量--------: {}---{}", orderDetailMo.getBuyPrice(), orderDetailMo.getBuyCount());
                 // 计算订单的下单金额
                 orderAmount = orderAmount.add(orderDetailMo.getBuyPrice().multiply(orderDetailMo.getBuyCount()));
+
             }
-            _log.debug("订单的下单金额为: {}", orderAmount);
+            _log.info("订单的下单金额为: {}", orderAmount);
             // 下单金额
             orderMo.setOrderMoney(orderAmount);
             // 实际金额=下单金额
@@ -580,6 +592,7 @@ public class OrdOrderSvcImpl extends MybatisBaseSvcImpl<OrdOrderMo, java.lang.Lo
                 // 添加取消订单任务
                 ordTaskSvc.add(ordTaskMo);
             } else {
+                // 调用订单签收接口
 
             }
 

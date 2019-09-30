@@ -193,4 +193,10 @@ alter table ORD_RETURN modify column RETURN_COUNT decimal(20,4) default 0 commen
 
 -- ------------------------------------------------------- 上面的已更新到线上 2019.08.13 ----------------------------------------------------
 
+ALTER TABLE `ord`.`ORD_ORDER_DETAIL` 
+CHANGE COLUMN `ONLINE_TITLE` `ONLINE_TITLE` VARCHAR(200) NULL COMMENT '上线标题' ;
+
+
+ALTER TABLE `ord`.`ORD_ORDER_DETAIL` 
+CHANGE COLUMN `PRODUCT_ID` `PRODUCT_ID` BIGINT(20) NULL COMMENT '产品ID' ;
 

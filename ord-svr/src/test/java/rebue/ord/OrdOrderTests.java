@@ -50,12 +50,12 @@ public class OrdOrderTests {
     /**
      * 测试下单
      */
-    // @Test
+    @Test
     public void test01() throws IOException {
-        final List<OrderDetailTo> details = new LinkedList<>();
-        final OrderTo orderTo = new OrderTo();
-        orderTo.setUserId(515488916007157761L); // 下单的用户ID
-        orderTo.setDetails(details);
+//        final List<OrderDetailTo> details = new LinkedList<>();
+//        final OrderTo orderTo = new OrderTo();
+//        orderTo.setUserId(515488916007157761L); // 下单的用户ID
+//        orderTo.setDetails(details);
 //        Ro ro = order(orderTo);
 //        Assert.assertEquals("参数错误", ro.getMsg());
 
@@ -63,16 +63,16 @@ public class OrdOrderTests {
 //        Ro ro = order(orderTo);
 //        Assert.assertEquals("参数错误", ro.getMsg());
 
-        orderTo.setAddrId(1L); // 错误的收货地址ID
+//        orderTo.setAddrId(1L); // 错误的收货地址ID
 //        details.clear();
-        OrderDetailTo orderDetailTo = new OrderDetailTo();
+//        OrderDetailTo orderDetailTo = new OrderDetailTo();
 //        orderDetailTo.setOnlineId(560761261214793728L);
 //        details.add(orderDetailTo);
 //        Ro ro = order(orderTo);
 //        Assert.assertEquals("参数错误", ro.getMsg());
 
-        details.clear();
-        orderDetailTo = new OrderDetailTo();
+//        details.clear();
+//        orderDetailTo = new OrderDetailTo();
 //        orderDetailTo.setOnlineId(560761261214793728L);
 //        orderDetailTo.setOnlineSpecId(560761261843939330L);
 //        details.add(orderDetailTo);
@@ -116,31 +116,65 @@ public class OrdOrderTests {
 //        Ro ro = order(orderTo);
 //        Assert.assertEquals("找不到下单的收货地址信息", ro.getMsg());
 //
-        orderTo.setAddrId(521989707005952000L); // 正确的收货地址ID
+//        orderTo.setAddrId(521989707005952000L); // 正确的收货地址ID
 //
-        orderTo.setOrderMessages("订单留言"); // 订单留言
-
-        orderTo.setIsNowReceived(true);
-        details.clear();
+//        orderTo.setOrderMessages("订单留言"); // 订单留言
+//
+//        orderTo.setIsNowReceived(true);
+//        details.clear();
         // 第一个订单详情
-        orderDetailTo = new OrderDetailTo();
-        orderDetailTo.setOnlineId(560761261214793728L);
-        orderDetailTo.setOnlineSpecId(560761261843939330L);
-        orderDetailTo.setBuyCount(new BigDecimal("2.5"));
-        details.add(orderDetailTo);
+//        orderDetailTo = new OrderDetailTo();
+//        orderDetailTo.setOnlineId(560761261214793728L);
+//        orderDetailTo.setOnlineSpecId(560761261843939330L);
+//        orderDetailTo.setBuyCount(new BigDecimal("2.5"));
+//        details.add(orderDetailTo);
         // 第二个订单详情
-        orderDetailTo = new OrderDetailTo();
-        orderDetailTo.setOnlineId(560761261214793728L);
-        orderDetailTo.setOnlineSpecId(560761261843939330L);
-        orderDetailTo.setBuyCount(new BigDecimal("6"));
-        details.add(orderDetailTo);
+//        orderDetailTo = new OrderDetailTo();
+//        orderDetailTo.setOnlineId(560761261214793728L);
+//        orderDetailTo.setOnlineSpecId(560761261843939330L);
+//        orderDetailTo.setBuyCount(new BigDecimal("6"));
+//        details.add(orderDetailTo);
         // 第三个订单详情
-        orderDetailTo = new OrderDetailTo();
-        orderDetailTo.setOnlineId(560761261214793728L);
-        orderDetailTo.setOnlineSpecId(560761261843939330L);
-        orderDetailTo.setBuyCount(new BigDecimal("8.6"));
-        details.add(orderDetailTo);
+//        orderDetailTo = new OrderDetailTo();
+//        orderDetailTo.setOnlineId(560761261214793728L);
+//        orderDetailTo.setOnlineSpecId(560761261843939330L);
+//        orderDetailTo.setBuyCount(new BigDecimal("8.6"));
+//        details.add(orderDetailTo);
         // 下单
+        final OrderTo orderTo = new OrderTo();
+        final List<OrderDetailTo> details = new LinkedList<>();
+        // 订单基本参数
+        orderTo.setUserId(515488916007157761L); // 下单的用户ID
+        orderTo.setDetails(details);
+        orderTo.setIsNowReceived(true);
+        orderTo.setAddrId(636713937089331200L);
+        orderTo.setIsTester(false);
+        // 订单详情参数
+        // 1:有上线信息，不需要价格，取上线规格里面的
+        OrderDetailTo orderDetailTo1 = new OrderDetailTo();
+        orderDetailTo1.setGoodName("上线名称");
+        orderDetailTo1.setOnlineId(646881018229424129L);
+        orderDetailTo1.setOnlineSpecId(646881029247860736L);
+        orderDetailTo1.setBuyCount(new BigDecimal("2"));
+        orderDetailTo1.setProductId(646881017499615232L);
+        orderDetailTo1.setProductSpecId(646881017763856384L);
+        // 2:没有上线信息，需要价格
+        OrderDetailTo orderDetailTo = new OrderDetailTo();
+        orderDetailTo.setGoodName("产品名称");
+        orderDetailTo.setBuyCount(new BigDecimal("2"));
+        orderDetailTo.setBuyPrice(new BigDecimal("10"));
+        orderDetailTo.setProductId(646881017499615232L);
+        orderDetailTo.setProductSpecId(646881017763856384L);
+        // 3:没有上线信息，需要价格
+        OrderDetailTo orderDetailTo2 = new OrderDetailTo();
+        orderDetailTo2.setGoodName("临时名称");
+        orderDetailTo2.setBuyCount(new BigDecimal("2"));
+        orderDetailTo2.setBuyPrice(new BigDecimal("10"));
+        orderDetailTo2.setTempGood(true);
+
+        details.add(orderDetailTo);
+        details.add(orderDetailTo1);
+        details.add(orderDetailTo2);
         Ro ro = order(orderTo);
         Assert.assertEquals(ResultDic.SUCCESS, ro.getResult());
     }
@@ -264,7 +298,7 @@ public class OrdOrderTests {
 
     }
 
-    @Test
+    // @Test
     public void exportData２() throws IOException {
         String url = hostUrl + "/ord/export-data２";
         Map<String, Object> paramsMap = new LinkedHashMap<>();
