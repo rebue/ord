@@ -170,11 +170,18 @@ public class OrdOrderTests {
         orderDetailTo2.setGoodName("临时名称");
         orderDetailTo2.setBuyCount(new BigDecimal("2"));
         orderDetailTo2.setBuyPrice(new BigDecimal("10"));
-        orderDetailTo2.setTempGood(true);
+        orderDetailTo2.setIsTempGood(true);
+
+        OrderDetailTo orderDetailTo3 = new OrderDetailTo();
+        orderDetailTo3.setGoodName("临时名称3");
+        orderDetailTo3.setBuyCount(new BigDecimal("2"));
+        orderDetailTo3.setBuyPrice(new BigDecimal("10"));
+        orderDetailTo3.setIsTempGood(true);
 
         details.add(orderDetailTo);
         details.add(orderDetailTo1);
         details.add(orderDetailTo2);
+        details.add(orderDetailTo3);
         Ro ro = order(orderTo);
         Assert.assertEquals(ResultDic.SUCCESS, ro.getResult());
     }

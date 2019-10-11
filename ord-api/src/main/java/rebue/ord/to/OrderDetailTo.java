@@ -71,6 +71,6 @@ public class OrderDetailTo {
     /**
      * 是否是临时商品
      */
-    private boolean isTempGood;
+    private Boolean isTempGood;
 
 }

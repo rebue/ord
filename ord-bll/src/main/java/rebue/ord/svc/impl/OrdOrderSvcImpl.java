@@ -113,6 +113,7 @@ import rebue.robotech.dic.ResultDic;
 import rebue.robotech.dic.TaskExecuteStateDic;
 import rebue.robotech.ro.Ro;
 import rebue.robotech.svc.impl.MybatisBaseSvcImpl;
+import rebue.suc.co.StaticUserId;
 import rebue.suc.mo.SucOrgMo;
 import rebue.suc.mo.SucUserMo;
 import rebue.suc.svr.feign.SucOrgSvc;
@@ -280,6 +281,15 @@ public class OrdOrderSvcImpl extends MybatisBaseSvcImpl<OrdOrderMo, java.lang.Lo
             ro.setMsg(msg);
             return ro;
         }
+        // 如果用户ID为空可能是线下支付，设置常量用户id
+        if (to.getUserId() == null) {
+            _log.info("检查到用户id为空，设置静态用户Id，请确认确实需要设置静态用户Id!!!!!!!!!!!!!!!!!!!!!!!");
+            _log.info("检查到用户id为空，设置静态用户Id，请确认确实需要设置静态用户Id!!!!!!!!!!!!!!!!!!!!!!!");
+            _log.info("检查到用户id为空，设置静态用户Id，请确认确实需要设置静态用户Id!!!!!!!!!!!!!!!!!!!!!!!");
+            to.setUserId(StaticUserId.USER_ID);
+            to.setIsTester(false);
+        }
+
         _log.debug("参数正确");
         // 上线列表(获取过的上线信息放进这里，避免重复获取)
         final Map<Long, OnlOnlineMo> onlines = new LinkedHashMap<>();
@@ -312,17 +322,35 @@ public class OrdOrderSvcImpl extends MybatisBaseSvcImpl<OrdOrderMo, java.lang.Lo
 
             _log.debug("根据产品ID获取产品信息");
             // 根据产品ID获取产品信息(在不是临时商品的情况下才去获取)
-            if (!orderDetailTo.isTempGood()) {
-                _log.info("获取产品信息的参数为-{}", orderDetailTo.getProductId());
-                PrdProductMo prdProductResult = prdProductSvc.getById(orderDetailTo.getProductId());
-                _log.info("获取产品信息的结果为-{}", prdProductResult);
-                orderDetailMo.setProductId(orderDetailTo.getProductId());
-                orderDetailMo.setProductSpecId(orderDetailTo.getProductSpecId());
-                _log.info("获取产品规格信息的参数为-{}", orderDetailTo.getProductSpecId());
-                PrdProductSpecMo prdProductSeocResult = prdProductSpecSvc.getById(orderDetailTo.getProductSpecId());
-                _log.info("获取产品规格信息的结果为-{}", prdProductSeocResult);
-                orderDetailMo.setSpecName(prdProductSeocResult.getName());
-                orderDetailMo.setBuyUnit(prdProductSeocResult.getUnit());
+            if (!orderDetailTo.getIsTempGood()) {
+                // 如果是上线商品，则需要根据上线规格id获取该条上线规格记录，再获取产品的相应信息,否则可以直接使用产品规格Id直接获取
+                if (orderDetailTo.getOnlineSpecId() != null) {
+                    OnlOnlineSpecMo onlineSpacResult = onlOnlineSpecSvc.getById(orderDetailTo.getOnlineSpecId());
+                    _log.info("获取产品规格信息的参数为-{}", onlineSpacResult.getProductSpecId());
+                    PrdProductSpecMo prdProductSeocResult = prdProductSpecSvc
+                            .getById(onlineSpacResult.getProductSpecId());
+                    _log.info("获取产品规格信息的结果为-{}", prdProductSeocResult);
+                    orderDetailMo.setSpecName(prdProductSeocResult.getName());
+                    orderDetailMo.setBuyUnit(prdProductSeocResult.getUnit());
+                    _log.info("获取产品信息的参数为-{}", prdProductSeocResult.getProductId());
+                    PrdProductMo prdProductResult = prdProductSvc.getById(prdProductSeocResult.getProductId());
+                    _log.info("获取产品信息的结果为-{}", prdProductResult);
+                    orderDetailMo.setProductId(orderDetailTo.getProductId());
+                    orderDetailMo.setProductSpecId(orderDetailTo.getProductSpecId());
+
+                } else {
+                    _log.info("获取产品信息的参数为-{}", orderDetailTo.getProductId());
+                    PrdProductMo prdProductResult = prdProductSvc.getById(orderDetailTo.getProductId());
+                    _log.info("获取产品信息的结果为-{}", prdProductResult);
+                    orderDetailMo.setProductId(orderDetailTo.getProductId());
+                    orderDetailMo.setProductSpecId(orderDetailTo.getProductSpecId());
+                    _log.info("获取产品规格信息的参数为-{}", orderDetailTo.getProductSpecId());
+                    PrdProductSpecMo prdProductSeocResult = prdProductSpecSvc.getById(orderDetailTo.getProductSpecId());
+                    _log.info("获取产品规格信息的结果为-{}", prdProductSeocResult);
+                    orderDetailMo.setSpecName(prdProductSeocResult.getName());
+                    orderDetailMo.setBuyUnit(prdProductSeocResult.getUnit());
+                }
+
             }
 
             _log.debug("根据上线ID获取上线信息");
@@ -336,7 +364,7 @@ public class OrdOrderSvcImpl extends MybatisBaseSvcImpl<OrdOrderMo, java.lang.Lo
                 }
                 // 临时商品或未上架产品
                 List<OrdOrderDetailMo> orderDetails = new LinkedList<>();
-                if (orderDetailTo.isTempGood()) {
+                if (orderDetailTo.getIsTempGood()) {
                     onlineOrgs.put(1L, orderDetails); // 只是为了在下面使用上线组织拆单的时候临时商品和上线商品会被拆开
                 } else {
                     onlineOrgs.put(2L, orderDetails);
@@ -344,7 +372,7 @@ public class OrdOrderSvcImpl extends MybatisBaseSvcImpl<OrdOrderMo, java.lang.Lo
                 orderDetailMo.setActualAmount(orderDetailMo.getBuyPrice().multiply(orderDetailMo.getBuyCount()));
                 orderDetailMo.setCashbackAmount(new BigDecimal("0"));
                 orderDetailMo.setCashbackTotal(new BigDecimal("0"));
-                if (orderDetailTo.isTempGood()) {
+                if (orderDetailTo.getIsTempGood()) {
                     orderDetailMo.setSpecName(orderDetailTo.getGoodName());
                 }
                 orderDetails.add(orderDetailMo);
@@ -484,22 +512,24 @@ public class OrdOrderSvcImpl extends MybatisBaseSvcImpl<OrdOrderMo, java.lang.Lo
             }
 
         }
-
-        _log.debug("通过地址ID获取地址详细信息");
-
-        final OrdAddrMo addrMo = ordAddrSvc.getById(to.getAddrId());
-
-        if (addrMo == null) {
-            // 不是当场签收的商品必须要填收货地址
-            if (to.getIsNowReceived() != true) {
-                final String msg = "找不到下单的收货地址信息";
-                _log.error("{}: addrId-{}", msg, to.getAddrId());
-                ro.setResult(ResultDic.PARAM_ERROR);
-                ro.setMsg(msg);
-                return ro;
+        OrdAddrMo addrMo = new OrdAddrMo();
+        // 当场签收不需要地址
+        if (to.getAddrId() != null) {
+            _log.debug("通过地址ID获取地址详细信息");
+            addrMo = ordAddrSvc.getById(to.getAddrId());
+            if (addrMo == null) {
+                // 不是当场签收的商品必须要填收货地址
+                if (to.getIsNowReceived() != true) {
+                    final String msg = "找不到下单的收货地址信息";
+                    _log.error("{}: addrId-{}", msg, to.getAddrId());
+                    ro.setResult(ResultDic.PARAM_ERROR);
+                    ro.setMsg(msg);
+                    return ro;
+                }
             }
+            _log.info("获取用户收货地址信息为：{}", addrMo);
         }
-        _log.info("获取用户收货地址信息为：{}", addrMo);
+
         final Date now = new Date();
         // 支付订单ID
         final Long payOrderId = _idWorker.getId();
@@ -507,9 +537,15 @@ public class OrdOrderSvcImpl extends MybatisBaseSvcImpl<OrdOrderMo, java.lang.Lo
         for (final Entry<Long, List<OrdOrderDetailMo>> onlineOrg : onlineOrgs.entrySet()) {
             final OrdOrderMo orderMo = new OrdOrderMo();
             orderMo.setId(_idWorker.getId());
-            // 订单状态(如果是当场签收则设置为已签收状态，否则是已下单)
-            orderMo.setOrderState(to.getIsNowReceived() ? (byte) OrderStateDic.SIGNED.getCode()
-                    : (byte) OrderStateDic.ORDERED.getCode());
+            if (to.getIsNowReceived()) {
+                orderMo.setOrderState((byte) OrderStateDic.SIGNED.getCode());
+                orderMo.setPayTime(new Date());
+                orderMo.setSendTime(new Date());
+                orderMo.setReceivedTime(new Date());
+            } else {
+                orderMo.setOrderState((byte) OrderStateDic.ORDERED.getCode());
+            }
+
             // 下单时间
             orderMo.setOrderTime(now);
             // 上线组织ID(卖家ID)
@@ -592,8 +628,9 @@ public class OrdOrderSvcImpl extends MybatisBaseSvcImpl<OrdOrderMo, java.lang.Lo
                 // 添加取消订单任务
                 ordTaskSvc.add(ordTaskMo);
             } else {
-                // 调用订单签收接口
-
+                // 添加一笔交易记录
+                // 添加启动结算任务
+                ordSettleTaskSvc.addStartSettleTask(orderMo.getId());
             }
 
             final UpdateOnlineAfterOrderTo updateOnlineTo = new UpdateOnlineAfterOrderTo();
@@ -607,9 +644,13 @@ public class OrdOrderSvcImpl extends MybatisBaseSvcImpl<OrdOrderMo, java.lang.Lo
                 throw new RuntimeException(updateOnlineRo.getMsg());
             }
         }
+        if (to.getIsNowReceived()) {
+            ro.setMsg("支付成功");
+        } else {
+            ro.setMsg("下单成功");
+        }
         ro.setPayOrderId(payOrderId);
         ro.setResult(ResultDic.SUCCESS);
-        ro.setMsg("下单成功");
         return ro;
     }
 

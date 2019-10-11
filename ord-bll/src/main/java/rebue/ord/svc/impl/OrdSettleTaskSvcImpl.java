@@ -25,7 +25,6 @@ import rebue.ibr.dic.TaskTypeDic;
 import rebue.ibr.mo.IbrBuyRelationTaskMo;
 import rebue.ibr.svr.feign.IbrBuyRelationTaskSvc;
 import rebue.ord.dao.OrdSettleTaskDao;
-import rebue.ord.dic.CommissionStateDic;
 import rebue.ord.dic.OrderStateDic;
 import rebue.ord.dic.OrderTaskTypeDic;
 import rebue.ord.dic.ReturnStateDic;
@@ -197,8 +196,15 @@ public class OrdSettleTaskSvcImpl
         // 计算计划执行时间
         final Calendar calendar = Calendar.getInstance();
         calendar.setTime(now);
-        calendar.add(Calendar.MINUTE,
-                startSettleDelay.multiply(BigDecimal.valueOf(60)).setScale(0, BigDecimal.ROUND_HALF_UP).intValue());
+        // 如果订单当前签收状态为true,那么就设置一个小时后执行订单结算任务
+        if (order.getIsNowReceived()) {
+            _log.info("该订单为当场签收，设置启动结算任务为一个小时后");
+            calendar.add(Calendar.MINUTE, 60);
+        } else {
+            _log.info("该订单不是当场签收，设置启动结算任务时间为正常时间");
+            calendar.add(Calendar.MINUTE,
+                    startSettleDelay.multiply(BigDecimal.valueOf(60)).setScale(0, BigDecimal.ROUND_HALF_UP).intValue());
+        }
         taskMo.setExecutePlanTime(calendar.getTime());
         taskSvc.add(taskMo);
         _log.info("添加启动结算订单的任务成功：orderId-{}", orderId);
@@ -273,8 +279,8 @@ public class OrdSettleTaskSvcImpl
         List<OrdOrderDetailMo> detailResult = orderDetailMapper.selectSelective(getDetailMo);
         _log.info("获取该订单所有的详情以便添加结算任务的结果为 mo-", detailResult);
         for (OrdOrderDetailMo ordOrderDetailMo : detailResult) {
-            IbrBuyRelationTaskMo addTaskMo                = new IbrBuyRelationTaskMo();
-            final Calendar       settleCommissionCalendar = Calendar.getInstance();
+            IbrBuyRelationTaskMo addTaskMo = new IbrBuyRelationTaskMo();
+            final Calendar settleCommissionCalendar = Calendar.getInstance();
             settleCommissionCalendar.setTime(new Date());
             settleCommissionCalendar.add(Calendar.MINUTE, 5);
             final Date executePlanTime = settleCommissionCalendar.getTime();
@@ -306,15 +312,15 @@ public class OrdSettleTaskSvcImpl
      * 添加结算子任务
      *
      * @param orderId
-     *                订单ID
+     *            订单ID
      * @param now
-     *                当前时间
+     *            当前时间
      * @param delay
-     *                延迟时间
+     *            延迟时间
      */
     private void addSettleSubTask(final Long orderId, final Date now, final SettleTaskTypeDic taskType,
             final BigDecimal delay) {
-        final Calendar  calendar  = Calendar.getInstance();
+        final Calendar calendar = Calendar.getInstance();
         final OrdTaskMo subTaskMo = new OrdTaskMo();
         subTaskMo.setOrderId(orderId.toString());
         subTaskMo.setTaskType((byte) OrderTaskTypeDic.SETTLE.getCode());
@@ -339,8 +345,8 @@ public class OrdSettleTaskSvcImpl
             _log.error(msg);
             throw new RuntimeException(msg);
         }
-        final Long       orderId = Long.valueOf(taskMo.getOrderId());
-        final OrdOrderMo order   = orderSvc.getById(orderId);
+        final Long orderId = Long.valueOf(taskMo.getOrderId());
+        final OrdOrderMo order = orderSvc.getById(orderId);
         if (order == null) {
             final String msg = "订单不存在";
             _log.error("{}: orderId-{}", msg, orderId);
@@ -693,44 +699,44 @@ public class OrdSettleTaskSvcImpl
      * 处理返佣(订单详情如果符合返佣条件，则返佣)
      * 
      * @param orderDetail
-     *                    要判断是否返佣的订单详情
+     *            要判断是否返佣的订单详情
      */
-    private void handleCommission(final OrdOrderDetailMo orderDetail, final Long buyerId, final Date now) {
-        _log.info("处理返佣(订单详情如果符合返佣条件，则返佣): orderDetail-{}", orderDetail);
-        if (orderDetail == null || orderDetail.getCommissionSlot() != 0 //
-                && orderDetail.getReturnState() != ReturnStateDic.NONE.getCode()) {
-            _log.info("订单详情返佣名额不为0/不是未退货状态，未满足返佣条件");
-            return;
-        }
-
-        // 最晚签收时间=当前时间7天前
-        final Date lastTime = new Date(now.getTime() - 86400000 * 7);
-        _log.info("最晚签收时间不得大于{}", lastTime);
-
-        _log.info("统计所有已签收超过7天的上下家订单详情的数量的参数: {}", orderDetail.getId());
-        final int settledCount = 1 + 3;
-        _log.info("统计所有已签收超过7天的上下家订单详情的数量的返回值: {}", settledCount);
-        if (settledCount < 3) {
-            _log.info("已签收数量不够3个，未满足返佣条件: 数量-{}", settledCount);
-            return;
-        } else if (settledCount > 3) {
-            new RuntimeExceptionX("已签收数量超过3个，数据不正常: 数量-" + settledCount + " orderDetail-" + orderDetail);
-        }
-
-        _log.debug("修改订单详情的返佣状态为已返");
-        final OrdOrderDetailMo modifyOrderDetail = new OrdOrderDetailMo();
-        modifyOrderDetail.setId(orderDetail.getId());
-        modifyOrderDetail.setCommissionState((byte) CommissionStateDic.RETURNED.getCode());
-        orderDetailMapper.updateByPrimaryKeySelective(modifyOrderDetail);
-
-        _log.debug("添加一笔返佣交易");
-        final AfcTradeMo tradeMo = new AfcTradeMo();
-        tradeMo.setAccountId(buyerId);
-        tradeMo.setTradeType((byte) TradeTypeDic.SETTLE_COMMISSION.getCode());
-        tradeMo.setTradeAmount(orderDetail.getBuyPrice());
-        tradeMo.setTradeTitle("大卖网络-拼全返佣金");
-        tradeMo.setOrderId(orderDetail.getOrderId().toString());
-        tradeMo.setOrderDetailId(orderDetail.getId().toString());
-        addAccountTrade(null, orderDetail, tradeMo, now);
-    }
+//    private void handleCommission(final OrdOrderDetailMo orderDetail, final Long buyerId, final Date now) {
+//        _log.info("处理返佣(订单详情如果符合返佣条件，则返佣): orderDetail-{}", orderDetail);
+//        if (orderDetail == null || orderDetail.getCommissionSlot() != 0 //
+//                && orderDetail.getReturnState() != ReturnStateDic.NONE.getCode()) {
+//            _log.info("订单详情返佣名额不为0/不是未退货状态，未满足返佣条件");
+//            return;
+//        }
+//
+//        // 最晚签收时间=当前时间7天前
+//        final Date lastTime = new Date(now.getTime() - 86400000 * 7);
+//        _log.info("最晚签收时间不得大于{}", lastTime);
+//
+//        _log.info("统计所有已签收超过7天的上下家订单详情的数量的参数: {}", orderDetail.getId());
+//        final int settledCount = 1 + 3;
+//        _log.info("统计所有已签收超过7天的上下家订单详情的数量的返回值: {}", settledCount);
+//        if (settledCount < 3) {
+//            _log.info("已签收数量不够3个，未满足返佣条件: 数量-{}", settledCount);
+//            return;
+//        } else if (settledCount > 3) {
+//            new RuntimeExceptionX("已签收数量超过3个，数据不正常: 数量-" + settledCount + " orderDetail-" + orderDetail);
+//        }
+//
+//        _log.debug("修改订单详情的返佣状态为已返");
+//        final OrdOrderDetailMo modifyOrderDetail = new OrdOrderDetailMo();
+//        modifyOrderDetail.setId(orderDetail.getId());
+//        modifyOrderDetail.setCommissionState((byte) CommissionStateDic.RETURNED.getCode());
+//        orderDetailMapper.updateByPrimaryKeySelective(modifyOrderDetail);
+//
+//        _log.debug("添加一笔返佣交易");
+//        final AfcTradeMo tradeMo = new AfcTradeMo();
+//        tradeMo.setAccountId(buyerId);
+//        tradeMo.setTradeType((byte) TradeTypeDic.SETTLE_COMMISSION.getCode());
+//        tradeMo.setTradeAmount(orderDetail.getBuyPrice());
+//        tradeMo.setTradeTitle("大卖网络-拼全返佣金");
+//        tradeMo.setOrderId(orderDetail.getOrderId().toString());
+//        tradeMo.setOrderDetailId(orderDetail.getId().toString());
+//        addAccountTrade(null, orderDetail, tradeMo, now);
+//    }
 }
