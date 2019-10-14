@@ -35,6 +35,7 @@ import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
 
 import rebue.afc.msg.PayDoneMsg;
+import rebue.afc.sgjz.msg.SgjzPayDoneMsg;
 import rebue.afc.svr.feign.AfcRefundSvc;
 import rebue.afc.to.RefundApprovedTo;
 import rebue.afc.to.RefundImmediateTo;
@@ -76,6 +77,7 @@ import rebue.ord.mo.OrdOrderDetailDeliverMo;
 import rebue.ord.mo.OrdOrderDetailMo;
 import rebue.ord.mo.OrdOrderMo;
 import rebue.ord.mo.OrdTaskMo;
+import rebue.ord.pub.SgjzDonePub;
 import rebue.ord.ro.BulkShipmentRo;
 import rebue.ord.ro.CancellationOfOrderRo;
 import rebue.ord.ro.DetailAndRelationRo;
@@ -228,6 +230,9 @@ public class OrdOrderSvcImpl extends MybatisBaseSvcImpl<OrdOrderMo, java.lang.Lo
 
     @Resource
     private Mapper dozerMapper;
+
+    @Resource
+    private SgjzDonePub sgjzDonePub;
 
     @Resource
     private IbrBuyRelationSvc ibrBuyRelationSvc;
@@ -628,9 +633,21 @@ public class OrdOrderSvcImpl extends MybatisBaseSvcImpl<OrdOrderMo, java.lang.Lo
                 // 添加取消订单任务
                 ordTaskSvc.add(ordTaskMo);
             } else {
-                // 添加一笔交易记录
-                // 添加启动结算任务
-                ordSettleTaskSvc.addStartSettleTask(orderMo.getId());
+                if (to.getIsSgjz() != null && to.getIsSgjz()) {
+                    // 发布手工记账消息
+                    _log.info("用户id为静态用户id，添加手工记账消息userId-{}", to.getUserId());
+                    SgjzPayDoneMsg sgjzPayDoneMsg = new SgjzPayDoneMsg();
+                    sgjzPayDoneMsg.setOrderId(String.valueOf(orderMo.getId()));// 这里也可能是suc的静态id，因为上面有判断和设置
+                    sgjzPayDoneMsg.setPayAmount(orderMo.getRealMoney());
+                    sgjzPayDoneMsg.setUserId(to.getUserId());//
+                    sgjzPayDoneMsg.setSgjzOpId(StaticUserId.USER_ID);// 当收银机登录功能完善之后需要将这里设置为传过来的操作人id
+                    sgjzPayDoneMsg.setPayTime(new Date());
+                    sgjzPayDoneMsg.setPayWay(to.getPayWay());
+                    sgjzDonePub.send(sgjzPayDoneMsg);
+                    // 添加启动结算任务
+                    ordSettleTaskSvc.addStartSettleTask(orderMo.getId());
+                }
+
             }
 
             final UpdateOnlineAfterOrderTo updateOnlineTo = new UpdateOnlineAfterOrderTo();
