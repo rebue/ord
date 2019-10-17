@@ -327,7 +327,7 @@ public class OrdOrderSvcImpl extends MybatisBaseSvcImpl<OrdOrderMo, java.lang.Lo
 
             _log.debug("根据产品ID获取产品信息");
             // 根据产品ID获取产品信息(在不是临时商品的情况下才去获取)
-            if (!orderDetailTo.getIsTempGood()) {
+            if (orderDetailTo.getIsTempGood() != null && !orderDetailTo.getIsTempGood()) {
                 // 如果是上线商品，则需要根据上线规格id获取该条上线规格记录，再获取产品的相应信息,否则可以直接使用产品规格Id直接获取
                 if (orderDetailTo.getOnlineSpecId() != null) {
                     OnlOnlineSpecMo onlineSpacResult = onlOnlineSpecSvc.getById(orderDetailTo.getOnlineSpecId());
@@ -542,15 +542,7 @@ public class OrdOrderSvcImpl extends MybatisBaseSvcImpl<OrdOrderMo, java.lang.Lo
         for (final Entry<Long, List<OrdOrderDetailMo>> onlineOrg : onlineOrgs.entrySet()) {
             final OrdOrderMo orderMo = new OrdOrderMo();
             orderMo.setId(_idWorker.getId());
-            if (to.getIsNowReceived()) {
-                orderMo.setOrderState((byte) OrderStateDic.SIGNED.getCode());
-                orderMo.setPayTime(new Date());
-                orderMo.setSendTime(new Date());
-                orderMo.setReceivedTime(new Date());
-            } else {
-                orderMo.setOrderState((byte) OrderStateDic.ORDERED.getCode());
-            }
-
+            orderMo.setOrderState((byte) OrderStateDic.ORDERED.getCode());
             // 下单时间
             orderMo.setOrderTime(now);
             // 上线组织ID(卖家ID)
@@ -616,7 +608,7 @@ public class OrdOrderSvcImpl extends MybatisBaseSvcImpl<OrdOrderMo, java.lang.Lo
                 orderDetailSvc.add(orderDetailMo);
             }
 
-            if (!to.getIsNowReceived()) {
+            if (to.getIsNowReceived() == null || !to.getIsNowReceived()) {
                 _log.debug("计算自动取消订单的执行时间");
                 final Calendar calendar = Calendar.getInstance();
                 calendar.setTime(now);
@@ -637,15 +629,13 @@ public class OrdOrderSvcImpl extends MybatisBaseSvcImpl<OrdOrderMo, java.lang.Lo
                     // 发布手工记账消息
                     _log.info("用户id为静态用户id，添加手工记账消息userId-{}", to.getUserId());
                     SgjzPayDoneMsg sgjzPayDoneMsg = new SgjzPayDoneMsg();
-                    sgjzPayDoneMsg.setOrderId(String.valueOf(orderMo.getId()));// 这里也可能是suc的静态id，因为上面有判断和设置
-                    sgjzPayDoneMsg.setPayAmount(orderMo.getRealMoney());
+                    sgjzPayDoneMsg.setOrderId(String.valueOf(orderMo.getPayOrderId()));
+                    sgjzPayDoneMsg.setPayAmount(orderMo.getRealMoney());// 这里也可能是suc的静态id，因为上面有判断和设置
                     sgjzPayDoneMsg.setUserId(to.getUserId());//
                     sgjzPayDoneMsg.setSgjzOpId(StaticUserId.USER_ID);// 当收银机登录功能完善之后需要将这里设置为传过来的操作人id
                     sgjzPayDoneMsg.setPayTime(new Date());
                     sgjzPayDoneMsg.setPayWay(to.getPayWay());
                     sgjzDonePub.send(sgjzPayDoneMsg);
-                    // 添加启动结算任务
-                    ordSettleTaskSvc.addStartSettleTask(orderMo.getId());
                 }
 
             }
@@ -661,7 +651,7 @@ public class OrdOrderSvcImpl extends MybatisBaseSvcImpl<OrdOrderMo, java.lang.Lo
                 throw new RuntimeException(updateOnlineRo.getMsg());
             }
         }
-        if (to.getIsNowReceived()) {
+        if (to.getIsNowReceived() != null && to.getIsNowReceived()) {
             ro.setMsg("支付成功");
         } else {
             ro.setMsg("下单成功");
@@ -1976,7 +1966,7 @@ public class OrdOrderSvcImpl extends MybatisBaseSvcImpl<OrdOrderMo, java.lang.Lo
         orderMo.setUserId(userId);
         orderMo.setReceivedTime(date);
         orderMo.setReceivedOpId(userId);
-        orderMo.setOrderState(order.getIsNowReceived() == false ? (byte) OrderStateDic.DELIVERED.getCode()
+        orderMo.setOrderState(!order.getIsNowReceived() ? (byte) OrderStateDic.DELIVERED.getCode()
                 : (byte) OrderStateDic.PAID.getCode());
         _log.info("订单签收的参数为：{}", orderMo);
         final int signInResult = _mapper.orderSignIn(orderMo);
@@ -2097,6 +2087,12 @@ public class OrdOrderSvcImpl extends MybatisBaseSvcImpl<OrdOrderMo, java.lang.Lo
     @Override
     @Transactional(readOnly = false, propagation = Propagation.REQUIRED)
     public boolean handleOrderPaidNotify(final PayDoneMsg payDoneMsg) {
+        try {
+            Thread.sleep(3000);
+        } catch (InterruptedException e1) {
+            // TODO Auto-generated catch block
+            e1.printStackTrace();
+        }
         _log.info("处理订单支付完成的通知：payDoneMsg-{}", payDoneMsg);
         // XXX 在本服务中支付传递的orderId实际上是payOrderId
         final Long payOrderId = Long.parseLong(payDoneMsg.getOrderId());
