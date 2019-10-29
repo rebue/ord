@@ -330,7 +330,9 @@ public class OrdOrderSvcImpl extends MybatisBaseSvcImpl<OrdOrderMo, java.lang.Lo
             if (orderDetailTo.getIsTempGood() != null && !orderDetailTo.getIsTempGood()) {
                 // 如果是上线商品，则需要根据上线规格id获取该条上线规格记录，再获取产品的相应信息,否则可以直接使用产品规格Id直接获取
                 if (orderDetailTo.getOnlineSpecId() != null) {
+                    _log.info("获取上线规格的参数为-{}", orderDetailTo.getOnlineSpecId());
                     OnlOnlineSpecMo onlineSpacResult = onlOnlineSpecSvc.getById(orderDetailTo.getOnlineSpecId());
+                    _log.info("获取上线规格的结果为-{}", onlineSpacResult);
                     _log.info("获取产品规格信息的参数为-{}", onlineSpacResult.getProductSpecId());
                     PrdProductSpecMo prdProductSeocResult = prdProductSpecSvc
                             .getById(onlineSpacResult.getProductSpecId());
@@ -369,7 +371,7 @@ public class OrdOrderSvcImpl extends MybatisBaseSvcImpl<OrdOrderMo, java.lang.Lo
                 }
                 // 临时商品或未上架产品
                 List<OrdOrderDetailMo> orderDetails = new LinkedList<>();
-                if (orderDetailTo.getIsTempGood()) {
+                if (orderDetailTo.getIsTempGood() != null && orderDetailTo.getIsTempGood()) {
                     onlineOrgs.put(1L, orderDetails); // 只是为了在下面使用上线组织拆单的时候临时商品和上线商品会被拆开
                 } else {
                     onlineOrgs.put(2L, orderDetails);
@@ -377,9 +379,7 @@ public class OrdOrderSvcImpl extends MybatisBaseSvcImpl<OrdOrderMo, java.lang.Lo
                 orderDetailMo.setActualAmount(orderDetailMo.getBuyPrice().multiply(orderDetailMo.getBuyCount()));
                 orderDetailMo.setCashbackAmount(new BigDecimal("0"));
                 orderDetailMo.setCashbackTotal(new BigDecimal("0"));
-                if (orderDetailTo.getIsTempGood()) {
-                    orderDetailMo.setSpecName(orderDetailTo.getGoodName());
-                }
+                orderDetailMo.setSpecName(orderDetailTo.getGoodName());
                 orderDetails.add(orderDetailMo);
 
             } else {
@@ -605,6 +605,7 @@ public class OrdOrderSvcImpl extends MybatisBaseSvcImpl<OrdOrderMo, java.lang.Lo
                 orderDetailMo.setUserId(to.getUserId());
                 orderDetailMo.setReturnState((byte) ReturnStateDic.NONE.getCode());
                 orderDetailMo.setIsSettleBuyer(false);
+                orderDetailMo.setIsDelivered(false);
                 orderDetailSvc.add(orderDetailMo);
             }
 
