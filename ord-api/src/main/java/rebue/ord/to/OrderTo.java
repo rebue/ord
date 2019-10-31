@@ -19,6 +19,10 @@ import rebue.afc.sgjz.dic.SgjzPayWayDic;
 @Setter
 public class OrderTo {
     /**
+     * 操作人id，目前使用这个操作id来获取他的组织来作为临时商品的上线组织
+     */
+    private Long opId;
+    /**
      * 下单的用户ID
      */
     private Long userId;

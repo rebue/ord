@@ -334,17 +334,13 @@ public class OrdOrderSvcImpl extends MybatisBaseSvcImpl<OrdOrderMo, java.lang.Lo
                     OnlOnlineSpecMo onlineSpacResult = onlOnlineSpecSvc.getById(orderDetailTo.getOnlineSpecId());
                     _log.info("获取上线规格的结果为-{}", onlineSpacResult);
                     _log.info("获取产品规格信息的参数为-{}", onlineSpacResult.getProductSpecId());
-                    PrdProductSpecMo prdProductSeocResult = prdProductSpecSvc
+                    PrdProductSpecMo prdProductSpecResult = prdProductSpecSvc
                             .getById(onlineSpacResult.getProductSpecId());
-                    _log.info("获取产品规格信息的结果为-{}", prdProductSeocResult);
-                    orderDetailMo.setSpecName(prdProductSeocResult.getName());
-                    orderDetailMo.setBuyUnit(prdProductSeocResult.getUnit());
-                    _log.info("获取产品信息的参数为-{}", prdProductSeocResult.getProductId());
-                    PrdProductMo prdProductResult = prdProductSvc.getById(prdProductSeocResult.getProductId());
-                    _log.info("获取产品信息的结果为-{}", prdProductResult);
-                    orderDetailMo.setProductId(orderDetailTo.getProductId());
-                    orderDetailMo.setProductSpecId(orderDetailTo.getProductSpecId());
-
+                    _log.info("获取产品规格信息的结果为-{}", prdProductSpecResult);
+                    orderDetailMo.setSpecName(prdProductSpecResult.getName());
+                    orderDetailMo.setBuyUnit(prdProductSpecResult.getUnit());
+                    orderDetailMo.setProductId(prdProductSpecResult.getProductId());
+                    orderDetailMo.setProductSpecId(prdProductSpecResult.getId());
                 } else {
                     _log.info("获取产品信息的参数为-{}", orderDetailTo.getProductId());
                     PrdProductMo prdProductResult = prdProductSvc.getById(orderDetailTo.getProductId());
@@ -369,16 +365,15 @@ public class OrdOrderSvcImpl extends MybatisBaseSvcImpl<OrdOrderMo, java.lang.Lo
                     ro.setMsg(msg);
                     return ro;
                 }
-                // 临时商品或未上架产品
+                // 临时商品
                 List<OrdOrderDetailMo> orderDetails = new LinkedList<>();
                 if (orderDetailTo.getIsTempGood() != null && orderDetailTo.getIsTempGood()) {
-                    onlineOrgs.put(1L, orderDetails); // 只是为了在下面使用上线组织拆单的时候临时商品和上线商品会被拆开
-                } else {
-                    onlineOrgs.put(2L, orderDetails);
+                    onlineOrgs.put(null, orderDetails); // 只是为了在下面使用上线组织拆单的时候临时商品和上线商品会被拆开
                 }
                 orderDetailMo.setActualAmount(orderDetailMo.getBuyPrice().multiply(orderDetailMo.getBuyCount()));
                 orderDetailMo.setCashbackAmount(new BigDecimal("0"));
                 orderDetailMo.setCashbackTotal(new BigDecimal("0"));
+                orderDetailMo.setCostPrice(new BigDecimal("0"));
                 orderDetailMo.setSpecName(orderDetailTo.getGoodName());
                 orderDetails.add(orderDetailMo);
 
@@ -546,7 +541,16 @@ public class OrdOrderSvcImpl extends MybatisBaseSvcImpl<OrdOrderMo, java.lang.Lo
             // 下单时间
             orderMo.setOrderTime(now);
             // 上线组织ID(卖家ID)
-            orderMo.setOnlineOrgId(onlineOrg.getKey());
+            if (onlineOrg.getKey() != null) {
+                _log.info("设置上线组织-{}", onlineOrg.getKey());
+                orderMo.setOnlineOrgId(onlineOrg.getKey());
+            } else {
+                _log.info("没有上线组织，获取操作人的组织作为临时商品的上线组织参数为-{}", to.getOpId());
+                SucUserMo OpUserResult = sucUserSvc.getById(to.getOpId());
+                _log.info("没有上线组织，获取操作人的组织作为临时商品的上线组织结果为-{}", OpUserResult);
+                orderMo.setOnlineOrgId(OpUserResult.getOrgId());
+            }
+
             // 支付订单ID
             orderMo.setPayOrderId(payOrderId);
             // 下单人用户ID
@@ -2231,28 +2235,32 @@ public class OrdOrderSvcImpl extends MybatisBaseSvcImpl<OrdOrderMo, java.lang.Lo
         _log.info("6. 添加计算首单的任务");
         _log.info("遍历订单详情: 添加计算首单的任务");
         for (final OrdOrderDetailMo orderDetail : orderDetailAlls) {
-            try {
-                _log.debug("添加计算首单的任务: orderDetail-{}", orderDetail);
-                _log.debug("设置计算首单任务的执行时间为150分钟后执行");
-                final Calendar calendar = Calendar.getInstance();
-                calendar.setTime(new Date());
-                calendar.add(Calendar.MINUTE, 150);
-                final Date executePlanTime = calendar.getTime();
-                _log.debug("计算首单任务的执行时间为: {}", executePlanTime);
-                _log.debug("准备添加计算首单的任务");
-                final OrdTaskMo ordTaskMo = new OrdTaskMo();
-                ordTaskMo.setExecuteState((byte) TaskExecuteStateDic.NONE.getCode());
-                ordTaskMo.setExecutePlanTime(executePlanTime);
-                ordTaskMo.setTaskType((byte) OrderTaskTypeDic.CALC_FIRST_BUY.getCode());
-                ordTaskMo.setOrderId(String.valueOf(orderDetail.getOnlineSpecId())); // 计算首单的任务的订单ID其实是上线规格ID
-                _log.debug("添加计算首单任务的参数为：{}", ordTaskMo);
-                // 添加计算首单任务
-                ordTaskSvc.addEx(ordTaskMo);
-            } catch (final DuplicateKeyException e) {
-                _log.info("已经存在计算首单的任务：onlineSpecId-" + orderDetail.getOnlineSpecId(), e);
-            } catch (final Exception e) {
-                _log.error("添加计算首单的任务报错：", e);
+            // 临时商品没有上线规格id，不用添加首单
+            if (orderDetail.getOnlineSpecId() != null) {
+                try {
+                    _log.debug("添加计算首单的任务: orderDetail-{}", orderDetail);
+                    _log.debug("设置计算首单任务的执行时间为150分钟后执行");
+                    final Calendar calendar = Calendar.getInstance();
+                    calendar.setTime(new Date());
+                    calendar.add(Calendar.MINUTE, 150);
+                    final Date executePlanTime = calendar.getTime();
+                    _log.debug("计算首单任务的执行时间为: {}", executePlanTime);
+                    _log.debug("准备添加计算首单的任务");
+                    final OrdTaskMo ordTaskMo = new OrdTaskMo();
+                    ordTaskMo.setExecuteState((byte) TaskExecuteStateDic.NONE.getCode());
+                    ordTaskMo.setExecutePlanTime(executePlanTime);
+                    ordTaskMo.setTaskType((byte) OrderTaskTypeDic.CALC_FIRST_BUY.getCode());
+                    ordTaskMo.setOrderId(String.valueOf(orderDetail.getOnlineSpecId())); // 计算首单的任务的订单ID其实是上线规格ID
+                    _log.debug("添加计算首单任务的参数为：{}", ordTaskMo);
+                    // 添加计算首单任务
+                    ordTaskSvc.addEx(ordTaskMo);
+                } catch (final DuplicateKeyException e) {
+                    _log.info("已经存在计算首单的任务：onlineSpecId-" + orderDetail.getOnlineSpecId(), e);
+                } catch (final Exception e) {
+                    _log.error("添加计算首单的任务报错：", e);
+                }
             }
+
         }
 
         _log.info("7. 添加匹配购买关系任务");
