@@ -2092,8 +2092,9 @@ public class OrdOrderSvcImpl extends MybatisBaseSvcImpl<OrdOrderMo, java.lang.Lo
     @Override
     @Transactional(readOnly = false, propagation = Propagation.REQUIRED)
     public boolean handleOrderPaidNotify(final PayDoneMsg payDoneMsg) {
+        // 这里休眠是为了有些订单是当场签收的，下单后立刻调用支付完成接口会找不到订单
         try {
-            Thread.sleep(3000);
+            Thread.sleep(1000);
         } catch (InterruptedException e1) {
             // TODO Auto-generated catch block
             e1.printStackTrace();
@@ -2286,8 +2287,12 @@ public class OrdOrderSvcImpl extends MybatisBaseSvcImpl<OrdOrderMo, java.lang.Lo
 
         _log.info("8. 判断订单是否是当场签收。");
         _log.info("遍历订单如果订单是当前签收的则调用订单签收接口");
+        // 这里是因为可能已经拆单成了多个订单，需要重新查询。
+        OrdOrderMo getNewOrders = new OrdOrderMo();
+        getNewOrders.setPayOrderId(payOrderId);
+        final List<OrdOrderMo> newOrders = _mapper.selectSelective(conditions);
         OrderSignInTo orderSignInTo = new OrderSignInTo();
-        for (final OrdOrderMo order : orders) {
+        for (final OrdOrderMo order : newOrders) {
             if (order.getIsNowReceived()) {
                 orderSignInTo.setOrderId(order.getId());
                 _log.info("调用签收接口的参数为：orderSignInTo-{}", orderSignInTo);
