@@ -198,8 +198,8 @@ public class OrdSettleTaskSvcImpl
         calendar.setTime(now);
         // 如果订单当前签收状态为true,那么就设置一个小时后执行订单结算任务
         if (order.getIsNowReceived()) {
-            _log.info("该订单为当场签收，设置启动结算任务为一个小时后");
-            calendar.add(Calendar.MINUTE, 60);
+            _log.info("该订单为当场签收，设置启动结算任务为一个五分钟后");
+            calendar.add(Calendar.MINUTE, 5);
         } else {
             _log.info("该订单不是当场签收，设置启动结算任务时间为正常时间");
             calendar.add(Calendar.MINUTE,
@@ -255,22 +255,45 @@ public class OrdSettleTaskSvcImpl
         }
         // 计算当前时间
         final Date now = new Date();
-        _log.info("添加结算成本给供应商(余额+)的任务");
-        addSettleSubTask(orderId, now, SettleTaskTypeDic.SETTLE_COST_TO_SUPPLIER, settleSupplierDelay);
-        _log.info("添加结算返现金给买家的任务");
-        addSettleSubTask(orderId, now, SettleTaskTypeDic.SETTLE_CASHBACK_TO_BUYER, settleCashbackToBuyerDelay);
-        _log.info("添加结算购买积分给买家的任务");
-        addSettleSubTask(orderId, now, SettleTaskTypeDic.SETTLE_POINT_TO_BUYER, settlePointToBuyerDelay);
-        _log.info("添加释放卖家的已占用保证金的任务");
-        addSettleSubTask(orderId, now, SettleTaskTypeDic.FREE_DEPOSIT_USED_OF_SELLER, freeDepositUsedOfSellerDelay);
-        _log.info("添加结算利润给卖家(余额+)的任务");
-        addSettleSubTask(orderId, now, SettleTaskTypeDic.SETTLE_PROFIT_TO_SELLER, settleProfitToSellerDelay);
-        _log.info("添加结算平台服务费的任务");
-        addSettleSubTask(orderId, now, SettleTaskTypeDic.SETTLE_PLATFORM_SERVICE_FEE, settlePlatformServiceFeeDelay);
-//        _log.info("添加结算返佣金的任务");这个是原来的，现在去掉在ibr那边做这件事
-//        addSettleSubTask(orderId, now, SettleTaskTypeDic.SETTLE_COMMISSION, settleCommissionDelay);
-        _log.info("添加结算平台利润任务");
-        addSettleSubTask(orderId, now, SettleTaskTypeDic.SETTLE_PROFIT_TO_PLATFORM, settlePlatformProfitFeeDelay);
+        if (order.getIsNowReceived()) {
+            _log.info("是当场签收的商品，结算时间设置为n分钟后结算");
+            _log.info("添加结算成本给供应商(余额+)的任务");
+            addSettleSubTask(orderId, now, SettleTaskTypeDic.SETTLE_COST_TO_SUPPLIER, new BigDecimal("0.05"));
+            _log.info("添加结算返现金给买家的任务");
+            addSettleSubTask(orderId, now, SettleTaskTypeDic.SETTLE_CASHBACK_TO_BUYER, new BigDecimal("0.06"));
+            _log.info("添加结算购买积分给买家的任务");
+            addSettleSubTask(orderId, now, SettleTaskTypeDic.SETTLE_POINT_TO_BUYER, new BigDecimal("0.07"));
+            _log.info("添加释放卖家的已占用保证金的任务");
+            addSettleSubTask(orderId, now, SettleTaskTypeDic.FREE_DEPOSIT_USED_OF_SELLER, new BigDecimal("0.08"));
+            _log.info("添加结算利润给卖家(余额+)的任务");
+            addSettleSubTask(orderId, now, SettleTaskTypeDic.SETTLE_PROFIT_TO_SELLER, new BigDecimal("0.09"));
+            _log.info("添加结算平台服务费的任务");
+            addSettleSubTask(orderId, now, SettleTaskTypeDic.SETTLE_PLATFORM_SERVICE_FEE, new BigDecimal("0.10"));
+//            _log.info("添加结算返佣金的任务");这个是原来的，现在去掉在ibr那边做这件事
+//            addSettleSubTask(orderId, now, SettleTaskTypeDic.SETTLE_COMMISSION, settleCommissionDelay);
+            _log.info("添加结算平台利润任务");
+            addSettleSubTask(orderId, now, SettleTaskTypeDic.SETTLE_PROFIT_TO_PLATFORM, new BigDecimal("0.11"));
+
+        } else {
+            _log.info("不是当场签收的商品，按照正常时间结算");
+            _log.info("添加结算成本给供应商(余额+)的任务");
+            addSettleSubTask(orderId, now, SettleTaskTypeDic.SETTLE_COST_TO_SUPPLIER, settleSupplierDelay);
+            _log.info("添加结算返现金给买家的任务");
+            addSettleSubTask(orderId, now, SettleTaskTypeDic.SETTLE_CASHBACK_TO_BUYER, settleCashbackToBuyerDelay);
+            _log.info("添加结算购买积分给买家的任务");
+            addSettleSubTask(orderId, now, SettleTaskTypeDic.SETTLE_POINT_TO_BUYER, settlePointToBuyerDelay);
+            _log.info("添加释放卖家的已占用保证金的任务");
+            addSettleSubTask(orderId, now, SettleTaskTypeDic.FREE_DEPOSIT_USED_OF_SELLER, freeDepositUsedOfSellerDelay);
+            _log.info("添加结算利润给卖家(余额+)的任务");
+            addSettleSubTask(orderId, now, SettleTaskTypeDic.SETTLE_PROFIT_TO_SELLER, settleProfitToSellerDelay);
+            _log.info("添加结算平台服务费的任务");
+            addSettleSubTask(orderId, now, SettleTaskTypeDic.SETTLE_PLATFORM_SERVICE_FEE,
+                    settlePlatformServiceFeeDelay);
+//            _log.info("添加结算返佣金的任务");这个是原来的，现在去掉在ibr那边做这件事
+//            addSettleSubTask(orderId, now, SettleTaskTypeDic.SETTLE_COMMISSION, settleCommissionDelay);
+            _log.info("添加结算平台利润任务");
+            addSettleSubTask(orderId, now, SettleTaskTypeDic.SETTLE_PROFIT_TO_PLATFORM, settlePlatformProfitFeeDelay);
+        }
 
         // 添加结算返佣金的任务，因为要把购买关系有联系的拆分出去，所以这个任务在ibr哪里执行。
         OrdOrderDetailMo getDetailMo = new OrdOrderDetailMo();
@@ -300,8 +323,14 @@ public class OrdSettleTaskSvcImpl
         // 计算计划执行时间
         final Calendar calendar = Calendar.getInstance();
         calendar.setTime(now);
-        calendar.add(Calendar.MINUTE,
-                completeSettleDelay.multiply(BigDecimal.valueOf(60)).setScale(0, BigDecimal.ROUND_HALF_UP).intValue());
+        if (order.getIsNowReceived()) {
+            _log.info("该订单为当场签收，设置完成结算的任务任务十分钟后");
+            calendar.add(Calendar.MINUTE, 10);
+        } else {
+            calendar.add(Calendar.MINUTE, completeSettleDelay.multiply(BigDecimal.valueOf(60))
+                    .setScale(0, BigDecimal.ROUND_HALF_UP).intValue());
+           
+        }
         taskMo.setExecutePlanTime(calendar.getTime());
         _log.info("添加订单结算完成任务的参数为:{}", taskMo);
         taskSvc.add(taskMo);
@@ -365,7 +394,7 @@ public class OrdSettleTaskSvcImpl
                 startSettleDelay.multiply(BigDecimal.valueOf(60)).setScale(0, BigDecimal.ROUND_HALF_UP).intValue());
         _log.info("计算计划执行时间为:{}", calendar.getTimeInMillis());
         _log.info("当前时间戳为:{}", System.currentTimeMillis());
-        if (calendar.getTimeInMillis() > System.currentTimeMillis()) {
+        if (calendar.getTimeInMillis() > System.currentTimeMillis() && !order.getIsNowReceived()) {
             final String msg = "还未到订单启动结算的时间";
             _log.error("{}: 订单信息-{}", msg, order);
             throw new RuntimeException(msg);
