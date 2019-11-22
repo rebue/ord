@@ -1,6 +1,7 @@
 package rebue.ord.svr.feign;
 
 import java.math.BigDecimal;
+import java.util.List;
 
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -39,4 +40,8 @@ public interface OrdOrderDetailSvc {
 
     @PostMapping("/ord/export-data２")
     void exportData２();
+    
+    
+    @GetMapping("/ord/detailList")
+    List<OrdOrderDetailMo> listAll(@RequestParam("orderId") java.lang.Long orderId);
 }

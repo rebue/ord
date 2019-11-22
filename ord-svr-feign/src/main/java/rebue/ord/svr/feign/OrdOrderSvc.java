@@ -79,4 +79,7 @@ public interface OrdOrderSvc {
      */
     @GetMapping("/ord/order/getbyid")
     OrdOrderMo getById(@RequestParam("id") final java.lang.Long id);
+    
+    @GetMapping("/ord/order/listselective")
+    List<OrdOrderMo> listSelective(@RequestParam("payOrderId") final java.lang.Long payOrderId);
 }
