@@ -115,6 +115,8 @@ import rebue.robotech.dic.ResultDic;
 import rebue.robotech.dic.TaskExecuteStateDic;
 import rebue.robotech.ro.Ro;
 import rebue.robotech.svc.impl.MybatisBaseSvcImpl;
+import rebue.slr.mo.SlrShopAccountMo;
+import rebue.slr.svr.feign.SlrShopAccountSvc;
 import rebue.suc.co.StaticUserId;
 import rebue.suc.mo.SucOrgMo;
 import rebue.suc.mo.SucUserMo;
@@ -230,7 +232,10 @@ public class OrdOrderSvcImpl extends MybatisBaseSvcImpl<OrdOrderMo, java.lang.Lo
 
     @Resource
     private Mapper dozerMapper;
-
+    
+    @Resource
+    private   SlrShopAccountSvc slrShopAccountSvc;
+    
     @Resource
     private SgjzDonePub sgjzDonePub;
 
@@ -549,6 +554,13 @@ public class OrdOrderSvcImpl extends MybatisBaseSvcImpl<OrdOrderMo, java.lang.Lo
                 SucUserMo OpUserResult = sucUserSvc.getById(to.getOpId());
                 _log.info("没有上线组织，获取操作人的组织作为临时商品的上线组织结果为-{}", OpUserResult);
                 orderMo.setOnlineOrgId(OpUserResult.getOrgId());
+            }
+            // 店铺id
+            if(to.getOpId() != null) {
+                _log.info("获取店铺的参数为opId-{}",to.getOpId());
+                SlrShopAccountMo  shopResult = slrShopAccountSvc.getOneShopAccountByAccountId(to.getOpId());
+                _log.info("获取店铺的参数为shopResult-{}",shopResult);
+                orderMo.setShopId(shopResult.getShopId());
             }
 
             // 支付订单ID

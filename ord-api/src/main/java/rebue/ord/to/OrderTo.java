@@ -19,7 +19,9 @@ import rebue.afc.sgjz.dic.SgjzPayWayDic;
 @Setter
 public class OrderTo {
     /**
-     * 操作人id，目前使用这个操作id来获取他的组织来作为临时商品的上线组织
+     * 操作人id，使用这个操作id来获取他的组织来作为临时商品的上线组织
+     * ，还有使用这个操作人id来查询这个订单是属于那个店铺的,注意公众号里面
+     * 下单的话这个id是null。
      */
     private Long opId;
     /**

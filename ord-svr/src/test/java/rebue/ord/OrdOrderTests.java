@@ -50,7 +50,7 @@ public class OrdOrderTests {
     /**
      * 测试下单
      */
-    @Test
+ //   @Test
     public void test01() throws IOException {
 //        final List<OrderDetailTo> details = new LinkedList<>();
 //        final OrderTo orderTo = new OrderTo();
@@ -196,6 +196,29 @@ public class OrdOrderTests {
         _log.info("获取到返回值: {}", ro);
         return ro;
     }
+    
+    /**
+     * 测试下单
+     * @throws IOException 
+     */
+    // @Test
+    public void testOrder() throws IOException {
+        
+        final OrderTo orderTo = new OrderTo();
+        final List<OrderDetailTo> details = new LinkedList<>();
+        OrderDetailTo orderDetailTo3 = new OrderDetailTo();
+        orderDetailTo3.setGoodName("临时名称3");
+        orderDetailTo3.setBuyCount(new BigDecimal("2"));
+        orderDetailTo3.setBuyPrice(new BigDecimal("10"));
+        orderDetailTo3.setIsTempGood(true);
+        orderTo.setOpId(581703841586741249l);
+        orderTo.setIsNowReceived(true);
+        details.add(orderDetailTo3);
+        orderTo.setDetails(details);
+        Ro ro = order(orderTo);
+        _log.info("下单的结果为-{}",ro);
+    }
+    
 
     // @Test
     public void modifyPayOrderIdTest() throws IOException {
@@ -250,15 +273,15 @@ public class OrdOrderTests {
      * 
      * @throws IOException
      */
-    // @Test
+     @Test
     public void handleOrderPaidNotify() throws IOException {
         String url = hostUrl + "/ord/order/handleOrderPaidNotify";
         PayDoneMsg payDoneMsg = new PayDoneMsg();
-        payDoneMsg.setOrderId("561030684311945221");
-        payDoneMsg.setUserId(561030054302187520l);
+        payDoneMsg.setOrderId("674482426814267404");
+        payDoneMsg.setUserId(-1l);
         payDoneMsg.setPayTime(new Date());
         payDoneMsg.setPayType(PayAndRefundTypeDic.VPAY);
-        payDoneMsg.setPayAmount(new BigDecimal("44"));
+        payDoneMsg.setPayAmount(new BigDecimal("20"));
         OkhttpUtils.putByJsonParams(url, payDoneMsg);
     }
 

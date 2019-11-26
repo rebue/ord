@@ -1,4 +1,5 @@
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 	<modelVersion>4.0.0</modelVersion>
 
@@ -30,8 +31,10 @@
 			<groupId>com.github.rebue.prd</groupId>
 			<artifactId>prd-svr-feign</artifactId>
 		</dependency>
-		
-
+		<dependency>
+			<groupId>com.github.rebue.slr</groupId>
+			<artifactId>slr-svr-feign</artifactId>
+		</dependency>
 		<dependency>
 			<groupId>com.github.rebue.robotech</groupId>
 			<artifactId>robotech-bll</artifactId>
@@ -76,12 +79,12 @@
 			<groupId>com.github.rebue.afc</groupId>
 			<artifactId>afc-svr-feign</artifactId>
 		</dependency>
-		
+
 		<dependency>
 			<groupId>com.github.rebue.ibr</groupId>
 			<artifactId>ibr-svr-feign</artifactId>
 		</dependency>
-		
+
 
 		<dependency>
 			<groupId>com.github.rebue.kdi</groupId>

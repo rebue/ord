@@ -45,7 +45,8 @@
     <result column="SEND_OP_ID" jdbcType="BIGINT" property="sendOpId" />
     <result column="RECEIVED_OP_ID" jdbcType="BIGINT" property="receivedOpId" />
     <result column="CANCEL_REASON" jdbcType="VARCHAR" property="cancelReason" />
-    <result column="IS_NOW_RECEIVED" jdbcType="TINYINT" property="isNowReceived" />
+    <result column="IS_NOW_RECEIVED" jdbcType="BIT" property="isNowReceived" />
+    <result column="SHOP_ID" jdbcType="BIGINT" property="shopId" />
   </resultMap>
   <sql id="Base_Column_List">
     <!--
@@ -58,7 +59,7 @@
     SHIPPER_CODE, SHIPPER_NAME, LOGISTIC_CODE, RECEIVER_NAME, RECEIVER_TEL, RECEIVER_MOBILE, 
     RECEIVER_PROVINCE, RECEIVER_CITY, RECEIVER_EXP_AREA, RECEIVER_ADDRESS, RECEIVER_POST_CODE, 
     ORDER_MESSAGES, MODIFY_REALVERY_MONEY_OP_ID, CANCELING_ORDER_OP_ID, CANCELDELI_REASON, 
-    SEND_OP_ID, RECEIVED_OP_ID, CANCEL_REASON, IS_NOW_RECEIVED
+    SEND_OP_ID, RECEIVED_OP_ID, CANCEL_REASON, IS_NOW_RECEIVED, SHOP_ID
   </sql>
   <select id="selectByPrimaryKey" parameterType="java.lang.Long" resultMap="BaseResultMap">
     <!--
@@ -96,7 +97,8 @@
       RECEIVER_ADDRESS, RECEIVER_POST_CODE, ORDER_MESSAGES, 
       MODIFY_REALVERY_MONEY_OP_ID, CANCELING_ORDER_OP_ID, 
       CANCELDELI_REASON, SEND_OP_ID, RECEIVED_OP_ID, 
-      CANCEL_REASON, IS_NOW_RECEIVED)
+      CANCEL_REASON, IS_NOW_RECEIVED, SHOP_ID
+      )
     values (#{id,jdbcType=BIGINT}, #{orderCode,jdbcType=VARCHAR}, #{orderState,jdbcType=TINYINT}, 
       #{orderTitle,jdbcType=VARCHAR}, #{onlineOrgId,jdbcType=BIGINT}, #{deliverOrgId,jdbcType=BIGINT}, 
       #{orderMoney,jdbcType=DECIMAL}, #{realMoney,jdbcType=DECIMAL}, #{returnTotal,jdbcType=DECIMAL}, 
@@ -110,7 +112,8 @@
       #{receiverAddress,jdbcType=VARCHAR}, #{receiverPostCode,jdbcType=CHAR}, #{orderMessages,jdbcType=VARCHAR}, 
       #{modifyRealveryMoneyOpId,jdbcType=BIGINT}, #{cancelingOrderOpId,jdbcType=BIGINT}, 
       #{canceldeliReason,jdbcType=VARCHAR}, #{sendOpId,jdbcType=BIGINT}, #{receivedOpId,jdbcType=BIGINT}, 
-      #{cancelReason,jdbcType=VARCHAR}, #{isNowReceived,jdbcType=TINYINT})
+      #{cancelReason,jdbcType=VARCHAR}, #{isNowReceived,jdbcType=BIT}, #{shopId,jdbcType=BIGINT}
+      )
   </insert>
   <insert id="insertSelective" parameterType="rebue.ord.mo.OrdOrderMo">
     <!--
@@ -239,6 +242,9 @@
       <if test="isNowReceived != null">
         IS_NOW_RECEIVED,
       </if>
+      <if test="shopId != null">
+        SHOP_ID,
+      </if>
     </trim>
     <trim prefix="values (" suffix=")" suffixOverrides=",">
       <if test="id != null">
@@ -359,7 +365,10 @@
         #{cancelReason,jdbcType=VARCHAR},
       </if>
       <if test="isNowReceived != null">
-        #{isNowReceived,jdbcType=TINYINT},
+        #{isNowReceived,jdbcType=BIT},
+      </if>
+      <if test="shopId != null">
+        #{shopId,jdbcType=BIGINT},
       </if>
     </trim>
   </insert>
@@ -485,7 +494,10 @@
         CANCEL_REASON = #{cancelReason,jdbcType=VARCHAR},
       </if>
       <if test="isNowReceived != null">
-        IS_NOW_RECEIVED = #{isNowReceived,jdbcType=TINYINT},
+        IS_NOW_RECEIVED = #{isNowReceived,jdbcType=BIT},
+      </if>
+      <if test="shopId != null">
+        SHOP_ID = #{shopId,jdbcType=BIGINT},
       </if>
     </set>
     where ID = #{id,jdbcType=BIGINT}
@@ -534,7 +546,8 @@
       SEND_OP_ID = #{sendOpId,jdbcType=BIGINT},
       RECEIVED_OP_ID = #{receivedOpId,jdbcType=BIGINT},
       CANCEL_REASON = #{cancelReason,jdbcType=VARCHAR},
-      IS_NOW_RECEIVED = #{isNowReceived,jdbcType=TINYINT}
+      IS_NOW_RECEIVED = #{isNowReceived,jdbcType=BIT},
+      SHOP_ID = #{shopId,jdbcType=BIGINT}
     where ID = #{id,jdbcType=BIGINT}
   </update>
   <select id="selectAll" resultMap="BaseResultMap">
@@ -548,7 +561,7 @@
     SHIPPER_CODE, SHIPPER_NAME, LOGISTIC_CODE, RECEIVER_NAME, RECEIVER_TEL, RECEIVER_MOBILE, 
     RECEIVER_PROVINCE, RECEIVER_CITY, RECEIVER_EXP_AREA, RECEIVER_ADDRESS, RECEIVER_POST_CODE, 
     ORDER_MESSAGES, MODIFY_REALVERY_MONEY_OP_ID, CANCELING_ORDER_OP_ID, CANCELDELI_REASON, 
-    SEND_OP_ID, RECEIVED_OP_ID, CANCEL_REASON, IS_NOW_RECEIVED
+    SEND_OP_ID, RECEIVED_OP_ID, CANCEL_REASON, IS_NOW_RECEIVED, SHOP_ID
     from ORD_ORDER
   </select>
   <select id="selectSelective" parameterType="rebue.ord.mo.OrdOrderMo" resultMap="BaseResultMap">
@@ -675,7 +688,10 @@
         and CANCEL_REASON = #{cancelReason,jdbcType=VARCHAR}
       </if>
       <if test="isNowReceived != null">
-        and IS_NOW_RECEIVED = #{isNowReceived,jdbcType=TINYINT}
+        and IS_NOW_RECEIVED = #{isNowReceived,jdbcType=BIT}
+      </if>
+      <if test="shopId != null">
+        and SHOP_ID = #{shopId,jdbcType=BIGINT}
       </if>
     </where>
   </select>
@@ -813,8 +829,11 @@
       <if test="cancelReason != null and cancelReason != ''">
         and CANCEL_REASON = #{cancelReason,jdbcType=VARCHAR}
       </if>
-      <if test="isNowReceived != null">
-        and IS_NOW_RECEIVED = #{isNowReceived,jdbcType=TINYINT}
+      <if test="isNowReceived != null and isNowReceived != ''">
+        and IS_NOW_RECEIVED = #{isNowReceived,jdbcType=BIT}
+      </if>
+      <if test="shopId != null and shopId != ''">
+        and SHOP_ID = #{shopId,jdbcType=BIGINT}
       </if>
     </where>
   </select>
@@ -941,7 +960,10 @@
         and CANCEL_REASON = #{cancelReason,jdbcType=VARCHAR}
       </if>
       <if test="isNowReceived != null">
-        and IS_NOW_RECEIVED = #{isNowReceived,jdbcType=TINYINT}
+        and IS_NOW_RECEIVED = #{isNowReceived,jdbcType=BIT}
+      </if>
+      <if test="shopId != null">
+        and SHOP_ID = #{shopId,jdbcType=BIGINT}
       </if>
     </where>
   </select>

@@ -408,6 +408,15 @@ public class OrdOrderMo implements Serializable {
     private Boolean isNowReceived;
 
     /**
+     *    店铺ID
+     *
+     *    数据库字段: ORD_ORDER.SHOP_ID
+     *
+     *    @mbg.generated 自动生成，如需修改，请删除本行
+     */
+    private Long shopId;
+
+    /**
      *    @mbg.generated 自动生成，如需修改，请删除本行
      */
     private static final long serialVersionUID = 1L;
@@ -1327,6 +1336,28 @@ public class OrdOrderMo implements Serializable {
     }
 
     /**
+     *    店铺ID
+     *
+     *    数据库字段: ORD_ORDER.SHOP_ID
+     *
+     *    @mbg.generated 自动生成，如需修改，请删除本行
+     */
+    public Long getShopId() {
+        return shopId;
+    }
+
+    /**
+     *    店铺ID
+     *
+     *    数据库字段: ORD_ORDER.SHOP_ID
+     *
+     *    @mbg.generated 自动生成，如需修改，请删除本行
+     */
+    public void setShopId(Long shopId) {
+        this.shopId = shopId;
+    }
+
+    /**
      *    @mbg.generated 自动生成，如需修改，请删除本行
      */
     @Override
@@ -1375,6 +1406,7 @@ public class OrdOrderMo implements Serializable {
         sb.append(", receivedOpId=").append(receivedOpId);
         sb.append(", cancelReason=").append(cancelReason);
         sb.append(", isNowReceived=").append(isNowReceived);
+        sb.append(", shopId=").append(shopId);
         sb.append(", serialVersionUID=").append(serialVersionUID);
         sb.append("]");
         return sb.toString();
