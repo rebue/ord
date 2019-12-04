@@ -200,3 +200,9 @@ CHANGE COLUMN `ONLINE_TITLE` `ONLINE_TITLE` VARCHAR(200) NULL COMMENT '上线标
 ALTER TABLE `ord`.`ORD_ORDER_DETAIL` 
 CHANGE COLUMN `PRODUCT_ID` `PRODUCT_ID` BIGINT(20) NULL COMMENT '产品ID' ;
 
+
+alter table ORD_ORDER add SHOP_ID  bigint comment '店铺ID';
+
+-- ------------------------------------------------------- 上面的已更新到线上 2019.12.04 ----------------------------------------------------
+
+
