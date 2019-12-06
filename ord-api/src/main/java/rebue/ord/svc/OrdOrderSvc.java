@@ -30,6 +30,7 @@ import rebue.ord.ro.ShipmentConfirmationRo;
 import rebue.ord.to.BulkShipmentTo;
 import rebue.ord.to.CancelDeliveryTo;
 import rebue.ord.to.DeliverAndGetTraceTo;
+import rebue.ord.to.DownLineOrderTo;
 import rebue.ord.to.ListOrderTo;
 import rebue.ord.to.OrderSignInTo;
 import rebue.ord.to.OrderTo;
@@ -367,4 +368,6 @@ public interface OrdOrderSvc extends BaseSvc<java.lang.Long, OrdOrderMo, OrdOrde
      * @return
      */
     OrdOrderMo getLatestOneByUserId(Long userId);
+
+    OrderRo downLineOrder(DownLineOrderTo to);
 }

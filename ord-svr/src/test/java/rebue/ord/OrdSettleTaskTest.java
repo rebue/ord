@@ -4,6 +4,8 @@ import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.LinkedHashMap;
+import java.util.LinkedList;
+import java.util.List;
 import java.util.Map;
 
 import org.junit.Test;
@@ -12,6 +14,7 @@ import org.slf4j.LoggerFactory;
 
 import rebue.ord.dic.SettleTaskExecuteStateDic;
 import rebue.ord.dic.SettleTypeDic;
+import rebue.ord.mo.OrdOrderDetailMo;
 import rebue.ord.mo.OrdSettleTaskMo;
 import rebue.ord.to.SuspendSettleTaskTo;
 import rebue.wheel.OkhttpUtils;
@@ -85,7 +88,7 @@ public class OrdSettleTaskTest {
         System.out.println(dd.format(date + 86400000 * 8));
     }
 
-    @Test
+   // @Test
     public void executeSettleTask() throws IOException {
         // 执行订单结算任务
         Map<String, Object> paramsMap = new LinkedHashMap<>();
@@ -106,4 +109,20 @@ public class OrdSettleTaskTest {
         String result = OkhttpUtils.postByJsonParams(hostUrl + "/ord/task/executeSettle", paramsMap);
         _log.info("执行订单结算任务的返回值为：{}", result);
     }
+   @Test
+    public void textMath() {
+     
+       final Map<Long, OrdOrderDetailMo> onlineOrgs = new LinkedHashMap<>();
+       OrdOrderDetailMo  detailMo = new OrdOrderDetailMo();
+       detailMo.setSpecName("烦烦烦");
+       
+       OrdOrderDetailMo  detailMo1 = new OrdOrderDetailMo();
+       detailMo1.setSpecName("都是对的");
+       onlineOrgs.put(null,detailMo);
+       onlineOrgs.put(null,detailMo1);
+       _log.info("：{}", onlineOrgs);
+
+
+   }
+
 }

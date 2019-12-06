@@ -43,6 +43,7 @@ import rebue.ord.svc.OrdOrderSvc;
 import rebue.ord.to.BulkShipmentTo;
 import rebue.ord.to.CancelDeliveryTo;
 import rebue.ord.to.DeliverAndGetTraceTo;
+import rebue.ord.to.DownLineOrderTo;
 import rebue.ord.to.ListOrderTo;
 import rebue.ord.to.OrderSignInTo;
 import rebue.ord.to.OrderTo;
@@ -568,5 +569,29 @@ public class OrdOrderCtrl {
         _log.info("handleOrderPaidNotify: {}", payDoneMsg);
         svc.handleOrderPaidNotify(payDoneMsg);
         return true;
+    }
+    
+    
+    /**
+     * 线下下订单
+     */
+    @PostMapping("/ord/order/down-line-order")
+    OrderRo downLineOrder(@RequestBody final DownLineOrderTo to, final HttpServletRequest req)
+            throws NumberFormatException, ParseException {
+        OrderRo ro = new OrderRo();
+        _log.info("线下用户下订单的参数为：{}", to);
+        // 设置是否是测试用户
+        if (to.getUserId() != null) {
+            to.setIsTester(sucSvc.isTester(to.getUserId()));
+        }
+        try {
+            ro = svc.downLineOrder(to);
+        } catch (final RuntimeException e) {
+            _log.error("下订单出现运行时异常", e);
+            ro.setResult(ResultDic.FAIL);
+            ro.setMsg(e.getMessage());
+        }
+        _log.info("返回值为：{}", ro);
+        return ro;
     }
 }

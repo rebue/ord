@@ -201,24 +201,85 @@ public class OrdOrderTests {
      * 测试下单
      * @throws IOException 
      */
-    // @Test
+   //  @Test
     public void testOrder() throws IOException {
         
         final OrderTo orderTo = new OrderTo();
-        final List<OrderDetailTo> details = new LinkedList<>();
-        OrderDetailTo orderDetailTo3 = new OrderDetailTo();
-        orderDetailTo3.setGoodName("临时名称3");
-        orderDetailTo3.setBuyCount(new BigDecimal("2"));
-        orderDetailTo3.setBuyPrice(new BigDecimal("10"));
-        orderDetailTo3.setIsTempGood(true);
         orderTo.setOpId(581703841586741249l);
         orderTo.setIsNowReceived(true);
+        orderTo.setIsSgjz(true);
+        
+        final List<OrderDetailTo> details = new LinkedList<>();
+        
+        OrderDetailTo orderDetailTo3 = new OrderDetailTo();
+        orderDetailTo3.setGoodName("临时名称3");
+        orderDetailTo3.setBuyCount(new BigDecimal("1"));
+        orderDetailTo3.setBuyPrice(new BigDecimal("10"));
+        orderDetailTo3.setIsTempGood(true);
+        orderDetailTo3.setIsTempGood(true);
+        
+
+        OrderDetailTo orderDetailTo1 = new OrderDetailTo();
+        orderDetailTo1.setGoodName("临时名称1");
+        orderDetailTo1.setBuyCount(new BigDecimal("1"));
+        orderDetailTo1.setBuyPrice(new BigDecimal("5"));
+        orderDetailTo1.setIsTempGood(true);
+
+        
+        details.add(orderDetailTo1);
         details.add(orderDetailTo3);
         orderTo.setDetails(details);
         Ro ro = order(orderTo);
         _log.info("下单的结果为-{}",ro);
     }
     
+     
+     /**
+      * 测试线下下单
+      * @throws IOException 
+      */
+      @Test
+     public void testDownLineOrder() throws IOException {
+         
+         final OrderTo DownLineOrderTo = new OrderTo();
+         DownLineOrderTo.setOpId(581703841586741249l);
+         DownLineOrderTo.setIsNowReceived(true);
+         DownLineOrderTo.setIsSgjz(true);
+         final List<OrderDetailTo> details = new LinkedList<>();
+         
+         OrderDetailTo orderDetailTo3 = new OrderDetailTo();
+         orderDetailTo3.setGoodName("临时名称3");
+         orderDetailTo3.setBuyCount(new BigDecimal("1"));
+         orderDetailTo3.setBuyPrice(new BigDecimal("10.5"));
+         orderDetailTo3.setIsTempGood(true);
+
+         
+
+         OrderDetailTo orderDetailTo1 = new OrderDetailTo();
+         orderDetailTo1.setGoodName("临时名称1");
+         orderDetailTo1.setBuyCount(new BigDecimal("1"));
+         orderDetailTo1.setBuyPrice(new BigDecimal("5.9"));
+         orderDetailTo1.setIsTempGood(true);
+         
+         OrderDetailTo orderDetailTo2 = new OrderDetailTo();
+         orderDetailTo2.setGoodName("线上商品");
+         orderDetailTo2.setOnlineId(675167520256294912l);
+         orderDetailTo2.setOnlineSpecId(675167522361835522l);
+         orderDetailTo2.setProductId(675159114405511168l);
+         orderDetailTo2.setProductSpecId(675159129106546689l);
+         orderDetailTo2.setBuyCount(new BigDecimal("1"));
+         orderDetailTo2.setBuyPrice(new BigDecimal("23"));
+         orderDetailTo2.setIsTempGood(false);
+         
+
+         
+       //  details.add(orderDetailTo1);
+         details.add(orderDetailTo2);
+      // details.add(orderDetailTo3);
+         DownLineOrderTo.setDetails(details);
+         final OrderRo ro = _objectMapper.readValue(OkhttpUtils.postByJsonParams(hostUrl + "/ord/order/down-line-order", DownLineOrderTo),OrderRo.class);
+         _log.info("下单的结果为-{}",ro);
+     }
 
     // @Test
     public void modifyPayOrderIdTest() throws IOException {
@@ -273,7 +334,7 @@ public class OrdOrderTests {
      * 
      * @throws IOException
      */
-     @Test
+    //  @Test
     public void handleOrderPaidNotify() throws IOException {
         String url = hostUrl + "/ord/order/handleOrderPaidNotify";
         PayDoneMsg payDoneMsg = new PayDoneMsg();

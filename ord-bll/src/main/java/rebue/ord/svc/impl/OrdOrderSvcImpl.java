@@ -101,6 +101,7 @@ import rebue.ord.svc.OrdTaskSvc;
 import rebue.ord.to.BulkShipmentTo;
 import rebue.ord.to.CancelDeliveryTo;
 import rebue.ord.to.DeliverAndGetTraceTo;
+import rebue.ord.to.DownLineOrderTo;
 import rebue.ord.to.ListOrderTo;
 import rebue.ord.to.OrderDetailTo;
 import rebue.ord.to.OrderSignInTo;
@@ -635,7 +636,7 @@ public class OrdOrderSvcImpl extends MybatisBaseSvcImpl<OrdOrderMo, java.lang.Lo
                 _log.error("更新上线信息(下单后)失败: {}", updateOnlineRo);
                 throw new RuntimeException(updateOnlineRo.getMsg());
             }
-            
+
             if (to.getIsNowReceived() == null || !to.getIsNowReceived()) {
                 _log.debug("计算自动取消订单的执行时间");
                 final Calendar calendar = Calendar.getInstance();
@@ -3175,6 +3176,186 @@ public class OrdOrderSvcImpl extends MybatisBaseSvcImpl<OrdOrderMo, java.lang.Lo
     public List<OrdOrderJo> listJoAll() {
         // TODO Auto-generated method stub
         return null;
+    }
+
+    /**
+     * 线下用户下订单
+     */
+    @Override
+    @Transactional(readOnly = false, propagation = Propagation.REQUIRED)
+    public OrderRo downLineOrder(DownLineOrderTo to) {
+
+        final OrderRo ro = new OrderRo();
+        _log.info("用户下单的参数为：{}", to);
+        _log.debug("检查参数的正确性");
+        if (to.getDetails() == null || to.getDetails().isEmpty()) {
+            final String msg = "参数错误";
+            _log.error("{}:{}", msg, "没有传入用户收货地址/订单详情");
+            ro.setResult(ResultDic.PARAM_ERROR);
+            ro.setMsg(msg);
+            return ro;
+        }
+        // 没有会员登录，设置常量用户id
+        if (to.getUserId() == null) {
+            _log.info("检查到用户id为空，设置静态用户Id，请确认确实需要设置静态用户Id!!!!!!!!!!!!!!!!!!!!!!!");
+            _log.info("检查到用户id为空，设置静态用户Id，请确认确实需要设置静态用户Id!!!!!!!!!!!!!!!!!!!!!!!");
+            _log.info("检查到用户id为空，设置静态用户Id，请确认确实需要设置静态用户Id!!!!!!!!!!!!!!!!!!!!!!!");
+            to.setUserId(StaticUserId.USER_ID);
+            to.setIsTester(false);
+        }
+
+        _log.info("添加订单信息");
+        Long orderIdAndPayOrderId = _idWorker.getId();
+        final OrdOrderMo orderMo = new OrdOrderMo();
+        orderMo.setId(orderIdAndPayOrderId);
+        orderMo.setPayOrderId(orderIdAndPayOrderId);
+        orderMo.setOrderTime(new Date());
+        orderMo.setUserId(to.getUserId());
+        orderMo.setOrderCode(genOrderCode(orderMo.getOrderTime(), orderMo.getId(), orderMo.getUserId()));
+        orderMo.setOrderTitle("微薄利线下商品");
+        // 店铺id
+        _log.info("获取店铺的参数为-{}", to.getOpId());
+        SlrShopAccountMo shopResult = slrShopAccountSvc.getOneShopAccountByAccountId(to.getOpId());
+        _log.info("获取店铺的结果为shopResult-{}", shopResult);
+        orderMo.setShopId(shopResult.getShopId());
+        if (to.getIsSgjz()) {
+            _log.info("是手工记账-{}", to.getIsSgjz());
+            orderMo.setOrderState((byte) OrderStateDic.SIGNED.getCode());
+            orderMo.setPayTime(new Date());
+            orderMo.setReceivedTime(new Date());
+        } else {
+            _log.info("不是手工记账-{}", to.getIsSgjz());
+            orderMo.setOrderState((byte) OrderStateDic.ORDERED.getCode());
+        }
+        BigDecimal orderAmount = BigDecimal.ZERO;
+        for (final OrderDetailTo orderDetailTo : to.getDetails()) {
+            if (orderDetailTo.getBuyCount() == null || orderDetailTo.getBuyCount().compareTo(BigDecimal.ZERO) <= 0) {
+                final String msg = "参数错误";
+                _log.error("{}: {}", msg, "购买数量不能为空或小于等于0 " + orderDetailTo);
+                ro.setResult(ResultDic.PARAM_ERROR);
+                ro.setMsg(msg);
+                return ro;
+            }
+            orderAmount = orderAmount.add(orderDetailTo.getBuyPrice().multiply(orderDetailTo.getBuyCount()));
+        }
+        _log.info("订单的下单金额为: {}", orderAmount);
+        // 下单金额
+        orderMo.setOrderMoney(orderAmount);
+        // 实际金额=下单金额
+        orderMo.setRealMoney(orderAmount);
+        _log.info("添加订单的参数为-{}", orderMo);
+        if (add(orderMo) != 1) {
+            ro.setResult(ResultDic.PARAM_ERROR);
+            ro.setMsg("添加订单失败");
+            return ro;
+        }
+
+        _log.debug("遍历并添加订单详情");
+        // 需要更新的上线规格列表
+        final List<UpdateOnlineSpecAfterOrderTo> specList = new ArrayList<>();
+        for (final OrderDetailTo orderDetailTo : to.getDetails()) {
+            OrdOrderDetailMo orderDetailMo = new OrdOrderDetailMo();
+            orderDetailMo.setIsDelivered(to.getIsNowReceived());
+            orderDetailMo.setBuyPrice(orderDetailTo.getBuyPrice());
+            orderDetailMo.setBuyCount(orderDetailTo.getBuyCount());
+            orderDetailMo.setProductId(orderDetailTo.getProductId());
+            orderDetailMo.setProductSpecId(orderDetailTo.getProductSpecId());
+            orderDetailMo.setOnlineId(orderDetailTo.getOnlineId());
+            orderDetailMo.setOnlineSpecId(orderDetailTo.getOnlineSpecId());
+            orderDetailMo.setOrderId(orderMo.getId());
+            orderDetailMo.setUserId(to.getUserId());
+            orderDetailMo.setReturnState((byte) ReturnStateDic.NONE.getCode());
+            orderDetailMo.setIsSettleBuyer(true);
+            orderDetailMo.setIsDelivered(true);
+            orderDetailMo.setOrderTimestamp(new Date().getTime());
+            orderDetailMo.setActualAmount(orderDetailMo.getBuyPrice().multiply(orderDetailMo.getBuyCount()));
+
+            if (!StringUtils.isBlank(orderDetailTo.getBuyUnit())) {
+                orderDetailMo.setBuyUnit(orderDetailTo.getBuyUnit());
+            }
+
+            if (orderDetailTo.getIsTempGood() != null && orderDetailTo.getIsTempGood()) {
+                _log.info("临时商品，不需要获取上线信息");
+                orderDetailMo.setCashbackAmount(new BigDecimal("0"));
+                orderDetailMo.setCashbackTotal(new BigDecimal("0"));
+                orderDetailMo.setCostPrice(new BigDecimal("0"));
+                orderDetailMo.setSpecName(orderDetailTo.getGoodName());
+            } else {
+                _log.info("获取上线信息参数-{}", orderDetailTo.getOnlineId());
+                OnlOnlineMo onlineResult = onlineSvc.getById(orderDetailTo.getOnlineId());
+                _log.info("获取上线信息参数-{}", onlineResult);
+                orderDetailMo.setOnlineTitle(onlineResult.getOnlineTitle());
+                _log.info("获取上线规格的参数为-{}", orderDetailTo.getOnlineSpecId());
+                OnlOnlineSpecMo onlineSpacResult = onlOnlineSpecSvc.getById(orderDetailTo.getOnlineSpecId());
+                _log.info("获取上线规格的结果为-{}", onlineSpacResult);
+                orderDetailMo.setSpecName(onlineSpacResult.getOnlineSpec());
+                orderDetailMo.setCostPrice(onlineSpacResult.getCostPrice());
+                orderDetailMo.setSubjectType(onlineResult.getSubjectType());
+                orderDetailMo.setCashbackAmount(onlineSpacResult.getCashbackAmount());
+                orderDetailMo
+                        .setCashbackTotal(onlineSpacResult.getCashbackAmount().multiply(orderDetailMo.getBuyCount()));
+                orderDetailMo.setCostPrice(orderDetailMo.getCostPrice());
+
+                // 添加要更新的上线规格信息
+                final UpdateOnlineSpecAfterOrderTo specTo = new UpdateOnlineSpecAfterOrderTo();
+                specTo.setOnlineId(orderDetailTo.getOnlineId());
+                specTo.setOnlineSpecId(orderDetailTo.getOnlineSpecId());
+                specTo.setBuyCount(orderDetailTo.getBuyCount());
+                specList.add(specTo);
+            }
+
+            _log.info("添加订单详情的参数为-{}", orderDetailMo);
+            orderDetailSvc.add(orderDetailMo);
+        }
+        // 更新上线信息
+        final UpdateOnlineAfterOrderTo updateOnlineTo = new UpdateOnlineAfterOrderTo();
+        updateOnlineTo.setUserId(to.getUserId());
+        updateOnlineTo.setSpecList(specList);
+        _log.debug("更新上线信息(下单后)：{}", updateOnlineTo);
+        final Ro updateOnlineRo = onlineSvc.updateOnlineAfterOrder(updateOnlineTo);
+        _log.info("更新上线信息(下单后)的返回值为：{}", updateOnlineRo);
+        if (updateOnlineRo.getResult() != ResultDic.SUCCESS) {
+            _log.error("更新上线信息(下单后)失败: {}", updateOnlineRo);
+            throw new RuntimeException(updateOnlineRo.getMsg());
+        }
+        // 判断是否是当前支付签收，因为可能是在线支付或者是记账
+        if (to.getIsNowReceived() == null || !to.getIsNowReceived()) {
+            _log.debug("计算自动取消订单的执行时间");
+            final Calendar calendar = Calendar.getInstance();
+            calendar.setTime(new Date());
+            calendar.add(Calendar.MINUTE, cancelOrderTime);
+            final Date executePlanTime = calendar.getTime();
+            _log.debug("取消订单的执行时间为: {}", executePlanTime);
+            _log.debug("准备添加自动取消订单的任务");
+            final OrdTaskMo ordTaskMo = new OrdTaskMo();
+            ordTaskMo.setExecuteState((byte) TaskExecuteStateDic.NONE.getCode());
+            ordTaskMo.setExecutePlanTime(executePlanTime);
+            ordTaskMo.setTaskType((byte) OrderTaskTypeDic.CANCEL.getCode());
+            ordTaskMo.setOrderId(String.valueOf(orderMo.getId()));
+            _log.debug("添加自动取消订单任务的参数为：{}", ordTaskMo);
+            // 添加取消订单任务
+            ordTaskSvc.add(ordTaskMo);
+        } else {
+            if (to.getIsSgjz() != null && to.getIsSgjz()) {
+                // 发布手工记账消息
+                _log.info("用户id为静态用户id，添加手工记账消息userId-{}", to.getUserId());
+                SgjzPayDoneMsg sgjzPayDoneMsg = new SgjzPayDoneMsg();
+                sgjzPayDoneMsg.setOrderId(String.valueOf(orderMo.getPayOrderId()));
+                sgjzPayDoneMsg.setPayAmount(orderMo.getRealMoney());// 这里也可能是suc的静态id，因为上面有判断和设置
+                sgjzPayDoneMsg.setUserId(to.getUserId());//
+                sgjzPayDoneMsg.setSgjzOpId(StaticUserId.USER_ID);// 当收银机登录功能完善之后需要将这里设置为传过来的操作人id
+                sgjzPayDoneMsg.setPayTime(new Date());
+                sgjzPayDoneMsg.setPayWay(to.getPayWay());
+                sgjzDonePub.send(sgjzPayDoneMsg);
+            }
+
+        }
+
+        ro.setMsg("支付成功");
+        ro.setResult(ResultDic.SUCCESS);
+        ro.setPayOrderId(orderIdAndPayOrderId);
+        return ro;
+
     }
 
 }
