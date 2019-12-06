@@ -232,10 +232,10 @@ public class OrdOrderSvcImpl extends MybatisBaseSvcImpl<OrdOrderMo, java.lang.Lo
 
     @Resource
     private Mapper dozerMapper;
-    
+
     @Resource
-    private   SlrShopAccountSvc slrShopAccountSvc;
-    
+    private SlrShopAccountSvc slrShopAccountSvc;
+
     @Resource
     private SgjzDonePub sgjzDonePub;
 
@@ -332,7 +332,7 @@ public class OrdOrderSvcImpl extends MybatisBaseSvcImpl<OrdOrderMo, java.lang.Lo
 
             _log.debug("根据产品ID获取产品信息");
             // 根据产品ID获取产品信息(在不是临时商品的情况下才去获取)
-            if (orderDetailTo.getIsTempGood() != null && !orderDetailTo.getIsTempGood()) {
+            if (orderDetailTo.getIsTempGood() == null || !orderDetailTo.getIsTempGood()) {
                 // 如果是上线商品，则需要根据上线规格id获取该条上线规格记录，再获取产品的相应信息,否则可以直接使用产品规格Id直接获取
                 if (orderDetailTo.getOnlineSpecId() != null) {
                     _log.info("获取上线规格的参数为-{}", orderDetailTo.getOnlineSpecId());
@@ -556,10 +556,10 @@ public class OrdOrderSvcImpl extends MybatisBaseSvcImpl<OrdOrderMo, java.lang.Lo
                 orderMo.setOnlineOrgId(OpUserResult.getOrgId());
             }
             // 店铺id
-            if(to.getOpId() != null) {
-                _log.info("获取店铺的参数为opId-{}",to.getOpId());
-                SlrShopAccountMo  shopResult = slrShopAccountSvc.getOneShopAccountByAccountId(to.getOpId());
-                _log.info("获取店铺的参数为shopResult-{}",shopResult);
+            if (to.getOpId() != null) {
+                _log.info("获取店铺的参数为opId-{}", to.getOpId());
+                SlrShopAccountMo shopResult = slrShopAccountSvc.getOneShopAccountByAccountId(to.getOpId());
+                _log.info("获取店铺的参数为shopResult-{}", shopResult);
                 orderMo.setShopId(shopResult.getShopId());
             }
 
@@ -625,6 +625,17 @@ public class OrdOrderSvcImpl extends MybatisBaseSvcImpl<OrdOrderMo, java.lang.Lo
                 orderDetailSvc.add(orderDetailMo);
             }
 
+            final UpdateOnlineAfterOrderTo updateOnlineTo = new UpdateOnlineAfterOrderTo();
+            updateOnlineTo.setUserId(to.getUserId());
+            updateOnlineTo.setSpecList(specList);
+            _log.debug("更新上线信息(下单后)：{}", updateOnlineTo);
+            final Ro updateOnlineRo = onlineSvc.updateOnlineAfterOrder(updateOnlineTo);
+            _log.info("更新上线信息(下单后)的返回值为：{}", updateOnlineRo);
+            if (updateOnlineRo.getResult() != ResultDic.SUCCESS) {
+                _log.error("更新上线信息(下单后)失败: {}", updateOnlineRo);
+                throw new RuntimeException(updateOnlineRo.getMsg());
+            }
+            
             if (to.getIsNowReceived() == null || !to.getIsNowReceived()) {
                 _log.debug("计算自动取消订单的执行时间");
                 final Calendar calendar = Calendar.getInstance();
@@ -655,17 +666,6 @@ public class OrdOrderSvcImpl extends MybatisBaseSvcImpl<OrdOrderMo, java.lang.Lo
                     sgjzDonePub.send(sgjzPayDoneMsg);
                 }
 
-            }
-
-            final UpdateOnlineAfterOrderTo updateOnlineTo = new UpdateOnlineAfterOrderTo();
-            updateOnlineTo.setUserId(to.getUserId());
-            updateOnlineTo.setSpecList(specList);
-            _log.debug("更新上线信息(下单后)：{}", updateOnlineTo);
-            final Ro updateOnlineRo = onlineSvc.updateOnlineAfterOrder(updateOnlineTo);
-            _log.info("更新上线信息(下单后)的返回值为：{}", updateOnlineRo);
-            if (updateOnlineRo.getResult() != ResultDic.SUCCESS) {
-                _log.error("更新上线信息(下单后)失败: {}", updateOnlineRo);
-                throw new RuntimeException(updateOnlineRo.getMsg());
             }
         }
         if (to.getIsNowReceived() != null && to.getIsNowReceived()) {
