@@ -244,7 +244,7 @@ public class OrdOrderTests {
          final OrderTo DownLineOrderTo = new OrderTo();
          DownLineOrderTo.setOpId(581703841586741249l);
          DownLineOrderTo.setIsNowReceived(true);
-         DownLineOrderTo.setIsSgjz(true);
+         DownLineOrderTo.setIsSgjz(false);
          final List<OrderDetailTo> details = new LinkedList<>();
          
          OrderDetailTo orderDetailTo3 = new OrderDetailTo();
@@ -258,7 +258,7 @@ public class OrdOrderTests {
          OrderDetailTo orderDetailTo1 = new OrderDetailTo();
          orderDetailTo1.setGoodName("临时名称1");
          orderDetailTo1.setBuyCount(new BigDecimal("1"));
-         orderDetailTo1.setBuyPrice(new BigDecimal("5.9"));
+         orderDetailTo1.setBuyPrice(new BigDecimal("5.5"));
          orderDetailTo1.setIsTempGood(true);
          
          OrderDetailTo orderDetailTo2 = new OrderDetailTo();
@@ -273,9 +273,9 @@ public class OrdOrderTests {
          
 
          
-       //  details.add(orderDetailTo1);
+         details.add(orderDetailTo1);
          details.add(orderDetailTo2);
-      // details.add(orderDetailTo3);
+         details.add(orderDetailTo3);
          DownLineOrderTo.setDetails(details);
          final OrderRo ro = _objectMapper.readValue(OkhttpUtils.postByJsonParams(hostUrl + "/ord/order/down-line-order", DownLineOrderTo),OrderRo.class);
          _log.info("下单的结果为-{}",ro);

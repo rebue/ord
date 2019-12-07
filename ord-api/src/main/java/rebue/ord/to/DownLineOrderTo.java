@@ -44,7 +44,8 @@ public class DownLineOrderTo {
     private List<OrderDetailTo> details;
 
     /**
-     * 是否是手工记账方式，是的话需要发布手工记账消息
+     * 是否是手工记账方式，是的话需要发布手工记账消息以便mq发布支付成功消息
+     * 
      */
     private Boolean isSgjz;
 
@@ -54,7 +55,7 @@ public class DownLineOrderTo {
     private SgjzPayWayDic payWay;
     
     /**
-     * 是否当场签收
+     * 是否当场签收,这个是用来支付完成通知回来的时候调用签收接口和添加结算任务为5分钟后而不是正常时间
      */
     private Boolean       isNowReceived;
 
