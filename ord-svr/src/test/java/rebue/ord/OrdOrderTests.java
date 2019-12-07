@@ -22,6 +22,7 @@ import com.github.dozermapper.core.Mapper;
 import rebue.afc.dic.PayAndRefundTypeDic;
 import rebue.afc.msg.PayDoneMsg;
 import rebue.ord.mo.OrdOrderDetailMo;
+import rebue.ord.mo.OrdOrderMo;
 import rebue.ord.ro.OrderRo;
 import rebue.ord.svc.OrdOrderDetailSvc;
 import rebue.ord.to.ModifyInviteIdTo;
@@ -50,12 +51,24 @@ public class OrdOrderTests {
     /**
      * 测试下单
      */
- //   @Test
+    @Test
     public void test01() throws IOException {
-//        final List<OrderDetailTo> details = new LinkedList<>();
-//        final OrderTo orderTo = new OrderTo();
-//        orderTo.setUserId(515488916007157761L); // 下单的用户ID
-//        orderTo.setDetails(details);
+        final List<OrderDetailTo> details = new LinkedList<>();
+        final OrderTo orderTo = new OrderTo();
+        orderTo.setUserId(1L); // 下单的用户ID
+        orderTo.setDetails(details);
+        orderTo.setAddrId(521997679778070533l);
+        
+
+        OrderDetailTo orderDetailTo = new OrderDetailTo();
+        orderDetailTo = new OrderDetailTo();
+        orderDetailTo.setOnlineId(675167520256294912L);
+        orderDetailTo.setOnlineSpecId(675167522361835522L);
+        orderDetailTo.setBuyCount(new BigDecimal("1"));
+        orderDetailTo.setCartId(678400380287057920l);
+
+        details.add(orderDetailTo);
+       
 //        Ro ro = order(orderTo);
 //        Assert.assertEquals("参数错误", ro.getMsg());
 
@@ -141,49 +154,7 @@ public class OrdOrderTests {
 //        orderDetailTo.setBuyCount(new BigDecimal("8.6"));
 //        details.add(orderDetailTo);
         // 下单
-        final OrderTo orderTo = new OrderTo();
-        final List<OrderDetailTo> details = new LinkedList<>();
-        // 订单基本参数
-        orderTo.setUserId(515488916007157761L); // 下单的用户ID
-        orderTo.setDetails(details);
-        orderTo.setIsNowReceived(true);
-        orderTo.setAddrId(636713937089331200L);
-        orderTo.setIsTester(false);
-        // 订单详情参数
-        // 1:有上线信息，不需要价格，取上线规格里面的
-        OrderDetailTo orderDetailTo1 = new OrderDetailTo();
-        orderDetailTo1.setGoodName("上线名称");
-        orderDetailTo1.setOnlineId(646881018229424129L);
-        orderDetailTo1.setOnlineSpecId(646881029247860736L);
-        orderDetailTo1.setBuyCount(new BigDecimal("2"));
-        orderDetailTo1.setProductId(646881017499615232L);
-        orderDetailTo1.setProductSpecId(646881017763856384L);
-        // 2:没有上线信息，需要价格
-        OrderDetailTo orderDetailTo = new OrderDetailTo();
-        orderDetailTo.setGoodName("产品名称");
-        orderDetailTo.setBuyCount(new BigDecimal("2"));
-        orderDetailTo.setBuyPrice(new BigDecimal("10"));
-        orderDetailTo.setProductId(646881017499615232L);
-        orderDetailTo.setProductSpecId(646881017763856384L);
-        // 3:没有上线信息，需要价格
-        OrderDetailTo orderDetailTo2 = new OrderDetailTo();
-        orderDetailTo2.setGoodName("临时名称");
-        orderDetailTo2.setBuyCount(new BigDecimal("2"));
-        orderDetailTo2.setBuyPrice(new BigDecimal("10"));
-        orderDetailTo2.setIsTempGood(true);
-
-        OrderDetailTo orderDetailTo3 = new OrderDetailTo();
-        orderDetailTo3.setGoodName("临时名称3");
-        orderDetailTo3.setBuyCount(new BigDecimal("2"));
-        orderDetailTo3.setBuyPrice(new BigDecimal("10"));
-        orderDetailTo3.setIsTempGood(true);
-
-        details.add(orderDetailTo);
-        details.add(orderDetailTo1);
-        details.add(orderDetailTo2);
-        details.add(orderDetailTo3);
-        Ro ro = order(orderTo);
-        Assert.assertEquals(ResultDic.SUCCESS, ro.getResult());
+        order(orderTo);
     }
 
     /**
@@ -196,28 +167,28 @@ public class OrdOrderTests {
         _log.info("获取到返回值: {}", ro);
         return ro;
     }
-    
+
     /**
      * 测试下单
-     * @throws IOException 
+     * 
+     * @throws IOException
      */
-   //  @Test
+    // @Test
     public void testOrder() throws IOException {
-        
+
         final OrderTo orderTo = new OrderTo();
         orderTo.setOpId(581703841586741249l);
         orderTo.setIsNowReceived(true);
         orderTo.setIsSgjz(true);
-        
+
         final List<OrderDetailTo> details = new LinkedList<>();
-        
+
         OrderDetailTo orderDetailTo3 = new OrderDetailTo();
         orderDetailTo3.setGoodName("临时名称3");
         orderDetailTo3.setBuyCount(new BigDecimal("1"));
         orderDetailTo3.setBuyPrice(new BigDecimal("10"));
         orderDetailTo3.setIsTempGood(true);
         orderDetailTo3.setIsTempGood(true);
-        
 
         OrderDetailTo orderDetailTo1 = new OrderDetailTo();
         orderDetailTo1.setGoodName("临时名称1");
@@ -225,61 +196,57 @@ public class OrdOrderTests {
         orderDetailTo1.setBuyPrice(new BigDecimal("5"));
         orderDetailTo1.setIsTempGood(true);
 
-        
         details.add(orderDetailTo1);
         details.add(orderDetailTo3);
         orderTo.setDetails(details);
         Ro ro = order(orderTo);
-        _log.info("下单的结果为-{}",ro);
+        _log.info("下单的结果为-{}", ro);
     }
-    
-     
-     /**
-      * 测试线下下单
-      * @throws IOException 
-      */
-      @Test
-     public void testDownLineOrder() throws IOException {
-         
-         final OrderTo DownLineOrderTo = new OrderTo();
-         DownLineOrderTo.setOpId(581703841586741249l);
-         DownLineOrderTo.setIsNowReceived(true);
-         DownLineOrderTo.setIsSgjz(false);
-         final List<OrderDetailTo> details = new LinkedList<>();
-         
-         OrderDetailTo orderDetailTo3 = new OrderDetailTo();
-         orderDetailTo3.setGoodName("临时名称3");
-         orderDetailTo3.setBuyCount(new BigDecimal("1"));
-         orderDetailTo3.setBuyPrice(new BigDecimal("10.5"));
-         orderDetailTo3.setIsTempGood(true);
 
-         
+    /**
+     * 测试线下下单
+     * 
+     * @throws IOException
+     */
+    // @Test
+    public void testDownLineOrder() throws IOException {
 
-         OrderDetailTo orderDetailTo1 = new OrderDetailTo();
-         orderDetailTo1.setGoodName("临时名称1");
-         orderDetailTo1.setBuyCount(new BigDecimal("1"));
-         orderDetailTo1.setBuyPrice(new BigDecimal("5.5"));
-         orderDetailTo1.setIsTempGood(true);
-         
-         OrderDetailTo orderDetailTo2 = new OrderDetailTo();
-         orderDetailTo2.setGoodName("线上商品");
-         orderDetailTo2.setOnlineId(675167520256294912l);
-         orderDetailTo2.setOnlineSpecId(675167522361835522l);
-         orderDetailTo2.setProductId(675159114405511168l);
-         orderDetailTo2.setProductSpecId(675159129106546689l);
-         orderDetailTo2.setBuyCount(new BigDecimal("1"));
-         orderDetailTo2.setBuyPrice(new BigDecimal("23"));
-         orderDetailTo2.setIsTempGood(false);
-         
+        final OrderTo DownLineOrderTo = new OrderTo();
+        DownLineOrderTo.setOpId(581703841586741249l);
+        DownLineOrderTo.setIsNowReceived(true);
+        DownLineOrderTo.setIsSgjz(false);
+        final List<OrderDetailTo> details = new LinkedList<>();
 
-         
-         details.add(orderDetailTo1);
-         details.add(orderDetailTo2);
-         details.add(orderDetailTo3);
-         DownLineOrderTo.setDetails(details);
-         final OrderRo ro = _objectMapper.readValue(OkhttpUtils.postByJsonParams(hostUrl + "/ord/order/down-line-order", DownLineOrderTo),OrderRo.class);
-         _log.info("下单的结果为-{}",ro);
-     }
+        OrderDetailTo orderDetailTo3 = new OrderDetailTo();
+        orderDetailTo3.setGoodName("临时名称3");
+        orderDetailTo3.setBuyCount(new BigDecimal("1"));
+        orderDetailTo3.setBuyPrice(new BigDecimal("10.5"));
+        orderDetailTo3.setIsTempGood(true);
+
+        OrderDetailTo orderDetailTo1 = new OrderDetailTo();
+        orderDetailTo1.setGoodName("临时名称1");
+        orderDetailTo1.setBuyCount(new BigDecimal("1"));
+        orderDetailTo1.setBuyPrice(new BigDecimal("5.5"));
+        orderDetailTo1.setIsTempGood(true);
+
+        OrderDetailTo orderDetailTo2 = new OrderDetailTo();
+        orderDetailTo2.setGoodName("线上商品");
+        orderDetailTo2.setOnlineId(675167520256294912l);
+        orderDetailTo2.setOnlineSpecId(675167522361835522l);
+        orderDetailTo2.setProductId(675159114405511168l);
+        orderDetailTo2.setProductSpecId(675159129106546689l);
+        orderDetailTo2.setBuyCount(new BigDecimal("1"));
+        orderDetailTo2.setBuyPrice(new BigDecimal("23"));
+        orderDetailTo2.setIsTempGood(false);
+
+        details.add(orderDetailTo1);
+        details.add(orderDetailTo2);
+        details.add(orderDetailTo3);
+        DownLineOrderTo.setDetails(details);
+        final OrderRo ro = _objectMapper.readValue(
+                OkhttpUtils.postByJsonParams(hostUrl + "/ord/order/down-line-order", DownLineOrderTo), OrderRo.class);
+        _log.info("下单的结果为-{}", ro);
+    }
 
     // @Test
     public void modifyPayOrderIdTest() throws IOException {
@@ -334,7 +301,7 @@ public class OrdOrderTests {
      * 
      * @throws IOException
      */
-    //  @Test
+    // @Test
     public void handleOrderPaidNotify() throws IOException {
         String url = hostUrl + "/ord/order/handleOrderPaidNotify";
         PayDoneMsg payDoneMsg = new PayDoneMsg();
@@ -394,6 +361,22 @@ public class OrdOrderTests {
         String url = hostUrl + "/ord/export-data２";
         Map<String, Object> paramsMap = new LinkedHashMap<>();
         OkhttpUtils.postByJsonParams(url, paramsMap);
+
+    }
+
+    // @Test
+    public void TestMapper() {
+        final Map<Long, Ro> onlineOrgs = new LinkedHashMap<>();
+
+        Ro mo = new Ro();
+        mo.setMsg("第一个");
+        mo.setResult(ResultDic.SUCCESS);
+        onlineOrgs.put(1l, mo);
+        mo = dozerMapper.map(mo, Ro.class);
+        mo.setMsg("第二个");
+        mo.setResult(ResultDic.SUCCESS);
+        onlineOrgs.put(2l, mo);
+        System.out.println(onlineOrgs);
 
     }
 
