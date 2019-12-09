@@ -101,7 +101,6 @@ import rebue.ord.svc.OrdTaskSvc;
 import rebue.ord.to.BulkShipmentTo;
 import rebue.ord.to.CancelDeliveryTo;
 import rebue.ord.to.DeliverAndGetTraceTo;
-import rebue.ord.to.DownLineOrderTo;
 import rebue.ord.to.ListOrderTo;
 import rebue.ord.to.OrderDetailTo;
 import rebue.ord.to.OrderSignInTo;
@@ -279,7 +278,7 @@ public class OrdOrderSvcImpl extends MybatisBaseSvcImpl<OrdOrderMo, java.lang.Lo
     /**
      * 下订单
      */
-   // @Override
+    // @Override
     @Transactional(readOnly = false, propagation = Propagation.REQUIRED)
     public OrderRo order2(final OrderTo to) {
         final OrderRo ro = new OrderRo();
@@ -735,7 +734,7 @@ public class OrdOrderSvcImpl extends MybatisBaseSvcImpl<OrdOrderMo, java.lang.Lo
                 orderDetailMo.setOnlineId(onlineResult.getId());
                 orderDetailMo.setOnlineTitle(onlineResult.getOnlineTitle());
                 orderDetailMo.setSubjectType(onlineResult.getSubjectType());
-                if(onlineResult.getProductId() != null) {
+                if (onlineResult.getProductId() != null) {
                     orderDetailMo.setProductId(onlineResult.getProductId());
                 }
                 // 判断是否是测试用户
@@ -762,7 +761,7 @@ public class OrdOrderSvcImpl extends MybatisBaseSvcImpl<OrdOrderMo, java.lang.Lo
                 ro.setMsg(msg);
                 return ro;
             }
-           
+
             orderDetailMo.setOnlineSpecId(onlineSpacResult.getId());
             orderDetailMo.setSpecName(onlineSpacResult.getOnlineSpec());
             orderDetailMo.setCostPrice(onlineSpacResult.getCostPrice());
@@ -788,15 +787,11 @@ public class OrdOrderSvcImpl extends MybatisBaseSvcImpl<OrdOrderMo, java.lang.Lo
             // XXX 检查购买数量是否超过库存数量：判断上线数量-销售数量是否小于购买数量-1
             if (onlineSpacResult.getCurrentOnlineCount().subtract(onlineSpacResult.getSaleCount())
                     .compareTo(orderDetailTo.getBuyCount()) == -1) {
-                if (!to.getIsNowReceived()) {
-                    final String msg = "商品库存不足";
-                    _log.error("{}: onlineSpecMo-{}, 购买数量-{}", msg, onlineSpacResult, orderDetailTo.getBuyCount());
-                    ro.setResult(ResultDic.FAIL);
-                    ro.setMsg(msg);
-                    return ro;
-                } else {
-                    // TODO 临时增加库存(增加数量为CurrentOnlineCount-SaleCount-BuyCount)
-                }
+                final String msg = "商品库存不足";
+                _log.error("{}: onlineSpecMo-{}, 购买数量-{}", msg, onlineSpacResult, orderDetailTo.getBuyCount());
+                ro.setResult(ResultDic.FAIL);
+                ro.setMsg(msg);
+                return ro;
             }
 
             _log.debug("检查是否限制购买");
@@ -844,7 +839,7 @@ public class OrdOrderSvcImpl extends MybatisBaseSvcImpl<OrdOrderMo, java.lang.Lo
                 orderDetailList.add(orderDetailMo);
             }
 
-            _log.debug("添加要更新的上线规格信息"); 
+            _log.debug("添加要更新的上线规格信息");
             final UpdateOnlineSpecAfterOrderTo specTo = new UpdateOnlineSpecAfterOrderTo();
             specTo.setOnlineId(orderDetailTo.getOnlineId());
             specTo.setOnlineSpecId(orderDetailTo.getOnlineSpecId());
@@ -886,7 +881,6 @@ public class OrdOrderSvcImpl extends MybatisBaseSvcImpl<OrdOrderMo, java.lang.Lo
                 orderMo.setOnlineOrgId(OpUserResult.getOrgId());
             }
 
-
             // 订单信息
             orderMo.setPayOrderId(payOrderId);
             orderMo.setUserId(to.getUserId());
@@ -905,7 +899,7 @@ public class OrdOrderSvcImpl extends MybatisBaseSvcImpl<OrdOrderMo, java.lang.Lo
             if (!StringUtils.isBlank(orderMessages)) {
                 orderMo.setOrderMessages(orderMessages);
             }
-            
+
             if (to.getIsNowReceived() != null && to.getIsNowReceived() == true) {
                 orderMo.setIsNowReceived(to.getIsNowReceived());
             }
@@ -3482,7 +3476,7 @@ public class OrdOrderSvcImpl extends MybatisBaseSvcImpl<OrdOrderMo, java.lang.Lo
      */
     @Override
     @Transactional(readOnly = false, propagation = Propagation.REQUIRED)
-    public OrderRo downLineOrder(DownLineOrderTo to) {
+    public OrderRo downLineOrder(OrderTo to) {
 
         final OrderRo ro = new OrderRo();
         _log.info("用户下单的参数为：{}", to);
@@ -3580,7 +3574,20 @@ public class OrdOrderSvcImpl extends MybatisBaseSvcImpl<OrdOrderMo, java.lang.Lo
                 _log.info("获取上线规格的参数为-{}", orderDetailTo.getOnlineSpecId());
                 OnlOnlineSpecMo onlineSpacResult = onlOnlineSpecSvc.getById(orderDetailTo.getOnlineSpecId());
                 _log.info("获取上线规格的结果为-{}", onlineSpacResult);
+                
+                _log.debug("检查购买数量是否超过库存数量");
+                // XXX 检查购买数量是否超过库存数量：判断上线数量-销售数量是否小于购买数量-1
+                if (onlineSpacResult.getCurrentOnlineCount().subtract(onlineSpacResult.getSaleCount())
+                        .compareTo(orderDetailTo.getBuyCount()) == -1) {
+                    final String msg = "商品库存不足";
+                    _log.error("{}: onlineSpecMo-{}, 购买数量-{}", msg, onlineSpacResult, orderDetailTo.getBuyCount());
+                    ro.setResult(ResultDic.FAIL);
+                    ro.setMsg(msg);
+                    return ro;
+                }
+                
                 orderDetailMo.setSpecName(onlineSpacResult.getOnlineSpec());
+                orderDetailMo.setBuyUnit(onlineSpacResult.getSaleUnit());
                 orderDetailMo.setCostPrice(onlineSpacResult.getCostPrice());
                 orderDetailMo.setSubjectType(onlineResult.getSubjectType());
                 orderDetailMo.setCashbackAmount(onlineSpacResult.getCashbackAmount());

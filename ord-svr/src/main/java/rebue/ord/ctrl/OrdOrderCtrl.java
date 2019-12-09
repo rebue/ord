@@ -43,7 +43,6 @@ import rebue.ord.svc.OrdOrderSvc;
 import rebue.ord.to.BulkShipmentTo;
 import rebue.ord.to.CancelDeliveryTo;
 import rebue.ord.to.DeliverAndGetTraceTo;
-import rebue.ord.to.DownLineOrderTo;
 import rebue.ord.to.ListOrderTo;
 import rebue.ord.to.OrderSignInTo;
 import rebue.ord.to.OrderTo;
@@ -217,6 +216,8 @@ public class OrdOrderCtrl {
 
     /**
      * 下订单
+     * 注意现在这里根据opId判断是线上线下商品，后续会将两个接口分开
+     * ，需要需要收银机端的ulr地址。
      */
     @PostMapping("/ord/order")
     OrderRo order(@RequestBody final OrderTo to, final HttpServletRequest req)
@@ -233,7 +234,13 @@ public class OrdOrderCtrl {
             to.setIsTester(sucSvc.isTester(to.getUserId()));
         }
         try {
-            ro = svc.order(to);
+            // 如果操作人id等于null等话证明是线下商品。
+            if (to.getOpId() != null) {
+                ro = svc.downLineOrder(to);
+            } else {
+                ro = svc.order(to);
+            }
+
         } catch (final RuntimeException e) {
             _log.error("下订单出现运行时异常", e);
             ro.setResult(ResultDic.FAIL);
@@ -570,13 +577,12 @@ public class OrdOrderCtrl {
         svc.handleOrderPaidNotify(payDoneMsg);
         return true;
     }
-    
-    
+
     /**
      * 线下下订单
      */
     @PostMapping("/ord/order/down-line-order")
-    OrderRo downLineOrder(@RequestBody final DownLineOrderTo to, final HttpServletRequest req)
+    OrderRo downLineOrder(@RequestBody final OrderTo to, final HttpServletRequest req)
             throws NumberFormatException, ParseException {
         OrderRo ro = new OrderRo();
         _log.info("线下用户下订单的参数为：{}", to);

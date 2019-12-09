@@ -369,5 +369,5 @@ public interface OrdOrderSvc extends BaseSvc<java.lang.Long, OrdOrderMo, OrdOrde
      */
     OrdOrderMo getLatestOneByUserId(Long userId);
 
-    OrderRo downLineOrder(DownLineOrderTo to);
+    OrderRo downLineOrder(OrderTo to);
 }

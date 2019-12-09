@@ -65,5 +65,7 @@ public class OrderTo {
      * 手工记账方式
      */
     private SgjzPayWayDic payWay;
+    
+    
 
 }
