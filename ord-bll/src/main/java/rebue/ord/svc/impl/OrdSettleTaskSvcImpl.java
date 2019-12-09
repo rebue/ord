@@ -511,6 +511,10 @@ public class OrdSettleTaskSvcImpl
             // 释放卖家的已占用保证金
             case FREE_DEPOSIT_USED_OF_SELLER: {
                 _log.info("释放卖家的已占用保证金");
+                if(order.getOnlineOrgId() == null) {
+                    _log.info("卖家字段为空，认为是临时商品，不需要释放卖家的已占用保证金-{}",order.getOnlineOrgId());
+                    continue; 
+                }
                 final AfcTradeMo tradeMo = new AfcTradeMo();
                 tradeMo.setTradeType((byte) TradeTypeDic.SETTLE_DEPOSIT_USED.getCode());
                 tradeMo.setAccountId(order.getOnlineOrgId());
@@ -547,6 +551,10 @@ public class OrdSettleTaskSvcImpl
             // 结算利润给卖家(余额+)
             case SETTLE_PROFIT_TO_SELLER: {
                 _log.info("结算利润给卖家(余额+)");
+                if(order.getOnlineOrgId() == null) {
+                    _log.info("卖家字段为空，认为是临时商品，不需要结算给卖家-{}",order.getOnlineOrgId());
+                    continue; 
+                }
                 final AfcTradeMo tradeMo = new AfcTradeMo();
                 tradeMo.setTradeType((byte) TradeTypeDic.SETTLE_SELLER.getCode());
                 tradeMo.setAccountId(order.getOnlineOrgId());
