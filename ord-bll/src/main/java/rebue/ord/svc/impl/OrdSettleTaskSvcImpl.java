@@ -302,8 +302,8 @@ public class OrdSettleTaskSvcImpl
         List<OrdOrderDetailMo> detailResult = orderDetailMapper.selectSelective(getDetailMo);
         _log.info("获取该订单所有的详情以便添加结算任务的结果为 mo-", detailResult);
         for (OrdOrderDetailMo ordOrderDetailMo : detailResult) {
-            IbrBuyRelationTaskMo addTaskMo = new IbrBuyRelationTaskMo();
-            final Calendar settleCommissionCalendar = Calendar.getInstance();
+            IbrBuyRelationTaskMo addTaskMo                = new IbrBuyRelationTaskMo();
+            final Calendar       settleCommissionCalendar = Calendar.getInstance();
             settleCommissionCalendar.setTime(new Date());
             settleCommissionCalendar.add(Calendar.MINUTE, 5);
             final Date executePlanTime = settleCommissionCalendar.getTime();
@@ -329,7 +329,7 @@ public class OrdSettleTaskSvcImpl
         } else {
             calendar.add(Calendar.MINUTE, completeSettleDelay.multiply(BigDecimal.valueOf(60))
                     .setScale(0, BigDecimal.ROUND_HALF_UP).intValue());
-           
+
         }
         taskMo.setExecutePlanTime(calendar.getTime());
         _log.info("添加订单结算完成任务的参数为:{}", taskMo);
@@ -341,15 +341,15 @@ public class OrdSettleTaskSvcImpl
      * 添加结算子任务
      *
      * @param orderId
-     *            订单ID
+     *                订单ID
      * @param now
-     *            当前时间
+     *                当前时间
      * @param delay
-     *            延迟时间
+     *                延迟时间
      */
     private void addSettleSubTask(final Long orderId, final Date now, final SettleTaskTypeDic taskType,
             final BigDecimal delay) {
-        final Calendar calendar = Calendar.getInstance();
+        final Calendar  calendar  = Calendar.getInstance();
         final OrdTaskMo subTaskMo = new OrdTaskMo();
         subTaskMo.setOrderId(orderId.toString());
         subTaskMo.setTaskType((byte) OrderTaskTypeDic.SETTLE.getCode());
@@ -374,8 +374,8 @@ public class OrdSettleTaskSvcImpl
             _log.error(msg);
             throw new RuntimeException(msg);
         }
-        final Long orderId = Long.valueOf(taskMo.getOrderId());
-        final OrdOrderMo order = orderSvc.getById(orderId);
+        final Long       orderId = Long.valueOf(taskMo.getOrderId());
+        final OrdOrderMo order   = orderSvc.getById(orderId);
         if (order == null) {
             final String msg = "订单不存在";
             _log.error("{}: orderId-{}", msg, orderId);
@@ -511,9 +511,9 @@ public class OrdSettleTaskSvcImpl
             // 释放卖家的已占用保证金
             case FREE_DEPOSIT_USED_OF_SELLER: {
                 _log.info("释放卖家的已占用保证金");
-                if(order.getOnlineOrgId() == null) {
-                    _log.info("卖家字段为空，认为是临时商品，不需要释放卖家的已占用保证金-{}",order.getOnlineOrgId());
-                    continue; 
+                if (order.getOnlineOrgId() == null) {
+                    _log.info("卖家字段为空，认为是临时商品，不需要释放卖家的已占用保证金-{}", order.getOnlineOrgId());
+                    continue;
                 }
                 final AfcTradeMo tradeMo = new AfcTradeMo();
                 tradeMo.setTradeType((byte) TradeTypeDic.SETTLE_DEPOSIT_USED.getCode());
@@ -551,9 +551,9 @@ public class OrdSettleTaskSvcImpl
             // 结算利润给卖家(余额+)
             case SETTLE_PROFIT_TO_SELLER: {
                 _log.info("结算利润给卖家(余额+)");
-                if(order.getOnlineOrgId() == null) {
-                    _log.info("卖家字段为空，认为是临时商品，不需要结算给卖家-{}",order.getOnlineOrgId());
-                    continue; 
+                if (order.getOnlineOrgId() == null) {
+                    _log.info("卖家字段为空，认为是临时商品，不需要结算给卖家-{}", order.getOnlineOrgId());
+                    continue;
                 }
                 final AfcTradeMo tradeMo = new AfcTradeMo();
                 tradeMo.setTradeType((byte) TradeTypeDic.SETTLE_SELLER.getCode());
@@ -578,10 +578,13 @@ public class OrdSettleTaskSvcImpl
                     // 平台服务费 = 实际成交金额 * 平台服务费比例
                     platformServiceFee = actualAmount.multiply(platformServiceFeeRatio);
                 }
+                // 总返现金额 板块类型为返积分(2)时,返现金额为购买总积分/10 否则为返现总额
+                BigDecimal cashbackTotal = orderDetail.getSubjectType() == 2
+                        ? orderDetail.getBuyPointTotal().divide(BigDecimal.TEN)
+                        : orderDetail.getCashbackTotal();
                 // 卖家利润 = 实际成交金额/2 - 总成本 - 总返现金额 - 平台服务费
                 final BigDecimal profitAmount = actualAmount.divide(BigDecimal.valueOf(2)).subtract(costPriceTotal)
-                        .subtract(orderDetail.getCashbackTotal()).subtract(platformServiceFee)
-                        .setScale(4, BigDecimal.ROUND_HALF_UP);
+                        .subtract(cashbackTotal).subtract(platformServiceFee).setScale(4, BigDecimal.ROUND_HALF_UP);
                 tradeMo.setTradeAmount(profitAmount);
                 tradeMo.setTradeTitle("结算利润给卖家(余额+)");
                 addAccountTrade(taskMo, orderDetail, tradeMo, now);
@@ -736,7 +739,7 @@ public class OrdSettleTaskSvcImpl
      * 处理返佣(订单详情如果符合返佣条件，则返佣)
      * 
      * @param orderDetail
-     *            要判断是否返佣的订单详情
+     *                    要判断是否返佣的订单详情
      */
 //    private void handleCommission(final OrdOrderDetailMo orderDetail, final Long buyerId, final Date now) {
 //        _log.info("处理返佣(订单详情如果符合返佣条件，则返佣): orderDetail-{}", orderDetail);
