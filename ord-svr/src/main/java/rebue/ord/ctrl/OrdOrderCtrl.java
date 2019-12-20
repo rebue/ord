@@ -609,10 +609,7 @@ public class OrdOrderCtrl {
     Ro confirmOrder(@RequestParam("payOrderId") Long payOrderId) {
         _log.info("确认订单支付的参数为 payOrderId:{}", payOrderId);
         Ro result = new Ro();
-        OrdOrderMo  mo = new OrdOrderMo();
-        mo.setPayOrderId(payOrderId);
-        mo.setOrderState((byte) OrderStateDic.SIGNED.getCode());
-        if(svc.list(mo).size() > 0) {
+        if(svc.confirmOrder(payOrderId) > 0) {
             result.setMsg("确认支付成功");
             result.setResult(ResultDic.SUCCESS);
         }else {

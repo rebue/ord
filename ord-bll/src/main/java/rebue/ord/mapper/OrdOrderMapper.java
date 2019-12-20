@@ -305,4 +305,8 @@ public interface OrdOrderMapper extends MybatisBaseMapper<OrdOrderMo, Long> {
 	 */
 	@Select("SELECT * FROM ORD_ORDER WHERE USER_ID=#{userId,jdbcType=BIGINT} AND ORDER_STATE > 1 ORDER BY PAY_TIME DESC LIMIT 1")	
 	OrdOrderMo getLatestOneByUserId(@Param("userId") Long userId);
+	
+	@Select("SELECT count(*) from ORD_ORDER WHERE PAY_ORDER_ID=#{payOrderId,jdbcType=BIGINT} and ORDER_STATE > 1 ")
+	int confirmOrder(@Param("payOrderId") Long payOrderId);
+	
 }

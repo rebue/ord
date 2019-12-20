@@ -3622,7 +3622,7 @@ public class OrdOrderSvcImpl extends MybatisBaseSvcImpl<OrdOrderMo, java.lang.Lo
                 orderDetailMo.setOnlineTitle(orderDetailTo.getGoodName());
                 orderDetailMo.setBuyPoint(orderDetailTo.getBuyPrice());
                 orderDetailMo.setBuyPointTotal(orderDetailTo.getBuyPrice().multiply(orderDetailMo.getBuyCount()));
-                orderDetailMo.setSubjectType((byte)0);
+                orderDetailMo.setSubjectType((byte)2); // 临时商品类型是2，作为返积分类型
             } else {
                 _log.info("获取上线信息参数-{}", orderDetailTo.getOnlineId());
                 OnlOnlineMo onlineResult = onlineSvc.getById(orderDetailTo.getOnlineId());
@@ -3712,6 +3712,11 @@ public class OrdOrderSvcImpl extends MybatisBaseSvcImpl<OrdOrderMo, java.lang.Lo
 
         return ro;
 
+    }
+
+    @Override
+    public int confirmOrder(Long payOrderId) {
+        return _mapper.confirmOrder(payOrderId);
     }
 
 }
