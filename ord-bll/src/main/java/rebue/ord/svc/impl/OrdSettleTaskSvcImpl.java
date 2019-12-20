@@ -497,7 +497,8 @@ public class OrdSettleTaskSvcImpl
                 pntPointSvc.addPointTrade(addPointTradeTo);
 
                 // 如果是首单支付，结算商品首单购买奖励积分
-                if (orderDetail.getPaySeq() != null && orderDetail.getPaySeq() == 1) {
+                if (orderDetail.getPaySeq() != null && orderDetail.getPaySeq() == 1
+                        && orderDetail.getSubjectType() == 1) {
                     addPointTradeTo.setPointLogType((byte) PointLogTypeDic.ORDER_SETTLE_FIRST_BUY.getCode());
                     addPointTradeTo.setChangedTitile("大卖网-商品首单购买奖励积分");
                     // 首单购买奖励积分 = 成本价 * 实际购买数量
@@ -532,16 +533,27 @@ public class OrdSettleTaskSvcImpl
             }
             // 结算-结算利润给平台
             case SETTLE_PROFIT_TO_PLATFORM: {
-                _log.info("结算利润给平台,全返商品实际成交价格的二分之一(余额+)");
                 final AfcPlatformTradeMo tradeMo = new AfcPlatformTradeMo();
-                tradeMo.setPlatformTradeType((byte) PlatformTradeTypeDic.PROFIT_TO_PLATFORM.getCode());
                 // 真实购买数量 = 购买数量 - 退货数量
                 final BigDecimal realBuyCount = orderDetail.getBuyCount().subtract(orderDetail.getReturnCount());
-                // 实际成交金额 = 真实购买数量 * 购买金额（单价）
-                final BigDecimal actualAmount = orderDetail.getBuyPrice().multiply(realBuyCount);
-                // 平台利润 = 实际成交价格/2
-                final BigDecimal platformProfit = actualAmount.divide(BigDecimal.valueOf(2));
-                tradeMo.setTradeAmount(platformProfit);
+                if (orderDetail.getSubjectType() == 2) {
+                    _log.info("结算利润给平台,返积分商品返还总积分/10(余额+)");
+                    tradeMo.setPlatformTradeType((byte) PlatformTradeTypeDic.PROFIT_TO_PLATFORM.getCode());
+                    // 实际返还积分 = 真实购买数量 * 购买积分（单价）
+                    final BigDecimal actualPoint = orderDetail.getBuyPoint().multiply(realBuyCount);
+                    // 平台利润 = 实际返还总积分/10
+                    final BigDecimal platformProfit = actualPoint.divide(BigDecimal.TEN);
+                    tradeMo.setTradeAmount(platformProfit);
+                } else {
+                    _log.info("结算利润给平台,全返商品实际成交价格的二分之一(余额+)");
+                    tradeMo.setPlatformTradeType((byte) PlatformTradeTypeDic.PROFIT_TO_PLATFORM.getCode());
+
+                    // 实际成交金额 = 真实购买数量 * 购买金额（单价）
+                    final BigDecimal actualAmount = orderDetail.getBuyPrice().multiply(realBuyCount);
+                    // 平台利润 = 实际成交价格/2
+                    final BigDecimal platformProfit = actualAmount.divide(BigDecimal.valueOf(2));
+                    tradeMo.setTradeAmount(platformProfit);
+                }
                 tradeMo.setOrderId(taskMo.getOrderId());
                 tradeMo.setOrderDetailId(orderDetail.getId().toString());
                 tradeMo.setModifiedTimestamp(now.getTime());
@@ -582,9 +594,18 @@ public class OrdSettleTaskSvcImpl
                 BigDecimal cashbackTotal = orderDetail.getSubjectType() == 2
                         ? orderDetail.getBuyPointTotal().divide(BigDecimal.TEN)
                         : orderDetail.getCashbackTotal();
-                // 卖家利润 = 实际成交金额/2 - 总成本 - 总返现金额 - 平台服务费
-                final BigDecimal profitAmount = actualAmount.divide(BigDecimal.valueOf(2)).subtract(costPriceTotal)
-                        .subtract(cashbackTotal).subtract(platformServiceFee).setScale(4, BigDecimal.ROUND_HALF_UP);
+
+                BigDecimal profitAmount = null;
+                if (orderDetail.getSubjectType() == 1) {
+                    // 卖家利润 = 实际成交金额/2 - 总成本 - 平台服务费(全返(1))
+                    profitAmount = actualAmount.divide(BigDecimal.valueOf(2)).subtract(cashbackTotal)
+                            .subtract(platformServiceFee).setScale(4, BigDecimal.ROUND_HALF_UP);
+                } else {
+                    // 卖家利润 = 实际成交金额 - 总成本 - 总返现金额 - 平台服务费(返积分(2))
+                    profitAmount = actualAmount.subtract(costPriceTotal).subtract(cashbackTotal)
+                            .subtract(platformServiceFee).setScale(4, BigDecimal.ROUND_HALF_UP);
+                }
+
                 tradeMo.setTradeAmount(profitAmount);
                 tradeMo.setTradeTitle("结算利润给卖家(余额+)");
                 addAccountTrade(taskMo, orderDetail, tradeMo, now);
