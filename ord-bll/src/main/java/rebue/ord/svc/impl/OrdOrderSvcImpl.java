@@ -3520,6 +3520,9 @@ public class OrdOrderSvcImpl extends MybatisBaseSvcImpl<OrdOrderMo, java.lang.Lo
 
     /**
      * 线下用户下订单
+     * 
+     * 值得注意的地方：
+     *   1：供应商，发货组织，上线组织，都是传进来的操作人id的组织(目前认为是这样2019-12-20)
      */
     @Override
     @Transactional(readOnly = false, propagation = Propagation.REQUIRED)
@@ -3554,11 +3557,13 @@ public class OrdOrderSvcImpl extends MybatisBaseSvcImpl<OrdOrderMo, java.lang.Lo
         orderMo.setOrderCode(genOrderCode(orderMo.getOrderTime(), orderMo.getId(), orderMo.getUserId()));
         orderMo.setOrderTitle("微薄利线下商品");
         orderMo.setIsNowReceived(to.getIsNowReceived());
-        // 店铺id
+        // 店铺id和卖家id
         _log.info("获取店铺的参数为-{}", to.getOpId());
         SlrShopAccountMo shopResult = slrShopAccountSvc.getOneShopAccountByAccountId(to.getOpId());
         _log.info("获取店铺的结果为shopResult-{}", shopResult);
         orderMo.setShopId(shopResult.getShopId());
+        orderMo.setOnlineOrgId(shopResult.getSellerId());
+        orderMo.setDeliverOrgId(shopResult.getSellerId());
         orderMo.setOrderState((byte) OrderStateDic.ORDERED.getCode());
         BigDecimal orderAmount = BigDecimal.ZERO;
         for (final OrderDetailTo orderDetailTo : to.getDetails()) {
@@ -3602,7 +3607,8 @@ public class OrdOrderSvcImpl extends MybatisBaseSvcImpl<OrdOrderMo, java.lang.Lo
             orderDetailMo.setIsDelivered(true);
             orderDetailMo.setOrderTimestamp(new Date().getTime());
             orderDetailMo.setActualAmount(orderDetailMo.getBuyPrice().multiply(orderDetailMo.getBuyCount()));
-
+            orderDetailMo.setSupplierId(orderMo.getOnlineOrgId());
+            orderDetailMo.setDeliverOrgId(orderMo.getOnlineOrgId());
             if (!StringUtils.isBlank(orderDetailTo.getBuyUnit())) {
                 orderDetailMo.setBuyUnit(orderDetailTo.getBuyUnit());
             }
