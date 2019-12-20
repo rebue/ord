@@ -27,6 +27,7 @@ import com.github.pagehelper.PageInfo;
 import rebue.afc.msg.PayDoneMsg;
 import rebue.ord.dic.CancellationOfOrderDic;
 import rebue.ord.dic.OrderSignInDic;
+import rebue.ord.dic.OrderStateDic;
 import rebue.ord.dic.ShipmentConfirmationDic;
 import rebue.ord.mo.OrdOrderMo;
 import rebue.ord.ro.BulkShipmentRo;
@@ -599,5 +600,25 @@ public class OrdOrderCtrl {
         }
         _log.info("返回值为：{}", ro);
         return ro;
+    }
+    
+    /**
+     * 确认订单支付
+     */
+    @GetMapping("/ord/order/confirmOrder")
+    Ro confirmOrder(@RequestParam("payOrderId") Long payOrderId) {
+        _log.info("确认订单支付的参数为 payOrderId:{}", payOrderId);
+        Ro result = new Ro();
+        OrdOrderMo  mo = new OrdOrderMo();
+        mo.setPayOrderId(payOrderId);
+        mo.setOrderState((byte) OrderStateDic.SIGNED.getCode());
+        if(svc.list(mo).size() > 0) {
+            result.setMsg("确认支付成功");
+            result.setResult(ResultDic.SUCCESS);
+        }else {
+            result.setMsg("订单未支付，无法确认结账");
+            result.setResult(ResultDic.WARN);
+        }
+        return  result;
     }
 }

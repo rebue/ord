@@ -57,7 +57,7 @@ public class OrderTo {
     private Boolean isNowReceived;
 
     /**
-     * 是否是手工记账方式，是的话需要发布手工记账消息
+     * 是否是手工记账方式，是的话需要发布手工记账消息(暂时废弃，但收银端还是会传过来)
      */
     private Boolean isSgjz;
 

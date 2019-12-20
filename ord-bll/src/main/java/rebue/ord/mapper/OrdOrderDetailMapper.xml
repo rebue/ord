@@ -1075,7 +1075,7 @@
 		    ORD_ORDER b ON a.ORDER_ID = b.ID
 		WHERE
 		    a.RETURN_STATE IN (0 , 3)
-		        AND a.SUBJECT_TYPE = 1
+		       <!--  AND a.SUBJECT_TYPE = 1 -->
 		        AND b.ORDER_STATE IN (2 , 3, 4)
 		        AND b.USER_ID = #{userId,jdbcType=BIGINT}
 	</select>

@@ -1035,16 +1035,27 @@ public class OrdOrderSvcImpl extends MybatisBaseSvcImpl<OrdOrderMo, java.lang.Lo
                 final List<OrderDetailRo> orderDetailRoList = new ArrayList<>();
                 for (final OrdOrderDetailMo orderDetailMo : orderDetailList) {
                     final OrderDetailRo orderDetailRo = new OrderDetailRo();
+                    // 临时商品是不用获取的
+                    if (orderDetailMo.getOnlineId() != null) {
+                        _log.info("查询用户订单信息开始获取商品主图");
+                        final List<OnlOnlinePicMo> onlinePicList = onlOnlinePicSvc.list(orderDetailMo.getOnlineId(),
+                                (byte) 1);
+                        _log.info("获取商品主图的返回值为{}", String.valueOf(onlinePicList));
+                        _log.info("根据上线ID查找上线商品信息");
+                        _log.info("参数 " + orderDetailMo.getOnlineId());
+                        final OnlOnlineMo onlineMo = onlineSvc.getById(orderDetailMo.getOnlineId());
+                        _log.info("返回值{}", onlineMo);
+                        _log.info("获取订单本家购买关系参数id-{}", orderDetailMo.getId());
+                        orderDetailRo.setSubjectType(onlineMo.getSubjectType());
+                        orderDetailRo.setGoodsQsmm(onlinePicList.get(0).getPicPath());
 
-                    _log.info("查询用户订单信息开始获取商品主图");
-                    final List<OnlOnlinePicMo> onlinePicList = onlOnlinePicSvc.list(orderDetailMo.getOnlineId(),
-                            (byte) 1);
-                    _log.info("获取商品主图的返回值为{}", String.valueOf(onlinePicList));
-                    _log.info("根据上线ID查找上线商品信息");
-                    _log.info("参数 " + orderDetailMo.getOnlineId());
-                    final OnlOnlineMo onlineMo = onlineSvc.getById(orderDetailMo.getOnlineId());
-                    _log.info("返回值{}", onlineMo);
-                    _log.info("获取订单本家购买关系参数id-{}", orderDetailMo.getId());
+                    }else {
+                        _log.info("临时商品");
+
+                        orderDetailRo.setSubjectType(orderDetailMo.getSubjectType());
+                        orderDetailRo.setGoodsQsmm("/damaiQsmm/2019/05/17/20/07/76EE7353CBA148999164734B7EA34643.png");
+                    }
+
                     final IbrBuyRelationMo ordNativeBuyRelationResult = ibrBuyRelationSvc
                             .getById(orderDetailMo.getId());
                     if (ordNativeBuyRelationResult != null) {
@@ -1053,6 +1064,7 @@ public class OrdOrderSvcImpl extends MybatisBaseSvcImpl<OrdOrderMo, java.lang.Lo
                     }
                     _log.info("获取订单下家购买关系参数id-{}", orderDetailMo.getId());
                     final List<IbrBuyRelationMo> ordBuyRelationResult = ibrBuyRelationSvc.list(orderDetailMo.getId());
+
                     final List<OrdBuyRelationRo> buyRelationList = new ArrayList<>();
                     if (ordBuyRelationResult.size() == 0) {
                         _log.info("下家购买关系为空");
@@ -1076,7 +1088,6 @@ public class OrdOrderSvcImpl extends MybatisBaseSvcImpl<OrdOrderMo, java.lang.Lo
                         }
                     }
                     orderDetailRo.setOrdBuyRelation(buyRelationList);
-                    orderDetailRo.setSubjectType(onlineMo.getSubjectType());
                     orderDetailRo.setId(orderDetailMo.getId());
                     orderDetailRo.setOrderId(orderDetailMo.getOrderId());
                     orderDetailRo.setOnlineId(orderDetailMo.getOnlineId());
@@ -1088,7 +1099,6 @@ public class OrdOrderSvcImpl extends MybatisBaseSvcImpl<OrdOrderMo, java.lang.Lo
                     orderDetailRo.setCashbackAmount(orderDetailMo.getCashbackAmount());
                     orderDetailRo.setBuyUnit(orderDetailMo.getBuyUnit());
                     orderDetailRo.setReturnState(orderDetailMo.getReturnState());
-                    orderDetailRo.setGoodsQsmm(onlinePicList.get(0).getPicPath());
                     orderDetailRo.setReturnCount(orderDetailMo.getReturnCount());
                     orderDetailRo.setCashbackTotal(orderDetailMo.getCashbackTotal());
 
@@ -2712,21 +2722,24 @@ public class OrdOrderSvcImpl extends MybatisBaseSvcImpl<OrdOrderMo, java.lang.Lo
             return ro;
         }
         for (final OrdOrderDetailMo ordOrderDetailMo : detailList) {
-            _log.info("根据订单id修改支付订单id查询上线信息的参数为：{}", ordOrderDetailMo.getOnlineId());
-            final OnlOnlineMo onlOnlineMo = onlineSvc.getById(ordOrderDetailMo.getOnlineId());
-            _log.info("根据订单id修改支付订单id查询上线信息的返回值为：{}", onlOnlineMo);
-            if (onlOnlineMo == null) {
-                _log.info("根据订单id修改支付订单id查询上线信息时发现该商品不存在，订单id为：{}", id);
-                ro.setResult(ResultDic.FAIL);
-                ro.setMsg("该商品不存在");
-                return ro;
+            if(ordOrderDetailMo.getOnlineId() !=  null) {
+                _log.info("根据订单id修改支付订单id查询上线信息的参数为：{}", ordOrderDetailMo.getOnlineId());
+                final OnlOnlineMo onlOnlineMo = onlineSvc.getById(ordOrderDetailMo.getOnlineId());
+                _log.info("根据订单id修改支付订单id查询上线信息的返回值为：{}", onlOnlineMo);
+                if (onlOnlineMo == null) {
+                    _log.info("根据订单id修改支付订单id查询上线信息时发现该商品不存在，订单id为：{}", id);
+                    ro.setResult(ResultDic.FAIL);
+                    ro.setMsg("该商品不存在");
+                    return ro;
+                }
+                if (onlOnlineMo.getOnlineState() == 0) {
+                    _log.error("根据订单id修改支付订单id时发先该商品已下线，订单id为：{}", id);
+                    ro.setResult(ResultDic.FAIL);
+                    ro.setMsg("商品：" + ordOrderDetailMo.getOnlineTitle() + "已下线");
+                    return ro;
+                }
             }
-            if (onlOnlineMo.getOnlineState() == 0) {
-                _log.error("根据订单id修改支付订单id时发先该商品已下线，订单id为：{}", id);
-                ro.setResult(ResultDic.FAIL);
-                ro.setMsg("商品：" + ordOrderDetailMo.getOnlineTitle() + "已下线");
-                return ro;
-            }
+
         }
 
         final OrdOrderMo orderMo = new OrdOrderMo();
@@ -3600,6 +3613,10 @@ public class OrdOrderSvcImpl extends MybatisBaseSvcImpl<OrdOrderMo, java.lang.Lo
                 orderDetailMo.setCashbackTotal(new BigDecimal("0"));
                 orderDetailMo.setCostPrice(new BigDecimal("0"));
                 orderDetailMo.setSpecName(orderDetailTo.getGoodName());
+                orderDetailMo.setOnlineTitle(orderDetailTo.getGoodName());
+                orderDetailMo.setBuyPoint(orderDetailTo.getBuyPrice());
+                orderDetailMo.setBuyPointTotal(orderDetailTo.getBuyPrice().multiply(orderDetailMo.getBuyCount()));
+                orderDetailMo.setSubjectType((byte)0);
             } else {
                 _log.info("获取上线信息参数-{}", orderDetailTo.getOnlineId());
                 OnlOnlineMo onlineResult = onlineSvc.getById(orderDetailTo.getOnlineId());
@@ -3627,7 +3644,8 @@ public class OrdOrderSvcImpl extends MybatisBaseSvcImpl<OrdOrderMo, java.lang.Lo
                 orderDetailMo.setCashbackAmount(onlineSpacResult.getCashbackAmount());
                 orderDetailMo
                         .setCashbackTotal(onlineSpacResult.getCashbackAmount().multiply(orderDetailMo.getBuyCount()));
-
+                orderDetailMo.setBuyPointTotal(onlineSpacResult.getBuyPoint().multiply(orderDetailMo.getBuyCount()));
+                orderDetailMo.setBuyPoint(onlineSpacResult.getBuyPoint());
                 // 添加要更新的上线规格信息
                 final UpdateOnlineSpecAfterOrderTo specTo = new UpdateOnlineSpecAfterOrderTo();
                 specTo.setOnlineId(orderDetailTo.getOnlineId());
@@ -3651,10 +3669,8 @@ public class OrdOrderSvcImpl extends MybatisBaseSvcImpl<OrdOrderMo, java.lang.Lo
             throw new RuntimeException(updateOnlineRo.getMsg());
         }
 
-        // 判断是否是当前支付签收，因为可能是在线支付或者是记账
-        if (to.getIsSgjz() != null && to.getIsSgjz()) {
-            // 发布手工记账消息
-            _log.info("用户id为静态用户id，添加手工记账消息userId-{}", to.getUserId());
+        // 判断如果是现金记账方式就发布手工记账消息。
+        if (to.getPayWay().getCode() == 1) {
             SgjzPayDoneMsg sgjzPayDoneMsg = new SgjzPayDoneMsg();
             sgjzPayDoneMsg.setOrderId(String.valueOf(orderMo.getPayOrderId()));
             sgjzPayDoneMsg.setPayAmount(orderMo.getRealMoney());// 这里也可能是suc的静态id，因为上面有判断和设置
@@ -3662,6 +3678,7 @@ public class OrdOrderSvcImpl extends MybatisBaseSvcImpl<OrdOrderMo, java.lang.Lo
             sgjzPayDoneMsg.setSgjzOpId(StaticUserId.USER_ID);// 当收银机登录功能完善之后需要将这里设置为传过来的操作人id
             sgjzPayDoneMsg.setPayTime(new Date());
             sgjzPayDoneMsg.setPayWay(to.getPayWay());
+            _log.info("现金记账方式，发布手工记账消息-{}", to.getUserId());
             sgjzDonePub.send(sgjzPayDoneMsg);
             ro.setMsg("支付成功");
         } else {
@@ -3680,7 +3697,7 @@ public class OrdOrderSvcImpl extends MybatisBaseSvcImpl<OrdOrderMo, java.lang.Lo
             _log.debug("添加自动取消订单任务的参数为：{}", ordTaskMo);
             // 添加取消订单任务
             ordTaskSvc.add(ordTaskMo);
-            // 将支付订单Id返回去页面等待用户支付，如果是手工记账则需要
+            // 将支付订单Id返回去页面等待用户支付
             ro.setPayOrderId(payOrderId);
             ro.setMsg("下单成功");
         }
