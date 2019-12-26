@@ -3574,7 +3574,7 @@ public class OrdOrderSvcImpl extends MybatisBaseSvcImpl<OrdOrderMo, java.lang.Lo
                 ro.setMsg(msg);
                 return ro;
             }
-            orderAmount = orderAmount.add(orderDetailTo.getBuyPrice().multiply(orderDetailTo.getBuyCount()));
+            orderAmount = orderAmount.add(orderDetailTo.getBuyPrice().multiply(orderDetailTo.getBuyCount()).setScale(2,BigDecimal.ROUND_HALF_UP));
         }
         _log.info("订单的下单金额为: {}", orderAmount);
         // 下单金额
@@ -3606,7 +3606,7 @@ public class OrdOrderSvcImpl extends MybatisBaseSvcImpl<OrdOrderMo, java.lang.Lo
             orderDetailMo.setIsSettleBuyer(true);
             orderDetailMo.setIsDelivered(true);
             orderDetailMo.setOrderTimestamp(new Date().getTime());
-            orderDetailMo.setActualAmount(orderDetailMo.getBuyPrice().multiply(orderDetailMo.getBuyCount()));
+            orderDetailMo.setActualAmount(orderDetailMo.getBuyPrice().multiply(orderDetailMo.getBuyCount()).setScale(2,BigDecimal.ROUND_HALF_UP));
             orderDetailMo.setSupplierId(orderMo.getOnlineOrgId());
             orderDetailMo.setDeliverOrgId(orderMo.getOnlineOrgId());
             if (!StringUtils.isBlank(orderDetailTo.getBuyUnit())) {
@@ -3621,7 +3621,7 @@ public class OrdOrderSvcImpl extends MybatisBaseSvcImpl<OrdOrderMo, java.lang.Lo
                 orderDetailMo.setSpecName(orderDetailTo.getGoodName());
                 orderDetailMo.setOnlineTitle(orderDetailTo.getGoodName());
                 orderDetailMo.setBuyPoint(orderDetailTo.getBuyPrice());
-                orderDetailMo.setBuyPointTotal(orderDetailTo.getBuyPrice().multiply(orderDetailMo.getBuyCount()));
+                orderDetailMo.setBuyPointTotal(orderDetailTo.getBuyPrice().multiply(orderDetailMo.getBuyCount()).setScale(2,BigDecimal.ROUND_HALF_UP));
                 orderDetailMo.setSubjectType((byte)2); // 临时商品类型是2，作为返积分类型
             } else {
                 _log.info("获取上线信息参数-{}", orderDetailTo.getOnlineId());
@@ -3649,8 +3649,8 @@ public class OrdOrderSvcImpl extends MybatisBaseSvcImpl<OrdOrderMo, java.lang.Lo
                 orderDetailMo.setSubjectType(onlineResult.getSubjectType());
                 orderDetailMo.setCashbackAmount(onlineSpacResult.getCashbackAmount());
                 orderDetailMo
-                        .setCashbackTotal(onlineSpacResult.getCashbackAmount().multiply(orderDetailMo.getBuyCount()));
-                orderDetailMo.setBuyPointTotal(onlineSpacResult.getBuyPoint().multiply(orderDetailMo.getBuyCount()));
+                        .setCashbackTotal(onlineSpacResult.getCashbackAmount().multiply(orderDetailMo.getBuyCount()).setScale(2,BigDecimal.ROUND_HALF_UP));
+                orderDetailMo.setBuyPointTotal(onlineSpacResult.getBuyPoint().multiply(orderDetailMo.getBuyCount()).setScale(2,BigDecimal.ROUND_HALF_UP));
                 orderDetailMo.setBuyPoint(onlineSpacResult.getBuyPoint());
                 // 添加要更新的上线规格信息
                 final UpdateOnlineSpecAfterOrderTo specTo = new UpdateOnlineSpecAfterOrderTo();
@@ -3675,8 +3675,8 @@ public class OrdOrderSvcImpl extends MybatisBaseSvcImpl<OrdOrderMo, java.lang.Lo
             throw new RuntimeException(updateOnlineRo.getMsg());
         }
 
-        // 判断如果是现金记账方式就发布手工记账消息。
-        if (to.getPayWay().getCode() == 1) {
+        // 判断如果是现金记账方式或者是支付宝记账就发布手工记账消息。
+        if (to.getPayWay().getCode() == 1 ) {
             SgjzPayDoneMsg sgjzPayDoneMsg = new SgjzPayDoneMsg();
             sgjzPayDoneMsg.setOrderId(String.valueOf(orderMo.getPayOrderId()));
             sgjzPayDoneMsg.setPayAmount(orderMo.getRealMoney());// 这里也可能是suc的静态id，因为上面有判断和设置
@@ -3687,7 +3687,7 @@ public class OrdOrderSvcImpl extends MybatisBaseSvcImpl<OrdOrderMo, java.lang.Lo
             _log.info("现金记账方式，发布手工记账消息-{}", to.getUserId());
             sgjzDonePub.send(sgjzPayDoneMsg);
             ro.setMsg("支付成功");
-        } else {
+        } else if(to.getPayWay().getCode() == 2) {
             _log.debug("计算自动取消订单的执行时间");
             final Calendar calendar = Calendar.getInstance();
             calendar.setTime(new Date());
@@ -3704,6 +3704,19 @@ public class OrdOrderSvcImpl extends MybatisBaseSvcImpl<OrdOrderMo, java.lang.Lo
             // 添加取消订单任务
             ordTaskSvc.add(ordTaskMo);
             // 将支付订单Id返回去页面等待用户支付
+            ro.setPayOrderId(payOrderId);
+            ro.setMsg("下单成功");
+        }else {
+            SgjzPayDoneMsg sgjzPayDoneMsg = new SgjzPayDoneMsg();
+            sgjzPayDoneMsg.setOrderId(String.valueOf(orderMo.getPayOrderId()));
+            sgjzPayDoneMsg.setPayAmount(orderMo.getRealMoney());// 这里也可能是suc的静态id，因为上面有判断和设置
+            sgjzPayDoneMsg.setUserId(to.getUserId());//
+            sgjzPayDoneMsg.setSgjzOpId(StaticUserId.USER_ID);// 当收银机登录功能完善之后需要将这里设置为传过来的操作人id
+            sgjzPayDoneMsg.setPayTime(new Date());
+            sgjzPayDoneMsg.setPayWay(to.getPayWay());
+            _log.info("支付宝记账方式，发布手工记账消息-{}", to.getUserId());
+            sgjzDonePub.send(sgjzPayDoneMsg);
+            // 将支付订单Id返回去页面等待用户确认支付
             ro.setPayOrderId(payOrderId);
             ro.setMsg("下单成功");
         }
