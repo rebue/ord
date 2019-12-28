@@ -81,6 +81,7 @@ import rebue.ord.pub.SgjzDonePub;
 import rebue.ord.ro.BulkShipmentRo;
 import rebue.ord.ro.CancellationOfOrderRo;
 import rebue.ord.ro.DetailAndRelationRo;
+import rebue.ord.ro.GetOderPointRo;
 import rebue.ord.ro.ModifyOrderRealMoneyRo;
 import rebue.ord.ro.OrdBuyRelationRo;
 import rebue.ord.ro.OrdOrderRo;
@@ -107,6 +108,8 @@ import rebue.ord.to.OrderSignInTo;
 import rebue.ord.to.OrderTo;
 import rebue.ord.to.ShipmentConfirmationTo;
 import rebue.ord.to.UpdateOrgTo;
+import rebue.pnt.mo.PntAccountMo;
+import rebue.pnt.svr.feign.PntAccountSvc;
 import rebue.prd.svr.feign.PrdProductSpecSvc;
 import rebue.prd.svr.feign.PrdProductSvc;
 import rebue.robotech.dic.ResultDic;
@@ -246,6 +249,8 @@ public class OrdOrderSvcImpl extends MybatisBaseSvcImpl<OrdOrderMo, java.lang.Lo
     @Resource
     private IbrBuyRelationTaskSvc ibrBuyRelationTaskSvc;
 
+    @Resource
+    private   PntAccountSvc  pntAccountSvc;
     /**
      * 检查订单是否可结算 1. 订单必须存在 2. 订单必须处于签收状态 3. 订单必须已经记录签收时间 4. 已经超过订单启动结算的时间 5.
      * 如果订单还有退货中的申请未处理完成，不能结算
@@ -3730,6 +3735,36 @@ public class OrdOrderSvcImpl extends MybatisBaseSvcImpl<OrdOrderMo, java.lang.Lo
     @Override
     public int confirmOrder(Long payOrderId) {
         return _mapper.confirmOrder(payOrderId);
+    }
+    
+    
+    /**
+     * 微信端获取总收益，总积分，当前支付订单获得的积分
+     */
+    @Override
+    public GetOderPointRo getOderPoint(Long payOrderId) {
+        GetOderPointRo result = new GetOderPointRo();
+        OrdOrderMo mo = new OrdOrderMo();
+        mo.setPayOrderId(payOrderId);
+         List<OrdOrderMo> orderList = super.list(mo);
+         _log.info("根据订单支付id获取订单的结果为-{}",orderList);
+         if(orderList.size() == 0) {
+             result.setTotalIncome(BigDecimal.ZERO);
+             result.setPoint(BigDecimal.ZERO);
+             result.setThisPoint(BigDecimal.ZERO);
+         }
+         BigDecimal thisPoint = BigDecimal.ZERO;
+         for (final OrdOrderMo ordOrderMo : orderList) {
+             thisPoint = thisPoint.add(ordOrderMo.getRealMoney());
+         }
+         _log.info("计算出来的订单积分为-{}",thisPoint);
+         _log.info("获取用户累计收益和总积分的参数为-{}",orderList.get(0).getUserId());
+         PntAccountMo  pntResult =  pntAccountSvc.getById(orderList.get(0).getUserId());
+         result.setTotalIncome(pntResult.getTotalIncome());
+         result.setPoint(pntResult.getPoint());
+         result.setThisPoint(thisPoint);
+         _log.info("将返回的用户积分信息结果-{}",result);
+        return result;
     }
 
 }

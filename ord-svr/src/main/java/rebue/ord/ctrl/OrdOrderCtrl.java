@@ -27,11 +27,11 @@ import com.github.pagehelper.PageInfo;
 import rebue.afc.msg.PayDoneMsg;
 import rebue.ord.dic.CancellationOfOrderDic;
 import rebue.ord.dic.OrderSignInDic;
-import rebue.ord.dic.OrderStateDic;
 import rebue.ord.dic.ShipmentConfirmationDic;
 import rebue.ord.mo.OrdOrderMo;
 import rebue.ord.ro.BulkShipmentRo;
 import rebue.ord.ro.CancellationOfOrderRo;
+import rebue.ord.ro.GetOderPointRo;
 import rebue.ord.ro.ModifyOrderRealMoneyRo;
 import rebue.ord.ro.OrdOrderRo;
 import rebue.ord.ro.OrdSettleRo;
@@ -617,5 +617,14 @@ public class OrdOrderCtrl {
             result.setResult(ResultDic.WARN);
         }
         return  result;
+    }
+    
+    /**
+     * 微信端获取总收益，总积分，当前支付订单获得的积分
+     */
+    @GetMapping("/ord/order/getOderPoint")
+    GetOderPointRo getOderPoint(@RequestParam("payOrderId") Long payOrderId) {
+        _log.info("微信端获取总收益，总积分，当前支付订单获得的积分的参数为 payOrderId:{}", payOrderId);
+        return  svc.getOderPoint(payOrderId);
     }
 }

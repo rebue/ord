@@ -19,6 +19,7 @@ import rebue.ord.jo.OrdOrderJo;
 import rebue.ord.mo.OrdOrderMo;
 import rebue.ord.ro.BulkShipmentRo;
 import rebue.ord.ro.CancellationOfOrderRo;
+import rebue.ord.ro.GetOderPointRo;
 import rebue.ord.ro.ModifyOrderRealMoneyRo;
 import rebue.ord.ro.OrdOrderRo;
 import rebue.ord.ro.OrdSettleRo;
@@ -120,10 +121,14 @@ public interface OrdOrderSvc extends BaseSvc<java.lang.Long, OrdOrderMo, OrdOrde
     /**
      * 修改订单退款金额(根据订单ID和已退款总额)
      *
-     * @param refundTotal        退款总额
-     * @param orderState         订单状态
-     * @param whereOrderId       where条件-订单ID
-     * @param whereRefundedTotal where条件-已退款总额
+     * @param refundTotal
+     *            退款总额
+     * @param orderState
+     *            订单状态
+     * @param whereOrderId
+     *            where条件-订单ID
+     * @param whereRefundedTotal
+     *            where条件-已退款总额
      */
     int modifyRefund(BigDecimal refundTotal, Byte orderState, Long whereOrderId, BigDecimal whereRefundedTotal);
 
@@ -353,9 +358,12 @@ public interface OrdOrderSvc extends BaseSvc<java.lang.Long, OrdOrderMo, OrdOrde
     /**
      * 转移订单
      * 
-     * @param payOrderId 支付订单id
-     * @param newUserId  新用户id
-     * @param oldUserId  旧用户id
+     * @param payOrderId
+     *            支付订单id
+     * @param newUserId
+     *            新用户id
+     * @param oldUserId
+     *            旧用户id
      * @return
      */
     ShiftOrderRo shiftOrder(Long payOrderId, Long newUserId, Long oldUserId);
@@ -369,7 +377,8 @@ public interface OrdOrderSvc extends BaseSvc<java.lang.Long, OrdOrderMo, OrdOrde
     OrdOrderMo getLatestOneByUserId(Long userId);
 
     OrderRo downLineOrder(OrderTo to);
-    
-    
-   int  confirmOrder( Long payOrderId);
+
+    int confirmOrder(Long payOrderId);
+
+    GetOderPointRo getOderPoint(Long payOrderId);
 }
