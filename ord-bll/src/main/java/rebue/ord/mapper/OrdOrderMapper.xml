@@ -1295,7 +1295,7 @@
 		receiverAddress ,a.RECEIVER_MOBILE as receiverMobile,a.RECEIVER_POST_CODE receiverPostCode,a.PAY_TIME as payTime,
 		a.SEND_TIME as sendTime, a.RECEIVED_TIME as receivedTime,
 		a.CANCEL_TIME as cancelTime ,a.CLOSE_TIME as closeTime,
-		SUM(COST_PRICE * (b.BUY_COUNT - b.RETURN_COUNT)) as costPriveTotal
+		SUM(BUY_PRICE * (b.BUY_COUNT - b.RETURN_COUNT)) as costPriveTotal
 		,a.DELIVER_ORG_ID as deliverOrgId ,a.ONLINE_ORG_ID as onlineOrgId FROM
 		ORD_ORDER a
 		INNER JOIN
