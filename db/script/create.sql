@@ -1,6 +1,6 @@
 /*==============================================================*/
 /* DBMS name:      MySQL 5.0                                    */
-/* Created on:     2019/11/26 11:12:55                          */
+/* Created on:     2020/1/3 16:26:52                            */
 /*==============================================================*/
 
 
@@ -145,6 +145,7 @@ create table ORD_ORDER
    CANCEL_REASON        varchar(300) comment '作废原因',
    IS_NOW_RECEIVED      bool not null default false comment '是否当场签收，默认为false，如果是true在支付成功后订单状态将是已签收状态',
    SHOP_ID              bigint comment '店铺ID',
+   DISCOUNT_MONEY       decimal(50,4) not null default 0 comment '折扣金额',
    primary key (ID),
    unique key AK_ORDER_CODE (ORDER_CODE)
 );
@@ -295,3 +296,4 @@ alter table ORD_RETURN add constraint FK_Relationship_3 foreign key (ORDER_ID)
 
 alter table ORD_RETURN_PIC add constraint FK_Relationship_4 foreign key (RETURN_ID)
       references ORD_RETURN (ID) on delete restrict on update restrict;
+
