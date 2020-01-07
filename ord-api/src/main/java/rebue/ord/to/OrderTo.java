@@ -1,5 +1,6 @@
 package rebue.ord.to;
 
+import java.math.BigDecimal;
 import java.util.List;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
@@ -65,7 +66,10 @@ public class OrderTo {
      * 手工记账方式
      */
     private SgjzPayWayDic payWay;
-    
-    
+
+    /**
+     * 折扣金额
+     */
+    private BigDecimal discountMoney;
 
 }

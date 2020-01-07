@@ -47,6 +47,7 @@
     <result column="CANCEL_REASON" jdbcType="VARCHAR" property="cancelReason" />
     <result column="IS_NOW_RECEIVED" jdbcType="BIT" property="isNowReceived" />
     <result column="SHOP_ID" jdbcType="BIGINT" property="shopId" />
+    <result column="DISCOUNT_MONEY" jdbcType="DECIMAL" property="discountMoney" />
   </resultMap>
   <sql id="Base_Column_List">
     <!--
@@ -59,7 +60,7 @@
     SHIPPER_CODE, SHIPPER_NAME, LOGISTIC_CODE, RECEIVER_NAME, RECEIVER_TEL, RECEIVER_MOBILE, 
     RECEIVER_PROVINCE, RECEIVER_CITY, RECEIVER_EXP_AREA, RECEIVER_ADDRESS, RECEIVER_POST_CODE, 
     ORDER_MESSAGES, MODIFY_REALVERY_MONEY_OP_ID, CANCELING_ORDER_OP_ID, CANCELDELI_REASON, 
-    SEND_OP_ID, RECEIVED_OP_ID, CANCEL_REASON, IS_NOW_RECEIVED, SHOP_ID
+    SEND_OP_ID, RECEIVED_OP_ID, CANCEL_REASON, IS_NOW_RECEIVED, SHOP_ID, DISCOUNT_MONEY
   </sql>
   <select id="selectByPrimaryKey" parameterType="java.lang.Long" resultMap="BaseResultMap">
     <!--
@@ -97,8 +98,8 @@
       RECEIVER_ADDRESS, RECEIVER_POST_CODE, ORDER_MESSAGES, 
       MODIFY_REALVERY_MONEY_OP_ID, CANCELING_ORDER_OP_ID, 
       CANCELDELI_REASON, SEND_OP_ID, RECEIVED_OP_ID, 
-      CANCEL_REASON, IS_NOW_RECEIVED, SHOP_ID
-      )
+      CANCEL_REASON, IS_NOW_RECEIVED, SHOP_ID, 
+      DISCOUNT_MONEY)
     values (#{id,jdbcType=BIGINT}, #{orderCode,jdbcType=VARCHAR}, #{orderState,jdbcType=TINYINT}, 
       #{orderTitle,jdbcType=VARCHAR}, #{onlineOrgId,jdbcType=BIGINT}, #{deliverOrgId,jdbcType=BIGINT}, 
       #{orderMoney,jdbcType=DECIMAL}, #{realMoney,jdbcType=DECIMAL}, #{returnTotal,jdbcType=DECIMAL}, 
@@ -112,8 +113,8 @@
       #{receiverAddress,jdbcType=VARCHAR}, #{receiverPostCode,jdbcType=CHAR}, #{orderMessages,jdbcType=VARCHAR}, 
       #{modifyRealveryMoneyOpId,jdbcType=BIGINT}, #{cancelingOrderOpId,jdbcType=BIGINT}, 
       #{canceldeliReason,jdbcType=VARCHAR}, #{sendOpId,jdbcType=BIGINT}, #{receivedOpId,jdbcType=BIGINT}, 
-      #{cancelReason,jdbcType=VARCHAR}, #{isNowReceived,jdbcType=BIT}, #{shopId,jdbcType=BIGINT}
-      )
+      #{cancelReason,jdbcType=VARCHAR}, #{isNowReceived,jdbcType=BIT}, #{shopId,jdbcType=BIGINT}, 
+      #{discountMoney,jdbcType=DECIMAL})
   </insert>
   <insert id="insertSelective" parameterType="rebue.ord.mo.OrdOrderMo">
     <!--
@@ -245,6 +246,9 @@
       <if test="shopId != null">
         SHOP_ID,
       </if>
+      <if test="discountMoney != null">
+        DISCOUNT_MONEY,
+      </if>
     </trim>
     <trim prefix="values (" suffix=")" suffixOverrides=",">
       <if test="id != null">
@@ -369,6 +373,9 @@
       </if>
       <if test="shopId != null">
         #{shopId,jdbcType=BIGINT},
+      </if>
+      <if test="discountMoney != null">
+        #{discountMoney,jdbcType=DECIMAL},
       </if>
     </trim>
   </insert>
@@ -499,6 +506,9 @@
       <if test="shopId != null">
         SHOP_ID = #{shopId,jdbcType=BIGINT},
       </if>
+      <if test="discountMoney != null">
+        DISCOUNT_MONEY = #{discountMoney,jdbcType=DECIMAL},
+      </if>
     </set>
     where ID = #{id,jdbcType=BIGINT}
   </update>
@@ -547,7 +557,8 @@
       RECEIVED_OP_ID = #{receivedOpId,jdbcType=BIGINT},
       CANCEL_REASON = #{cancelReason,jdbcType=VARCHAR},
       IS_NOW_RECEIVED = #{isNowReceived,jdbcType=BIT},
-      SHOP_ID = #{shopId,jdbcType=BIGINT}
+      SHOP_ID = #{shopId,jdbcType=BIGINT},
+      DISCOUNT_MONEY = #{discountMoney,jdbcType=DECIMAL}
     where ID = #{id,jdbcType=BIGINT}
   </update>
   <select id="selectAll" resultMap="BaseResultMap">
@@ -561,7 +572,7 @@
     SHIPPER_CODE, SHIPPER_NAME, LOGISTIC_CODE, RECEIVER_NAME, RECEIVER_TEL, RECEIVER_MOBILE, 
     RECEIVER_PROVINCE, RECEIVER_CITY, RECEIVER_EXP_AREA, RECEIVER_ADDRESS, RECEIVER_POST_CODE, 
     ORDER_MESSAGES, MODIFY_REALVERY_MONEY_OP_ID, CANCELING_ORDER_OP_ID, CANCELDELI_REASON, 
-    SEND_OP_ID, RECEIVED_OP_ID, CANCEL_REASON, IS_NOW_RECEIVED, SHOP_ID
+    SEND_OP_ID, RECEIVED_OP_ID, CANCEL_REASON, IS_NOW_RECEIVED, SHOP_ID, DISCOUNT_MONEY
     from ORD_ORDER
   </select>
   <select id="selectSelective" parameterType="rebue.ord.mo.OrdOrderMo" resultMap="BaseResultMap">
@@ -692,6 +703,9 @@
       </if>
       <if test="shopId != null">
         and SHOP_ID = #{shopId,jdbcType=BIGINT}
+      </if>
+      <if test="discountMoney != null">
+        and DISCOUNT_MONEY = #{discountMoney,jdbcType=DECIMAL}
       </if>
     </where>
   </select>
@@ -835,6 +849,9 @@
       <if test="shopId != null and shopId != ''">
         and SHOP_ID = #{shopId,jdbcType=BIGINT}
       </if>
+      <if test="discountMoney != null and discountMoney != ''">
+        and DISCOUNT_MONEY = #{discountMoney,jdbcType=DECIMAL}
+      </if>
     </where>
   </select>
   <select id="countSelective" parameterType="rebue.ord.mo.OrdOrderMo" resultType="int">
@@ -964,6 +981,9 @@
       </if>
       <if test="shopId != null">
         and SHOP_ID = #{shopId,jdbcType=BIGINT}
+      </if>
+      <if test="discountMoney != null">
+        and DISCOUNT_MONEY = #{discountMoney,jdbcType=DECIMAL}
       </if>
     </where>
   </select>
@@ -1328,16 +1348,16 @@
 
 
 
-	<!-- &amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;lt;select id="listByPayOrderId" parameterType="java.lang.Long" resultMap="BaseResultMap"&amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;gt; -->
+	<!-- &amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;lt;select id="listByPayOrderId" parameterType="java.lang.Long" resultMap="BaseResultMap"&amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;gt; -->
 	<!-- 根据支付订单ID获取订单详情列表 -->
 	<!-- select -->
-	<!-- &amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;lt;include refid="Base_Column_List" /&amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;gt; -->
+	<!-- &amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;lt;include refid="Base_Column_List" /&amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;gt; -->
 	<!-- from ORD_ORDER -->
-	<!-- &amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;lt;where&amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;gt; -->
+	<!-- &amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;lt;where&amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;gt; -->
 	<!-- PAY_ORDER_ID = #{payOrderId,jdbcType=BIGINT} -->
-	<!-- and ORDER_STATE &amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;gt;= 0 -->
-	<!-- &amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;lt;/where&amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;gt; -->
-	<!-- &amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;lt;/select&amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;gt; -->
+	<!-- and ORDER_STATE &amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;gt;= 0 -->
+	<!-- &amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;lt;/where&amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;gt; -->
+	<!-- &amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;lt;/select&amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;gt; -->
 
 	<update id="updateOrderReceiverInfo" parameterType="rebue.ord.mo.OrdOrderMo">
 		<!-- 修改收件人信息 -->

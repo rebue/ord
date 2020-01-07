@@ -417,6 +417,15 @@ public class OrdOrderMo implements Serializable {
     private Long shopId;
 
     /**
+     *    折扣金额
+     *
+     *    数据库字段: ORD_ORDER.DISCOUNT_MONEY
+     *
+     *    @mbg.generated 自动生成，如需修改，请删除本行
+     */
+    private BigDecimal discountMoney;
+
+    /**
      *    @mbg.generated 自动生成，如需修改，请删除本行
      */
     private static final long serialVersionUID = 1L;
@@ -1358,6 +1367,28 @@ public class OrdOrderMo implements Serializable {
     }
 
     /**
+     *    折扣金额
+     *
+     *    数据库字段: ORD_ORDER.DISCOUNT_MONEY
+     *
+     *    @mbg.generated 自动生成，如需修改，请删除本行
+     */
+    public BigDecimal getDiscountMoney() {
+        return discountMoney;
+    }
+
+    /**
+     *    折扣金额
+     *
+     *    数据库字段: ORD_ORDER.DISCOUNT_MONEY
+     *
+     *    @mbg.generated 自动生成，如需修改，请删除本行
+     */
+    public void setDiscountMoney(BigDecimal discountMoney) {
+        this.discountMoney = discountMoney;
+    }
+
+    /**
      *    @mbg.generated 自动生成，如需修改，请删除本行
      */
     @Override
@@ -1407,6 +1438,7 @@ public class OrdOrderMo implements Serializable {
         sb.append(", cancelReason=").append(cancelReason);
         sb.append(", isNowReceived=").append(isNowReceived);
         sb.append(", shopId=").append(shopId);
+        sb.append(", discountMoney=").append(discountMoney);
         sb.append(", serialVersionUID=").append(serialVersionUID);
         sb.append("]");
         return sb.toString();
