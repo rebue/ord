@@ -198,8 +198,8 @@ public class OrdSettleTaskSvcImpl
         calendar.setTime(now);
         // 如果订单当前签收状态为true,那么就设置一个小时后执行订单结算任务
         if (order.getIsNowReceived()) {
-            _log.info("该订单为当场签收，设置启动结算任务为五分钟后");
-            calendar.add(Calendar.MINUTE, 5);
+            _log.info("该订单为当场签收，设置启动结算为一个小时任务后，以免有商品要退货,假如结算的话会很麻烦退货流程。");
+            calendar.add(Calendar.HOUR,1 );
         } else {
             _log.info("该订单不是当场签收，设置启动结算任务时间为正常时间");
             calendar.add(Calendar.MINUTE,
