@@ -1108,9 +1108,9 @@ public class OrdReturnSvcImpl extends
         _log.info("将所有订单详情改为退货中的参数为-{}", to);
         Ro result = new Ro();
         OrdOrderMo getOrderResult = orderSvc.getById(to.getOrderId());
-        if (getOrderResult.getOrderState() != (byte) 2) {
+        if (getOrderResult.getOrderState() > (byte) 4 || getOrderResult.getOrderState() < (byte) 2) {
             result.setResult(ResultDic.WARN);
-            result.setMsg("该订单不是已支付状态，不能退货");
+            result.setMsg("该订单未支付或已结算，不能退货");
             return result;
         }
         OrdOrderMo orderMo = new OrdOrderMo();
