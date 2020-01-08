@@ -26,6 +26,11 @@
 			<groupId>com.github.rebue.pnt</groupId>
 			<artifactId>pnt-svr-feign</artifactId>
 		</dependency>
+		
+		<dependency>
+			<groupId>com.github.rebue.rep</groupId>
+			<artifactId>rep-svr-feign</artifactId>
+		</dependency>
 
 		<dependency>
 			<groupId>com.github.rebue.prd</groupId>

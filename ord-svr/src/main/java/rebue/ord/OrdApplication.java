@@ -7,7 +7,7 @@ import org.springframework.cloud.openfeign.EnableFeignClients;
 
 @ServletComponentScan("rebue")
 @SpringCloudApplication
-@EnableFeignClients(basePackages = { "rebue.onl.svr.feign", "rebue.prd.svr.feign", "rebue.ibr.svr.feign",
+@EnableFeignClients(basePackages = { "rebue.onl.svr.feign", "rebue.rep.svr.feign","rebue.prd.svr.feign", "rebue.ibr.svr.feign",
         "rebue.kdi.svr.feign", "rebue.pnt.svr.feign", "rebue.afc.svr.feign", "rebue.suc.svr.feign","rebue.slr.svr.feign" })
 public class OrdApplication {
 

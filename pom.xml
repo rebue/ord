@@ -67,6 +67,11 @@
 				<version>1.1.0</version>
 			</dependency>
 			<dependency>
+				<groupId>com.github.rebue.rep</groupId>
+				<artifactId>rep-svr-feign</artifactId>
+				<version>1.1.0</version>
+			</dependency>
+			<dependency>
 				<groupId>com.github.rebue.prd</groupId>
 				<artifactId>prd-svr-feign</artifactId>
 				<version>1.1.0</version>

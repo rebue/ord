@@ -314,4 +314,7 @@ public interface OrdOrderDetailMapper extends MybatisBaseMapper<OrdOrderDetailMo
             + "    a.PAY_SEQ IS NULL \n" + "    AND \n" + "    a.ORDER_ID = b.id\n" + "    and a.RETURN_STATE = 0\n"
             + "    and a.SUBJECT_TYPE = 1\n" + "    and b.ORDER_STATE > 1\n" + "    order by b.PAY_TIME  ")
     List<OrdOrderDetailMo> getNotIsFirstDetail();
+    
+    @Update("UPDATE ORD_ORDER_DETAIL SET RETURN_STATE = #{state,jdbcType=TINYINT} WHERE ORDER_ID = #{orderId,jdbcType=BIGINT} ")
+    int updateReturnStateByOrderId(@Param("orderId") Long orderId, @Param("state") Byte state);
 }

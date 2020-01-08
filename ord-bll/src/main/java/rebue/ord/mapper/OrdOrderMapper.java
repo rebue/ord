@@ -309,4 +309,7 @@ public interface OrdOrderMapper extends MybatisBaseMapper<OrdOrderMo, Long> {
 	@Select("SELECT count(*) from ORD_ORDER WHERE PAY_ORDER_ID=#{payOrderId,jdbcType=BIGINT} and ORDER_STATE > 1 ")
 	int confirmOrder(@Param("payOrderId") Long payOrderId);
 	
+	@Select("SELECT * FROM ord.ORD_ORDER where SHOP_ID  = #{shopId,jdbcType=BIGINT} order by ORDER_TIME desc  ")
+	List<OrdOrderMo> selectPosOrder(@Param("shopId") Long shopId);
+	
 }

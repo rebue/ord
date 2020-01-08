@@ -3772,5 +3772,19 @@ public class OrdOrderSvcImpl extends MybatisBaseSvcImpl<OrdOrderMo, java.lang.Lo
         _log.info("将返回的用户积分信息结果-{}", result);
         return result;
     }
+    
+    
+
+    /**
+     * 收银机查询订单
+     * 1：根据用户id查询用户的默认店铺
+     * 2：根据默认店铺id查询订单
+     */
+    @Override
+    public PageInfo<OrdOrderMo> listOrderForPos(Long userId, Integer pageNum, Integer pageSize) {
+        _log.info("根据用户Id获取用户默认店铺的参数为-{},",userId);
+        SlrShopAccountMo  shopResult  =  slrShopAccountSvc.getOneShopAccountByAccountId(userId);
+        return PageHelper.startPage(pageNum, pageSize).doSelectPageInfo(() -> _mapper.selectPosOrder(shopResult.getShopId()));
+    }
 
 }

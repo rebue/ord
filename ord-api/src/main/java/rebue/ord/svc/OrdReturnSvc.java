@@ -78,4 +78,6 @@ public interface OrdReturnSvc extends BaseSvc<java.lang.Long, OrdReturnMo, OrdRe
      * @return
      */
     Ro cancelReturn(OrdReturnMo mo);
+
+    Ro posAgreetoarefund(OrdOrderReturnTo to);
 }

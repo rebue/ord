@@ -627,4 +627,27 @@ public class OrdOrderCtrl {
         _log.info("微信端获取总收益，总积分，当前支付订单获得的积分的参数为 payOrderId:{}", payOrderId);
         return  svc.getOderPoint(payOrderId);
     }
+    
+    
+    /**
+     * 收银端查询订单信息
+     *
+     */
+    @GetMapping("/ord/order/listOrderForPos")
+    PageInfo<OrdOrderMo> listOrderForPos(final  Long userId ,
+            @RequestParam(value = "pageNum", required = false) Integer pageNum,
+            @RequestParam(value = "pageSize", required = false) Integer pageSize, final HttpServletRequest req)
+            throws ParseException {
+
+        _log.info("listOrderForPos:userId" + userId + ", pageNum = " + pageNum + ", pageSize = " + pageSize);
+        if (pageSize > 50) {
+            final String msg = "pageSize不能大于50";
+            _log.error(msg);
+            throw new IllegalArgumentException(msg);
+        }
+        final PageInfo<OrdOrderMo> result = svc.listOrderForPos(userId, pageNum, pageSize);
+        _log.info("result: " + result.getList());
+        return result;
+    }
+
 }

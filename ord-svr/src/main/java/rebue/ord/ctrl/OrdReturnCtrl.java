@@ -188,7 +188,8 @@ public class OrdReturnCtrl {
      * @mbg.overrideByMethodName
      */
     @GetMapping("/ord/return")
-    PageInfo<ReturnPageListRo> list(final ReturnPageListRo mo, @RequestParam("pageNum") final int pageNum, @RequestParam("pageSize") final int pageSize) {
+    PageInfo<ReturnPageListRo> list(final ReturnPageListRo mo, @RequestParam("pageNum") final int pageNum,
+            @RequestParam("pageSize") final int pageSize) {
         _log.info("list OrdReturnMo:" + mo + ", pageNum = " + pageNum + ", pageSize = " + pageSize);
         if (pageSize > 50) {
             final String msg = "pageSize不能大于50";
@@ -204,7 +205,8 @@ public class OrdReturnCtrl {
      * 拒绝退货
      */
     @PutMapping("/ord/return/reject")
-    Ro rejectReturn(@RequestBody final RejectReturnTo to, final HttpServletRequest req) throws NumberFormatException, ParseException {
+    Ro rejectReturn(@RequestBody final RejectReturnTo to, final HttpServletRequest req)
+            throws NumberFormatException, ParseException {
         _log.info("拒绝退货的参数为：{}", to);
         final Ro ro = new Ro();
         Long loginId = 520469568947224576L;
@@ -225,7 +227,8 @@ public class OrdReturnCtrl {
      * 同意退款
      */
     @PostMapping("/ord/return/agreetoarefund")
-    Ro agreeRefund(@RequestBody final OrdOrderReturnTo to, final HttpServletRequest req) throws NumberFormatException, ParseException {
+    Ro agreeRefund(@RequestBody final OrdOrderReturnTo to, final HttpServletRequest req)
+            throws NumberFormatException, ParseException {
         Ro ro = new Ro();
         if (!isDebug) {
             to.setOpId(JwtUtils.getJwtUserIdInCookie(req));
@@ -252,7 +255,8 @@ public class OrdReturnCtrl {
      * 同意退货
      */
     @PostMapping("/ord/return/agreereturn")
-    Ro agreeReturn(@RequestBody final AgreeReturnTo to, final HttpServletRequest req) throws NumberFormatException, ParseException {
+    Ro agreeReturn(@RequestBody final AgreeReturnTo to, final HttpServletRequest req)
+            throws NumberFormatException, ParseException {
         final Ro ro = new Ro();
         Long loginId = 520469568947224576L;
         if (!isDebug) {
@@ -279,7 +283,8 @@ public class OrdReturnCtrl {
      * 已收到货并退款
      */
     @PostMapping("/ord/return/receivedandrefunded")
-    Ro receivedAndRefunded(@RequestBody final ReceivedAndRefundedTo to, final HttpServletRequest req) throws NumberFormatException, ParseException {
+    Ro receivedAndRefunded(@RequestBody final ReceivedAndRefundedTo to, final HttpServletRequest req)
+            throws NumberFormatException, ParseException {
         _log.info("已收到货并退款的请求参数为：{}", to);
         final Ro ro = new Ro();
         Long loginId = 520469568947224576L;
@@ -306,7 +311,8 @@ public class OrdReturnCtrl {
      * 查询用户退货中订单信息
      */
     @GetMapping("/ord/order/returningInfo")
-    List<Map<String, Object>> getReturningInfo(@RequestParam final Map<String, Object> map) throws ParseException, IllegalAccessException, IllegalArgumentException, InvocationTargetException, IntrospectionException {
+    List<Map<String, Object>> getReturningInfo(@RequestParam final Map<String, Object> map) throws ParseException,
+            IllegalAccessException, IllegalArgumentException, InvocationTargetException, IntrospectionException {
         _log.info("查询用户退货中订单信息的参数为：{}", map.toString());
         final List<Map<String, Object>> list = svc.selectReturningInfo(map);
         _log.info("查询退货订单信息的返回值：{}", String.valueOf(list));
@@ -317,7 +323,8 @@ public class OrdReturnCtrl {
      * 查询用户退货完成订单
      */
     @GetMapping("/ord/order/returnInfo")
-    List<Map<String, Object>> getReturnInfo(@RequestParam final Map<String, Object> map) throws ParseException, IllegalAccessException, IllegalArgumentException, InvocationTargetException, IntrospectionException {
+    List<Map<String, Object>> getReturnInfo(@RequestParam final Map<String, Object> map) throws ParseException,
+            IllegalAccessException, IllegalArgumentException, InvocationTargetException, IntrospectionException {
         _log.info("查询用户退货完成订单信息的参数为：{}", map.toString());
         final List<Map<String, Object>> list = svc.selectReturnInfo(map);
         _log.info("查询退货订单信息的返回值：{}", String.valueOf(list));
@@ -342,4 +349,24 @@ public class OrdReturnCtrl {
             return ro;
         }
     }
+
+    /**
+     * 收银机退款(因为是当场处理的，页面为退货，实际是退款)
+     */
+    @PostMapping("/ord/return/posAgreetoarefund")
+    Ro posAgreetoarefund(@RequestBody final OrdOrderReturnTo to) throws NumberFormatException, ParseException {
+        Ro ro = new Ro();
+        try {
+            _log.info("收银机同意退款的请求参数为：{}", to);
+            ro = svc.posAgreetoarefund(to);
+            _log.info("收银机同意退款的返回值为：{}", ro);
+            return ro;
+        } catch (final RuntimeException e) {
+            final String msg = e.getMessage();
+            ro.setResult(ResultDic.FAIL);
+            ro.setMsg(msg);
+            return ro;
+        }
+    }
+
 }
