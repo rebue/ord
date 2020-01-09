@@ -66,7 +66,6 @@ import rebue.ord.to.ReceivedAndRefundedTo;
 import rebue.ord.to.RejectReturnTo;
 import rebue.pnt.svr.feign.PntPointSvc;
 import rebue.pnt.to.AddPointTradeTo;
-import rebue.rep.svr.feign.RepRevenuAnnualSvr;
 import rebue.rep.svr.feign.RepRevenueDailySvc;
 import rebue.rep.to.ReturnTurnoverTo;
 import rebue.robotech.dic.ResultDic;
@@ -1104,6 +1103,7 @@ public class OrdReturnSvcImpl extends
      * 
      */
     @Override
+    @Transactional(readOnly = false, propagation = Propagation.REQUIRED)
     public Ro posAgreetoarefund(OrdOrderReturnTo to) {
         _log.info("将所有订单详情改为退货中的参数为-{}", to);
         Ro result = new Ro();
@@ -1130,6 +1130,7 @@ public class OrdReturnSvcImpl extends
         ReturnTurnoverTo returnTurnoverTo = new ReturnTurnoverTo();
         returnTurnoverTo.setShopId(getOrderResult.getShopId());
         returnTurnoverTo.setRealMoney(getOrderResult.getRealMoney());
+        returnTurnoverTo.setOrderId(getOrderResult.getId());
         result = RepRevenueDailySvc.returnTurnover(returnTurnoverTo);
         if (result.getResult().getCode() == 1) {
             result.setMsg("退货成功");

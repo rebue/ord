@@ -426,6 +426,15 @@ public class OrdOrderMo implements Serializable {
     private BigDecimal discountMoney;
 
     /**
+     *    支付方式1：现金2：微信3：支付宝4：返现金
+     *
+     *    数据库字段: ORD_ORDER.PAY_WAY
+     *
+     *    @mbg.generated 自动生成，如需修改，请删除本行
+     */
+    private Byte payWay;
+
+    /**
      *    @mbg.generated 自动生成，如需修改，请删除本行
      */
     private static final long serialVersionUID = 1L;
@@ -1389,6 +1398,28 @@ public class OrdOrderMo implements Serializable {
     }
 
     /**
+     *    支付方式1：现金2：微信3：支付宝4：返现金
+     *
+     *    数据库字段: ORD_ORDER.PAY_WAY
+     *
+     *    @mbg.generated 自动生成，如需修改，请删除本行
+     */
+    public Byte getPayWay() {
+        return payWay;
+    }
+
+    /**
+     *    支付方式1：现金2：微信3：支付宝4：返现金
+     *
+     *    数据库字段: ORD_ORDER.PAY_WAY
+     *
+     *    @mbg.generated 自动生成，如需修改，请删除本行
+     */
+    public void setPayWay(Byte payWay) {
+        this.payWay = payWay;
+    }
+
+    /**
      *    @mbg.generated 自动生成，如需修改，请删除本行
      */
     @Override
@@ -1439,6 +1470,7 @@ public class OrdOrderMo implements Serializable {
         sb.append(", isNowReceived=").append(isNowReceived);
         sb.append(", shopId=").append(shopId);
         sb.append(", discountMoney=").append(discountMoney);
+        sb.append(", payWay=").append(payWay);
         sb.append(", serialVersionUID=").append(serialVersionUID);
         sb.append("]");
         return sb.toString();

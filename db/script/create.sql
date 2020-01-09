@@ -1,6 +1,6 @@
 /*==============================================================*/
 /* DBMS name:      MySQL 5.0                                    */
-/* Created on:     2020/1/3 16:26:52                            */
+/* Created on:     2020/1/9 9:52:38                             */
 /*==============================================================*/
 
 
@@ -145,7 +145,8 @@ create table ORD_ORDER
    CANCEL_REASON        varchar(300) comment '作废原因',
    IS_NOW_RECEIVED      bool not null default false comment '是否当场签收，默认为false，如果是true在支付成功后订单状态将是已签收状态',
    SHOP_ID              bigint comment '店铺ID',
-   DISCOUNT_MONEY       decimal(50,4) not null default 0 comment '折扣金额',
+   DISCOUNT_MONEY       decimal(50,4) default 0 comment '折扣金额',
+   PAY_WAY              tinyint comment '支付方式1：现金2：微信3：支付宝4：返现金',
    primary key (ID),
    unique key AK_ORDER_CODE (ORDER_CODE)
 );
@@ -159,27 +160,27 @@ create table ORD_ORDER_DETAIL
 (
    ID                   bigint not null comment '订单详情ID',
    ORDER_ID             bigint not null comment '订单ID',
-   ONLINE_SPEC_ID       bigint not null comment '上线规格ID(限购时获取用户购买数量时使用)',
-   ONLINE_ID            bigint not null comment '上线ID',
-   PRODUCT_ID           bigint not null comment '产品ID',
+   ONLINE_SPEC_ID       bigint comment '上线规格ID(限购时获取用户购买数量时使用)',
+   ONLINE_ID            bigint comment '上线ID',
+   PRODUCT_ID           bigint comment '产品ID',
    PRODUCT_SPEC_ID      bigint comment '产品规格ID',
    ORDER_TIMESTAMP      bigint not null default 0 comment '下单时间戳(用于排序识别详情的先后顺序)',
    SUBJECT_TYPE         tinyint not null default 0 comment '版块类型（0：普通，1：全返）',
    COMMISSION_SLOT      tinyint comment '返佣金名额',
    COMMISSION_STATE     tinyint comment '返佣金状态（0：匹配中，1：待返，2：已返）',
-   ONLINE_TITLE         varchar(200) not null comment '上线标题',
-   SPEC_NAME            varchar(50) not null comment '规格名称',
+   ONLINE_TITLE         varchar(200) comment '上线标题',
+   SPEC_NAME            varchar(50) comment '规格名称',
    IS_SETTLE_BUYER      bool comment '是否结算给买家',
    ACTUAL_AMOUNT        decimal(18,4) comment '实际成交金额',
-   BUY_COUNT            decimal(18,4) not null comment '购买数量(实际数量=购买数量-退货数量)',
-   RETURN_COUNT         decimal(18,4) not null default 0 comment '退货数量',
+   BUY_COUNT            decimal(18,4) comment '购买数量(实际数量=购买数量-退货数量)',
+   RETURN_COUNT         decimal(18,4) default 0 comment '退货数量',
    BUY_PRICE            decimal(18,4) not null comment '购买价格（单价）',
    COST_PRICE           decimal(18,4) comment '成本价格（单个）',
    BUY_POINT            decimal(18,4) comment '购买积分',
    BUY_POINT_TOTAL      decimal(18,4) comment '购买总积分',
    PAY_SEQ              tinyint comment '支付顺序',
    SUPPLIER_ID          bigint comment '供应商ID',
-   DELIVER_ORG_ID       bigint not null comment '发货组织ID(默认填入上线组织ID，可变更为供应商的ID)',
+   DELIVER_ORG_ID       bigint comment '发货组织ID(默认填入上线组织ID，可变更为供应商的ID)',
    CASHBACK_AMOUNT      decimal(18,4) not null comment '返现金额',
    CASHBACK_TOTAL       decimal(18,4) not null comment '返现总额(返现总额=返现金额 * (购买数量-退货数量)',
    BUY_UNIT             varchar(10) comment '购买单位',
