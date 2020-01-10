@@ -206,3 +206,7 @@ alter table ORD_ORDER add SHOP_ID  bigint comment '店铺ID';
 -- ------------------------------------------------------- 上面的已更新到线上 2019.12.04 ----------------------------------------------------
 
 alter table ORD_ORDER add DISCOUNT_MONEY   decimal(50,4) not null default 0 comment '折扣金额';
+alter table ORD_ORDER add PAY_WAY  tinyint comment '支付方式1：现金2：微信3：支付宝4：返现金';
+
+-- ------------------------------------------------------- 上面的已更新到线上 2020----------------------------------------------------
+
