@@ -903,7 +903,7 @@ public class OrdOrderSvcImpl extends MybatisBaseSvcImpl<OrdOrderMo, java.lang.Lo
             orderMo.setPayOrderId(payOrderId);
             orderMo.setUserId(to.getUserId());
             // 线上支付默认微信
-            orderMo.setPayWay((byte)PayWayDic.WXPAY.getCode());
+            orderMo.setPayWay((byte) PayWayDic.WXPAY.getCode());
             orderMo.setOrderTitle("大卖网络-购买商品");
             // orderMo.setOrderCode(_idWorker.getIdStr()); // 订单编号 TODO 重写订单编号的生成算法
             orderMo.setOrderCode(genOrderCode(orderMo.getOrderTime(), orderMo.getId(), orderMo.getUserId()));
@@ -1173,11 +1173,14 @@ public class OrdOrderSvcImpl extends MybatisBaseSvcImpl<OrdOrderMo, java.lang.Lo
         for (final OrdOrderDetailMo ordOrderDetailMo : orderDetailList) {
             _log.info("取消订单根据上线规格id修改销售数量的参数为：onlineSpecId-{}, buyCount-{}", ordOrderDetailMo.getOnlineSpecId(),
                     ordOrderDetailMo.getBuyCount());
-            final Ro modifySaleCountByIdResult = onlOnlineSpecSvc
-                    .modifySaleCountById(ordOrderDetailMo.getOnlineSpecId(), ordOrderDetailMo.getBuyCount());
-            _log.info("取消订单根据上线规格id修改销售数量的返回值为：{}", modifySaleCountByIdResult);
-            if (modifySaleCountByIdResult.getResult() != ResultDic.SUCCESS) {
-                throw new RuntimeException("修改规格数量失败");
+            // 临时商品是没有上线规格的，是不用修改规格数量的
+            if (ordOrderDetailMo.getOnlineSpecId() != null) {
+                final Ro modifySaleCountByIdResult = onlOnlineSpecSvc
+                        .modifySaleCountById(ordOrderDetailMo.getOnlineSpecId(), ordOrderDetailMo.getBuyCount());
+                _log.info("取消订单根据上线规格id修改销售数量的返回值为：{}", modifySaleCountByIdResult);
+                if (modifySaleCountByIdResult.getResult() != ResultDic.SUCCESS) {
+                    throw new RuntimeException("修改规格数量失败");
+                }
             }
         }
         _log.info("{}取消订单：{}成功", userId, id);
