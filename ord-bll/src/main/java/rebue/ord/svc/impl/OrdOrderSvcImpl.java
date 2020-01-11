@@ -67,6 +67,7 @@ import rebue.ord.dic.ModifyOrderRealMoneyDic;
 import rebue.ord.dic.OrderSignInDic;
 import rebue.ord.dic.OrderStateDic;
 import rebue.ord.dic.OrderTaskTypeDic;
+import rebue.ord.dic.PayWayDic;
 import rebue.ord.dic.ReturnStateDic;
 import rebue.ord.dic.SetUpExpressCompanyDic;
 import rebue.ord.dic.ShipmentConfirmationDic;
@@ -901,7 +902,8 @@ public class OrdOrderSvcImpl extends MybatisBaseSvcImpl<OrdOrderMo, java.lang.Lo
             }
             orderMo.setPayOrderId(payOrderId);
             orderMo.setUserId(to.getUserId());
-
+            // 线上支付默认微信
+            orderMo.setPayWay((byte)PayWayDic.WXPAY.getCode());
             orderMo.setOrderTitle("大卖网络-购买商品");
             // orderMo.setOrderCode(_idWorker.getIdStr()); // 订单编号 TODO 重写订单编号的生成算法
             orderMo.setOrderCode(genOrderCode(orderMo.getOrderTime(), orderMo.getId(), orderMo.getUserId()));
