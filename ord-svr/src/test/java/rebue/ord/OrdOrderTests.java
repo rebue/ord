@@ -299,7 +299,7 @@ public class OrdOrderTests {
      * 
      * @throws IOException
      */
-     @Test
+    // @Test
     public void handleOrderPaidNotify() throws IOException {
         String url = hostUrl + "/ord/order/handleOrderPaidNotify";
         PayDoneMsg payDoneMsg = new PayDoneMsg();
@@ -375,6 +375,15 @@ public class OrdOrderTests {
         mo.setResult(ResultDic.SUCCESS);
         onlineOrgs.put(2l, mo);
         System.out.println(onlineOrgs);
+
+    }
+    
+    
+    @Test
+    public void TestBigDecimal() {
+        BigDecimal b=new BigDecimal("19.4");
+        BigDecimal  a =    b.multiply(new BigDecimal("0.01")).setScale(2,BigDecimal.ROUND_HALF_UP);
+        System.out.println(a);
 
     }
 

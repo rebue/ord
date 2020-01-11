@@ -383,4 +383,6 @@ public interface OrdOrderSvc extends BaseSvc<java.lang.Long, OrdOrderMo, OrdOrde
     GetOderPointRo getOderPoint(Long payOrderId);
 
     PageInfo<OrdOrderMo> listOrderForPos(Long userId, Integer pageNum, Integer pageSize);
+
+    Ro posPayOrder(OrdOrderMo mo);
 }

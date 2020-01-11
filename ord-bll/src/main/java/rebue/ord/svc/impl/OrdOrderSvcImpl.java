@@ -3787,4 +3787,35 @@ public class OrdOrderSvcImpl extends MybatisBaseSvcImpl<OrdOrderMo, java.lang.Lo
                 .doSelectPageInfo(() -> _mapper.selectPosOrder(shopResult.getShopId()));
     }
 
+    /**
+     * 收银机使用微信以外的支付方式支付处于待支付的订单
+     * 1:先修改该订单的支付方式以便报表获取
+     * 2：发布支付完成通知
+     */
+    @Override
+    @Transactional(readOnly = false, propagation = Propagation.REQUIRED)
+    public Ro posPayOrder(OrdOrderMo mo) {
+        Ro result = new Ro();
+        OrdOrderMo orderResult = super.getById(mo.getId());
+        if (orderResult == null) {
+            result.setMsg("订单不存在");
+            result.setResult(ResultDic.FAIL);
+            return result;
+        }
+        // 1:先修改该订单的支付方式以便报表获取是那种支付类型
+        super.modify(mo);
+        // 2：发布支付完成通知
+        SgjzPayDoneMsg sgjzPayDoneMsg = new SgjzPayDoneMsg();
+        sgjzPayDoneMsg.setOrderId(String.valueOf(orderResult.getPayOrderId()));
+        sgjzPayDoneMsg.setPayAmount(orderResult.getRealMoney());// 这里也可能是suc的静态id，因为上面有判断和设置
+        sgjzPayDoneMsg.setUserId(orderResult.getUserId());//
+        sgjzPayDoneMsg.setPayTime(new Date());
+        sgjzPayDoneMsg.setSgjzOpId(StaticUserId.USER_ID);// 当收银机登录功能完善之后需要将这里设置为传过来的操作人id
+        _log.info("支付宝记账方式，发布手工记账消息-{}", orderResult.getUserId());
+        sgjzDonePub.send(sgjzPayDoneMsg);
+        result.setMsg("支付完成");
+        result.setResult(ResultDic.SUCCESS);
+        return result;
+    }
+
 }

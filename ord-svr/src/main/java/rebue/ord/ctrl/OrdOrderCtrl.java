@@ -601,7 +601,7 @@ public class OrdOrderCtrl {
         _log.info("返回值为：{}", ro);
         return ro;
     }
-    
+
     /**
      * 确认订单支付
      */
@@ -609,32 +609,31 @@ public class OrdOrderCtrl {
     Ro confirmOrder(@RequestParam("payOrderId") Long payOrderId) {
         _log.info("确认订单支付的参数为 payOrderId:{}", payOrderId);
         Ro result = new Ro();
-        if(svc.confirmOrder(payOrderId) > 0) {
+        if (svc.confirmOrder(payOrderId) > 0) {
             result.setMsg("确认支付成功");
             result.setResult(ResultDic.SUCCESS);
-        }else {
+        } else {
             result.setMsg("订单未支付，无法确认结账");
             result.setResult(ResultDic.WARN);
         }
-        return  result;
+        return result;
     }
-    
+
     /**
      * 微信端获取总收益，总积分，当前支付订单获得的积分
      */
     @GetMapping("/ord/order/getOderPoint")
     GetOderPointRo getOderPoint(@RequestParam("payOrderId") Long payOrderId) {
         _log.info("微信端获取总收益，总积分，当前支付订单获得的积分的参数为 payOrderId:{}", payOrderId);
-        return  svc.getOderPoint(payOrderId);
+        return svc.getOderPoint(payOrderId);
     }
-    
-    
+
     /**
      * 收银端查询订单信息
      *
      */
     @GetMapping("/ord/order/listOrderForPos")
-    PageInfo<OrdOrderMo> listOrderForPos(final  Long userId ,
+    PageInfo<OrdOrderMo> listOrderForPos(final Long userId,
             @RequestParam(value = "pageNum", required = false) Integer pageNum,
             @RequestParam(value = "pageSize", required = false) Integer pageSize, final HttpServletRequest req)
             throws ParseException {
@@ -648,6 +647,16 @@ public class OrdOrderCtrl {
         final PageInfo<OrdOrderMo> result = svc.listOrderForPos(userId, pageNum, pageSize);
         _log.info("result: " + result.getList());
         return result;
+    }
+
+    /**
+     * 收银机使用微信以外的支付方式支付处于待支付的订单
+     * 
+     */
+    @PostMapping("/ord/order/posPayOrder")
+    Ro posPayOrder(@RequestBody final OrdOrderMo mo) throws NumberFormatException, ParseException {
+        _log.info("收银机支付处于待支付的订单的参数为：{}", mo);
+        return svc.posPayOrder(mo);
     }
 
 }
