@@ -302,17 +302,20 @@ public class OrdSettleTaskSvcImpl
         List<OrdOrderDetailMo> detailResult = orderDetailMapper.selectSelective(getDetailMo);
         _log.info("获取该订单所有的详情以便添加结算任务的结果为 mo-", detailResult);
         for (OrdOrderDetailMo ordOrderDetailMo : detailResult) {
-            IbrBuyRelationTaskMo addTaskMo                = new IbrBuyRelationTaskMo();
-            final Calendar       settleCommissionCalendar = Calendar.getInstance();
-            settleCommissionCalendar.setTime(new Date());
-            settleCommissionCalendar.add(Calendar.MINUTE, 5);
-            final Date executePlanTime = settleCommissionCalendar.getTime();
-            addTaskMo.setExecuteState((byte) TaskExecuteStateDic.NONE.getCode());
-            addTaskMo.setTaskType((byte) TaskTypeDic.SETTLE_COMMISSION.getCode());
-            addTaskMo.setExecutePlanTime(executePlanTime);
-            addTaskMo.setOrderDetailId(ordOrderDetailMo.getId());
-            _log.info("添加结算返佣金关系的参数为:{}", addTaskMo);
-            ibrBuyRelationTaskSvc.add(addTaskMo);
+            if(ordOrderDetailMo.getSubjectType() ==1 ) {
+                IbrBuyRelationTaskMo addTaskMo                = new IbrBuyRelationTaskMo();
+                final Calendar       settleCommissionCalendar = Calendar.getInstance();
+                settleCommissionCalendar.setTime(new Date());
+                settleCommissionCalendar.add(Calendar.MINUTE, 5);
+                final Date executePlanTime = settleCommissionCalendar.getTime();
+                addTaskMo.setExecuteState((byte) TaskExecuteStateDic.NONE.getCode());
+                addTaskMo.setTaskType((byte) TaskTypeDic.SETTLE_COMMISSION.getCode());
+                addTaskMo.setExecutePlanTime(executePlanTime);
+                addTaskMo.setOrderDetailId(ordOrderDetailMo.getId());
+                _log.info("添加结算返佣金关系的参数为:{}", addTaskMo);
+                ibrBuyRelationTaskSvc.add(addTaskMo);
+            }
+
         }
 
         // 添加完成结算的任务
