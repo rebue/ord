@@ -298,4 +298,16 @@ public interface OrdOrderMapper extends MybatisBaseMapper<OrdOrderMo, Long> {
 
     @Select("SELECT * FROM ord.ORD_ORDER where SHOP_ID  = #{shopId,jdbcType=BIGINT} order by ORDER_TIME desc  ")
     List<OrdOrderMo> selectPosOrder(@Param("shopId") Long shopId);
+    
+    
+    /**
+     * 修改订单用户id
+     *
+     * @param id        订单id
+     * @param newUserId 新的用户id
+     * @param oldUserId 旧的用户id
+     */
+    @Update("update ORD_ORDER set PAY_WAY=#{payWay,jdbcType=BIGINT} where PAY_ORDER_ID=#{payOrderId,jdbcType=BIGINT}")
+    int updatePayWayByPayOrderId(@Param("payOrderId") Long payOrderId, @Param("payWay") byte payWay);
+
 }

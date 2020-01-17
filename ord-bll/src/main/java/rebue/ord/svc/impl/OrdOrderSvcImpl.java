@@ -34,6 +34,7 @@ import com.github.dozermapper.core.Mapper;
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
 
+import rebue.afc.dic.PayAndRefundTypeDic;
 import rebue.afc.msg.PayDoneMsg;
 import rebue.afc.sgjz.msg.SgjzPayDoneMsg;
 import rebue.afc.svr.feign.AfcRefundSvc;
@@ -2443,6 +2444,13 @@ public class OrdOrderSvcImpl extends MybatisBaseSvcImpl<OrdOrderMo, java.lang.Lo
             refundGoBackTo.setTradeTitle(msg);
             refundSvc.refundImmediate(refundGoBackTo);
             return true;
+        }
+        if (payDoneMsg.getPayType() == PayAndRefundTypeDic.VPAY) {
+            _log.info("支付类型是v支付，将该支付订单下的订单修改为v支付，参数为payOrderId-{},PayType{}", payOrderId,
+                    payDoneMsg.getPayType().getCode());
+            if (_mapper.updatePayWayByPayOrderId(payOrderId, (byte) PayWayDic.CASHBACK.getCode()) < 1) {
+                _log.error("支付类型是v支付，将该支付订单下的订单修改为v支付失败payOrderId-{}",payOrderId);
+            }
         }
         _log.debug("根据支付订单ID获取所有订单的结果: {}", orders);
 
