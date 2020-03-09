@@ -1,6 +1,7 @@
 package rebue.ord.ctrl;
 
 import java.beans.IntrospectionException;
+import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
 import java.math.BigDecimal;
 import java.text.ParseException;
@@ -10,6 +11,7 @@ import java.util.Map;
 
 import javax.annotation.Resource;
 import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -657,6 +659,28 @@ public class OrdOrderCtrl {
     Ro posPayOrder(@RequestBody final OrdOrderMo mo) throws NumberFormatException, ParseException {
         _log.info("收银机支付处于待支付的订单的参数为：{}", mo);
         return svc.posPayOrder(mo);
+    }
+    
+    
+    /**
+     * 微信端获取总收益，总积分，当前支付订单获得的积分 
+     * @throws IOException 
+     */
+    @GetMapping("/ord/order/payRedirect")
+    void payRedirect(@RequestParam("shopId") Long shopId,OrdOrderMo mo, HttpServletRequest request,HttpServletResponse response ) throws IOException {
+        _log.info("用户扫码shopId-{}",shopId);
+        _log.info("用户mo-{}",mo);
+        String agent= request.getHeader("user-agent");
+        String id= request.getParameter("shopId");
+        _log.info("getParameter-{}",id);
+        _log.info(agent);
+        if(agent.contains("AlipayClient")) {
+            response.sendRedirect("https://qr.alipay.com/fkx19984zwsayf3b9uwqqba");
+        }else {
+            response.sendRedirect("http://192.168.1.16:8080/wbolybusiness/wechat/order/transfer.htm?payOrderId=679198097947099150&oldUserId=1");
+        }
+   
+
     }
 
 }
