@@ -26,6 +26,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.github.pagehelper.PageInfo;
 
+import rebue.afc.dic.PayAndRefundTypeDic;
 import rebue.afc.msg.PayDoneMsg;
 import rebue.ord.dic.CancellationOfOrderDic;
 import rebue.ord.dic.OrderSignInDic;
@@ -375,8 +376,8 @@ public class OrdOrderCtrl {
     @GetMapping("/ord/getByOrderCode/{orderCode}")
     OrdOrderMo getByOrderCode(@PathVariable("orderCode") final java.lang.Long orderCode) {
         _log.info("根据定单编号查找定单: " + orderCode);
-        final String orderCodeStr = String.valueOf(orderCode);
-        final OrdOrderMo mo = new OrdOrderMo();
+        final String     orderCodeStr = String.valueOf(orderCode);
+        final OrdOrderMo mo           = new OrdOrderMo();
         mo.setOrderCode(orderCodeStr);
         final OrdOrderMo result = svc.getOne(mo);
         _log.info("get: " + result);
@@ -543,11 +544,11 @@ public class OrdOrderCtrl {
      * 转移订单
      * 
      * @param orderId
-     *            支付订单id
+     *                  支付订单id
      * @param newUserId
-     *            新用户id
+     *                  新用户id
      * @param oldUserId
-     *            旧用户id
+     *                  旧用户id
      * @return
      * @throws ParseException
      * @throws NumberFormatException
@@ -660,27 +661,73 @@ public class OrdOrderCtrl {
         _log.info("收银机支付处于待支付的订单的参数为：{}", mo);
         return svc.posPayOrder(mo);
     }
-    
-    
+
     /**
-     * 微信端获取总收益，总积分，当前支付订单获得的积分 
-     * @throws IOException 
+     * 微信端获取总收益，总积分，当前支付订单获得的积分
+     * 
+     * @throws IOException
      */
-    @GetMapping("/ord/order/payRedirect")
-    void payRedirect(@RequestParam("shopId") Long shopId,OrdOrderMo mo, HttpServletRequest request,HttpServletResponse response ) throws IOException {
-        _log.info("用户扫码shopId-{}",shopId);
-        _log.info("用户mo-{}",mo);
-        String agent= request.getHeader("user-agent");
-        String id= request.getParameter("shopId");
-        _log.info("getParameter-{}",id);
-        _log.info(agent);
-        if(agent.contains("AlipayClient")) {
+//    @GetMapping("/ord/order/payRedirect")
+//    void payRedirect(@RequestParam("shopId") Long shopId, OrdOrderMo mo, HttpServletRequest request,
+//            HttpServletResponse response) throws IOException {
+//        _log.info("用户扫码shopId-{}", shopId);
+//        _log.info("用户mo-{}", mo);
+//        String agent = request.getHeader("user-agent");
+//        String id    = request.getParameter("shopId");
+//        _log.info("getParameter-{}", id);
+//        _log.info(agent);
+//        if (agent.contains("AlipayClient")) {
+//            response.sendRedirect("https://qr.alipay.com/fkx19984zwsayf3b9uwqqba");
+//        } else {
+//            response.sendRedirect(
+//                    "http://192.168.1.7:8080/wbolybusiness/wechat/order/transfer.htm?payOrderId=679198097947099150&oldUserId=1");
+//        }
+//
+//    }
+    /**
+     * 判断扫码APP类型
+     * 
+     * @param request
+     * @param response
+     * @throws IOException
+     */
+    @GetMapping("/ord/order/payment-type")
+    void paymentType(@RequestParam("shopId") Long shopId, HttpServletRequest request, HttpServletResponse response)
+            throws IOException {
+        _log.info("用户扫码");
+
+        _log.info("根据店铺id获取最新未支付订单信息,shopId-{}", shopId);
+        OrdOrderMo order = svc.getLatestOneByShopId(shopId);
+        _log.info("根据店铺id获取最新未支付订单信息的返回值:{}", order);
+        String agent = request.getHeader("user-agent");
+//      String id    = request.getParameter("shopId");
+        _log.info("获取请求头数据-{}", agent);
+        if (agent != null && agent.contains("AlipayClient")) {
+            _log.info("-----------支付宝扫码-------------");
+            // 支付完成通知 用户ID和支付账户ID为-1
+            PayDoneMsg payDoneMsg = new PayDoneMsg();
+            payDoneMsg.setOrderId(order.getPayOrderId().toString());
+            payDoneMsg.setPayAccountId("-1");
+            payDoneMsg.setPayAmount(order.getRealMoney());
+            payDoneMsg.setPayAmount1(BigDecimal.ZERO);
+            payDoneMsg.setPayAmount2(BigDecimal.ZERO);
+            payDoneMsg.setPayTime(new Date());
+            payDoneMsg.setPayType(PayAndRefundTypeDic.ALIPAY);
+            payDoneMsg.setSgjzOpId(shopId);
+            payDoneMsg.setUserId(-1L);
+            svc.handleOrderPaidNotify(payDoneMsg);
             response.sendRedirect("https://qr.alipay.com/fkx19984zwsayf3b9uwqqba");
-        }else {
-            response.sendRedirect("http://192.168.1.16:8080/wbolybusiness/wechat/order/transfer.htm?payOrderId=679198097947099150&oldUserId=1");
+        } else if (agent != null && agent.contains("MicroMessenger")) {
+            _log.info("-----------微信扫码-------------");
+            // 线上
+            String address = "https://www.duamai.com";
+            // 本地测试
+//            address = "http://192.168.1.7:8080";
+            // 重定向
+            response.sendRedirect(address + "/wbolybusiness/wechat/order/transfer.htm?payOrderId="
+                    + order.getPayOrderId() + "&oldUserId=" + order.getUserId());
+        } else {
+            _log.info("-----------其他扫码-------------");
         }
-   
-
     }
-
 }

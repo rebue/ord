@@ -122,13 +122,13 @@ public interface OrdOrderSvc extends BaseSvc<java.lang.Long, OrdOrderMo, OrdOrde
      * 修改订单退款金额(根据订单ID和已退款总额)
      *
      * @param refundTotal
-     *            退款总额
+     *                           退款总额
      * @param orderState
-     *            订单状态
+     *                           订单状态
      * @param whereOrderId
-     *            where条件-订单ID
+     *                           where条件-订单ID
      * @param whereRefundedTotal
-     *            where条件-已退款总额
+     *                           where条件-已退款总额
      */
     int modifyRefund(BigDecimal refundTotal, Byte orderState, Long whereOrderId, BigDecimal whereRefundedTotal);
 
@@ -359,11 +359,11 @@ public interface OrdOrderSvc extends BaseSvc<java.lang.Long, OrdOrderMo, OrdOrde
      * 转移订单
      * 
      * @param payOrderId
-     *            支付订单id
+     *                   支付订单id
      * @param newUserId
-     *            新用户id
+     *                   新用户id
      * @param oldUserId
-     *            旧用户id
+     *                   旧用户id
      * @return
      */
     ShiftOrderRo shiftOrder(Long payOrderId, Long newUserId, Long oldUserId);
@@ -375,6 +375,11 @@ public interface OrdOrderSvc extends BaseSvc<java.lang.Long, OrdOrderMo, OrdOrde
      * @return
      */
     OrdOrderMo getLatestOneByUserId(Long userId);
+
+    /**
+     * 根据店铺id查询订单状态为未支付的且下单时间为最新的订单信息
+     */
+    OrdOrderMo getLatestOneByShopId(Long shopId);
 
     OrderRo downLineOrder(OrderTo to);
 
