@@ -5,6 +5,7 @@ import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
 import java.math.BigDecimal;
 import java.text.ParseException;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
@@ -28,10 +29,12 @@ import com.github.pagehelper.PageInfo;
 
 import rebue.afc.dic.PayAndRefundTypeDic;
 import rebue.afc.msg.PayDoneMsg;
+import rebue.afc.sgjz.msg.SgjzPayDoneMsg;
 import rebue.ord.dic.CancellationOfOrderDic;
 import rebue.ord.dic.OrderSignInDic;
 import rebue.ord.dic.ShipmentConfirmationDic;
 import rebue.ord.mo.OrdOrderMo;
+import rebue.ord.pub.SgjzDonePub;
 import rebue.ord.ro.BulkShipmentRo;
 import rebue.ord.ro.CancellationOfOrderRo;
 import rebue.ord.ro.GetOderPointRo;
@@ -54,6 +57,8 @@ import rebue.ord.to.ShipmentConfirmationTo;
 import rebue.ord.to.UpdateOrgTo;
 import rebue.robotech.dic.ResultDic;
 import rebue.robotech.ro.Ro;
+import rebue.sbs.redis.RedisClient;
+import rebue.suc.co.StaticUserId;
 import rebue.suc.svr.feign.SucUserSvc;
 import rebue.wheel.AgentUtils;
 import rebue.wheel.turing.JwtUtils;
@@ -76,6 +81,13 @@ public class OrdOrderCtrl {
      */
     @Resource
     private OrdOrderSvc svc;
+
+    @Resource
+    private SgjzDonePub sgjzDonePub;
+    
+    
+    @Resource
+    private RedisClient         redisClient;
 
     /**
      * 获取单个订单信息
@@ -123,6 +135,10 @@ public class OrdOrderCtrl {
      */
     @Value("${afc.passProxy:noproxy}")
     private String passProxy;
+    
+    
+    
+   
 
     /**
      * 查询订单信息
@@ -376,8 +392,8 @@ public class OrdOrderCtrl {
     @GetMapping("/ord/getByOrderCode/{orderCode}")
     OrdOrderMo getByOrderCode(@PathVariable("orderCode") final java.lang.Long orderCode) {
         _log.info("根据定单编号查找定单: " + orderCode);
-        final String     orderCodeStr = String.valueOf(orderCode);
-        final OrdOrderMo mo           = new OrdOrderMo();
+        final String orderCodeStr = String.valueOf(orderCode);
+        final OrdOrderMo mo = new OrdOrderMo();
         mo.setOrderCode(orderCodeStr);
         final OrdOrderMo result = svc.getOne(mo);
         _log.info("get: " + result);
@@ -544,11 +560,11 @@ public class OrdOrderCtrl {
      * 转移订单
      * 
      * @param orderId
-     *                  支付订单id
+     *            支付订单id
      * @param newUserId
-     *                  新用户id
+     *            新用户id
      * @param oldUserId
-     *                  旧用户id
+     *            旧用户id
      * @return
      * @throws ParseException
      * @throws NumberFormatException
@@ -627,6 +643,7 @@ public class OrdOrderCtrl {
      */
     @GetMapping("/ord/order/getOderPoint")
     GetOderPointRo getOderPoint(@RequestParam("payOrderId") Long payOrderId) {
+      
         _log.info("微信端获取总收益，总积分，当前支付订单获得的积分的参数为 payOrderId:{}", payOrderId);
         return svc.getOderPoint(payOrderId);
     }
@@ -663,28 +680,6 @@ public class OrdOrderCtrl {
     }
 
     /**
-     * 微信端获取总收益，总积分，当前支付订单获得的积分
-     * 
-     * @throws IOException
-     */
-//    @GetMapping("/ord/order/payRedirect")
-//    void payRedirect(@RequestParam("shopId") Long shopId, OrdOrderMo mo, HttpServletRequest request,
-//            HttpServletResponse response) throws IOException {
-//        _log.info("用户扫码shopId-{}", shopId);
-//        _log.info("用户mo-{}", mo);
-//        String agent = request.getHeader("user-agent");
-//        String id    = request.getParameter("shopId");
-//        _log.info("getParameter-{}", id);
-//        _log.info(agent);
-//        if (agent.contains("AlipayClient")) {
-//            response.sendRedirect("https://qr.alipay.com/fkx19984zwsayf3b9uwqqba");
-//        } else {
-//            response.sendRedirect(
-//                    "http://192.168.1.7:8080/wbolybusiness/wechat/order/transfer.htm?payOrderId=679198097947099150&oldUserId=1");
-//        }
-//
-//    }
-    /**
      * 判断扫码APP类型
      * 
      * @param request
@@ -692,42 +687,80 @@ public class OrdOrderCtrl {
      * @throws IOException
      */
     @GetMapping("/ord/order/payment-type")
-    void paymentType(@RequestParam("shopId") Long shopId, HttpServletRequest request, HttpServletResponse response)
-            throws IOException {
+    String paymentType(@RequestParam("shopId") Long shopId, HttpServletRequest request, HttpServletResponse response) throws IOException
+           {
+        String alipay = "https://qr.alipay.com/fkx19984zwsayf3b9uwqqba";
+        if(shopId.equals(683556894379343873l)) { 
+            //线上麻溜烫店铺id：683556894379343873
+            alipay = "https://qr.alipay.com/fkx12382vgofk6yhnuxal7c";
+        }
+        
         _log.info("用户扫码");
-
         _log.info("根据店铺id获取最新未支付订单信息,shopId-{}", shopId);
         OrdOrderMo order = svc.getLatestOneByShopId(shopId);
         _log.info("根据店铺id获取最新未支付订单信息的返回值:{}", order);
         String agent = request.getHeader("user-agent");
-//      String id    = request.getParameter("shopId");
         _log.info("获取请求头数据-{}", agent);
-        if (agent != null && agent.contains("AlipayClient")) {
+        // 判断是否是支付宝
+        if (order == null && agent != null && agent.contains("AlipayClient")) {
+            return "没有订单记录,请让客服重新下单商品。" ;
+        } else if (order != null && agent != null && agent.contains("AlipayClient")) {
             _log.info("-----------支付宝扫码-------------");
-            // 支付完成通知 用户ID和支付账户ID为-1
-            PayDoneMsg payDoneMsg = new PayDoneMsg();
-            payDoneMsg.setOrderId(order.getPayOrderId().toString());
-            payDoneMsg.setPayAccountId("-1");
-            payDoneMsg.setPayAmount(order.getRealMoney());
-            payDoneMsg.setPayAmount1(BigDecimal.ZERO);
-            payDoneMsg.setPayAmount2(BigDecimal.ZERO);
-            payDoneMsg.setPayTime(new Date());
-            payDoneMsg.setPayType(PayAndRefundTypeDic.ALIPAY);
-            payDoneMsg.setSgjzOpId(shopId);
-            payDoneMsg.setUserId(-1L);
-            svc.handleOrderPaidNotify(payDoneMsg);
-            response.sendRedirect("https://qr.alipay.com/fkx19984zwsayf3b9uwqqba");
-        } else if (agent != null && agent.contains("MicroMessenger")) {
+            // 先修改支付方式
+            OrdOrderMo modifyMo = new OrdOrderMo();
+            modifyMo.setId(order.getId());
+            modifyMo.setPayWay((byte) 3);
+            if (svc.modify(modifyMo) < 1) {
+                return  "" ;
+            }
+            // 发布支付完成通知
+            SgjzPayDoneMsg sgjzPayDoneMsg = new SgjzPayDoneMsg();
+            sgjzPayDoneMsg.setOrderId(String.valueOf(order.getPayOrderId()));
+            sgjzPayDoneMsg.setPayAmount(order.getRealMoney());// 这里也可能是suc的静态id，因为上面有判断和设置
+            sgjzPayDoneMsg.setUserId(order.getUserId());//
+            sgjzPayDoneMsg.setPayTime(new Date());
+            sgjzPayDoneMsg.setSgjzOpId(StaticUserId.USER_ID);// 当收银机登录功能完善之后需要将这里设置为传过来的操作人id
+            _log.info("支付宝记账方式，发布手工记账消息-{}", order.getUserId());
+            sgjzDonePub.send(sgjzPayDoneMsg);
+            response.sendRedirect(alipay);
+          
+        }
+
+       
+        String address = "https://www.duamai.com";
+        if(isDebug) {
+            address = "http://192.168.1.16:8080";
+        }
+        // 判断是否是微信
+        if (order == null && agent != null && agent.contains("MicroMessenger")) {
+            _log.info("-----------微信扫码找不到订单-------------");
+            // 该链接会跳到公众号提示商品已经被购买的页面
+            response.sendRedirect(address + "/wbolybusiness/wechat/order/transfer.htm?payOrderId=1&oldUserId=-1");
+            return "微信扫码找不到订单" ;
+        } else if (order != null && agent != null && agent.contains("MicroMessenger")) {
             _log.info("-----------微信扫码-------------");
-            // 线上
-            String address = "https://www.duamai.com";
-            // 本地测试
-//            address = "http://192.168.1.7:8080";
-            // 重定向
+            // 先修改支付方式
+            OrdOrderMo modifyMo = new OrdOrderMo();
+            modifyMo.setId(order.getId());
+            modifyMo.setPayWay((byte) 2);
+            if (svc.modify(modifyMo) < 1) {
+                return  "" ;
+            }
             response.sendRedirect(address + "/wbolybusiness/wechat/order/transfer.htm?payOrderId="
                     + order.getPayOrderId() + "&oldUserId=" + order.getUserId());
-        } else {
-            _log.info("-----------其他扫码-------------");
+           return "微信扫码成功" ;
         }
+     
+        _log.info("未知扫码-------");
+        return  "ddaf" ;
+    }
+
+    /**
+     * 重新下单订单
+     */
+    @PostMapping("/ord/order/orderAgain")
+    Ro orderAgain(@RequestBody final OrdOrderMo mo) throws NumberFormatException, ParseException {
+        _log.info("收银机重新下单：{}", mo);
+        return svc.orderAgain(mo);
     }
 }

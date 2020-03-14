@@ -336,6 +336,6 @@ public interface OrdOrderMapper extends MybatisBaseMapper<OrdOrderMo, Long> {
     /**
      * 根据店铺id查询订单状态为未支付的且下单时间为最新的订单信息
      */
-    @Select("SELECT * FROM ORD_ORDER WHERE SHOP_ID= #{shopId,jdbcType=BIGINT} AND ORDER_STATE = 1 ORDER BY ORDER_TIME DESC LIMIT 1")
+    @Select("SELECT * FROM ORD_ORDER WHERE SHOP_ID= #{shopId,jdbcType=BIGINT} AND ORDER_STATE = 1 AND USER_ID = -1  ORDER BY ORDER_TIME DESC LIMIT 1")
     OrdOrderMo getLatestOneByShopId(@Param("shopId") Long shopId);
 }

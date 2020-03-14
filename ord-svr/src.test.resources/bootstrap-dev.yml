@@ -1,0 +1,55 @@
+debug: true
+
+server:
+  port: 20180
+
+eureka:
+  client:
+    service-url:
+      defaultZone: http://192.168.1.201:8761/eureka/
+
+logging:
+  config: classpath:config/log4j2.xml
+  level:
+    root: info
+    rebue: trace
+    com.netflix.discovery: off
+
+spring:
+  rabbitmq:
+      host: 192.168.1.201
+      port: 5672
+      username: guest
+      password: guest
+  datasource:
+    url: jdbc:mysql://192.168.1.201:3306/ord?useUnicode=true&characterEncoding=utf-8&allowMultiQueries=true
+    username: ord
+    password: ord
+  redis:
+    # 最大实例数
+    maxTotal: 100
+    # 最大空闲实例数
+    maxIdle: 10
+    # (创建实例时)最大等待时间
+    maxWaitMillis: 10000
+    # (创建实例时)是否验证
+    testOnBorrow: false
+    # 集群类型 (Single,RedisCluster)
+    clusterType: Single
+    # Single类型需要配置连接Redis的host和port
+    host: 192.168.1.201
+    port: 6379
+  
+
+appid: 1
+
+hystrix:
+  command:
+    default:
+      execution:
+        isolation:
+          thread:
+            timeoutInMilliseconds: 10000
+ribbon:  
+  ReadTimeout: 10000  
+  ConnectTimeout: 10000

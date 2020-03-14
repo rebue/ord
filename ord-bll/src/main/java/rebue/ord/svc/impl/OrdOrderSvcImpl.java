@@ -190,7 +190,10 @@ public class OrdOrderSvcImpl extends MybatisBaseSvcImpl<OrdOrderMo, java.lang.Lo
 
     @Resource
     private OrdTaskSvc ordTaskSvc;
-
+    
+    @Resource
+    private OrdReturnSvc ordReturnSvc;
+    
     @Resource
     private OnlOnlineSvc onlineSvc;
 
@@ -3701,7 +3704,7 @@ public class OrdOrderSvcImpl extends MybatisBaseSvcImpl<OrdOrderMo, java.lang.Lo
             throw new RuntimeException(updateOnlineRo.getMsg());
         }
 
-        // 判断如果是现金记账方式或者是支付宝记账就发布手工记账消息。
+        // 判断如果是现金记账方式就发布手工记账消息。
         if (to.getPayWay().getCode() == 1) {
             SgjzPayDoneMsg sgjzPayDoneMsg = new SgjzPayDoneMsg();
             sgjzPayDoneMsg.setOrderId(String.valueOf(orderMo.getPayOrderId()));
@@ -3729,23 +3732,8 @@ public class OrdOrderSvcImpl extends MybatisBaseSvcImpl<OrdOrderMo, java.lang.Lo
             _log.debug("添加自动取消订单任务的参数为：{}", ordTaskMo);
             // 添加取消订单任务
             ordTaskSvc.add(ordTaskMo);
-            // 将支付订单Id返回去页面等待用户支付
-            ro.setPayOrderId(payOrderId);
             ro.setMsg("下单成功");
-        } else {
-            SgjzPayDoneMsg sgjzPayDoneMsg = new SgjzPayDoneMsg();
-            sgjzPayDoneMsg.setOrderId(String.valueOf(orderMo.getPayOrderId()));
-            sgjzPayDoneMsg.setPayAmount(orderMo.getRealMoney());// 这里也可能是suc的静态id，因为上面有判断和设置
-            sgjzPayDoneMsg.setUserId(to.getUserId());//
-            sgjzPayDoneMsg.setSgjzOpId(StaticUserId.USER_ID);// 当收银机登录功能完善之后需要将这里设置为传过来的操作人id
-            sgjzPayDoneMsg.setPayTime(new Date());
-            sgjzPayDoneMsg.setPayWay(to.getPayWay());
-            _log.info("支付宝记账方式，发布手工记账消息-{}", to.getUserId());
-            sgjzDonePub.send(sgjzPayDoneMsg);
-            // 将支付订单Id返回去页面等待用户确认支付
-            ro.setPayOrderId(payOrderId);
-            ro.setMsg("下单成功");
-        }
+        } 
 
         ro.setResult(ResultDic.SUCCESS);
 
@@ -3838,5 +3826,33 @@ public class OrdOrderSvcImpl extends MybatisBaseSvcImpl<OrdOrderMo, java.lang.Lo
     public OrdOrderMo getLatestOneByShopId(Long shopId) {
         _log.info("getLatestOneByShopId,shopId-{}", shopId);
         return _mapper.getLatestOneByShopId(shopId);
+    }
+    
+    
+    @Override
+    @Transactional(readOnly = false, propagation = Propagation.REQUIRED)
+    public Ro orderAgain(OrdOrderMo mo) {
+        OrdOrderMo order =super.getById(mo.getId());
+        if(order.getOrderState() < 1 || order.getOrderState() > 4) {
+            return new Ro(ResultDic.FAIL,"订单已退货或已经结算不能重新下单");
+        }
+        
+        _log.info("根据订单id获取订单的结果为-{}",order);
+        if(order.getOrderState() > 1) {
+            _log.info("该订单已支付-orderState{}",order.getOrderState());
+            // 1:退货,修改订单状态，下单时间，用户id-1，取消结算任务
+            ordReturnSvc.beforeOrderAgain(order.getId());
+        }else {
+            _log.info("该订单未支付-orderState{}",order.getOrderState());
+            // 修改订单下单时间
+            OrdOrderMo modifyMo = new OrdOrderMo();
+            modifyMo.setId(mo.getId());
+            modifyMo.setOrderTime(new Date());
+            modifyMo.setUserId(-1L);
+            if(super.modify(modifyMo) != 1) {
+              return   new Ro(ResultDic.FAIL,"重新下单失败");
+            }
+        }
+        return new Ro(ResultDic.SUCCESS,"重新下单成功");
     }
 }

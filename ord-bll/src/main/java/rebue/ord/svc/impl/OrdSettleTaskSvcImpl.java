@@ -169,6 +169,20 @@ public class OrdSettleTaskSvcImpl
     @Transactional(readOnly = false, propagation = Propagation.REQUIRED)
     public void addStartSettleTask(final Long orderId) {
         _log.info("添加启动结算订单的任务：orderId-{}", orderId);
+        // 查询启动结算任务是否已经存在
+        OrdTaskMo ordTaskMo = new OrdTaskMo();
+        ordTaskMo.setTaskType((byte) OrderTaskTypeDic.START_SETTLE.getCode());
+        ordTaskMo.setOrderId(String.valueOf(orderId));
+        OrdTaskMo getTaskResult = taskSvc.getOne(ordTaskMo);
+        if(getTaskResult != null) {
+            // 任务可能已经被取消，重新启动任务。
+            OrdTaskMo modifyTaskMo = new OrdTaskMo(); 
+            modifyTaskMo.setExecuteState((byte)0);
+            modifyTaskMo.setId(getTaskResult.getId());
+            _log.info("任务已存在重新启动任务参数为-{}",modifyTaskMo);
+            taskSvc.modify(modifyTaskMo);
+            return ;
+        }
         if (orderId == null) {
             final String msg = "参数不正确";
             _log.error(msg);

@@ -31,6 +31,7 @@ import com.github.pagehelper.PageInfo;
 
 import damai.pnt.dic.PointLogTypeDic;
 import rebue.afc.dic.TradeTypeDic;
+import rebue.afc.svr.feign.AfcPaySvc;
 import rebue.afc.svr.feign.AfcRefundSvc;
 import rebue.afc.svr.feign.AfcSettleTaskSvc;
 import rebue.afc.to.RefundApprovedTo;
@@ -43,6 +44,7 @@ import rebue.onl.svr.feign.OnlOnlinePicSvc;
 import rebue.onl.svr.feign.OnlOnlineSpecSvc;
 import rebue.ord.dao.OrdReturnDao;
 import rebue.ord.dic.OrderStateDic;
+import rebue.ord.dic.OrderTaskTypeDic;
 import rebue.ord.dic.ReturnApplicationStateDic;
 import rebue.ord.dic.ReturnStateDic;
 import rebue.ord.dic.ReturnTypeDic;
@@ -53,12 +55,14 @@ import rebue.ord.mo.OrdOrderDetailMo;
 import rebue.ord.mo.OrdOrderMo;
 import rebue.ord.mo.OrdReturnMo;
 import rebue.ord.mo.OrdReturnPicMo;
+import rebue.ord.mo.OrdTaskMo;
 import rebue.ord.ro.OrderDetailRo;
 import rebue.ord.ro.ReturnPageListRo;
 import rebue.ord.svc.OrdOrderDetailSvc;
 import rebue.ord.svc.OrdOrderSvc;
 import rebue.ord.svc.OrdReturnPicSvc;
 import rebue.ord.svc.OrdReturnSvc;
+import rebue.ord.svc.OrdTaskSvc;
 import rebue.ord.to.AddReturnTo;
 import rebue.ord.to.AgreeReturnTo;
 import rebue.ord.to.OrdOrderReturnTo;
@@ -117,6 +121,11 @@ public class OrdReturnSvcImpl extends
 
     @Resource
     private OrdOrderSvc orderSvc;
+    @Resource
+    private  AfcPaySvc afcPaySvc;
+
+    @Resource
+    private OrdTaskSvc ordTaskSvc;
 
     @Resource
     private OrdOrderDetailSvc orderDetailSvc;
@@ -1127,6 +1136,68 @@ public class OrdReturnSvcImpl extends
             throw new RuntimeException("操作失败");
         }
         // 3:将报表的营收减去该比交易金额
+        ReturnTurnoverTo returnTurnoverTo = new ReturnTurnoverTo();
+        returnTurnoverTo.setShopId(getOrderResult.getShopId());
+        returnTurnoverTo.setRealMoney(getOrderResult.getRealMoney());
+        returnTurnoverTo.setOrderId(getOrderResult.getId());
+        result = RepRevenueDailySvc.returnTurnover(returnTurnoverTo);
+        if (result.getResult().getCode() == 1) {
+            result.setMsg("退货成功");
+            return result;
+        } else {
+            throw new RuntimeException("操作失败");
+        }
+    }
+    
+    
+    /**
+     * 1:退货,修改订单状态，下单时间，用户id-1，取消结算任务
+     * 2:将报表的营收减去该比交易金额
+     * 
+     */
+    @Override
+    @Transactional(readOnly = false, propagation = Propagation.REQUIRED)
+    public Ro beforeOrderAgain(Long  orderId) {
+        _log.info("将所有订单详情改为退货中的参数为-{}", orderId);
+        Ro result = new Ro();
+        OrdOrderMo getOrderResult = orderSvc.getById(orderId);
+        if (getOrderResult.getOrderState() > (byte) 4 || getOrderResult.getOrderState() < (byte) 2) {
+            result.setResult(ResultDic.WARN);
+            result.setMsg("该订单未支付或已结算，不能退货");
+            return result;
+        }
+        OrdOrderMo orderMo = new OrdOrderMo();
+        orderMo.setId(orderId);
+        orderMo.setOrderState((byte) 1);
+        orderMo.setUserId(-1l);
+        orderMo.setOrderTime(new Date());
+        // 1:将订单信息
+        if (orderSvc.modify(orderMo) != 1) {
+            _log.error("退货失败：{}", orderId);
+            throw new RuntimeException("操作失败");
+        }
+        
+        // 查询启动结算任务是否已经存在,是的话取消该任务
+        OrdTaskMo ordTaskMo = new OrdTaskMo();
+        ordTaskMo.setTaskType((byte) OrderTaskTypeDic.START_SETTLE.getCode());
+        ordTaskMo.setOrderId(String.valueOf(orderId));
+        OrdTaskMo getTaskResult = ordTaskSvc.getOne(ordTaskMo);
+        if(getTaskResult != null) {
+            // 取消该任务
+            OrdTaskMo modifyTaskMo = new OrdTaskMo(); 
+            modifyTaskMo.setExecuteState((byte)-1);
+            modifyTaskMo.setId(getTaskResult.getId());
+            _log.info("取消该任务参数为-{}",modifyTaskMo);
+            ordTaskSvc.modify(modifyTaskMo);
+        }
+        
+        // 删除交易记录(weiguicaozuo)
+        Ro delatePay =  afcPaySvc.delatePay(getOrderResult.getPayOrderId());
+        if(!delatePay.getResult().equals(ResultDic.SUCCESS)) {
+            throw new RuntimeException("删除交易记录");
+        }
+        
+        // 2:将报表的营收减去该比交易金额
         ReturnTurnoverTo returnTurnoverTo = new ReturnTurnoverTo();
         returnTurnoverTo.setShopId(getOrderResult.getShopId());
         returnTurnoverTo.setRealMoney(getOrderResult.getRealMoney());
