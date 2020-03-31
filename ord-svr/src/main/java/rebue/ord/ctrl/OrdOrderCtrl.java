@@ -84,10 +84,9 @@ public class OrdOrderCtrl {
 
     @Resource
     private SgjzDonePub sgjzDonePub;
-    
-    
+
     @Resource
-    private RedisClient         redisClient;
+    private RedisClient redisClient;
 
     /**
      * 获取单个订单信息
@@ -135,10 +134,6 @@ public class OrdOrderCtrl {
      */
     @Value("${afc.passProxy:noproxy}")
     private String passProxy;
-    
-    
-    
-   
 
     /**
      * 查询订单信息
@@ -643,7 +638,7 @@ public class OrdOrderCtrl {
      */
     @GetMapping("/ord/order/getOderPoint")
     GetOderPointRo getOderPoint(@RequestParam("payOrderId") Long payOrderId) {
-      
+
         _log.info("微信端获取总收益，总积分，当前支付订单获得的积分的参数为 payOrderId:{}", payOrderId);
         return svc.getOderPoint(payOrderId);
     }
@@ -687,14 +682,14 @@ public class OrdOrderCtrl {
      * @throws IOException
      */
     @GetMapping("/ord/order/payment-type")
-    String paymentType(@RequestParam("shopId") Long shopId, HttpServletRequest request, HttpServletResponse response) throws IOException
-           {
+    String paymentType(@RequestParam("shopId") Long shopId, HttpServletRequest request, HttpServletResponse response)
+            throws IOException {
         String alipay = "https://qr.alipay.com/fkx19984zwsayf3b9uwqqba";
-        if(shopId.equals(683556894379343873l)) { 
-            //线上麻溜烫店铺id：683556894379343873
+        if (shopId.equals(683556894379343873l)) {
+            // 线上麻溜烫店铺id：683556894379343873
             alipay = "https://qr.alipay.com/fkx12382vgofk6yhnuxal7c";
         }
-        
+
         _log.info("用户扫码");
         _log.info("根据店铺id获取最新未支付订单信息,shopId-{}", shopId);
         OrdOrderMo order = svc.getLatestOneByShopId(shopId);
@@ -703,7 +698,7 @@ public class OrdOrderCtrl {
         _log.info("获取请求头数据-{}", agent);
         // 判断是否是支付宝
         if (order == null && agent != null && agent.contains("AlipayClient")) {
-            return "没有订单记录,请让客服重新下单商品。" ;
+            return "没有订单记录,请让客服重新下单商品。";
         } else if (order != null && agent != null && agent.contains("AlipayClient")) {
             _log.info("-----------支付宝扫码-------------");
             // 先修改支付方式
@@ -711,7 +706,7 @@ public class OrdOrderCtrl {
             modifyMo.setId(order.getId());
             modifyMo.setPayWay((byte) 3);
             if (svc.modify(modifyMo) < 1) {
-                return  "" ;
+                return "";
             }
             // 发布支付完成通知
             SgjzPayDoneMsg sgjzPayDoneMsg = new SgjzPayDoneMsg();
@@ -723,20 +718,19 @@ public class OrdOrderCtrl {
             _log.info("支付宝记账方式，发布手工记账消息-{}", order.getUserId());
             sgjzDonePub.send(sgjzPayDoneMsg);
             response.sendRedirect(alipay);
-          
+
         }
 
-       
         String address = "https://www.duamai.com";
-        if(isDebug) {
+        if (isDebug) {
             address = "http://192.168.1.16:8080";
         }
         // 判断是否是微信
-        if (order == null && agent != null && agent.contains("MicroMessenger")) {
+        if (order == null && agent != null && agent.contains("MicroMessenger") ) {
             _log.info("-----------微信扫码找不到订单-------------");
             // 该链接会跳到公众号提示商品已经被购买的页面
-            response.sendRedirect(address + "/wbolybusiness/wechat/order/transfer.htm?payOrderId=1&oldUserId=-1");
-            return "微信扫码找不到订单" ;
+            response.sendRedirect(address + "/wbolybusiness/wechat/order/transfer.htm?payOrderId=21&oldUserId=-1");
+            return "微信扫码找不到订单";
         } else if (order != null && agent != null && agent.contains("MicroMessenger")) {
             _log.info("-----------微信扫码-------------");
             // 先修改支付方式
@@ -744,15 +738,15 @@ public class OrdOrderCtrl {
             modifyMo.setId(order.getId());
             modifyMo.setPayWay((byte) 2);
             if (svc.modify(modifyMo) < 1) {
-                return  "" ;
+                return "";
             }
             response.sendRedirect(address + "/wbolybusiness/wechat/order/transfer.htm?payOrderId="
                     + order.getPayOrderId() + "&oldUserId=" + order.getUserId());
-           return "微信扫码成功" ;
+            return "微信扫码成功";
         }
-     
+
         _log.info("未知扫码-------");
-        return  "ddaf" ;
+        return "ddaf";
     }
 
     /**
